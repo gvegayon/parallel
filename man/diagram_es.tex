@@ -1,0 +1,80 @@
+\begin{tikzpicture}[
+	every node/.style={node distance=.5cm and .5cm, font=\sffamily}, 
+	datablock/.style={rectangle, draw, fill=black!10, text width=2cm, minimum height=1.5cm, text badly centered},
+	cluster/.style={rectangle, draw,text width=1cm, text badly centered, minimum height=1cm, font=\footnotesize\sffamily},
+	explain/.style={rectangle, text width=5.5cm, align=left, font=\footnotesize\sffamily, node distance=.3, scale=.9}
+	] 
+	
+\node [rectangle, draw=gray, text width=9cm, minimum height=2.5cm, rounded corners] (stata instance0) at (0,0) {};
+
+% Original data
+\node [datablock] (data) at (-3,0) {Datos};
+\matrix [
+	draw=black,
+	nodes={
+		rectangle, text width=1.5cm, minimum height=.75cm, 
+		scale=1,
+		font=\tt\footnotesize, text badly centered}, column sep=0, row sep=0
+	] (others) at (2,0) {
+	\node {globales};& \node {programas}; \\
+	\node {objetos mata}; & \node {programas mata}; \\
+};
+
+% Data clusters
+\node [cluster] (cluster3) at (0,-3) {Cluster 3};
+\node [cluster, left=of cluster3] (cluster2) {Cluster 2};
+\node [cluster, left=of cluster2] (cluster1) {Cluster 1};
+\node [rectangle, right=of cluster3, text width=1cm, font=\Huge] (threepoints) {...};
+\node [cluster, right=of threepoints,text badly centered] (clustern) {Cluster $n$};
+
+% Splitting
+\draw[->] (data) -- (cluster1);
+\draw[->] (data) -- (cluster2);
+\draw[->] (data) -- node [fill=white, font=\footnotesize\it] {Dividiendo el set de datos} (cluster3);
+\draw[->] (data) -- (clustern);
+
+\draw[->, dashed] (others) -- node [fill=white, font=\scriptsize\it, below=.65cm, text width=1.2cm, minimum height=.7cm,text badly centered] {Traspasando objetos} (2,-4);
+
+% Procesed clusters
+\node [cluster] (cluster3p) at (0,-6) {Cluster 3'};
+\node [cluster, left=of cluster3p] (cluster2p) {Cluster 2'};
+\node [cluster, left=of cluster2p] (cluster1p) {Cluster 1'};
+\node [rectangle, right=of cluster3p, text width=1cm, font=\Huge] (threepointsp) {...};
+\node [cluster, right=of threepointsp,text badly centered] (clusternp) {Cluster $n$'};
+
+\draw[->] (cluster1) -- (cluster1p);
+\draw[->] (cluster2) -- (cluster2p);
+\draw[->] (cluster3) -- (cluster3p);
+\draw[->] (clustern) -- (clusternp);
+
+% Task
+\node [rectangle, draw=gray, text width=9cm, minimum height=5cm, rounded corners] (stata batch) at (0,-4.5) {};
+\node [rectangle, fill=white, draw, text width=8cm, text badly centered,minimum height=1cm] (task) at (0,-4.5) {Algoritmo (tarea) (\texttt{stata en modo batch})};
+
+% Result
+\node [rectangle, draw=gray, text width=9cm, minimum height=2.5cm, rounded corners] (stata instance1) at (0,-9) {};
+\node [datablock] (datap) at (-3,-9) {Datos'};
+\matrix [
+	draw=black,
+	nodes={
+		rectangle, text width=1.5cm, minimum height=.75cm, 
+		scale=1,
+		font=\tt\footnotesize, text badly centered}, column sep=0, row sep=0
+	] (othersp) at (2,-9) {
+	\node {globales};& \node {programas}; \\
+	\node {objetos mata}; & \node {programas mata}; \\
+};
+
+\draw[->] (cluster1p) -- (datap);
+\draw[->] (cluster2p) -- (datap);
+\draw[->] (cluster3p) -- node [fill=white, font=\footnotesize\it] {Pegando sets de datos} (datap);
+\draw[->] (clusternp) -- (datap);
+
+% Text
+\node [explain, right=of stata instance0] {Instancia inicial (actual) de {\tt stata} cargada con datos m\'as objetos definidos por el usuario {\tt globales}, {\tt programas}, {\tt objetos mata} y {\tt programas mata}};
+
+\node [explain, right=of stata batch] {Una nueva instancia de {\tt stata} (en modo batch) para cada clusters de datos. Los {\tt globales}, {\tt programas}, {\tt objetos mata} y {\tt programas mata} son traspasados a ellas.\\\bigskip El mismo algoritmo (tarea) es aplicado simult\'aneamente sobre los clusters de datos.\\\bigskip Luego de que cada instancia se detiene, los clusters de datos son anexados (vuelve a ser un solo set).};
+
+\node [explain, right=of stata instance1] {Instancia final (resultante) de {\tt stata} cargada con los datos nuevos.\\\bigskip Los {\tt globales}, {\tt programas}, {\tt objetos mata} y {\tt programas mata} permanecen intactos.};
+
+\end{tikzpicture}

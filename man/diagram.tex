@@ -1,0 +1,80 @@
+\begin{tikzpicture}[
+	every node/.style={node distance=.5cm and .5cm, font=\sffamily}, 
+	datablock/.style={rectangle, draw, fill=black!10, text width=2cm, minimum height=1.5cm, text badly centered},
+	cluster/.style={rectangle, draw,text width=1cm, text badly centered, minimum height=1cm, font=\footnotesize\sffamily},
+	explain/.style={rectangle, text width=5.5cm, align=left, font=\footnotesize\sffamily, node distance=.3, scale=.9}
+	] 
+	
+\node [rectangle, draw=gray, text width=9cm, minimum height=2.5cm, rounded corners] (stata instance0) at (0,0) {};
+
+% Original data
+\node [datablock] (data) at (-3,0) {Data};
+\matrix [
+	draw=black,
+	nodes={
+		rectangle, text width=1.5cm, minimum height=.75cm, 
+		scale=1,
+		font=\tt\footnotesize, text badly centered}, column sep=0, row sep=0
+	] (others) at (2,0) {
+	\node {globals};& \node {programs}; \\
+	\node {mata objects}; & \node {mata programs}; \\
+};
+
+% Data clusters
+\node [cluster] (cluster3) at (0,-3) {Cluster 3};
+\node [cluster, left=of cluster3] (cluster2) {Cluster 2};
+\node [cluster, left=of cluster2] (cluster1) {Cluster 1};
+\node [rectangle, right=of cluster3, text width=1cm, font=\Huge] (threepoints) {...};
+\node [cluster, right=of threepoints,text badly centered] (clustern) {Cluster $n$};
+
+% Splitting
+\draw[->] (data) -- (cluster1);
+\draw[->] (data) -- (cluster2);
+\draw[->] (data) -- node [fill=white, font=\footnotesize\it] {Splitting the data set} (cluster3);
+\draw[->] (data) -- (clustern);
+
+\draw[->, dashed] (others) -- node [fill=white, font=\scriptsize\it, below=.65cm, text width=1.2cm, minimum height=.7cm,text badly centered] {Passing objects} (2,-4);
+
+% Procesed clusters
+\node [cluster] (cluster3p) at (0,-6) {Cluster 3'};
+\node [cluster, left=of cluster3p] (cluster2p) {Cluster 2'};
+\node [cluster, left=of cluster2p] (cluster1p) {Cluster 1'};
+\node [rectangle, right=of cluster3p, text width=1cm, font=\Huge] (threepointsp) {...};
+\node [cluster, right=of threepointsp,text badly centered] (clusternp) {Cluster $n$'};
+
+\draw[->] (cluster1) -- (cluster1p);
+\draw[->] (cluster2) -- (cluster2p);
+\draw[->] (cluster3) -- (cluster3p);
+\draw[->] (clustern) -- (clusternp);
+
+% Task
+\node [rectangle, draw=gray, text width=9cm, minimum height=5cm, rounded corners] (stata batch) at (0,-4.5) {};
+\node [rectangle, fill=white, draw, text width=8cm, text badly centered,minimum height=1cm] (task) at (0,-4.5) {Task (\texttt{stata batch-mode})};
+
+% Result
+\node [rectangle, draw=gray, text width=9cm, minimum height=2.5cm, rounded corners] (stata instance1) at (0,-9) {};
+\node [datablock] (datap) at (-3,-9) {Data'};
+\matrix [
+	draw=black,
+	nodes={
+		rectangle, text width=1.5cm, minimum height=.75cm, 
+		scale=1,
+		font=\tt\footnotesize, text badly centered}, column sep=0, row sep=0
+	] (othersp) at (2,-9) {
+	\node {globals};& \node {programs}; \\
+	\node {mata objects}; & \node {mata programs}; \\
+};
+
+\draw[->] (cluster1p) -- (datap);
+\draw[->] (cluster2p) -- (datap);
+\draw[->] (cluster3p) -- node [fill=white, font=\footnotesize\it] {Appending the data set} (datap);
+\draw[->] (clusternp) -- (datap);
+
+% Text
+\node [explain, right=of stata instance0] {Starting (current) {\tt stata} instance loaded with data plus user defined {\tt globals}, {\tt programs}, {\tt mata objects} and {\tt mata programs}};
+
+\node [explain, right=of stata batch] {A new {\tt stata} instance (batch-mode) for every data-clusters. Programs, globals and mata objects/programs are passed to them.\\\bigskip The same algorithm (task) is simultaneously applied over the data-clusters.\\\bigskip After every instance stops, the data-clusters are appended into one.};
+
+\node [explain, right=of stata instance1] {Ending (resulting) {\tt stata} instance loaded with the new data.\\\bigskip User defined {\tt globals}, {\tt programs}, {\tt mata objects} and {\tt mata programs} remind unchanged.};
+
+\end{tikzpicture}
