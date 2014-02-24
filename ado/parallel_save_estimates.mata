@@ -5,25 +5,12 @@ clear all
 mata mata clear
 
 mata
-/*
-void function parallel_save_estimates(
-	string scalar return_list,
-	| real scalar append
-	)
-{
-
-	real scalar i, fh
-	string scalar fn
-	string rowvector
-
-}
-*/
 
 // List the names of ereturn list output
 pointer(string scalar) colvector function parallel_xreturn_list(
-	| string scalar cmd,
-	string scalar returntype,
-	string scalar randtype)
+	| string scalar cmd,      // Command to run
+	string scalar returntype, // Which return to store
+	string scalar randtype)   // RNG algorithm/source
 {
 	real scalar fh, curps
 	string scalar fn, txt, re
@@ -65,7 +52,7 @@ pointer(string scalar) colvector function parallel_xreturn_list(
 	return(rlist[1::curps])
 }
 
-// Process a matrix and store it
+// Process a matrix and store it as a plain-text file
 void function parallel_process_mat(
 	string scalar stmatname,
 	| string scalar fn,
@@ -259,5 +246,5 @@ mata  parallel_process_mat("e(b)")
 regress mpg foreign rep78 c.weight#c.weight
 
 mata  parallel_process_mat("e(b)")
-local pll_instance 1
-local pll_id 1asd156
+
+insheet using `pll_id'mat`pll_instance'.tab, tab names clear
