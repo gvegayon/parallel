@@ -21,7 +21,7 @@ set matastrict on
 vers 10.0
 
 /* Build documentation */
-run ../../dev_tools/build_source_hlp.mata
+cap run ../../dev_tools/build_source_hlp.mata
 
 mata:
 archmata = dir(".","files","*.mata")

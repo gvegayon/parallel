@@ -53,9 +53,9 @@ pointer(string scalar) colvector function parallel_xreturn_list(
 }
 
 // Process a matrix and store it as a plain-text file
-void function parallel_process_mat(
-	string scalar stmatname,
-	| string scalar fn,
+void function parallel_estout_save(
+	| string scalar stmatname,
+	string scalar fn,
 	real scalar fappend
 )
 {
@@ -69,13 +69,16 @@ void function parallel_process_mat(
 	real rowvector namesorder
 	string scalar txt, tabs, fn0, randtype
 	
-	if (fappend == J(1,1,.)) fappend = 1
+	if (fappend   == J(1,1,.)) fappend = 1
+	if (stmatname == J(1,1,"")) stmatname = "e(b)"
 	
 	// Matrix parsing
 	stmat       = st_matrix(stmatname)
-	stcolnames0 = st_matrixcolstripe(stmatname)
+	stcolnames0 = ("","N")\st_matrixcolstripe(stmatname)
 	strownames0 = st_matrixrowstripe(stmatname)
 	
+	stmat = J(rows(stmat),1,st_numscalar("e(N)")), stmat
+stmat
 	// Col and row names
 	stcolnames = J(1, rows(stcolnames0),"")
 	for(i=1;i<=rows(stcolnames0);i++)
@@ -98,7 +101,7 @@ void function parallel_process_mat(
 			tabheader[j + ncol*(i-1)] = strownames[i]+"_"+stcolnames[j]
 
 	// File parsing
-	if (fn == J(1,1,"")) fn = st_local("pll_id")+"mat"+st_local("pll_instance")+".tab"
+	if (fn == J(1,1,"")) fn = "__pll"+st_local("pll_id")+"_estout"+st_local("pll_instance")+".tab"
 	if (!fappend) unlink(fn)
 	
 	
@@ -112,7 +115,8 @@ void function parallel_process_mat(
 		nhead = length(tabheader)
 		txt = ""
 		for(i=1;i<=nhead;i++) 
-			txt = txt + tabheader[i] + (i == nhead ? "" : sprintf("\t"))
+			txt = txt + tabheader[i] + 
+				(i == nhead ? "" : sprintf("\t"))
 		fput(fh, txt)
 		
 		// Writing the file lines
@@ -120,7 +124,8 @@ void function parallel_process_mat(
 		{
 			txt = ""
 			for(j=1;j<=ncol;j++)
-				txt = txt + sprintf("%g",stmat[i,j]) + (j==ncol? "" : sprintf("\t"))
+				txt = txt + sprintf("%g",stmat[i,j]) + 
+					(j==ncol? "" : sprintf("\t"))
 			fput(fh, txt)
 		}
 				
@@ -168,7 +173,9 @@ void function parallel_process_mat(
 		{
 			
 			fh    = fopen(fn, "r")
-			fh0   = fopen((fn0=parallel_randomid(10,randtype,1,1,1)), "w")
+			fh0   = fopen(
+				(fn0=parallel_randomid(10,randtype,1,1,1)), 
+				"w")
 			
 			txt   = fget(fh)
 			txt
@@ -201,18 +208,53 @@ void function parallel_process_mat(
 		{
 			txt = ""
 			for(j=1;j<=ncol;j++)
-				txt = txt+sprintf("%g",stmattmp[i,j]) + sprintf((j==ncol? "" : "\t"))
+				txt = txt + sprintf("%g",
+					stmattmp[i,j]) + 
+					sprintf((j==ncol? "" : "\t")
+				)
 				
 			fput(fh, txt)
 		}
 		
-		fclose(fh)
-		
+		// Finishing
+		fclose(fh)		
 		return
 	}
+}
+/*
+// Resampling algorithm
+real scalar function parallel_resample(
+	| real scalar size,
+	real colvector weights
+	)
+{
+	real colvector newsample
+	real scalar N, n, i, k
+
+	N = c("N")
+
+	// Getting the sample size
+	if (size < 1) n = max((1,round(size*N))
+	else size = n
+
+	newsample = round(runiform(N,1):*N:*weights)
+	k = 1
+	i = 0
+	while(++k<N)
+		if (
 	
 	
-	
+}
+*/
+// General manager of parallel_estout
+// Possible actions:
+//  0: Start
+//  1: Merge
+void function parallel_estout_start()
+{
+	// Checking if the file exists
+	fn = "__pll"+st_local("pll_id")+"_estout"+st_local("pll_instance")+".tab"
+	unlink(fn)	
 }
 
 end
@@ -221,30 +263,38 @@ sysuse auto
 summ
 
 mata 
-rlist = parallel_xreturn_list("regress mpg weight c.weight#c.weight foreign")
-rlist
+elist = parallel_xreturn_list("regress mpg weight c.weight#c.weight foreign")
+elist
 
-for(i=1;i<=length(rlist);i++) *rlist[i]
+for(i=1;i<=length(elist);i++) *elist[i]
+
 
 end
-mata nf = "5"
-mata unlink("nuevo"+nf+".tab")
-mata parallel_process_mat("e(b)","",0)
+
+mata 
+
+parallel_estout_start()
+
+parallel_estout_save()
+end
+
 sample 90
 regress mpg weight c.weight#c.weight foreign
 
-mata  parallel_process_mat("e(b)")
+mata parallel_estout_save()
 
 regress mpg c.weight#c.weight foreign
 
-mata  parallel_process_mat("e(b)")
+mata parallel_estout_save()
 
 regress mpg c.weight#c.weight foreign rep78
 
-mata  parallel_process_mat("e(b)")
+mata  parallel_estout_save()
 
 regress mpg foreign rep78 c.weight#c.weight
 
-mata  parallel_process_mat("e(b)")
+mata  parallel_estout_save()
 
-insheet using `pll_id'mat`pll_instance'.tab, tab names clear
+insheet using __pll`pll_id'_estout`pll_instance'.tab, tab names clear
+list
+
