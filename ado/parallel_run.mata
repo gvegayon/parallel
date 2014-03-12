@@ -26,7 +26,7 @@ real scalar parallel_run(
 	if (c("os") != "Windows") { // MACOS/UNIX
 		unlink("__pll"+parallelid+"_shell.sh")
 		fh = fopen("__pll"+parallelid+"_shell.sh","w", 1)
-		*fput(fh, "echo Stata instances PID:")
+		// fput(fh, "echo Stata instances PID:")
 		
 		// Writing file
 		if (c("os") != "Unix") {

@@ -2,16 +2,8 @@ set matadebug off
 set trace off
 local oldcd = c(pwd)
 
-if ("$S_OS" == "Windows") {
-	net from I:\george\comandos_paquetes_librerias\stata
-	cap cd I:\george\comandos_paquetes_librerias\stata\parallel\ado
-}
-else {
-	cap net from ~/../investigacion/george/comandos_paquetes_librerias/stata
-	cap cd ~/../investigacion/george/comandos_paquetes_librerias/stata/parallel/ado
-	cap net from ~/Documents/programacion/stata_super
-	cap cd ~/Documents/programacion/stata_super/parallel/ado
-}
+net from http://software.ggvega.com/stata
+
 *clear all
 program drop _all
 macro drop _all
