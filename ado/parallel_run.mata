@@ -1,6 +1,14 @@
-*! parallel_run() version 0.14.3
-*! Runs Stata in batch mode
-*! author: George Vega
+*! version 0.14.3 18mar2014
+*! author: George G. Vega Yon
+
+/**oxygen
+ * @brief Runs parallel clusters in batch mode.
+ * @param parallelid Parallel id.
+ * @param nclusters Number of clusters.
+ * @param paralleldir Dir where the process should be running.
+ * @param timeout Number of seconds to wait until stop the process for no conextion.
+ * @returns Number of clusters that stopped with an error.
+ */
 
 mata:
 real scalar parallel_run(
@@ -56,3 +64,4 @@ real scalar parallel_run(
 	return(parallel_finito(parallelid,nclusters,timeout))
 }
 end
+

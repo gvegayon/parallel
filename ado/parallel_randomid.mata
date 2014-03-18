@@ -1,4 +1,15 @@
-// Mata's Random id generation
+*! vers 0.14.3 18mar2014
+*! author: George G. Vega Yon
+
+/**oxygen 
+ * @brief Mata's Random id generation.
+ * @param n Number of random ids to generate.
+ * @param randtype Type of random algorithm to use.
+ * @param alpha Whether to use or not alphanum.
+ * @param nele Length of each random id generated.
+ * @param silent Whether to run quietly or not.
+ * @returns String colvector of random ids.
+ */
 mata:
 string colvector parallel_randomid(|real scalar n, string scalar randtype, real scalar alpha, real scalar nele, real scalar silent) {
 	
@@ -85,3 +96,4 @@ string colvector parallel_randomid(|real scalar n, string scalar randtype, real 
 	return(id)
 }
 end
+

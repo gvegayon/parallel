@@ -1,8 +1,15 @@
-////////////////////////////////////////////////////////////////////////////////
-// Looks for global macros and writes to the dofile
+*! parallel_export_globals vers 0.14.3
+*! author: George G. Vega Yon
+
 mata:
-void globals_export(|string scalar outname , real scalar ou_fh)
-	{
+
+/**oxygen
+* @brief Looks for global macros and writes to the dofile.
+* @param  outname Name of the new do-file.
+* @param  out_fh If a file is already open, the user can export the globals to it.
+* @returns A do-file eady to be runned and define globals.
+*/
+void parallel_export_globals(|string scalar outname, real scalar ou_fh) {
 	
 	real   scalar ismacro, forbidden, in_fh, isnewfile
 	string scalar line, macname, macvalu, typeofmacro, REGEX, FORBIDDEN

@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.13.10.22 22oct2013}{...}
+{* *! version 0.14.3 18mar2014}{...}
 
 {cmd:help parallel}
 {hline}
@@ -406,19 +406,22 @@ in the package, help file which contains the source code in a fancy way.
 {pstd}
 In order to get acces to different sections of the source code you can follow these
 links:
-
-        Export global macros {col 58} {help parallel_source##globals_export:globals_export.mata}
-        Normalize a filepath {col 58} {help parallel_source##normalizepath:normalizepath.mata}
+		
+        Stops a cluster after the user pressed break {col 58} {help parallel_source##parallel_break:parallel_break.mata}
         Remove auxiliary files {col 58} {help parallel_source##parallel_clean:parallel_clean.mata}
+        Distributes observations across clusters {col 58} {help parallel_source##parallel_divide_index:parallel_divide_index.mata}
+        Export global macros {col 58} {help parallel_source##parallel_export_globals:parallel_export_globals.mata}
+        Export programs {col 58} {help parallel_source##parallel_export_programs:parallel_export_programs.mata}
         Wait until a cluster finishes {col 58} {help parallel_source##parallel_finito:parallel_finito.mata}
         (on development) {col 58} {help parallel_source##parallel_for:parallel_for.mata}
+        Normalize a filepath {col 58} {help parallel_source##parallel_normalizepath:parallel_normalizepath.mata}
+        Generate random alphanum {col 58} {help parallel_source##parallel_randomid:parallel_randomid.mata}
         Lunch simultaneous Stata instances in batch mode {col 58} {help parallel_source##parallel_run:parallel_run.mata}
+        Set of tools to protect parallel aux files {col 58} {help parallel_source##parallel_sandbox:parallel_sandbox.mata}
         Set the number of clusters {col 58} {help parallel_source##parallel_setclusters:parallel_setclusters.mata}
         Set the Stata EXE direcroty {col 58} {help parallel_source##parallel_setstatadir:parallel_setstatadir.mata}
+        Write a ``diagnosis'' {col 58} {help parallel_source##parallel_write_diagnosis:parallel_write_diagnosis.mata}
         Write a dofile to be paralellized {col 58} {help parallel_source##parallel_write_do:parallel_write_do.mata}
-        Export programs {col 58} {help parallel_source##program_export:program_export.mata}
-        Generate random alphanum {col 58} {help parallel_source##randomid:randomid.mata}
-        Write a ``diagnosis'' {col 58} {help parallel_source##write_diagnosis:write_diagnosis.mata}
 
 {title:Also see}
 

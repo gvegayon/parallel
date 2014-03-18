@@ -1,6 +1,16 @@
-mata:
+*! vers 0.14.3 18mar2014
+*! author: George G. Vega Yon
 
-/* Compare observations i and j */
+
+mata:
+/**oxygen
+ * @brief Compares vectors and returns 1 if are equal.
+ * @param numvars Numeric matrix.
+ * @param strvars String matrix.
+ * @param i i-th row to compare.
+ * @param j j-th row to compare.
+ * @returns TRUE if all vector elements are equal, FALSE otherwise.
+ */
 real scalar parallel_compare_matrix(
 	| real matrix numvars,
 	string matrix strvars,
@@ -21,7 +31,13 @@ real scalar parallel_compare_matrix(
 	return((numtest & strtest))
 }
 
-/* Generate index for dividing a dataset */
+/**
+ * @brief Generate index for grouping observations
+ * @param numvars Numeric matrix.
+ * @param strvars String matrix.
+ * @param nclusters Number of clusters.
+ * @returns TRUE if all vector elements are equal, FALSE otherwise.
+ */
 real colvector parallel_divide_index(
 	| real   matrix numvars,
 	string matrix strvars,
@@ -133,3 +149,4 @@ real colvector parallel_divide_index(
 }
 
 end
+

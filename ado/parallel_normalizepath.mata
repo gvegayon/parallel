@@ -1,5 +1,15 @@
+*! vers 0.14.3 18mar2014
+*! author: George G. Vega Yon
+
+/**oxygen
+* @brief Path parsing.
+* @param Path to be analized.
+* @param Whether to export the results as local or not.
+* @return A vector with path\fullpath\fileext\filename. 
+*/
+
 mata:
-transmorphic normalizepath(
+transmorphic parallel_normalizepath(
 	string scalar path,
 	| real scalar exportaslocal
 	)

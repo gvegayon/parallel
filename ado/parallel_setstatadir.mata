@@ -1,3 +1,13 @@
+*! vers 0.14.3 18mar2014
+*! author: George G. Vega Yon
+
+/**oxygen
+ * @brief Sets the path where stata exe is installed.
+ * @param statadir If the user wants to set it manually
+ * @param force Avoids path checking.
+ * @returns A global PLL_DIR.
+ */
+
 mata:
 real scalar parallel_setstatadir(string scalar statadir, | real scalar force) {
 
@@ -54,3 +64,4 @@ real scalar parallel_setstatadir(string scalar statadir, | real scalar force) {
 	return(0)
 }
 end
+

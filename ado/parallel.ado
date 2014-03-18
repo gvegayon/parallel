@@ -1,4 +1,4 @@
-*! version 0.14.01  26jan2014
+*! version 0.14.3.18  18mar2014
 *! PARALLEL: Stata module for parallel computing
 *! by George G. Vega (g.vegayon at gmail)
 /*
@@ -164,7 +164,7 @@ program def parallel_do, rclass
 	if (!`prefix') {
 	
 		/* First checks if the file exists */
-		mata:normalizepath(`"`dofile'"',1)
+		mata: parallel_normalizepath(`"`dofile'"',1)
 		local pll_dir = "`filedir'"
 		local dofile = "`filename'"
 	}
@@ -297,10 +297,6 @@ end
 cap program drop parallel_setclusters
 program parallel_setclusters
 	syntax anything(name=nclusters)  [, Force Statadir(string asis)]
-	
-	// checks for normalizepath (required)
-	cap normalizepath
-	if _rc == 199 cap ssc install normalizepath
 	
 	local nclusters = real(`"`nclusters'"')
 	if (`nclusters' == .) {

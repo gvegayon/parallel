@@ -1,4 +1,12 @@
-*! vers 0.13.10.7 7oct2013
+*! vers 0.14.3 18mar2014
+/**oxygen 
+ * @brief Set of tools to prevent parallel instances to overlap.
+ * @param action Action to be taken.
+ * @param pll_id Parallel process id.
+ * @param result Pointer to list of files that can be removed (without stopping
+                 another parallel process).
+ * @returns Depends on the action.
+ */
 mata:
 void parallel_sandbox(
 	real scalar action,   /* 

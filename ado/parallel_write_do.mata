@@ -1,5 +1,22 @@
 *! version 0.13.10.7  7oct2013
 * Generates the corresponding dofiles
+
+/**oxygen
+ * @brief Writes a fully functional do-file to be runned by -parallel_run()-.
+ * @param inputname Name of a do-file or string with a commando to be runned.
+ * @param parallelid Parallel instance ID.
+ * @param ncluster Number of clusters (files).
+ * @param prefix Whether this is a command (prefix != 0) or a do-file.
+ * @param matsave Whether to include or not MATA objects.
+ * @param getmacros Whete to include or not Globals.
+ * @param seed Seed to be used (list)
+ * @param randtype If no seeds provided, type of algorithm used to generate the seeds
+ * @param nodata Wheter to load (1) data or not.
+ * @param folder Folder where the do-file should be running.
+ * @param progsave Wheter to use (1) or not (0) programs loaded in the current stat sesion.
+ * @param processors Number of statamp processors to use in each cluster.
+ * @returns As many do-files as clusers used.
+ */
 mata:
 real scalar parallel_write_do(
 	string scalar inputname,
@@ -62,8 +79,8 @@ real scalar parallel_write_do(
 	if (!c("MP") & processors != 0 & processors != J(1,1,.)) display("{it:{result:Warning:} processors option ignored...}")
 	else if (processors == J(1,1,.) | processors == 0) processors = 1
 	
-	if (progsave) program_export("__pll"+parallelid+"_prog.do")
-	if (getmacros) globals_export("__pll"+parallelid+"_glob.do")
+	if (progsave) parallel_export_programs("__pll"+parallelid+"_prog.do")
+	if (getmacros) parallel_export_globals("__pll"+parallelid+"_glob.do")
 	
 	for(i=1;i<=nclusters;i++) 
 	{
