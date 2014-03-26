@@ -5,25 +5,16 @@ local oldcd = c(pwd)
 *clear all
 program drop _all
 macro drop _all
-mata: mata clear
 set matastrict on
 
 vers 10.0
 
 /* Build documentation */
-if (c(os)=="Windows") {
-	cap run i:/george/comandos_paquetes_librerias/stata/dev_tools/build_source_hlp.mata
-}
-else {
-	cap run ../../dev_tools/build_source_hlp.mata
-	cap run ~/../investigacion/george/comandos_paquetes_librerias/stata/dev_tools/build_source_hlp.mata
-}
-
 mata:
 archmata = dir(".","files","*.mata")
 _sort(archmata,1)
-build_source_hlp_pll(archmata, "parallel_source.hlp", 1)
-mata clear
+dt_moxygen(archmata, "parallel_source.hlp", 1)
+
 end
 
 /* Compiling */
@@ -43,8 +34,9 @@ run parallel_break.mata
 run parallel_sandbox.mata
 
 mata: mata mlib create lparallel, replace
-mata: mata mlib add lparallel *()
+mata: mata mlib add lparallel parallel_*()
 
+/*
 /* Creando checksum */
 mata st_global("ayuda",invtokens(dir(".","files","*.hlp")'))
 mata st_global("ados",invtokens(dir(".","files","*.ado")'))
@@ -55,6 +47,9 @@ foreach g in ayuda ados {
 	}
 }
 checksum lparallel.mlib, save replace
+*/
+
+mata: dt_install_on_the_fly("parallel")
 
 
 

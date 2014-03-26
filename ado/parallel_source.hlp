@@ -181,7 +181,6 @@ end
 
 
 mata:
- */
 {smcl}
 *! {marker parallel_compare_matrix}{bf:function -{it:parallel_compare_matrix}- in file -{it:parallel_divide_index.mata}-}
 *! {back:{it:(previous page)}}
@@ -215,16 +214,17 @@ real scalar parallel_compare_matrix(
     return((numtest & strtest))
 }
 
-/**
- * @brief Generate index for grouping observations
- * @param numvars Numeric matrix.
- * @param strvars String matrix.
- * @param nclusters Number of clusters.
- * @returns TRUE if all vector elements are equal, FALSE otherwise.
- */
 {smcl}
 *! {marker parallel_divide_index}{bf:function -{it:parallel_divide_index}- in file -{it:parallel_divide_index.mata}-}
 *! {back:{it:(previous page)}}
+*!{dup 78:{c -}}
+*!{col 4}{it:Generate index for grouping observations}
+*!{col 4}{bf:parameters:}
+*!{col 6}{bf:numvars}{col 20}Numeric matrix.
+*!{col 6}{bf:trvars}{col 20}String matrix.
+*!{col 6}{bf:nclusters}{col 20}Number of clusters.
+*!{col 4}{bf:returns:}
+*!{col 6}{it:TRUE if all vector elements are equal, FALSE otherwise.}
 *!{dup 78:{c -}}{asis}
 real colvector parallel_divide_index(
     | real   matrix numvars,
@@ -878,7 +878,6 @@ end
 *! version 0.14.3  18mar2014
 *! author: George G. Vega Yon
 
- */
 mata:
 {smcl}
 *! {marker parallel_finito}{bf:function -{it:parallel_finito}- in file -{it:parallel_finito.mata}-}
@@ -1160,7 +1159,6 @@ end
 *! vers 0.14.3 18mar2014
 *! author: George G. Vega Yon
 
- */
 mata:
 {smcl}
 *! {marker parallel_randomid}{bf:function -{it:parallel_randomid}- in file -{it:parallel_randomid.mata}-}
@@ -1270,10 +1268,9 @@ end
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:Beginning of file -parallel_run.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
-*! version 0.14.3 18mar2014
+*! version 0.14.3.26 26mar2014
 *! author: George G. Vega Yon
 
- */
 
 mata:
 {smcl}
@@ -1306,13 +1303,14 @@ real scalar parallel_run(
     display("{text:Parallel Computing with Stata} {result:(by GVY)}")
     display("{text:Clusters:} {result:"+strofreal(nclusters)+"}")
     display("{text:ID:} {result:"+parallelid+"}")
+    display("{text:Running at:} {result:"+c("pwd")+"}")
     
     if (strlen(st_local("randtype"))) display("{text:{it:Note: randtype = "+st_local("randtype")+"}}")
 
     if (c("os") != "Windows") { // MACOS/UNIX
         unlink("__pll"+parallelid+"_shell.sh")
         fh = fopen("__pll"+parallelid+"_shell.sh","w", 1)
-        // fput(fh, "echo Stata instances PID:")
+
         
         // Writing file
         if (c("os") != "Unix") {
@@ -1353,7 +1351,6 @@ end
 *! {c BLC}{dup 78:{c -}}{c BRC}
 *! vers 0.14.3 18mar2014
                  another parallel process).
- */
 mata:
 {smcl}
 *! {marker parallel_sandbox}{bf:function -{it:parallel_sandbox}- in file -{it:parallel_sandbox.mata}-}
@@ -1474,7 +1471,6 @@ ls
 *! vers 0.14.3 18mar2014
 *! author: George G. Vega Yon
 
- */
 mata:
 {smcl}
 *! {marker parallel_setclusters}{bf:function -{it:parallel_setclusters}- in file -{it:parallel_setclusters.mata}-}
@@ -1509,7 +1505,6 @@ end
 *! vers 0.14.3 18mar2014
 *! author: George G. Vega Yon
 
- */
 
 mata:
 {smcl}
@@ -1590,7 +1585,6 @@ end
 *! version 0.13.09.30  30sep2013
 *! author: George G. Vega Yon
 
- */
 mata:
 {smcl}
 *! {marker parallel_write_diagnosis}{bf:function -{it:parallel_write_diagnosis}- in file -{it:parallel_write_diagnosis.mata}-}
@@ -1630,7 +1624,6 @@ end
 *! version 0.13.10.7  7oct2013
 * Generates the corresponding dofiles
 
- */
 mata:
 {smcl}
 *! {marker parallel_write_do}{bf:function -{it:parallel_write_do}- in file -{it:parallel_write_do.mata}-}

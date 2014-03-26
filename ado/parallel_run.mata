@@ -1,7 +1,7 @@
-*! version 0.14.3 18mar2014
+*! version 0.14.3.26 26mar2014
 *! author: George G. Vega Yon
 
-/**oxygen
+/**
  * @brief Runs parallel clusters in batch mode.
  * @param parallelid Parallel id.
  * @param nclusters Number of clusters.
@@ -28,13 +28,14 @@ real scalar parallel_run(
 	display("{text:Parallel Computing with Stata} {result:(by GVY)}")
 	display("{text:Clusters:} {result:"+strofreal(nclusters)+"}")
 	display("{text:ID:} {result:"+parallelid+"}")
+	display("{text:Running at:} {result:"+c("pwd")+"}")
 	
 	if (strlen(st_local("randtype"))) display("{text:{it:Note: randtype = "+st_local("randtype")+"}}")
 
 	if (c("os") != "Windows") { // MACOS/UNIX
 		unlink("__pll"+parallelid+"_shell.sh")
 		fh = fopen("__pll"+parallelid+"_shell.sh","w", 1)
-		// fput(fh, "echo Stata instances PID:")
+
 		
 		// Writing file
 		if (c("os") != "Unix") {
