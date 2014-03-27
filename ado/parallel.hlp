@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.14.3 18mar2014}{...}
+{* *! version 0.14.3.27 27mar2014}{...}
 
 {cmd:help parallel}
 {hline}
@@ -382,7 +382,23 @@ to write:
 
 {pstd}
 George Vega Yon, Superindentencia de Pensiones. {browse "mailto:gvega@spensiones.cl"}
+{browse "mailto:g.vegayon@gmail.com"}
 {p_end}
+
+{title:Up-to-date versions}
+
+{pstd}
+You can always have access to the lastest version of {cmd:parallel}. One option
+is from its github repo:
+{p_end}
+
+    {phang}{browse "https://github.com/gvegayon/parallel"}{p_end}
+	
+{pstd} Or from the author's personal website:{p_end}
+
+	{cmd:. net install parallel, from(http://software.ggvega.com/stata) replace}
+	{cmd:. mata mata mlib index}
+	
 
 {title:Contributors}
 
