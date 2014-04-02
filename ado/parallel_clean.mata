@@ -1,7 +1,7 @@
 *! vers 0.14.3 18mar2014
 *! author: George G. Vega
 
-/**oxygen
+/**
 * @brief Removes parallel auxiliry files
 * @param parallelid Parallel of the id instance.
 * @param cleanall Whether to remove all files no matter what parallel id.

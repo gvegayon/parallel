@@ -1,4 +1,4 @@
-*! version 0.14.3.26 26mar2014
+*! version 0.14.4 02apr2014
 *! author: George G. Vega Yon
 
 /**
@@ -36,33 +36,51 @@ real scalar parallel_run(
 		unlink("__pll"+parallelid+"_shell.sh")
 		fh = fopen("__pll"+parallelid+"_shell.sh","w", 1)
 
-		
 		// Writing file
 		if (c("os") != "Unix") {
 			for(i=1;i<=nclusters;i++) {
+				fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i))
+				fput(fh, "export TMPDIR="+c("tmpdir")+"/"+parallelid+strofreal(i))
 				fput(fh, paralleldir+" -e do __pll"+parallelid+"_do"+strofreal(i)+".do &")
 			}
 		}
 		else {
 			for(i=1;i<=nclusters;i++) {
+				fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i))
+				fput(fh, "export TMPDIR="+c("tmpdir")+"/"+parallelid+strofreal(i))
 				fput(fh, paralleldir+" -b do __pll"+parallelid+"_do"+strofreal(i)+".do &")
 			}
 		}
-		
+
 		fclose(fh)
 		
 		// stata("shell sh __pll"+parallelid+"shell.sh&")
 		stata("winexec sh __pll"+parallelid+"_shell.sh")
 	}
 	else { // WINDOWS
+		
+		unlink("__pll"+parallelid+"_shell.bat")
+		fh = fopen("__pll"+parallelid+"_shell.bat","w", 1)
+		
+		// Writing file
 		for(i=1;i<=nclusters;i++) {
-			// Lunching procces
-			stata("winexec "+paralleldir+" /e /q do __pll"+parallelid+"_do"+strofreal(i)+".do ")
+			fput(fh, `"mkdir ""'+c("tmpdir")+parallelid+strofreal(i)+`"""')
+			fwrite(fh, "set TEMP="+c("tmpdir")+parallelid+strofreal(i)+" & ")
+			fput(fh, paralleldir+" /e /q do __pll"+parallelid+"_do"+strofreal(i)+".do &")
 		}
+		
+		fput(fh, "exit")
+		
+		fclose(fh)
+		
+		stata("shell start /MIN __pll"+parallelid+"_shell.bat")
+		
 	}
 	
 	/* Waits until each process ends */
 	return(parallel_finito(parallelid,nclusters,timeout))
 }
 end
+
+// set TEMP=C:\Users\SPENSI~1\AppData\Local\Temp/ubslh38mmc1 & "C:\Program Files (x86)\Stata12/Stata-64.exe" /e /q do __pllubslh38mmc_do1.do
 

@@ -5,6 +5,7 @@ local oldcd = c(pwd)
 *clear all
 program drop _all
 macro drop _all
+mata mata clear
 set matastrict on
 
 vers 10.0
