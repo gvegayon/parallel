@@ -1,4 +1,4 @@
-*! vers 0.14.3 18mar2014
+*! vers 0.14.4 03apr2014
 *! author: George G. Vega Yon
 
 /** 
@@ -69,7 +69,10 @@ string colvector parallel_randomid(|real scalar n, string scalar randtype, real 
 	}
 	else if (randtype=="datetime") {
 		newseed = strtrim(sprintf("%15.0f",
-			sum(ascii(c("current_date")))+strtoreal(subinstr(c("current_time"),":",""))))
+			sum(ascii(c("current_date")))+ /* Date component */
+			sum(ascii(c("user")))+         /* Usr name component */
+			strtoreal(strreverse(subinstr(c("current_time"),":","")))) /* Time component */
+			)
 		stata("set seed "+newseed)
 	}
 	

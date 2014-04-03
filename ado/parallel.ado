@@ -123,6 +123,7 @@ program def parallel_do, rclass
 		Programs 
 		Mata 
 		NOGlobals 
+		Globals
 		KEEPTiming 
 		Seeds(string)
 		NOData 
@@ -140,9 +141,17 @@ program def parallel_do, rclass
 	}
 	
 	// Initial checks
-	foreach opt in macrolist keep keeplast prefix force programs mata noglobals keeptiming nodata {
+	foreach opt in macrolist keep keeplast prefix force programs mata noglobals globals keeptiming nodata {
 		local `opt' = length("``opt''") > 0
 	}
+
+	if (`noglobals') di as text "{it Note: -noglobals- option is depracated, now it is a default.}"
+	
+	if (`globals') local noglobals = 0
+	else local noglobals = 1
+
+	/* Randtype */
+	if ("`randtype'" == "") local randtype = "datetime"
 	
 	/* If no data parsing has to be done (because of no data!) */
 	if (!(c(N)*c(k))) local nodata 1

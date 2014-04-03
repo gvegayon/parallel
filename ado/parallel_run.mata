@@ -26,9 +26,9 @@ real scalar parallel_run(
 	
 	// Message
 	display("{text:Parallel Computing with Stata} {result:(by GVY)}")
-	display("{text:Clusters:} {result:"+strofreal(nclusters)+"}")
-	display("{text:ID:} {result:"+parallelid+"}")
-	display("{text:Running at:} {result:"+c("pwd")+"}")
+	display("{text:Clusters   :} {result:"+strofreal(nclusters)+"}")
+	display("{text:pll_id     :} {result:"+parallelid+"}")
+	display("{text:Running at :} {result:"+c("pwd")+"}")
 	
 	if (strlen(st_local("randtype"))) display("{text:{it:Note: randtype = "+st_local("randtype")+"}}")
 
@@ -73,7 +73,7 @@ real scalar parallel_run(
 		
 		fclose(fh)
 		
-		stata("shell start /MIN __pll"+parallelid+"_shell.bat")
+		stata("shell start /MIN __pll"+parallelid+"_shell.bat&exit")
 		
 	}
 	

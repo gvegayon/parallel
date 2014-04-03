@@ -1156,7 +1156,7 @@ end
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:Beginning of file -parallel_randomid.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
-*! vers 0.14.3 18mar2014
+*! vers 0.14.4 03apr2014
 *! author: George G. Vega Yon
 
 mata:
@@ -1232,7 +1232,10 @@ string colvector parallel_randomid(|real scalar n, string scalar randtype, real 
     }
     else if (randtype=="datetime") {
         newseed = strtrim(sprintf("%15.0f",
-            sum(ascii(c("current_date")))+strtoreal(subinstr(c("current_time"),":",""))))
+            sum(ascii(c("current_date")))+ /* Date component */
+            sum(ascii(c("user")))+         /* Usr name component */
+            strtoreal(strreverse(subinstr(c("current_time"),":","")))) /* Time component */
+            )
         stata("set seed "+newseed)
     }
     
@@ -1301,9 +1304,9 @@ real scalar parallel_run(
     
     // Message
     display("{text:Parallel Computing with Stata} {result:(by GVY)}")
-    display("{text:Clusters:} {result:"+strofreal(nclusters)+"}")
-    display("{text:ID:} {result:"+parallelid+"}")
-    display("{text:Running at:} {result:"+c("pwd")+"}")
+    display("{text:Clusters   :} {result:"+strofreal(nclusters)+"}")
+    display("{text:pll_id     :} {result:"+parallelid+"}")
+    display("{text:Running at :} {result:"+c("pwd")+"}")
     
     if (strlen(st_local("randtype"))) display("{text:{it:Note: randtype = "+st_local("randtype")+"}}")
 
@@ -1348,7 +1351,7 @@ real scalar parallel_run(
         
         fclose(fh)
         
-        stata("shell start /MIN __pll"+parallelid+"_shell.bat")
+        stata("shell start /MIN __pll"+parallelid+"_shell.bat&exit")
         
     }
     
