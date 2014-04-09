@@ -33,6 +33,7 @@ run parallel_divide_index.mata
 run parallel_write_diagnosis.mata
 run parallel_break.mata
 run parallel_sandbox.mata
+run parallel_expand_expr.mata
 
 mata: mata mlib create lparallel, replace
 mata: mata mlib add lparallel parallel_*()
