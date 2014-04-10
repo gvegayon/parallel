@@ -115,7 +115,7 @@ program def pllappend
 		file close fh
 		
 		qui parallel setclusters `--j', s(`olddir') f
-		parallel do `f', keep `programs'
+		parallel do `f', `programs'
 
 		/*!less __pll`=r(pll_id)'_do1.do
 		!less __pll`=r(pll_id)'_do1.log*/
