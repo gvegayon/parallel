@@ -1,5 +1,13 @@
-*! version 0.13.10.3  3oct2013
-* Waits until every process finishes or stops the processes
+*! version 0.14.3  18mar2014
+*! author: George G. Vega Yon
+
+/**oxygen
+ * @brief Waits until every process finishes or stops the processes
+ * @param parallelid Parallel instance id.
+ * @param nclusters Number of clusters.
+ * @param timeout Time (in secs) before abort.
+ * @returns Number of clusters that stopped with error.
+ */
 mata:
 real scalar parallel_finito(
 	string scalar parallelid,

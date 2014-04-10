@@ -1,5 +1,13 @@
 *! version 0.13.10.2  2oct2013
-*! Aborts execution and returns to the current instancee
+*! author: George G. Vega Yon
+
+/**oxygen
+* @brief Stops the cluster if the mother instance has requiered so.
+* @param parallelid Parallel process id. 
+* @param pllinstance Parallel instance id.
+* @returns Stops the cluster.
+*/
+
 mata:
 void parallel_break(
 	|string scalar parallelid, 
@@ -41,6 +49,12 @@ void parallel_break(
 	}
 }
 
+/**oxygen
+* @brief Stops the cluster if the mother instance has requiered so.
+* @param parallelid Parallel id. 
+* @param pllinstance Parallel instance
+* @returns Returns -1- if the mother process has stop, else returns -0-.
+*/
 real scalar _parallel_break(
 	|string scalar parallelid, 
 	string scalar pllinstance
@@ -78,3 +92,4 @@ real scalar _parallel_break(
 	return(0)
 }
 end
+

@@ -1,5 +1,13 @@
 *! version 0.13.09.30  30sep2013
-* Writes a diagnosis to be read by -parallel_finito()-
+*! author: George G. Vega Yon
+
+/**oxygen 
+ * @brief Writes a diagnosis to be read by -parallel_finito()-
+ * @param diagnosis Text to be written.
+ * @param fname File where to write the diagnosis.
+ * @param msg Message to include at the end of the file.
+ * @returns A file with one or two lines.
+ */
 mata:
 void parallel_write_diagnosis(
 	string scalar diagnosis,

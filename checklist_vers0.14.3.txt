@@ -1,0 +1,18 @@
+UNIX tests:
+ - stata-mp, se, ic, sm
+
+WINDOWS test:
+ - ic 10, ic 11, ic 12
+
+ALGORITHMS:
+ - reshape
+ - by egen
+ - gen
+ - by gen
+ - collapse
+
+DOCUMENTATION:
+ - Versions of all source code
+ - Check variables
+ - Document mata functions (in source code)
+ - Document 'parallel_estimates'

@@ -1,4 +1,15 @@
-// Mata's Random id generation
+*! vers 0.14.4 03apr2014
+*! author: George G. Vega Yon
+
+/** 
+ * @brief Mata's Random id generation.
+ * @param n Number of random ids to generate.
+ * @param randtype Type of random algorithm to use.
+ * @param alpha Whether to use or not alphanum.
+ * @param nele Length of each random id generated.
+ * @param silent Whether to run quietly or not.
+ * @returns String colvector of random ids.
+ */
 mata:
 string colvector parallel_randomid(|real scalar n, string scalar randtype, real scalar alpha, real scalar nele, real scalar silent) {
 	
@@ -58,7 +69,10 @@ string colvector parallel_randomid(|real scalar n, string scalar randtype, real 
 	}
 	else if (randtype=="datetime") {
 		newseed = strtrim(sprintf("%15.0f",
-			sum(ascii(c("current_date")))+strtoreal(subinstr(c("current_time"),":",""))))
+			sum(ascii(c("current_date")))+ /* Date component */
+			sum(ascii(c("user")))+         /* Usr name component */
+			strtoreal(strreverse(subinstr(c("current_time"),":","")))) /* Time component */
+			)
 		stata("set seed "+newseed)
 	}
 	
@@ -85,3 +99,4 @@ string colvector parallel_randomid(|real scalar n, string scalar randtype, real 
 	return(id)
 }
 end
+

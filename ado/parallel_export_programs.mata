@@ -1,6 +1,15 @@
-*! vers 0.13.10.7 7oct2013
+*! vers 0.14.3 18mar2014
+*! author: George G. Vega
+
+/**oxygen
+* @brief export programs loaded in the current sesion.
+* @param ouname Name of the file that will contain the programs.
+* @param programlist List of programs to be exported.
+* @param inname Name of the tmp file that will be used as log.
+* @return A do-file ready to be runned to load programs.
+*/
 mata:
-void program_export(
+void parallel_export_programs(
 	string scalar ouname ,
 	|string scalar programlist,
 	string scalar inname

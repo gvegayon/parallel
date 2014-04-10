@@ -1,3 +1,14 @@
+*! vers 0.14.3 18mar2014
+*! author: George G. Vega
+
+/**
+* @brief Removes parallel auxiliry files
+* @param parallelid Parallel of the id instance.
+* @param cleanall Whether to remove all files no matter what parallel id.
+* @param force Forces parallel to remove files even if sandbox is working.
+* @returns Removes all auxiliary files.
+*/
+
 mata:
 void parallel_clean(|string scalar parallelid, real scalar cleanall, real scalar force) {
 	

@@ -1,3 +1,12 @@
+*! vers 0.14.3 18mar2014
+*! author: George G. Vega Yon
+
+/**oxygen
+ * @brief Initial cluster setup for parallel.
+ * @param ncluster Number of clusters.
+ * @param force Whether to force setting more than 8 clusters.
+ * @returns A global PLL_CLUSTERS.
+ */
 mata:
 void parallel_setclusters(real scalar nclusters, |real scalar force) {
 		
