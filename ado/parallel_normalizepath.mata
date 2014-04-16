@@ -1,4 +1,4 @@
-*! vers 0.14.3 18mar2014
+*! vers 0.14.4 18apr2014
 *! author: George G. Vega Yon
 
 /**oxygen
@@ -9,7 +9,7 @@
 */
 
 mata:
-transmorphic parallel_normalizepath(
+transmorphic function parallel_normalizepath(
 	string scalar path,
 	| real scalar exportaslocal
 	)
@@ -68,7 +68,7 @@ transmorphic parallel_normalizepath(
 	// Extracting details
 	pathsplit(fullpath, filedir, filename)
 	fileext = pathsuffix(filename)	
-	
+		
 	if (exportaslocal) {
 		st_local("filedir",filedir)
 		st_local("filename",filename)

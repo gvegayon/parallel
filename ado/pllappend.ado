@@ -134,7 +134,7 @@ program def pllappend
 		
 		if (!c(N)) cap use `tmpid'`i'
 		
-		if (_rc) local err `err' `file'`i'
+		if (_rc) local err `err' `file`i''
 	}
 	di "The following files could't be found `err'"
 
