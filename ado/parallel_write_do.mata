@@ -13,7 +13,7 @@
  * @param randtype If no seeds provided, type of algorithm used to generate the seeds
  * @param nodata Wheter to load (1) data or not.
  * @param folder Folder where the do-file should be running.
- * @param progsave Wheter to use (1) or not (0) programs loaded in the current stat sesion.
+ * @param programs A list of programs to be used within each cluster.
  * @param processors Number of statamp processors to use in each cluster.
  * @returns As many do-files as clusers used.
  */
@@ -29,7 +29,7 @@ real scalar parallel_write_do(
 	string scalar randtype,
 	real   scalar nodata,
 	string scalar folder,
-	real scalar progsave,
+	string scalar programs,
 	real scalar processors
 	)
 {
@@ -38,7 +38,7 @@ real scalar parallel_write_do(
 	string scalar memset, maxvarset, matsizeset
 	real scalar i
 	string colvector seeds
-	
+
 	// Checking optargs
 	if (matasave == J(1,1,.)) matasave = 0
 	if (prefix == J(1,1,.)) prefix = 1
@@ -73,21 +73,24 @@ real scalar parallel_write_do(
 	}
 	if (nodata == J(1,1,.)) nodata = 0
 	if (folder == J(1,1,"")) folder = c("pwd")
-	if (progsave == J(1,1,.)) progsave = 0
+
+	real scalar progsave
+	if (strlen(programs)) progsave = 1
+	else progsave = 0
 	
 	/* Checks for the MP version */
 	if (!c("MP") & processors != 0 & processors != J(1,1,.)) display("{it:{result:Warning:} processors option ignored...}")
 	else if (processors == J(1,1,.) | processors == 0) processors = 1
-	
-	if (progsave) parallel_export_programs(folder+"/__pll"+parallelid+"_prog.do")
+
+	if (progsave) parallel_export_programs(folder+"/__pll"+parallelid+"_prog.do", programs)
 	if (getmacros) parallel_export_globals(folder+"/__pll"+parallelid+"_glob.do")
 	
 	for(i=1;i<=nclusters;i++) 
 	{
 		// Sets dofile
-                fname = "__pll"+parallelid+"_do"+strofreal(i)+".do"
+                fname = "__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do"
 		if (fileexists(fname)) unlink(fname)
-		output_fh = fopen("__pll"+parallelid+"_do"+strofreal(i)+".do", "w", 1)
+		output_fh = fopen("__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do", "w", 1)
 		
 		// Step 1
 		fput(output_fh, "capture {")
@@ -124,7 +127,7 @@ real scalar parallel_write_do(
 		fput(output_fh, "local result = _rc")
 		fput(output_fh, "if (c(rc)) {")
 		fput(output_fh, `"cd ""'+folder+`"""')
-		fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"/__pll"+parallelid+"_finito"+strofreal(i)+`"","while setting memory")"')
+		fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"/__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while setting memory")"')
 		fput(output_fh, "clear")
 		fput(output_fh, "exit")
 		fput(output_fh, "}")
@@ -140,7 +143,7 @@ real scalar parallel_write_do(
 			fput(output_fh, "local result = _rc")
 			fput(output_fh, "if (c(rc)) {")
 			fput(output_fh, `"cd ""'+folder+`"""')
-			fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"/__pll"+parallelid+"_finito"+strofreal(i)+`"","while loading programs")"')
+			fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"/__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while loading programs")"')
 			fput(output_fh, "clear")
 			fput(output_fh, "exit")
 			fput(output_fh, "}")
@@ -161,7 +164,7 @@ real scalar parallel_write_do(
 			fput(output_fh, "local result = _rc")
 			fput(output_fh, "if (c(rc)) {")
 			fput(output_fh, `"cd ""'+folder+`"""')
-			fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"/__pll"+parallelid+"_finito"+strofreal(i)+`"","while loading mata objects")"')
+			fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"/__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while loading mata objects")"')
 			fput(output_fh, "clear")
 			fput(output_fh, "exit")
 			fput(output_fh, "}")
@@ -181,7 +184,7 @@ real scalar parallel_write_do(
 			fput(output_fh, "}")
 			fput(output_fh, "if (c(rc)) {")
 			fput(output_fh, `"cd ""'+folder+`"""')
-			fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"/__pll"+parallelid+"_finito"+strofreal(i)+`"","while loading globals")"')
+			fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"/__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while loading globals")"')
 			fput(output_fh, "clear")
 			fput(output_fh, "exit")
 			fput(output_fh, "}")
@@ -212,11 +215,11 @@ real scalar parallel_write_do(
 		
 		fput(output_fh, "}")
 		fput(output_fh, "}")
-		if (!nodata) fput(output_fh, "save "+folder+"/__pll"+parallelid+"_dta"+strofreal(i)+", replace")
+		if (!nodata) fput(output_fh, "save "+folder+"/__pll"+parallelid+"_dta"+strofreal(i,"%04.0f")+", replace")
 		
 		// Step 3
 		fput(output_fh, `"cd ""'+folder+`"""')
-		fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"/__pll"+parallelid+"_finito"+strofreal(i)+`"","while running the command/dofile")"')
+		fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"/__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while running the command/dofile")"')
 		fclose(output_fh)
 	}
 	return(0)

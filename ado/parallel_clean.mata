@@ -1,6 +1,68 @@
 *! vers 0.14.3 18mar2014
 *! author: George G. Vega
 
+mata:
+
+/**
+ * @brief Removes tmpfolders
+ * @param parallelid Id of the paralallel process
+ */
+void function parallel_clean_tmp(
+	|string scalar parallelid,
+	real scalar force
+)
+{
+	/* Getting the temppath */
+	string scalar tmpdirs, dirslist
+	string colvector sbfiles
+	real scalar i
+	
+	string scalar tmpbat
+	real scalar fh
+	(parallelid == "" ? "*" : parallelid) + "ok"
+	tmpdirs = dir(c("tmpdir"),"dirs","__pll"+ (parallelid == "" ? "*" : parallelid) , 1)
+	
+	/* Getting the list of folders that should not be removed */
+	sbfiles = J(0,1,"")
+	if (!force)
+	{
+		parallel_sandbox(4,"",&sbfiles)
+		for(i=1;i<=length(sbfiles);i++)
+			tmpdirs = select(tmpdirs, tmpdirs :!= sbfiles[i])
+	}
+	
+	/* If no dir left, continue */
+	if (!length(tmpdirs)) return
+	
+	printf(tmpdirs[1])
+	/* Removing the dirs */
+	if (c("os") == "Windows")
+	{
+		/* Getting a file name for the tmp.bat */
+		while(fileexists(tmpbat = tmpfilename()))
+			continue
+	
+		fh = fopen(tmpbat, "w")
+		
+		for(i=1;i<=length(tmpdirs);i++)
+		{
+			tmpdirs[i] = subinstr(tmpdirs[i],"/","\",.)
+			fput(fh, "rmdir /S /Q "+tmpdirs[i])
+			printf("rmdir /S /Q "+tmpdirs[i])
+		}
+		fclose(fh)
+		stata("shell start /MIN "+tmpbat+"&exit")
+		unlink(tmpbat)
+	}
+	else 
+	{
+		for(i=1;i<=length(tmpdirs);i++)
+			stata("cap winexec rm -R "+tmpdirs[i])
+	}
+	
+	return
+}
+
 /**
 * @brief Removes parallel auxiliry files
 * @param parallelid Parallel of the id instance.
@@ -8,8 +70,6 @@
 * @param force Forces parallel to remove files even if sandbox is working.
 * @returns Removes all auxiliary files.
 */
-
-mata:
 void parallel_clean(|string scalar parallelid, real scalar cleanall, real scalar force) {
 	
 	real scalar i ;
@@ -22,16 +82,16 @@ void parallel_clean(|string scalar parallelid, real scalar cleanall, real scalar
 	
 	if (!cleanall & strlen(parallelid)) // If its not all
 	{ 
-		files = dir("","files","__pll"+parallelid+"_*") \ dir("","files","l__pll"+parallelid+"_*")
+		files = dir(pwd(),"files","__pll"+parallelid+"_*",1) \ dir(pwd(),"files","l__pll"+parallelid+"_*",1) \ dir(c("tmpdir"),"files","__pll"+parallelid+"sandbox",1)
 	}
 	else if (cleanall)
 	{           // If its all
-		files = dir("","files","__pll*") \ dir("","files","l__pll*")
+		files = dir(pwd(),"files","__pll*",1) \ dir(pwd(),"files","l__pll*",1)\dir(c("tmpdir"),"files","__pll*sandbox",1)
 	}
 	
 	/* Extracting files that are in use */
 	if (!force) parallel_sandbox(1,"",&sbfiles)
-			
+	
 	/* Checking if there is anything to clean */
 	if (files == J(0,1,"")) display(sprintf("{text:parallel clean:} {result: nothing to clean...}"))
 	else {
@@ -43,6 +103,11 @@ void parallel_clean(|string scalar parallelid, real scalar cleanall, real scalar
 		for(i=1;i<=rows(files);i++)
 			unlink(files[i])
 	}
+	
+	/* Removing temp files */
+	parallel_clean_tmp(parallelid, force)
+	
+	return
 }
 end
 

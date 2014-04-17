@@ -1,4 +1,4 @@
-*! version 0.14.3  18mar2014
+*! version 0.14.4  17apr2014
 *! author: George G. Vega Yon
 
 /**oxygen
@@ -47,14 +47,14 @@ real scalar parallel_finito(
 	for(i=1;i<=nclusters;i++)
 	{		
 		/* Building filename */
-		fname = sprintf("__pll%s_do%g.log", parallelid, i)
+		fname = sprintf("__pll%s_do%04.0f.log", parallelid, i)
 		time = 0
 		while (!fileexists(fname) & ((++time)*100 < timeout) & !breakkey())
 			stata("sleep 100")
 			
-		if (!fileexists(fname)) 
+		if (!fileexists(fname))
 		{
-			display(sprintf("{it:cluster %g} {error:has finished with a connection error -601- (timeout) ({stata search r(601):see more})...}", i))
+			display(sprintf("{it:cluster %04.0f} {error:has finished with a connection error -601- (timeout) ({stata search r(601):see more})...}", i))
 			suberrors++
 			continue
 		}
@@ -75,7 +75,7 @@ real scalar parallel_finito(
 			/* If this cluster is ready, then continue */
 			if (!any(pendingcl :== i)) continue
 			
-			fname = sprintf("__pll%s_finito%g", parallelid, i)
+			fname = sprintf("__pll%s_finito%04.0f", parallelid, i)
 			
 			if (breakkey() & !pressed) 
 			{ /* If the user pressed -break-, each instance will try to finish the work through parallel finito */
@@ -92,23 +92,23 @@ real scalar parallel_finito(
 				fclose(out_fh)
 				
 				pressed = 1
-				fname = sprintf("__pll%s_finito%g", parallelid, i)
+				fname = sprintf("__pll%s_finito%04.0f", parallelid, i)
 				
 			}
 		
 			if (fileexists(fname)) // If the file exists
-			{ 
+			{
 				/* Opening the file and looking for somethign different of 0
 				(which is clear) */
 				in_fh = fopen(fname, "r", 1)
 				if ((errornum=strtoreal(fget(in_fh))))
 				{
 					msg = fget(in_fh)
-					if (msg == J(0,0,"")) display(sprintf("{it:cluster %g} {error:has finished with an error -%g- ({stata search r(%g):see more})...}", i, errornum, errornum))
-					else display(sprintf("{it:cluster %g} {error:has finished with an error -%g- %s ({stata search r(%g):see more})...}", i, errornum, msg, errornum))
+					if (msg == J(0,0,"")) display(sprintf("{it:cluster %04.0f} {error:has finished with an error -%g- ({stata search r(%g):see more})...}", i, errornum, errornum))
+					else display(sprintf("{it:cluster %04.0f} {error:has finished with an error -%g- %s ({stata search r(%g):see more})...}", i, errornum, msg, errornum))
 					suberrors++
 				}
-				else display(sprintf("{it:cluster %g} {text:has finished without any error...}", i))
+				else display(sprintf("{it:cluster %04.0f} {text:has finished without any error...}", i))
 				fclose(in_fh)
 				
 				/* Taking the finished cluster out of the list */
@@ -131,3 +131,4 @@ real scalar parallel_finito(
 	
 }
 end
+

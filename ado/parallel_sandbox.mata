@@ -1,10 +1,10 @@
-*! vers 0.14.3 18mar2014
-/**oxygen 
+*! vers 0.14.4 17apr2014
+/** 
  * @brief Set of tools to prevent parallel instances to overlap.
  * @param action Action to be taken.
  * @param pll_id Parallel process id.
  * @param result Pointer to list of files that can be removed (without stopping
-                 another parallel process).
+ *               another parallel process).
  * @returns Depends on the action.
  */
 mata:
@@ -21,17 +21,20 @@ void parallel_sandbox(
 {
 	/* Definign variables */
 	real scalar fh,i;
+	string scalar tmpdir
 	string colvector sbids, sbfnames;
 	
+	tmpdir = c("tmpdir")+(c("os") != "Windows" ? "/" : "")
+
 	/* Checks if a parallel instance is currently running with the same pll id name */
 	if (action==0)
 	{
 		/* Checking if the files exist */
-		if (fileexists("__pll"+pll_id+"_sandbox"))
+		if (fileexists(tmpdir+"__pll"+pll_id+"_sandbox"))
 			_error(912,sprintf("-%s- aldready in use. Please change the seed.", pll_id))
 		
 		/* Creating the new file */
-		fh = fopen("__pll"+pll_id+"_sandbox", "w");
+		fh = fopen(tmpdir+"__pll"+pll_id+"_sandbox", "w");
 		fput(fh,"pll_id:"+pll_id);
 		fput(fh,"date:"+c("current_date")+" "+c("current_time"))
 		fclose(fh);
@@ -40,19 +43,24 @@ void parallel_sandbox(
 	}
 	
 	/* Returns a list of files which are not intended to be erased */
+	string scalar sbidsi
 	if (action==1)
 	{
 		/* Listing the files that shuldn't be removed */
-		sbids = dir(".","files","__pll*sandbox");
+		sbids = dir(tmpdir,"files","__pll*sandbox",1);
 		
 		sbfnames = J(0,1,"");
 		
 		if (length(sbids))
 		{
-			sbids = regexr(regexr(sbids, "l?__pll", ""), "_.*", "");
-		
 			for(i=1;i<=length(sbids);i++)
-				sbfnames = sbfnames\dir(".","files","__pll"+sbids[i]+"*");
+			{
+				if (regexm(sbids[i],"[_][_]pll(.+)[_]sandbox$"))
+				{
+					sbidsi = regexs(1); // regexr(sbids[i], "__pll", ""), "_.*", "");
+					sbfnames = sbfnames\dir(pwd(),"files","__pll"+sbidsi+"*",1)\tmpdir+sbids[i];
+				}
+			}
 		}
 
 		/* Assigning the value */
@@ -64,7 +72,7 @@ void parallel_sandbox(
 	/* Removes the corresponding file to be removed */
 	if (action==2)
 	{
-		unlink("__pll"+pll_id+"_sandbox")
+		unlink(tmpdir+"__pll"+pll_id+"_sandbox")
 		return
 	}
 
@@ -78,6 +86,32 @@ void parallel_sandbox(
 		
 		return
 	} */
+
+	if (action==4)
+	{
+		/* Listing the folders that shouldn't be removed */
+		sbids = dir(tmpdir,"files","__pll*sandbox");
+		
+		sbfnames = J(0,1,"");
+
+		if (length(sbids))
+		{
+			for(i=1;i<=length(sbids);i++)
+			{
+				if (regexm(sbids[i],"[_][_]pll(.+)[_]sandbox$"))
+				{
+					sbidsi = regexs(1); // regexr(sbids[i], "__pll", ""), "_.*", "");
+					sbfnames = sbfnames\dir(pwd(),"dirs","__pll"+sbidsi+"*",1)
+				}
+			}
+		}
+
+		/* Assigning the value */
+		(*result) = sbfnames
+
+		return
+
+	}
 	
 }
 end
@@ -104,3 +138,4 @@ mata parallel_clean2("",1)
 ls
 
 */
+

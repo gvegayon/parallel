@@ -1,4 +1,4 @@
-*! version 0.14.4 02apr2014
+*! version 0.14.4.17 17apr2014
 *! author: George G. Vega Yon
 
 /**
@@ -39,16 +39,16 @@ real scalar parallel_run(
 		// Writing file
 		if (c("os") != "Unix") {
 			for(i=1;i<=nclusters;i++) {
-				fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i))
-				fput(fh, "export TMPDIR="+c("tmpdir")+"/"+parallelid+strofreal(i))
-				fput(fh, paralleldir+" -e do __pll"+parallelid+"_do"+strofreal(i)+".do &")
+				fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
+				fput(fh, "export TMPDIR="+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
+				fput(fh, paralleldir+" -e do __pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do &")
 			}
 		}
 		else {
 			for(i=1;i<=nclusters;i++) {
-				fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i))
-				fput(fh, "export TMPDIR="+c("tmpdir")+"/"+parallelid+strofreal(i))
-				fput(fh, paralleldir+" -b do __pll"+parallelid+"_do"+strofreal(i)+".do &")
+				fput(fh, "mkdir "+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
+				fput(fh, "export TMPDIR="+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
+				fput(fh, paralleldir+" -b do __pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do &")
 			}
 		}
 
@@ -64,9 +64,9 @@ real scalar parallel_run(
 		
 		// Writing file
 		for(i=1;i<=nclusters;i++) {
-			fput(fh, `"mkdir ""'+c("tmpdir")+parallelid+strofreal(i)+`"""')
-			fwrite(fh, "set TEMP="+c("tmpdir")+parallelid+strofreal(i)+" & ")
-			fput(fh, paralleldir+" /e /q do __pll"+parallelid+"_do"+strofreal(i)+".do &")
+			fput(fh, `"mkdir ""'+c("tmpdir")+"__pll"+parallelid+strofreal(i, "%04.0f")+`"""')
+			fwrite(fh, "set TEMP="+c("tmpdir")+"__pll"+parallelid+strofreal(i,"%04.0f")+" & ")
+			fput(fh, paralleldir+" /e /q do __pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do &")
 		}
 		
 		fput(fh, "exit")

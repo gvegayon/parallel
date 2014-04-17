@@ -28,6 +28,7 @@ void parallel_export_programs(
 	if (oldsettrace == "on") stata("set trace off")
 	stata("cap log close "+inname)
 	stata("log using "+inname+".txt, text replace name(log"+inname+")")
+
 	stata("noisily program list "+programlist)
 	stata("log close log"+inname)
 	stata("set trace "+oldsettrace)

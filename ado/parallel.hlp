@@ -21,7 +21,7 @@
 
 {p 8 17 2}
 {cmdab:parallel do}
-{it:{help filename}} [, {opt by}({it:{help varlist}}) {opt f:orce} {opt k:eep} {opt keepl:ast} {opt p:rograms} {opt m:ata} {opt nog:lobal} {opt s:eeds}({it:{help numlist}}) {opt nod:ata}
+{it:{help filename}} [, {opt by}({it:{help varlist}}) {opt f:orce} {opt k:eep} {opt keepl:ast} {opt p:rograms}({it:{help namelist}}) {opt m:ata} {opt nog:lobal} {opt s:eeds}({it:{help numlist}}) {opt nod:ata}
  {opt r:andtype}({it:{help strings:datetime|random.org}}) 
  {opt t:imeout}({it:integer}) 
  {opt pr:ocessors}({it:integer})]
@@ -29,7 +29,7 @@
 {pstd}Parallelizing a stata command
 
 {p 8 17 2}
-{cmdab:parallel} [, {opt by}({it:{help varlist}}) {opt f:orce} {opt k:eep} {opt keepl:ast} {opt p:rograms} {opt m:ata} {opt nog:lobal} {opt s:eeds}({it:{help numlist}}) {opt nod:ata} 
+{cmdab:parallel} [, {opt by}({it:{help varlist}}) {opt f:orce} {opt k:eep} {opt keepl:ast} {opt p:rograms}({it:{help namelist}}) {opt m:ata} {opt nog:lobal} {opt s:eeds}({it:{help numlist}}) {opt nod:ata} 
  {opt r:andtype}({it:{help strings:datetime|random.org}}) 
  {opt t:imeout}({it:integer}) 
  {opt pr:ocessors}({it:integer})
@@ -70,8 +70,7 @@ is properly sorted. By using {opt force} the command skips this check.{p_end}
 during the current session.{p_end}
 
 {syntab:Passing Stata/Mata objects}
-{synopt:{opt p:rograms}}In the case of having temporal programs loaded in the session,
-using this option {cmd:parallel} passes them to the clusters.{p_end}
+{synopt:{opt p:rograms}}A list of programs to be passed to each cluster. {p_end}
 {synopt:{opt m:ata}}If the algorithm needs to use mata objects, this option allows
 to pass to each cluster every mata object loaded in the current session (including functions).{p_end}
 {synopt:{opt nog:lobal}}By default {cmd:parallel} takes into account any global macro

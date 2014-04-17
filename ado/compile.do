@@ -35,8 +35,9 @@ run parallel_break.mata
 run parallel_sandbox.mata
 run parallel_expand_expr.mata
 
+rm lparallel.mlib
 mata: mata mlib create lparallel, replace
-mata: mata mlib add lparallel parallel_*()
+mata: mata mlib add lparallel parallel_*() _parallel_*()
 
 /*
 /* Creando checksum */
@@ -50,6 +51,8 @@ foreach g in ayuda ados {
 }
 checksum lparallel.mlib, save replace
 */
+
+cd ..
 
 mata: dt_install_on_the_fly("parallel")
 

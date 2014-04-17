@@ -5,7 +5,7 @@ program def pllappend
 
 	vers 11.0
 
-	syntax [anything(name=files)] [, Do(string asis) in(string asis) if (string asis) Programs Expression(string)]
+	syntax [anything(name=files)] [, Do(string asis) in(string asis) if (string asis) Expression(string) *]
 			
 	if ("`in'" != "") local in in `in'
 	if ("`if'" != "") local if if `if'
@@ -84,14 +84,19 @@ program def pllappend
 	}
 	
 	/* Getting a common id for the files */
-	mata: (void) parallel_randomid(10,"",1,1,1)
-	local tmpid = r(id1)
+	local err = 1
+	while (`err') {
+		mata: (void) parallel_randomid(10,"",1,1,1)
+		local tmpid = "__pllappend`r(id1)'"
+		cap mkdir `tmpid'	
+		local err = _rc
+	}
 	
 	local nsave = 0
 	forval i=1/`ng' {
 		
 		/* Writing the file */	
-		local f `tmpid'
+		local f `tmpid'.do
 		file open fh using `f', w replace
 		
 		tokenize `group`i''
@@ -101,7 +106,7 @@ program def pllappend
 		while (`"``++j''"' != "") {
 			file write fh "if (\`pll_instance' == `++k') {" _newline
 			file write fh "    use ``j'' `if' `in'" _newline 
-			file write fh "    local tmpn = `++nsave'" _newline "}" _newline
+			file write fh `"    local tmpn = string(`++nsave',"%04.0f")"' _newline "}" _newline
 		}
 		
 		cap findfile `do'
@@ -110,33 +115,37 @@ program def pllappend
 		}
 		
 		file write fh "compress" _newline
-		file write fh "save `tmpid'\`tmpn', replace" _newline
+		file write fh "save `tmpid'/`tmpid'\`tmpn', replace" _newline
 		
 		file close fh
-		
+
 		qui parallel setclusters `--j', s(`olddir') f
-		parallel do `f', `programs'
+		parallel do `f', `options'
 
 		/*!less __pll`=r(pll_id)'_do1.do
 		!less __pll`=r(pll_id)'_do1.log*/
-		parallel clean, all f
-		rm `tmpid'
+		rm `f'
 	}
-	
+	noi ls `tmpid'/
 	qui clear
 	
 	/* Appending all the results */
 	forval i=1/`nsave' {
+		local tmpn = "`tmpid'"+string(`i',"%04.0f")+".dta"
 		cap {
-			append using `tmpid'`i'
-			rm `tmpid'`i'.dta
+			append using `tmpid'/`tmpn'
+			rm `tmpid'/`tmpn'
 		}
 		
-		if (!c(N)) cap use `tmpid'`i'
+		if (!c(N)) cap use `tmpid'/`tmpn'
 		
 		if (_rc) local err `err' `file`i''
 	}
-	di "The following files could't be found `err'"
+	
+	/* Removing the tmp dir */
+	cap rmdir `tmpid'
+
+	if (length("`err'")) di as result "{it:Warning:The following files could't be found}" _newline as text "`err'"
 
 	qui parallel setclusters `oldclusters', s(`olddir') f
 	
