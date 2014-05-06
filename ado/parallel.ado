@@ -1,4 +1,4 @@
-*! version 0.14.4  17apr2014
+*! version 1.14  6may2014
 *! PARALLEL: Stata module for parallel computing
 *! by George G. Vega (g.vegayon at gmail)
 /*

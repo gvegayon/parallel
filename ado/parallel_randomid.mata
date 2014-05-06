@@ -1,4 +1,4 @@
-*! vers 0.14.4 03apr2014
+*! vers 1.14.5 06may2014
 *! author: George G. Vega Yon
 
 /** 
@@ -36,6 +36,15 @@ string colvector parallel_randomid(|real scalar n, string scalar randtype, real 
 	
 	// Keeping the current seed value (if its going to change)
 	if (randtype!=J(1,1,"")) curseed = c("seed")
+
+	/* Checking whether PLL has already used an ID */
+	if (!strlen(st_global("PLL_LASTRNG"))) st_global("PLL_LASTRNG","0")
+	
+	real scalar PLL_LASTRNG
+	PLL_LASTRNG = strtoreal(st_global("PLL_LASTRNG")) + 1
+	st_global("PLL_LASTRNG", strofreal(PLL_LASTRNG))
+
+	n = n - strlen(strofreal(PLL_LASTRNG))
 	
 	if (randtype=="random.org") {
 		if (!silent) printf("Connecting to random.org API...")
@@ -49,7 +58,7 @@ string colvector parallel_randomid(|real scalar n, string scalar randtype, real 
 		if (rn_fh >= 0) { // If the connection works fine
 			id = J(0,1,"")
 			while ((line=fget(rn_fh)) != J(0,0,"") ) {
-				id = id\ line
+				id = id\ line+strofreal(PLL_LASTRNG)
 			}
 			fclose(rn_fh)
 			if (!silent) printf("success!\n")
@@ -85,7 +94,7 @@ string colvector parallel_randomid(|real scalar n, string scalar randtype, real 
 		for(i=1;i<=n;i++) {
 			tmpid = tmpid+id2[i]
 		}
-		id = id\tmpid
+		id = id\tmpid+strofreal(PLL_LASTRNG)
 	}
 	
 	if (randtype!=J(1,1,"")) stata("set seed "+curseed)

@@ -170,13 +170,13 @@ void function parallel_clean_tmp(
             fput(fh, "rmdir /s /q "+tmpdirs[i])
         }
         fclose(fh)
-        stata("winexec cmd /c "+tmpbat+"&erase /f "+tmpbat+"&exit")
+        stata("shell "+tmpbat+"&erase /f "+tmpbat+"&exit")
         
     }
     else 
     {
         for(i=1;i<=length(tmpdirs);i++)
-            stata("cap winexec rm -R "+tmpdirs[i])
+            stata("cap shell rm -R "+tmpdirs[i])
     }
     
     return
@@ -842,9 +842,8 @@ mata:
 *!{dup 78:{c -}}{asis}
 void parallel_export_globals(|string scalar outname, real scalar ou_fh) {
     
-    real   scalar ismacro, forbidden, in_fh, isnewfile
-    string scalar line, macname, macvalu, typeofmacro, REGEX, FORBIDDEN
-    string scalar logname
+    real   scalar forbidden, isnewfile
+    string scalar logname, macname, macvalu, typeofmacro, FORBIDDEN
 
     if (outname == J(1,1,"")) outname = parallel_randomid(10,"",1,1,1)
     
@@ -857,43 +856,35 @@ void parallel_export_globals(|string scalar outname, real scalar ou_fh) {
     
     // Writing log
     logname = parallel_randomid(10,"",1,1,1)
-    
-    stata("cap log close log"+logname)
-    stata("log using "+logname+".log, text replace name(log"+logname+")")
-    stata("noisily macro dir")
-    stata("log close log"+logname)
-    
-    in_fh = fopen(logname+".log", "r", 1)
-    
+
     // Step 1
-    REGEX = "^([0-9a-zA-Z_]+)([:][ ]*)(.*)"
     FORBIDDEN = "^(S[_]FNDATE|S[_]FN|F[0-9]|S[_]level|S[_]ADO|S[_]FLAVOR|S[_]OS|S[_]MACH)([ ]*.*$)"
-    
-    line = fget(in_fh)
-    while (line!=J(0,0,""))
+/* local x : all globals     
+this should work in a cleaner way
+*/
+    stata("local "+logname+" : all globals")
+
+    string rowvector globals
+    real scalar i
+    globals = st_local(logname)    
+
+    if (length(globals))
     {
-        // Check wheater it is a macro or not (and not system macros)
-        forbidden = regexm(line, FORBIDDEN)
-        ismacro = regexm(line, REGEX)
-        
-        if (ismacro & !forbidden)
+        for(i=1;i<=length(globals);i++)
         {
-            macname = regexs(1)
-            
-            // Checks wheather if it is a local or global macro
-            if (!regexm(macname, "^[_]"))
-            {
+            macname = globals[i]
+            // Check wheater it is a macro or not (and not system macros)
+            if (!regexm(macname, FORBIDDEN))
+            {        
                 macvalu = st_macroexpand("$"+macname)
                 typeofmacro = "global "
-                line = typeofmacro+macname+" "+macvalu
-                fput(ou_fh, line)
+                macname = typeofmacro+macname+" "+macvalu
+                fput(ou_fh, macname)
+
             }
         }
-        line = fget(in_fh)
     }
     
-    fclose(in_fh)
-    unlink(logname+".log")
     if (isnewfile) fclose(ou_fh)
 }
 end
@@ -1289,7 +1280,7 @@ end
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:Beginning of file -parallel_randomid.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
-*! vers 0.14.4 03apr2014
+*! vers 1.14.5 06may2014
 *! author: George G. Vega Yon
 
 mata:
@@ -1332,6 +1323,15 @@ string colvector parallel_randomid(|real scalar n, string scalar randtype, real 
     
     // Keeping the current seed value (if its going to change)
     if (randtype!=J(1,1,"")) curseed = c("seed")
+
+    /* Checking whether PLL has already used an ID */
+    if (!strlen(st_global("PLL_LASTRNG"))) st_global("PLL_LASTRNG","0")
+    
+    real scalar PLL_LASTRNG
+    PLL_LASTRNG = strtoreal(st_global("PLL_LASTRNG")) + 1
+    st_global("PLL_LASTRNG", strofreal(PLL_LASTRNG))
+
+    n = n - strlen(strofreal(PLL_LASTRNG))
     
     if (randtype=="random.org") {
         if (!silent) printf("Connecting to random.org API...")
@@ -1345,7 +1345,7 @@ string colvector parallel_randomid(|real scalar n, string scalar randtype, real 
         if (rn_fh >= 0) { // If the connection works fine
             id = J(0,1,"")
             while ((line=fget(rn_fh)) != J(0,0,"") ) {
-                id = id\ line
+                id = id\ line+strofreal(PLL_LASTRNG)
             }
             fclose(rn_fh)
             if (!silent) printf("success!\n")
@@ -1381,7 +1381,7 @@ string colvector parallel_randomid(|real scalar n, string scalar randtype, real 
         for(i=1;i<=n;i++) {
             tmpid = tmpid+id2[i]
         }
-        id = id\tmpid
+        id = id\tmpid+strofreal(PLL_LASTRNG)
     }
     
     if (randtype!=J(1,1,"")) stata("set seed "+curseed)

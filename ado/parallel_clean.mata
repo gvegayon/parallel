@@ -49,13 +49,13 @@ void function parallel_clean_tmp(
 			fput(fh, "rmdir /s /q "+tmpdirs[i])
 		}
 		fclose(fh)
-		stata("winexec cmd /c "+tmpbat+"&erase /f "+tmpbat+"&exit")
+		stata("shell "+tmpbat+"&erase /f "+tmpbat+"&exit")
 		
 	}
 	else 
 	{
 		for(i=1;i<=length(tmpdirs);i++)
-			stata("cap winexec rm -R "+tmpdirs[i])
+			stata("cap shell rm -R "+tmpdirs[i])
 	}
 	
 	return
