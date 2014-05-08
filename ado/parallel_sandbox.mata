@@ -37,6 +37,7 @@ void parallel_sandbox(
 		fh = fopen(tmpdir+"__pll"+pll_id+"_sandbox", "w");
 		fput(fh,"pll_id:"+pll_id);
 		fput(fh,"date:"+c("current_date")+" "+c("current_time"))
+		fput(fh,"usr:"+c("username"))
 		fclose(fh);
 		
 		return

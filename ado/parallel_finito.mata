@@ -66,6 +66,8 @@ real scalar parallel_finito(
 	/* If there are as many errors as clusters, then exit */
 	if (suberrors == nclusters) return(suberrors)
 	
+	string scalar logfilename
+
 	while(length(pendingcl)>0)
 	{
 		
@@ -103,9 +105,14 @@ real scalar parallel_finito(
 				in_fh = fopen(fname, "r", 1)
 				if ((errornum=strtoreal(fget(in_fh))))
 				{
+					
+					/* Copying log file */
+					logfilename = sprintf("%s__pll%s_do%04.0f.log", (c("os") == "Windows" ? "" : "/"), parallelid, i)
+					stata(sprintf(`"cap copy __pll%s_do%04.0f.log "\`c(tmpdir)'%s", replace"', parallelid, i, logfilename))
+
 					msg = fget(in_fh)
-					if (msg == J(0,0,"")) display(sprintf("{it:cluster %04.0f} {error:has finished with an error -%g- ({stata search r(%g):see more})...}", i, errornum, errornum))
-					else display(sprintf("{it:cluster %04.0f} {error:has finished with an error -%g- %s ({stata search r(%g):see more})...}", i, errornum, msg, errornum))
+					if (msg == J(0,0,"")) display(sprintf(`"{it:cluster %04.0f} {error:has finished with an error -%g- ({stata view "\`c("tmpdir")'%s":view log})...}"', i, errornum, logfilename))
+					else display(sprintf(`"{it:cluster %04.0f} {error:has finished with an error -%g- %s ({stata view "\`c(tmpdir)'%s":view log})...}"', i, errornum, msg, logfilename))
 					suberrors++
 				}
 				else display(sprintf("{it:cluster %04.0f} {text:has finished without any error...}", i))
