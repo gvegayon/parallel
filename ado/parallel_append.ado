@@ -1,11 +1,11 @@
-*! vers 0.14.4 08apr2014
+*! vers 0.14.5 9may2014
 *! auth George G. Vega
 
-program def pllappend
+program def parallel_append
 
 	vers 11.0
 
-	syntax [anything(name=files)] [, Do(string asis) in(string asis) if (string asis) Expression(string) *]
+	syntax [anything(name=files)] , Do(string asis)[ in(string asis) if (string asis) Expression(string) *]
 			
 	if ("`in'" != "") local in in `in'
 	if ("`if'" != "") local if if `if'

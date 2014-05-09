@@ -6,52 +6,6 @@ mata mata clear
 
 mata
 
-// List the names of ereturn list output
-pointer(string scalar) colvector function parallel_xreturn_list(
-	| string scalar cmd,      // Command to run
-	string scalar returntype, // Which return to store
-	string scalar randtype)   // RNG algorithm/source
-{
-	real scalar fh, curps
-	string scalar fn, txt, re
-	pointer(string scalar) colvector rlist
-		
-	fn = "pll_return_list_"+parallel_randomid(10,randtype,1,1,1)+".log"
-	
-	if (returntype == J(1,1,"")) returntype = "e"
-	
-	// Creating return list
-	stata("cap log close "+fn)
-	stata("log using "+fn+", replace")
-	if (cmd != J(1,1,"")) stata(cmd)
-	stata(returntype+"return list")
-	stata("log close")
-	
-	fh = fopen(fn, "r")
-	
-	rlist = J(20,1,NULL)
-	rlist[1] = &""
-	curps = 1
-	re = "^[ ]*("+returntype+"[(][a-zA-Z0-9_]+[)])"
-	while((txt = fget(fh)) != J(0,0,""))
-	{
-		// If we are at the start of the macros list
-		if (regexm(txt,"^([a-zA-Z]+)[:]"))
-		{
-			rlist[1] = &(*rlist[1] + " "+regexs(1))
-			rlist[++curps] = &""
-			continue
-		}
-		
-		if (regexm(txt, re)) rlist[curps] = &(*rlist[curps] + " " + regexs(1))
-	}
-	
-	fclose(fh)
-	unlink(fn)
-	
-	return(rlist[1::curps])
-}
-
 // Process a matrix and store it as a plain-text file
 void function parallel_estout_save(
 	| string scalar stmatname,
@@ -78,7 +32,7 @@ void function parallel_estout_save(
 	strownames0 = st_matrixrowstripe(stmatname)
 	
 	stmat = J(rows(stmat),1,st_numscalar("e(N)")), stmat
-stmat
+
 	// Col and row names
 	stcolnames = J(1, rows(stcolnames0),"")
 	for(i=1;i<=rows(stcolnames0);i++)
@@ -239,15 +193,6 @@ sysuse auto
 summ
 
 mata 
-elist = parallel_xreturn_list("regress mpg weight c.weight#c.weight foreign")
-elist
-
-for(i=1;i<=length(elist);i++) *elist[i]
-
-
-end
-
-mata 
 
 parallel_estout_start()
 
@@ -256,21 +201,33 @@ end
 
 sample 90
 regress mpg weight c.weight#c.weight foreign
-
 mata parallel_estout_save()
 
 regress mpg c.weight#c.weight foreign
-
 mata parallel_estout_save()
 
 regress mpg c.weight#c.weight foreign rep78
-
 mata  parallel_estout_save()
 
 regress mpg foreign rep78 c.weight#c.weight
-
 mata  parallel_estout_save()
 
 insheet using __pll`pll_id'_estout`pll_instance'.tab, tab names clear
+
+/* Another one */
+sysuse auto , clear
+
+regress mpg weight c.weight#c.weight foreign
+estimates save estim, replace
+
+regress mpg c.weight#c.weight foreign
+estimates save estim, append
+
+regress mpg c.weight#c.weight foreign rep78
+estimates save estim, append
+
+regress mpg foreign rep78 c.weight#c.weight
+estimates save estim, append
+
 list
 

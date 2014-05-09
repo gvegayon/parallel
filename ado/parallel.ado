@@ -37,7 +37,7 @@ program def parallel
     version 10.0
 
 	// Checks wether if is parallel prefix or not
-	if  (regexm(`"`0'"', "^(do|clean|setclusters|break)")) { /* If not prefix */
+	if  (regexm(`"`0'"', "^(do|clean|setclusters|break|version|append)")) { /* If not prefix */
 		parallel_`0'
 	}
 	else if (regexm(`"`0'"',"^([,]?.*[:])")) {               /* if prefix */
@@ -55,6 +55,15 @@ program def parallel
 		di as result `"-`subcommand'-"' as error " invalid parallel subcommand" as text " ({stata h parallel:{it:help parallel}})"
 		exit 198
 	}
+end
+
+/* Returns the version of parallel */
+program def parallel_version, rclass
+	di as result "parallel" as text " Stata module for parallel computing"
+	di as result "vers" as text " 1.14.5 (9may2014)"
+	di as result "auth" as text " George G. Vega (g.vegayon at gmail.com)"
+	
+	return local pll_vers = "1.14.5"
 end
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -123,7 +132,6 @@ program def parallel_do, rclass
 		Programs(namelist)
 		Mata 
 		NOGlobals 
-		Globals
 		KEEPTiming 
 		Seeds(string)
 		NOData 
@@ -141,14 +149,9 @@ program def parallel_do, rclass
 	}
 	
 	// Initial checks
-	foreach opt in macrolist keep keeplast prefix force mata noglobals globals keeptiming nodata {
+	foreach opt in macrolist keep keeplast prefix force mata noglobals keeptiming nodata {
 		local `opt' = length("``opt''") > 0
 	}
-
-	if (`noglobals') di as text "{it: Note: -noglobals- option is depracated, now it is a default.}"
-	
-	if (`globals') local noglobals = 0
-	else local noglobals = 1
 
 	/* Randtype */
 	if ("`randtype'" == "") local randtype = "datetime"

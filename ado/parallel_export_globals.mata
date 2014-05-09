@@ -27,7 +27,7 @@ void parallel_export_globals(|string scalar outname, real scalar ou_fh) {
 	logname = parallel_randomid(10,"",1,1,1)
 
 	// Step 1
-	FORBIDDEN = "^(S[_]FNDATE|S[_]FN|F[0-9]|S[_]level|S[_]ADO|S[_]FLAVOR|S[_]OS|S[_]MACH)([ ]*.*$)"
+	FORBIDDEN = "^(S\_FNDATE|S\_FN|F[0-9]|S\_level|S\_ADO|S\_FLAVOR|S\_OS|S\_MACH)"
 /* local x : all globals 	
 this should work in a cleaner way
 */
@@ -35,7 +35,8 @@ this should work in a cleaner way
 
 	string rowvector globals
 	real scalar i
-	globals = st_local(logname)	
+	globals = tokens(st_local(logname))
+	st_local(logname, "")
 
 	if (length(globals))
 	{

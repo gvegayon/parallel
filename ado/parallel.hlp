@@ -1,7 +1,6 @@
 {smcl}
 {* *! version 0.14.3.27 27mar2014}{...}
-
-{cmd:help parallel}
+{cmd:help parallel}{right:also see:  {net "describe miparallel, from(http://fmwww.bc.edu/RePEc/bocode/m)":miparallel}}
 {hline}
 
 {title:Title}
@@ -11,12 +10,14 @@
 
 {title:Syntax}
 
-{pstd}Setting the number of clusters (data blocks)
+{col 5}{hline}
+{pstd}Setting the number of clusters (threads/processors)
 
 {p 8 17 2}
 {cmdab:parallel setclusters} # [, {opt f:orce} 
 {opt s:tatadir}({it:{help filename:stata_path}})]
 
+{col 5}{hline}{col 2}
 {pstd}Parallelizing a do-file
 
 {p 8 17 2}
@@ -26,7 +27,8 @@
  {opt t:imeout}({it:integer}) 
  {opt pr:ocessors}({it:integer})]
 
-{pstd}Parallelizing a stata command
+{col 5}{hline}
+{pstd}Parallelizing a stata command (parallel prefix)
 
 {p 8 17 2}
 {cmdab:parallel} [, {opt by}({it:{help varlist}}) {opt f:orce} {opt k:eep} {opt keepl:ast} {opt p:rograms}({it:{help namelist}}) {opt m:ata} {opt nog:lobal} {opt s:eeds}({it:{help numlist}}) {opt nod:ata} 
@@ -36,11 +38,30 @@
  {opt keepu:sing}({it:{help varlist}})]:
 {it:stata_cmd}
 
+{col 5}{hline}
+{pstd} Multiple file processing and appending
+
+{p 8 17 2}
+{cmdab:parallel append}
+ [{it:{help filename:file(s)}}] ,
+ {opt d:o}({it:cmd|dofile}) [{opt in}({it:{help in}}) {opt if}({it:{help if}})
+ {opt e:xpression}({it:expand expression (see details)}) {opt pr:ocessors}({it:integer})
+ {opt r:andtype}({it:{help strings:datetime|random.org}}) 
+ {opt t:imeout}({it:integer})]
+
+{col 5}{hline}
 {pstd}Removing auxiliary files
 
 {p 8 17 2}
 {cmdab:parallel clean} [, {opt e:vent(pll_id)} {opt a:ll} {opt f:orce}]
 
+{col 5}{hline}
+{pstd}Query {cmd:parallel} current version
+
+{p 8 17 2}
+{cmdab:parallel version}
+
+{col 5}{hline}
 {pstd}Query if the mother process has requested to break
 
 {p 8 17 2}
@@ -85,6 +106,11 @@ should not try to split or append anything.{p_end}
 {synopt:{opt randt:ype}}String. Tells parallel whether to use the current seed to
 generate the seeds for each clusters (default option) or use the current datetime -datetime-
 or random.org API -random.org- (please read the Description section).{p_end}
+
+{syntab:Multiple file processing and appending}
+{synopt:{opt d:o}}Stata cmd or dofile.{p_end}
+{synopt:{opt e:xpression}}String. Expression representing file names in the form of
+"{it:{help fmt:%fmts}}, {it:{help numlist: numlist1 [, numlist2 [, ...]]}}"
 
 {syntab:Removing auxiliary files}
 {synopt:{opt e:vent}}Integer. Specifies which executed (and stored) event's files should be removed.{p_end}
@@ -141,14 +167,18 @@ auxiliar files (default option), an specific parallel instance files (using
 security reasons, in-use auxiliary files will not be deleted unless the user
 specifies it through the option {opt:force}, which will override not deleting
 in-use auxiliary files (see the {help parallel##sandbox:sandbox} section for
-more information about it)}
+more information about it)}.
 
 {pstd}
-Giving {it:N} clusters, within each cluster {cmd:parallel} creates the local 
-macros {it:pll_id} (equal for all the clusters) and {it:pll_instance} (ranging
-from 1 up to {it:N}, equalling 1 inside the first and {it:N} inside the last).
-Also the global macros {it:PLL_CLUSTERS} and {it:PLL_DIR} are available within
-each cluster.
+In the case of handling multiple files (because it is, for example,
+a big dataset divided into multiple dta files), {cmd:parallel append} becomes handy
+as it allows the user to process them simultaneously. By providing a list of files
+and a Stata cmd or dofile, {cmd:parallel append} opens and executes the cmd/dofile
+within each file, stores each file results and appends them into a single file.
+Also, if the files to be processed have a pattern base name, the user can provide
+{cmd:parallel append} with an expression representing the list of files to be
+processed; for information on how to use this feature, see the section
+{help parallel##append:Parallel Append}.
 {p_end}
 
 {pstd}
@@ -157,6 +187,14 @@ the command {cmd:parallel break} (stata) and the functions
 {cmd:parallel_break()} or {cmd:_parallel_break()} (mata) in some parts of his
 code. These commands/functions check whether the user has pressed the 
 {cmd:-break-} key in the mother process.
+{p_end}
+
+{pstd}
+Giving {it:N} clusters, within each cluster {cmd:parallel} creates the local 
+macros {it:pll_id} (equal for all the clusters) and {it:pll_instance} (ranging
+from 1 up to {it:N}, equalling 1 inside the first and {it:N} inside the last).
+Also the global macros {it:PLL_CLUSTERS} and {it:PLL_DIR} are available within
+each cluster.
 {p_end}
 
 {pstd}
@@ -233,8 +271,63 @@ After several tests, it has been proven that--thanks to how {cmd:parallel} has b
 written--it is possible to use the algorithm in such a way that other techniques
 of parallel computing can be implemented; such as Monte Carlo Simulations, 
 simultaneously running models, etc.. An extensive
-example through Monte Carlo Simulations is provided {browse "http://fmwww.bc.edu/repec/bocode/p/parallel.pdf":here}
+example through Monte Carlo Simulations is provided
+{browse "http://fmwww.bc.edu/repec/bocode/p/parallel.pdf":here}.
 {p_end}
+
+{marker append}{...}
+{title:Parallel Append}
+
+{pstd}Imagine we have several dta files named -income.dta- stored in a folders
+2008_01 up to 2012_12, this is, a total of 60 files (12 times 5) monthly ordered
+which may look something like this: {p_end}
+
+{col 10}{it:2008_01/income.dta}
+{col 10}{it:2008_02/income.dta}
+{col 10}{it:2008_03/income.dta}
+
+{col 10}{it:...more files...}
+
+{col 10}{it:2010_01/income.dta}
+{col 10}{it:2010_02/income.dta}
+{col 10}{it:2010_03/income.dta}
+
+{col 10}{it:...more files...}
+
+{col 10}{it:2012_10/income.dta}
+{col 10}{it:2012_11/income.dta}
+{col 10}{it:2012_12/income.dta}
+
+{pstd}by using the {opt e:xpression}() option of {cmd:parallel append}, we could
+write an expresion such as {it:"%g_%02.0f/income.dta, 2008/2012, 1/12"} {p_end}
+
+{pstd}So the routine that we would like to run on each income.dta file is:{p_end}
+
+{tab}{cmd: program def myprogram}
+{tab}{cmd:{tab} gen female = gender == "female"}
+{tab}{cmd:{tab} collapse (mean) income, by(female) fast}
+{tab}{cmd: end}
+
+{pstd}So, the last step is{p_end}
+
+{tab}{cmd:. parallel append, do(myprogram) p(myprogram)} ///
+{tab}{tab}{cmd:e("%g_%02.0f/income.dta, 2008/2012, 1/12")}
+
+{pstd}So, in brief what {cmd:parallel append} does:{p_end}
+{p2colset 8 11 11 4}
+{p2col:1.}Distribute groups of files accross clusters{p_end}
+
+{tab}For each dta file
+
+{p2col:2.}Opens the file using {ifin} acorddingly to {opt in} and {opt if} options.{p_end}
+{p2col:3.}Executes the command/dofile specified by the user.{p_end}
+{p2col:3.}Stores the results in a dta file.{p_end}
+
+{tab}For each dta file
+
+{p2col:4.}Appends all the resulting files.{p_end}
+
+
 
 {marker caveats}{...}
 {title:Caveats}
@@ -263,17 +356,17 @@ interpret these kind of programs during the loading process causing errors.
 
 {pstd}
 In order to protect a {it:pll_id} code (and thus anciliary files), once {cmd:parallel}
-is called it creates a new file called {it:__pll}[{it:pll_id}]{it:sandbox} which
+is called it creates a new file called {it:__pll}[{it:pll_id}]{it:sandbox} 
+(stored at c(tmpdir), in your case: {ul:{ccl tmpdir}}) which
 forbids {cmd:parallel clean} from deleting any auxiliary file used by that process
-and reserves the {it:parallel_id}. Once every child process has finished, 
+and reserves the {it:pll_id}. Once every child process has finished, 
 {cmd:parallel}'s sandbox cleans up and frees the {it:pll_id}.
 {p_end}
 
 {pstd}
 If for any reason the algorithm breaks due to a flaw or crush of the system,
 the sandbox file will not be deleted, but the user will be allowed to do so
-manualy (moving the file(s) to the OS recycle bin) or using {cmd:parallel 
-clean, force} syntax.
+manualy (moving the file(s) to the OS recycle bin) or using {cmd:parallel clean, force} syntax.
 {p_end}
 
 {marker examples}{...}
@@ -283,18 +376,18 @@ clean, force} syntax.
 blood-pressure measurement ({it:bp}) by patient.{p_end}
 
 {pstd}Setup for a quad-core computer{p_end}
-	{cmd:. sysuse bplong.dta}
-	{cmd:. sort patient}
+{tab}{cmd:. sysuse bplong.dta}
+{tab}{cmd:. sort patient}
 	
-	{cmd:. parallel setclusters 4}
+{tab}{cmd:. parallel setclusters 4}
 
 {pstd}Computes the maximum of {it:bp} for each patient. We add the option {opt by(patient)}
 to tell parallel not to splitt stories.{p_end}
-	{cmd:. parallel, by(patient): by patient: egen max_bp = max(bp)}
+{tab}{cmd:. parallel, by(patient): by patient: egen max_bp = max(bp)}
 	
 {pstd}Which is the ``parallel way'' to do:{p_end}
 
-	{cmd:. by patient: egen max_bp = max(bp)}
+{tab}{cmd:. by patient: egen max_bp = max(bp)}
 	
 {pstd}Giving you the same result.{p_end}
 	
@@ -310,35 +403,36 @@ Using {cmd:parallel}, the proper way to do this would be using the ``parallel do
 syntax
 {p_end}
 
-	{cmd:. use mybigpanel.dta, clear}
+{tab}{cmd:. use mybigpanel.dta, clear}
 
-	{cmd:. parallel setclusters 4}
-	{cmd:. parallel do mymodel.do}
+{tab}{cmd:. parallel setclusters 4}
+{tab}{cmd:. parallel do mymodel.do}
 	
-	{cmd:. collapse ...}
+{tab}{cmd:. collapse ...}
 
 {pstd}where {it:mymodel.do} would look something like this{p_end}
 	
-	{hline 35} begin of do-file {hline 12}
-        {cmd:local maxiter = _N}
-        {cmd:forval i = 1/`maxiter'} {cmd:{c -(}}
-                        {cmd:/* Break key check (this line is optional) */}
-                        {cmd:parallel break}
-			{it:...some routine...}
-        {cmd:{c )-}}
-	{hline 35} end of the do-file {hline 10}
+{tab}{hline 35} begin of do-file {hline 12}
+{tab}{tab}{cmd:local maxiter = _N}
+{tab}{tab}{cmd:forval i = 1/`maxiter'} {cmd:{c -(}}
+{tab}{tab}{tab}{cmd:/* Break key check (this line is optional) */}
+{tab}{tab}{tab}{cmd:parallel break}
+{tab}{tab}{tab}{it:...some routine...}
+{tab}{tab}{cmd:{c )-}}
+{tab}{hline 35} end of the do-file {hline 10}
 
 {pstd}Or, in the case of using mata, this would look something like this{p_end}
 
-	{hline 35} begin of do-file {hline 12}
-        {cmd:mata:}
-        {cmd:N=c("N")}
-        {cmd:for(i = 1;i<=N;i++) {c -(}}
-                        {cmd:/* Break key check (this line is optional) */}
-                        {cmd:parallel_break()}
-			{it:...some routine...}
-        {cmd:{c )-}}
-	{hline 35} end of the do-file {hline 10}
+{tab}{hline 35} begin of do-file {hline 12}
+{tab}{tab}{cmd:mata:}
+{tab}{tab}{cmd:N=c("N")}
+{tab}{tab}{cmd:for(i = 1;i<=N;i++) {c -(}}
+{tab}{tab}{tab}{cmd:/* Break key check (this line is optional) */}
+{tab}{tab}{tab}{cmd:parallel_break()}
+{tab}{tab}{tab}{it:...some routine...}
+{tab}{tab}{cmd:{c )-}}
+{tab}{hline 35} end of the do-file {hline 10}
+
 {marker examples}{...}
 {title:Example 3: setting the right path}
 
@@ -347,7 +441,7 @@ syntax
 {it:"C:\Archivos de programa\Stata12/stata.exe"} is the right path we only have
 to write:
 
-	{cmd:. parallel setclusters 2, s("C:\Archivos de programa\Stata12/stata.exe")}
+{tab}{cmd:. parallel setclusters 2, s("C:\Archivos de programa\Stata12/stata.exe")}
 
 {marker saved_results}{...}
 {title:Saved results}
