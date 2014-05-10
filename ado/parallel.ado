@@ -37,7 +37,7 @@ program def parallel
     version 10.0
 
 	// Checks wether if is parallel prefix or not
-	if  (regexm(`"`0'"', "^(do|clean|setclusters|break|version|append)")) { /* If not prefix */
+	if  (regexm(`"`0'"', "^(do|clean|setclusters|break|version|append|seelog)")) { /* If not prefix */
 		parallel_`0'
 	}
 	else if (regexm(`"`0'"',"^([,]?.*[:])")) {               /* if prefix */
@@ -64,6 +64,38 @@ program def parallel_version, rclass
 	di as result "auth" as text " George G. Vega (g.vegayon at gmail.com)"
 	
 	return local pll_vers = "1.14.5"
+end
+
+/* Checks a logfile */
+program def parallel_seelog
+	args pll_instance
+	
+	if ("`=r(pll_id)'"!=".") {
+		/* By default uses 1 */
+		if ("`pll_instance'" == "") local pll_instance 1
+
+		local pll_instance : di %04.0f `pll_instance'
+
+		/* Does de file exists */
+		local logname = "__pll`r(pll_id)'_do`pll_instance'.log"
+
+		if (c(os) == "Windows") local logname = "`c(tmpdir)'`logname'"
+		else local logname = "`c(tmpdir)'/`logname'"
+
+		/* If the logfile does not exists, do nothing*/
+		cap confirm file "`logname'"
+		if (_rc) {
+			di as result "No logfile for instance -`pll_instance'- of parallel process -`r(pll_id)'- found"
+			exit
+		}
+
+		/* Showing the log in screen */
+		type "`logname'"
+	}
+	else {
+		di as error "It seems that you haven't use -parallel- yet."
+		exit 601
+	}
 end
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -1096,6 +1096,8 @@ real scalar parallel_finito(
         breakkeyreset()
         (void) setbreakintr(bk)
     }
+
+    if (suberrors) display(sprintf("{hline 80}{break}{text:{it:Enter -parallel seelog #- to checkout logfiles of clusters with errors.}}{break}{hline 80}"))
     
     return(suberrors)
     
@@ -1146,6 +1148,77 @@ mata: parallel_for(J(50,2,1),"sum[1..i]")
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:End of file -parallel_for.mata-}{col 83}{c |}
+*! {c BLC}{dup 78:{c -}}{c BRC}
+*! {smcl}
+*! {c TLC}{dup 78:{c -}}{c TRC}
+*! {c |} {bf:Beginning of file -parallel_montecarlo.mata-}{col 83}{c |}
+*! {c BLC}{dup 78:{c -}}{c BRC}
+mata
+
+// Resampling algorithm
+{smcl}
+*! {marker parallel_resample}{bf:function -{it:parallel_resample}- in file -{it:parallel_montecarlo.mata}-}
+*! {back:{it:(previous page)}}
+*!{dup 78:{c -}}{asis}
+real colvector function parallel_resample(
+        | real scalar size,
+        real colvector weights
+        )
+{
+        real colvector permut, index, newsample
+        real scalar N0, N1, n, i, k, j
+
+        N0 = c("N")
+
+        // Getting the sample size
+        if (size < 1) n = max( (1,round(size*N0)) )
+        else {
+        if (N0 < size)
+        {
+            printf("N is smaller than the requiered size\n")
+            n = N0
+        }
+        else n = size
+    }
+
+        // Expanding the observations index (or not!)
+    k = 0
+        if (weights != J(0,1,.))
+        {
+        N1 = sum(weights)
+                index = J(sum(weights),1,1)
+                for(i=1;i<=N0;i++)
+                {
+                        j=0
+                        while(j++ < weights[i])
+                                index[++k] = i
+                }
+        }
+        else
+    {
+        N1 = N0
+        index = 1::N0
+    }
+
+    index = index\index
+
+    // Getting the selected obs id
+        permut = index[order(runiform(N1*2,1),1)[1::n]]
+
+    // Creating the weights
+    newsample = J(N0,1,0)
+    for(i=1;i<=n;i++)
+        newsample[permut[i]] = newsample[permut[i]] + 1
+        
+
+    return(newsample)
+
+}
+
+end
+*! {smcl}
+*! {c TLC}{dup 78:{c -}}{c TRC}
+*! {c |} {bf:End of file -parallel_montecarlo.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
@@ -1417,14 +1490,14 @@ real scalar parallel_run(
             for(i=1;i<=nclusters;i++) {
                 fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
                 fput(fh, "export TMPDIR="+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
-                fput(fh, paralleldir+`" -e do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
+                fput(fh, paralleldir+`" -e -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
             }
         }
         else {
             for(i=1;i<=nclusters;i++) {
                 fput(fh, "mkdir "+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
                 fput(fh, "export TMPDIR="+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
-                fput(fh, paralleldir+`" -b do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
+                fput(fh, paralleldir+`" -b -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
             }
         }
 
@@ -1442,7 +1515,7 @@ real scalar parallel_run(
         for(i=1;i<=nclusters;i++) {
             fput(fh, `"mkdir ""'+c("tmpdir")+"__pll"+parallelid+strofreal(i, "%04.0f")+`"""')
             fwrite(fh, "set TEMP="+c("tmpdir")+"__pll"+parallelid+strofreal(i,"%04.0f")+" & ")
-            fput(fh, paralleldir+`" /e do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
+            fput(fh, paralleldir+`" /e /q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
         }
         
         fput(fh, "exit")
@@ -1884,6 +1957,15 @@ real scalar parallel_write_do(
         fput(output_fh, "set seed "+seeds[i])
 
         /* Parallel macros to be used by the current user */
+        fput(output_fh, `"noi di "{hline 80}""')
+        fput(output_fh, `"noi di "Parallel computing with stata (by GVY)""')
+        fput(output_fh, `"noi di "{hline 80}""')
+        fput(output_fh, sprintf(`"noi di \`"cmd/dofile   : "%s""'"', inputname))
+        fput(output_fh, sprintf(`"noi di "pll_id       : %s""',parallelid))
+        fput(output_fh, sprintf(`"noi di "pll_instance : %g/%g""',i,nclusters))
+        fput(output_fh,         `"noi di "TMPDIR       : \`c(tmpdir)'""')
+        fput(output_fh,         `"noi di "Date-time    : \`c(current_time)' \`c(current_date)'""')
+        fput(output_fh, `"noi di "{hline 80}""')
         fput(output_fh, "local pll_instance "+strofreal(i))
         fput(output_fh, "local pll_id "+parallelid)
         fput(output_fh, "global pll_instance "+strofreal(i))

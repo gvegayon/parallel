@@ -133,6 +133,8 @@ real scalar parallel_finito(
 		breakkeyreset()
 		(void) setbreakintr(bk)
 	}
+
+	if (suberrors) display(sprintf("{hline 80}{break}{text:{it:Enter -parallel seelog #- to checkout logfiles of clusters with errors.}}{break}{hline 80}"))
 	
 	return(suberrors)
 	

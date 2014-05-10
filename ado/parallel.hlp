@@ -8,16 +8,29 @@
 {phang}
 {bf:parallel} {hline 2} Stata module for Parallel computing
 
+{title:Available commands}
+
+{p2colset 5 26 26 2}
+{p2col:{help parallel##setclusters:{cmd:parallel setclusters}}}Setting the number of clusters.{p_end}
+{p2col:{help parallel##do:{cmd:parallel do}}}Parallelizing a do-file.{p_end}
+{p2col:{help parallel##prefix:{cmd:parallel :} (prefix)}}Parallelizing a stata command (parallel prefix).{p_end}
+{p2col:{help parallel##append:{cmd:parallel append}}}Multiple file processing and appending.{p_end}
+{p2col:{help parallel##clean:{cmd:parallel clean}}}Removing auziliary files.{p_end}
+{p2col:{help parallel##seelog:{cmd:parallel seelog}}}Printing logfiles (of instances with errors) on screen.{p_end}
+{p2col:{help parallel##version:{cmd:parallel version}}}Query parallel current version{p_end}
+{p2col:{help parallel##break:{cmd:parallel break}}}Query if the mother process has requested to break.{p_end}
+
+
 {title:Syntax}
 
-{col 5}{hline}
+{col 5}{hline}{marker setclusters}{...}
 {pstd}Setting the number of clusters (threads/processors)
 
 {p 8 17 2}
 {cmdab:parallel setclusters} # [, {opt f:orce} 
 {opt s:tatadir}({it:{help filename:stata_path}})]
 
-{col 5}{hline}{col 2}
+{col 5}{hline}{col 2}{marker do}{...}
 {pstd}Parallelizing a do-file
 
 {p 8 17 2}
@@ -27,7 +40,7 @@
  {opt t:imeout}({it:integer}) 
  {opt pr:ocessors}({it:integer})]
 
-{col 5}{hline}
+{col 5}{hline}{marker prefix}{...}
 {pstd}Parallelizing a stata command (parallel prefix)
 
 {p 8 17 2}
@@ -38,7 +51,7 @@
  {opt keepu:sing}({it:{help varlist}})]:
 {it:stata_cmd}
 
-{col 5}{hline}
+{col 5}{hline}{marker append}{...}
 {pstd} Multiple file processing and appending
 
 {p 8 17 2}
@@ -49,19 +62,25 @@
  {opt r:andtype}({it:{help strings:datetime|random.org}}) 
  {opt t:imeout}({it:integer})]
 
-{col 5}{hline}
+{col 5}{hline}{marker clean}{...}
 {pstd}Removing auxiliary files
 
 {p 8 17 2}
 {cmdab:parallel clean} [, {opt e:vent(pll_id)} {opt a:ll} {opt f:orce}]
 
-{col 5}{hline}
+{col 5}{hline}{marker seelog}{...}
+{pstd}Printing logfiles (of instances with errors) on screen
+
+{p 8 17 2}
+{cmdab:parallel seelog} [{it:#}]
+
+{col 5}{hline}{marker version}{...}
 {pstd}Query {cmd:parallel} current version
 
 {p 8 17 2}
 {cmdab:parallel version}
 
-{col 5}{hline}
+{col 5}{hline}{marker break}{...}
 {pstd}Query if the mother process has requested to break
 
 {p 8 17 2}
