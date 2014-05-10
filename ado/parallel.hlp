@@ -8,20 +8,37 @@
 {phang}
 {bf:parallel} {hline 2} Stata module for Parallel computing
 
-{title:Available commands}
+{title:Index}
 
-{p2colset 5 26 26 2}
-{p2col:{help parallel##setclusters:{cmd:parallel setclusters}}}Setting the number of clusters.{p_end}
-{p2col:{help parallel##do:{cmd:parallel do}}}Parallelizing a do-file.{p_end}
-{p2col:{help parallel##prefix:{cmd:parallel :} (prefix)}}Parallelizing a stata command (parallel prefix).{p_end}
-{p2col:{help parallel##append:{cmd:parallel append}}}Multiple file processing and appending.{p_end}
-{p2col:{help parallel##clean:{cmd:parallel clean}}}Removing auziliary files.{p_end}
-{p2col:{help parallel##seelog:{cmd:parallel seelog}}}Printing logfiles (of instances with errors) on screen.{p_end}
-{p2col:{help parallel##version:{cmd:parallel version}}}Query parallel current version{p_end}
-{p2col:{help parallel##break:{cmd:parallel break}}}Query if the mother process has requested to break.{p_end}
+{p2colset 5 29 29 2}
+{p2col:{bf:{ul:Sections}}}{p_end}
+
+{p2col:1. Syntax}Command syntax.{p_end}
+{p2col:2. Description}Commands description.{p_end}
+{p2col:3. Details}How does parellel works.{p_end}
+{p2col:4. Parallel Append}Using -parallel append- syntax.{p_end}
+{p2col:5. Caveates}Things to consider before unsing parallel.{p_end}
+{p2col:6. Technical note}{p_end}
+{p2col:7. Examples}Some examples using parallel{p_end}
+
+{p2colset 5 29 29 2}
+{p2col:{bf:{ul:Examples}}}{p_end}
+
+{p2colset 5 29 29 2}
+{p2col:{bf:{ul:Available commands}}}{p_end}
+
+{p2col:1. {help parallel##setclusters:parallel setclusters}}Setting the number of clusters.{p_end}
+{p2col:2. {help parallel##do:parallel do}}Parallelizing a do-file.{p_end}
+{p2col:3. {help parallel##prefix:parallel : (prefix)}}Parallelizing a stata command (parallel prefix).{p_end}
+{p2col:4. {help parallel##append:parallel append}}Multiple file processing and appending.{p_end}
+{p2col:5. {help parallel##clean:parallel clean}}Removing auziliary files.{p_end}
+{p2col:6. {help parallel##seelog:parallel seelog}}Printing logfiles (of instances with errors) on screen.{p_end}
+{p2col:7. {help parallel##version:parallel version}}Query parallel current version.{p_end}
+{p2col:8. {help parallel##break:parallel break}}Query if the mother process has requested to break.{p_end}
 
 
-{title:Syntax}
+{marker syntax}{...}
+{title:1. Syntax}
 
 {col 5}{hline}{marker setclusters}{...}
 {pstd}Setting the number of clusters (threads/processors)
@@ -185,7 +202,7 @@ auxiliar files (default option), an specific parallel instance files (using
 {it:#pll_id} number), or every stored auxiliar file (with {opt all}). For
 security reasons, in-use auxiliary files will not be deleted unless the user
 specifies it through the option {opt:force}, which will override not deleting
-in-use auxiliary files (see the {help parallel##sandbox:sandbox} section for
+in-use auxiliary files (see the {help parallel##tech:Technical note} section for
 more information about it)}.
 
 {pstd}
@@ -197,7 +214,7 @@ within each file, stores each file results and appends them into a single file.
 Also, if the files to be processed have a pattern base name, the user can provide
 {cmd:parallel append} with an expression representing the list of files to be
 processed; for information on how to use this feature, see the section
-{help parallel##append:Parallel Append}.
+{help parallel##append_how:Parallel Append}.
 {p_end}
 
 {pstd}
@@ -294,7 +311,7 @@ example through Monte Carlo Simulations is provided
 {browse "http://fmwww.bc.edu/repec/bocode/p/parallel.pdf":here}.
 {p_end}
 
-{marker append}{...}
+{marker append_how}{...}
 {title:Parallel Append}
 
 {pstd}Imagine we have several dta files named -income.dta- stored in a folders
@@ -370,8 +387,9 @@ is not recommended due to known issues. By now parallel can not correctly
 interpret these kind of programs during the loading process causing errors.
 {p_end}
 
-{marker sandbox}{...}
-{title:Sandbox}
+
+{marker tech}{...}
+{title:Technical note}
 
 {pstd}
 In order to protect a {it:pll_id} code (and thus anciliary files), once {cmd:parallel}
@@ -384,9 +402,22 @@ and reserves the {it:pll_id}. Once every child process has finished,
 
 {pstd}
 If for any reason the algorithm breaks due to a flaw or crush of the system,
-the sandbox file will not be deleted, but the user will be allowed to do so
-manualy (moving the file(s) to the OS recycle bin) or using {cmd:parallel clean, force} syntax.
+the sandbox file and the rest of auxiliary files will not be deleted. In order
+to clean up this, the user will be able to do so manualy (moving the file(s) to
+the OS recycle bin) or using {help parallel#clean:parallel clean, all force}
+syntax. This way all sandbox files in th c(tmpdir) folder and auxiliary files
+stored at the current directory will be deleted.
 {p_end}
+
+{pstd}
+In earlier versions of {cmd:parallel}, {help tempfile:tempfiles} generation was
+not safe as while running multiple stata instances simultaneously these could
+overwrite each other's tempfiles. Starting version 1.14, this is no longer a
+problem as each stata instance starts with a diferent {cmd:c(tmpdir)} location.
+This way, instances' tempfile management will not interfere with each other, allowing
+to safely use commands or algorithms implementing {help preserve:preserve, restore}.
+{p_end}
+
 
 {marker examples}{...}
 {title:Example 1: using prefix syntax}
