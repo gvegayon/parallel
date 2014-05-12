@@ -39,14 +39,14 @@ real scalar parallel_run(
 		// Writing file
 		if (c("os") != "Unix") {
 			for(i=1;i<=nclusters;i++) {
-				fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
+				mkdir(c("tmpdir")+"/__pll"+parallelid+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
 				fput(fh, "export TMPDIR="+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
 				fput(fh, paralleldir+`" -e -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
 			}
 		}
 		else {
 			for(i=1;i<=nclusters;i++) {
-				fput(fh, "mkdir "+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
+				mkdir(c("tmpdir")+"/__pll"+parallelid+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
 				fput(fh, "export TMPDIR="+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
 				fput(fh, paralleldir+`" -b -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
 			}
@@ -64,17 +64,16 @@ real scalar parallel_run(
 		
 		// Writing file
 		for(i=1;i<=nclusters;i++) {
-			fput(fh, `"mkdir ""'+c("tmpdir")+"__pll"+parallelid+strofreal(i, "%04.0f")+`"""')
-			fwrite(fh, "set TEMP="+c("tmpdir")+"__pll"+parallelid+strofreal(i,"%04.0f")+" & ")
-			fput(fh, paralleldir+`" /e /q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
+			mkdir(c("tmpdir")+"__pll"+parallelid+strofreal(i, "%04.0f"),1)
+			fwrite(fh, "start /MIN /HIGH set TEMP="+c("tmpdir")+"__pll"+parallelid+strofreal(i,"%04.0f")+" ^& ")
+			fput(fh, paralleldir+`" /e /q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do"^&exit"')
 		}
 		
 		fput(fh, "exit")
 		
 		fclose(fh)
 		
-		stata("shell start /MIN __pll"+parallelid+"_shell.bat&exit")
-		
+		stata("winexec __pll"+parallelid+"_shell.bat")
 	}
 	
 	/* Waits until each process ends */

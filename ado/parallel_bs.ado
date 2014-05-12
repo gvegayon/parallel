@@ -14,7 +14,7 @@ program def parallel_bs, eclass
 	}
 end
 
-program def parallel_bootstrap, eclass
+program def parallel_bootstrap, rclass 
 	#delimit ;
 	syntax anything(name=model equalok everything) [,
 		programs(namelist)
@@ -25,7 +25,7 @@ program def parallel_bootstrap, eclass
 		Timeout(integer 60)
 		PRocessors(integer 0)
 		argopt(string) 
-		Saving(string asis) *];
+		Saving(string asis) Reps(integer 100) *];
 	#delimit cr
 
 	/* Checking whereas parallel has been config */	
@@ -34,12 +34,13 @@ program def parallel_bootstrap, eclass
 		exit 198
 	}
 	
-	/* Chequeando reps */
+	/* Chequeando reps 
 	if (regexm(`"`options'"',"re?p?s?\(([0-9]*)\)")) {
 		local reps = regexs(1)
 		if ("`reps'" == "") local reps = 100
 		local options = regexr(`"`options'"',"(re?p?s?\([0-9]*\))","")
 	}
+	else local reps = 100*/
 	
 	/* Setting sizes */
 	local csize = floor(`reps'/$PLL_CLUSTERS)
@@ -51,6 +52,12 @@ program def parallel_bootstrap, eclass
 	/* Saving the tmpfile */
 	m st_local("simul",parallel_randomid(10, "datetime", 1, 1, 1))
 	local tmpdta = "__pll`simul'_bsdta.dta"
+	if (`"`saving'"' == "") {
+		if (c(os)=="Windows") local saving = `"`c(tmpdir)'__pll`simul'_outdta.dta"'
+		else local saving = `"`c(tmpdir)'/__pll`simul'_outdta.dta"'
+		local save = 0
+	}
+	else local save = 1
 	local simul = `"__pll`simul'_simul.do"'
 	
 	qui save `tmpdta'
@@ -79,6 +86,16 @@ program def parallel_bootstrap, eclass
 		}
 	}
 	
+	/* Storing macros */
+	local macros : r(macros)
+	local scalars : r(scalars)
+	foreach m of local macros {
+		local `m' = r(`m')
+	}
+	foreach s of local scalars {
+		local `s' = r(`s')
+	}
+	
 	/* Cleaning up */
 	parallel clean , e(`pll_id')
 	
@@ -89,6 +106,20 @@ program def parallel_bootstrap, eclass
 	
 	bstat using `saving', title(parallel bootstrapping)
 	
-	ereturn local pll 1
+	if (!`save') rm `"`saving'"'
 	
+	parallel_bs_ereturn
+	
+	/* Getting macros back */
+	foreach m of local macros {
+		return local `m'  `"``m''"'
+	}
+	foreach s of local scalars {
+		return scalar `s' = ``s''
+	}
+	
+end
+
+program def parallel_bs_ereturn, eclass
+	ereturn local pll 1
 end

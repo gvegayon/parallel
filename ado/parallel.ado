@@ -99,7 +99,14 @@ program def parallel_seelog
 		}
 
 		/* Showing the log in screen */
-		type "`logname'"
+		di as result "{hline 80}"
+		di as result %~80s "beginning of file -`logname'-"
+		di as result "{hline 80}"
+		
+		type `"`logname'"'
+		di as result "{hline 80}"
+		di as result %~80s "end of file -`logname'-"
+		di as result "{hline 80}"
 	}
 	else {
 		di as error "It seems that you haven't use -parallel- yet."

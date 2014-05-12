@@ -109,6 +109,7 @@ real scalar parallel_write_do(
 		fput(output_fh, sprintf(`"noi di "pll_instance : %g/%g""',i,nclusters))
 		fput(output_fh,         `"noi di "TMPDIR       : \`c(tmpdir)'""')
 		fput(output_fh,         `"noi di "Date-time    : \`c(current_time)' \`c(current_date)'""')
+		fput(output_fh,         `"noi di "Seed         : \`c(seed)'""')
 		fput(output_fh, `"noi di "{hline 80}""')
 		fput(output_fh, "local pll_instance "+strofreal(i))
 		fput(output_fh, "local pll_id "+parallelid)
