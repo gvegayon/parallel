@@ -4,6 +4,7 @@ d Distribution-Date:20140415
 d Author: George Vega
 F ado/parallel.ado
 F ado/parallel_append.ado
+F ado/parallel_bs.ado
 F ado/parallel.hlp
 F ado/parallel_source.hlp
 F ado/lparallel.mlib

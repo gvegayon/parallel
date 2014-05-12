@@ -27,11 +27,12 @@
 {p2col:1. {help parallel##setclusters:parallel setclusters}}Setting the number of clusters.{p_end}
 {p2col:2. {help parallel##do:parallel do}}Parallelizing a do-file.{p_end}
 {p2col:3. {help parallel##prefix:parallel : (prefix)}}Parallelizing a stata command (parallel prefix).{p_end}
-{p2col:4. {help parallel##append:parallel append}}Multiple file processing and appending.{p_end}
-{p2col:5. {help parallel##clean:parallel clean}}Removing auziliary files.{p_end}
-{p2col:6. {help parallel##seelog:parallel seelog}}Printing clusters' logfiles on screen.{p_end}
-{p2col:7. {help parallel##version:parallel version}}Query parallel current version.{p_end}
-{p2col:8. {help parallel##break:parallel break}}Query if the mother process has requested to break.{p_end}
+{p2col:4. {help parallel##bs:parallel bs}}Parallel bootstrapping.{p_end}
+{p2col:5. {help parallel##append:parallel append}}Multiple file processing and appending.{p_end}
+{p2col:6. {help parallel##clean:parallel clean}}Removing auziliary files.{p_end}
+{p2col:7. {help parallel##seelog:parallel seelog}}Printing clusters' logfiles on screen.{p_end}
+{p2col:8. {help parallel##version:parallel version}}Query parallel current version.{p_end}
+{p2col:9. {help parallel##break:parallel break}}Query if the mother process has requested to break.{p_end}
 
 
 {marker syntax}{...}
@@ -64,6 +65,18 @@
  {opt pr:ocessors}({it:integer})
  {opt keepu:sing}({it:{help varlist}})]:
 {it:stata_cmd}
+
+{col 5}{hline}{marker bs}{...}
+{pstd}Parallel bootstrapping
+
+{p 8 17 2}
+{cmdab:parallel bs}
+[, {opt p:rograms}({it:{help namelist}}) {opt m:ata} {opt nog:lobal} {opt s:eeds}({it:{help numlist}})
+ {opt r:andtype}({it:{help strings:datetime|random.org}}) 
+ {opt t:imeout}({it:integer}) 
+ {opt pr:ocessors}({it:integer})
+ {it:{help bs:...further bootstrap options...}}
+ ] [{cmd::} {it:command}]
 
 {col 5}{hline}{marker append}{...}
 {pstd} Multiple file processing and appending

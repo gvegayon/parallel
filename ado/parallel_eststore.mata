@@ -10,7 +10,7 @@ mata
  */
 void function parallel_eststore(
 	| string scalar fn,
-	string scalar stmatname,
+	string scalar stlist,
 	real scalar fappend
 )
 {
@@ -24,13 +24,17 @@ void function parallel_eststore(
 	real rowvector namesorder
 	string scalar txt, tabs, fn0, randtype
 	
+	string scalar stmatname
+	
 	if (fappend   == J(1,1,.)) fappend = 1
-	if (stmatname == J(1,1,"")) stmatname = "e(b)"
+	if (stlist == J(1,1,"")) stlist = "b"
+	
+	stmatname = "e("+stlist+")"
 	
 	// Matrix parsing
 	stmat       = st_matrix(stmatname)
 	stcolnames0 = ("","N")\st_matrixcolstripe(stmatname)
-	strownames0 = st_matrixrowstripe(stmatname)
+	strownames0 = ("","_"+stlist) // st_matrixrowstripe(stmatname)
 	
 	stmat = J(rows(stmat),1,st_numscalar("e(N)")), stmat
 

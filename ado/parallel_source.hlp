@@ -411,24 +411,25 @@ end
 *! {c BLC}{dup 78:{c -}}{c BRC}
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
-*! {c |} {bf:Beginning of file -parallel_estout.mata-}{col 83}{c |}
+*! {c |} {bf:Beginning of file -parallel_eststore.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
-local pll_instance 1
-local pll_id 1asd156
-
-clear all
-mata mata clear
-
+*! parallel_estout vers 0.14 10may2014
+*! auth George G Vega
 mata
-
-// Process a matrix and store it as a plain-text file
+// mata clear
+/*
+ * @brief Process e() and store it as a plain-text file
+ * @param stmatname Name of e()
+ * @param fn File name where to save the file
+ * @param fappend whether to append or replace the file
+ */
 {smcl}
-*! {marker parallel_estout_save}{bf:function -{it:parallel_estout_save}- in file -{it:parallel_estout.mata}-}
+*! {marker parallel_eststore}{bf:function -{it:parallel_eststore}- in file -{it:parallel_eststore.mata}-}
 *! {back:{it:(previous page)}}
 *!{dup 78:{c -}}{asis}
-void function parallel_estout_save(
-    | string scalar stmatname,
-    string scalar fn,
+void function parallel_eststore(
+    | string scalar fn,
+    string scalar stlist,
     real scalar fappend
 )
 {
@@ -442,13 +443,17 @@ void function parallel_estout_save(
     real rowvector namesorder
     string scalar txt, tabs, fn0, randtype
     
+    string scalar stmatname
+    
     if (fappend   == J(1,1,.)) fappend = 1
-    if (stmatname == J(1,1,"")) stmatname = "e(b)"
+    if (stlist == J(1,1,"")) stlist = "b"
+    
+    stmatname = "e("+stlist+")"
     
     // Matrix parsing
     stmat       = st_matrix(stmatname)
     stcolnames0 = ("","N")\st_matrixcolstripe(stmatname)
-    strownames0 = st_matrixrowstripe(stmatname)
+    strownames0 = ("","_"+stlist) // st_matrixrowstripe(stmatname)
     
     stmat = J(rows(stmat),1,st_numscalar("e(N)")), stmat
 
@@ -474,7 +479,7 @@ void function parallel_estout_save(
             tabheader[j + ncol*(i-1)] = strownames[i]+"_"+stcolnames[j]
 
     // File parsing
-    if (fn == J(1,1,"")) fn = "__pll"+st_local("pll_id")+"_estout"+st_local("pll_instance")+".tab"
+    if (fn == J(1,1,"")) fn = sprintf("__pll%s_eststore%04.0f.tab",st_local("pll_id"),strtoreal(st_local("pll_instance")))
     if (!fappend) unlink(fn)
     
     
@@ -576,7 +581,7 @@ void function parallel_estout_save(
         fh = fopen(fn, "a")
         
         ncol = cols(stmattmp)
-        stmattmp
+        
         for(i=1;i<=nrow;i++)
         {
             txt = ""
@@ -595,68 +600,188 @@ void function parallel_estout_save(
     }
 }
 
+/*
+ * @brief List returning objects (scalar/macro/matrix/function)
+ * @param typeofr Return type, could be e, r or s.
+ */
+{smcl}
+*! {marker parallel_xreturnlist}{bf:function -{it:parallel_xreturnlist}- in file -{it:parallel_eststore.mata}-}
+*! {back:{it:(previous page)}}
+*!{dup 78:{c -}}{asis}
+string colvector function parallel_xreturnlist(|string scalar typeofr)
+{
+
+    if (!args()) typeofr = "e"
+
+    if (!regexm(typeofr,"^(e|r|s)$")) _error(1)
+
+    string colvector out
+    out = J(0,1,"")
+    
+    if (typeofr == "e") /* ereturn type */
+    {
+        stata("local x : e(scalars)")
+        out = st_local("x")
+        
+        stata("local x : e(macros)")
+        out = out\st_local("x")
+        
+        stata("local x : e(matrices)")
+        out = out\st_local("x")
+        
+        stata("local x : e(functions)")
+        out = out\st_local("x")
+    }
+    else if (typeofr == "r") /*return type*/
+    {
+        stata("local x : r(scalars)")
+        out = st_local("x")
+        
+        stata("local x : r(macros)")
+        out = out\st_local("x")
+        
+        stata("local x : r(matrices)")
+        out = out\st_local("x")
+        
+        stata("local x : r(functions)")
+        out = out\st_local("x")
+    }
+    else if (typeofr == "s") /*sreturn type*/
+    {
+        stata("local x : s(macros)")
+        out = st_local("x")
+    }
+    
+    return(out)
+}
+
 // General manager of parallel_estout
 // Possible actions:
 //  0: Start
 //  1: Merge
 {smcl}
-*! {marker parallel_estout_start}{bf:function -{it:parallel_estout_start}- in file -{it:parallel_estout.mata}-}
+*! {marker parallel_eststore_start}{bf:function -{it:parallel_eststore_start}- in file -{it:parallel_eststore.mata}-}
 *! {back:{it:(previous page)}}
 *!{dup 78:{c -}}{asis}
-void function parallel_estout_start()
+void function parallel_eststore_start(|string scalar fn)
 {
     // Checking if the file exists
-    fn = "__pll"+st_local("pll_id")+"_estout"+st_local("pll_instance")+".tab"
+    if (args() == 0)
+        fn = sprintf("__pll%s_estout%04.0f.tab",st_local("pll_id"),strtoreal(st_local("pll_instance")))
     unlink(fn)    
+}
+
+/*
+ * @brief Merges parallel_estout_save() files
+ * @param fn Name of the output file
+ * @param fns List of file names
+ * @param expr Expresion to expand in the form of "%fmts, numlist"
+ */
+{smcl}
+*! {marker parallel_eststore_append}{bf:function -{it:parallel_eststore_append}- in file -{it:parallel_eststore.mata}-}
+*! {back:{it:(previous page)}}
+*!{dup 78:{c -}}{asis}
+void parallel_eststore_append(
+    string scalar fn,
+    | string scalar fns,
+    string scalar expr)
+{
+
+    real scalar i, nclusters
+    string scalar parallelid
+    string rowvector files
+    
+    /* If there are no arguments, ther it should be parallel using it */    
+    if (args()==1) 
+    {
+        /* Retrieving information from parallel */
+        parallelid = st_global("r(pll_id)")
+        nclusters  = strtoreal(st_global("PLL_CLUSTERS"))
+        
+        files = J(1,nclusters,"")
+        for(i=1;i<=nclusters;i++)
+            files[i] = sprintf("__pll%s_eststore%04.0f.tab", parallelid, i)
+    }
+    else if (args() == 2) files = tokens(fns)
+    else files = tokens(parallel_expand_expr(expr))
+    
+    if (parallelid == J(1,1,"")) parallelid = parallel_randomid(10,"",1,1,1)
+    
+    /* Checking which files exists */
+    for(i=1;i<=length(files);i++)
+    {
+        if (!fileexists(files[i])) files[i] = ""
+        files = select(files, files :!= "")
+    }
+    
+    /* If no file, then exit */
+    if (!length(files)) return
+    
+    /* Preserving information and appending the dataset */
+    real scalar N
+    N = c("N")
+    if (N) stata("qui save __pll"+parallelid+"estout_preserve.dta, replace")
+    for(i=1;i<=length(files);i++)
+    {
+        stata(sprintf("qui insheet using %s, clear", files[i]))
+        unlink(files[i])
+        if (i!=1) stata(sprintf("qui append using %s", fn))
+        stata(sprintf("qui save %s, replace", fn))
+    }
+    
+    /* Saving and compressing */
+    stata("qui compress")
+    stata(sprintf("save %s, replace", fn))
+    
+    display(sprintf("The file -%s- has been created at:{break}{tab}%s",fn,pwd()))
+    
+    if (N)
+    {
+        stata("qui use __pll"+parallelid+"estout_preserve.dta, clear")
+        unlink("__pll"+parallelid+"estout_preserve.dta")
+    }
+    
+    return
 }
 
 end
 
-sysuse auto
-summ
+/*
 
-mata 
+local pll_instance 1
+local pll_id 1asd156
+local reps 100
 
-parallel_estout_start()
+timer clear
+forval i=1/20 {
+    sysuse auto, clear
+    timer on 1
+    qui bs, reps(`reps') : regress mpg weight c.weight#c.weight foreign
+    timer off 1
 
-parallel_estout_save()
-end
+    tempfile x
+    save `x', replace
 
-sample 90
-regress mpg weight c.weight#c.weight foreign
-mata parallel_estout_save()
+    timer on 2
+    mata parallel_eststore_start("__pllest`i'.tab")
+    forval j=1/`reps' {
+        qui use `x', clear
+        bsample
+        qui regress mpg weight c.weight#c.weight foreign
+        mata parallel_eststore("__pllest`i'.tab")
+    }
 
-regress mpg c.weight#c.weight foreign
-mata parallel_estout_save()
+    insheet using "__pllest`i'.tab", tab names clear
+    qui summ
+    timer off 2
+}
+timer list
 
-regress mpg c.weight#c.weight foreign rep78
-mata  parallel_estout_save()
-
-regress mpg foreign rep78 c.weight#c.weight
-mata  parallel_estout_save()
-
-insheet using __pll`pll_id'_estout`pll_instance'.tab, tab names clear
-
-/* Another one */
-sysuse auto , clear
-
-regress mpg weight c.weight#c.weight foreign
-estimates save estim, replace
-
-regress mpg c.weight#c.weight foreign
-estimates save estim, append
-
-regress mpg c.weight#c.weight foreign rep78
-estimates save estim, append
-
-regress mpg foreign rep78 c.weight#c.weight
-estimates save estim, append
-
-list
+m parallel_eststore_append("__pllest.dta","","__pllest%g.tab,1/20")
 
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
-*! {c |} {bf:End of file -parallel_estout.mata-}{col 83}{c |}
+*! {c |} {bf:End of file -parallel_eststore.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
@@ -1065,14 +1190,14 @@ real scalar parallel_finito(
             {
                 /* Opening the file and looking for somethign different of 0
                 (which is clear) */
+
+                /* Copying log file */
+                logfilename = sprintf("%s__pll%s_do%04.0f.log", (c("os") == "Windows" ? "" : "/"), parallelid, i)
+                stata(sprintf(`"cap copy __pll%s_do%04.0f.log "\`c(tmpdir)'%s", replace"', parallelid, i, logfilename))
+
                 in_fh = fopen(fname, "r", 1)
                 if ((errornum=strtoreal(fget(in_fh))))
                 {
-                    
-                    /* Copying log file */
-                    logfilename = sprintf("%s__pll%s_do%04.0f.log", (c("os") == "Windows" ? "" : "/"), parallelid, i)
-                    stata(sprintf(`"cap copy __pll%s_do%04.0f.log "\`c(tmpdir)'%s", replace"', parallelid, i, logfilename))
-
                     msg = fget(in_fh)
                     if (msg == J(0,0,"")) display(sprintf(`"{it:cluster %04.0f} {error:has finished with an error -%g- ({stata view "\`c("tmpdir")'%s":view log})...}"', i, errornum, logfilename))
                     else display(sprintf(`"{it:cluster %04.0f} {error:has finished with an error -%g- %s ({stata view "\`c(tmpdir)'%s":view log})...}"', i, errornum, msg, logfilename))
@@ -1097,7 +1222,7 @@ real scalar parallel_finito(
         (void) setbreakintr(bk)
     }
 
-    if (suberrors) display(sprintf("{hline 80}{break}{text:{it:Enter -parallel seelog #- to checkout logfiles of clusters with errors.}}{break}{hline 80}"))
+    display(sprintf("{hline 80}{break}{text:{it:Enter -parallel seelog #- to checkout logfiles.}}{break}{hline 80}"))
     
     return(suberrors)
     
