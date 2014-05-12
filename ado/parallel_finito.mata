@@ -102,14 +102,14 @@ real scalar parallel_finito(
 			{
 				/* Opening the file and looking for somethign different of 0
 				(which is clear) */
+
+				/* Copying log file */
+				logfilename = sprintf("%s__pll%s_do%04.0f.log", (c("os") == "Windows" ? "" : "/"), parallelid, i)
+				stata(sprintf(`"cap copy __pll%s_do%04.0f.log "\`c(tmpdir)'%s", replace"', parallelid, i, logfilename))
+
 				in_fh = fopen(fname, "r", 1)
 				if ((errornum=strtoreal(fget(in_fh))))
 				{
-					
-					/* Copying log file */
-					logfilename = sprintf("%s__pll%s_do%04.0f.log", (c("os") == "Windows" ? "" : "/"), parallelid, i)
-					stata(sprintf(`"cap copy __pll%s_do%04.0f.log "\`c(tmpdir)'%s", replace"', parallelid, i, logfilename))
-
 					msg = fget(in_fh)
 					if (msg == J(0,0,"")) display(sprintf(`"{it:cluster %04.0f} {error:has finished with an error -%g- ({stata view "\`c("tmpdir")'%s":view log})...}"', i, errornum, logfilename))
 					else display(sprintf(`"{it:cluster %04.0f} {error:has finished with an error -%g- %s ({stata view "\`c(tmpdir)'%s":view log})...}"', i, errornum, msg, logfilename))
@@ -134,7 +134,7 @@ real scalar parallel_finito(
 		(void) setbreakintr(bk)
 	}
 
-	if (suberrors) display(sprintf("{hline 80}{break}{text:{it:Enter -parallel seelog #- to checkout logfiles of clusters with errors.}}{break}{hline 80}"))
+	display(sprintf("{hline 80}{break}{text:{it:Enter -parallel seelog #- to checkout logfiles.}}{break}{hline 80}"))
 	
 	return(suberrors)
 	

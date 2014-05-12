@@ -260,12 +260,12 @@ void parallel_eststore_append(
 	if (args()==1) 
 	{
 		/* Retrieving information from parallel */
-		parallelid = st_local("pll_id")
+		parallelid = st_global("r(pll_id)")
 		nclusters  = strtoreal(st_global("PLL_CLUSTERS"))
 		
 		files = J(1,nclusters,"")
 		for(i=1;i<=nclusters;i++)
-			files[i] = sprintf("__pll%s_estout%04.0f.tab", parallelid, i)
+			files[i] = sprintf("__pll%s_eststore%04.0f.tab", parallelid, i)
 	}
 	else if (args() == 2) files = tokens(fns)
 	else files = tokens(parallel_expand_expr(expr))
@@ -312,6 +312,7 @@ void parallel_eststore_append(
 end
 
 /*
+
 local pll_instance 1
 local pll_id 1asd156
 local reps 100
@@ -323,14 +324,16 @@ forval i=1/20 {
 	qui bs, reps(`reps') : regress mpg weight c.weight#c.weight foreign
 	timer off 1
 
+	tempfile x
+	save `x', replace
+
 	timer on 2
 	mata parallel_eststore_start("__pllest`i'.tab")
 	forval j=1/`reps' {
-		preserve
+		qui use `x', clear
 		bsample
 		qui regress mpg weight c.weight#c.weight foreign
 		mata parallel_eststore("__pllest`i'.tab")
-		restore
 	}
 
 	insheet using "__pllest`i'.tab", tab names clear
@@ -340,4 +343,4 @@ forval i=1/20 {
 timer list
 
 m parallel_eststore_append("__pllest.dta","","__pllest%g.tab,1/20")
-*/
+

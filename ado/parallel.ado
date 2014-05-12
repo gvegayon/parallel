@@ -1,4 +1,4 @@
-*! version 1.14.5  8may2014
+*! version 1.14.5  11may2014
 *! PARALLEL: Stata module for parallel computing
 *! by George G. Vega (g.vegayon at gmail)
 /*
@@ -39,6 +39,15 @@ program def parallel
 	// Checks wether if is parallel prefix or not
 	if  (regexm(`"`0'"', "^(do|clean|setclusters|break|version|append|seelog)")) { /* If not prefix */
 		parallel_`0'
+	}
+	else if (regexm(`"`0'"', "^bs[,]?[\s ]?")) {
+		local 0 = regexr(`"`0'"', "^bs", "")
+		gettoken x 0 : 0, parse(":")
+		local 0 = regexr(`"`0'"', "^[:]", "")
+		gettoken x options : x, parse(",") bind
+
+		gettoken 0 argopt : 0, parse(",") bind
+		parallel_bs `0', `options' argopt(`argopt')
 	}
 	else if (regexm(`"`0'"',"^([,]?.*[:])")) {               /* if prefix */
 		gettoken x 0 : 0, parse(":") 
@@ -161,7 +170,7 @@ program def parallel_do, rclass
 		KEEPLast 
 		prefix 
 		Force 
-		Programs(namelist)
+		programs(namelist)
 		Mata 
 		NOGlobals 
 		KEEPTiming 
@@ -389,6 +398,67 @@ program def parallel_fusion
 
 	
 	
+end
+
+program def parallel_bs
+	#delimit ;
+	syntax anything(name=model equalok everything) 
+		[,Saving(string asis) Reps(integer 100) argopt(string)];
+	#delimit cr
+
+	/* Checking whereas parallel has been config */	
+	if length("$PLL_CLUSTERS") == 0 {
+		di "{error:You haven't set the number of clusters}" _n "{error:Please set it with: {cmd:parallel setclusters} {it:#}}"
+		exit 198
+	}
+
+	/* Setting sizes */
+	if ("`reps'"=="") local reps = 100
+	local csize = floor(`reps'/$PLL_CLUSTERS)
+	if (`csize' == 0) error 1
+	else {
+		local lsize = `csize' + (`reps' - `csize'*$PLL_CLUSTERS)
+	}
+
+	/* Saving the tmpfile */
+	m st_local("simul",parallel_randomid(10, "datetime", 1, 1, 1))
+
+	if (c(os) == "Windows") {
+		local tmpdta = `"`c(tmpdir)'`simul'.dta"'
+		qui save `"`tmpdta'"', replace
+	}
+	else {
+		local tmpdta = `"`c(tmpdir)'/`simul'.dta"'
+		qui save `"`tmpdta'"', replace
+	}
+	local simul = `"`simul'.do"'
+
+	/* Creating a tmp program */	
+	file open fh using `"`simul'"', w replace
+	file write fh "if (\`pll_instance'==\$PLL_CLUSTERS) local reps = `lsize'" _n
+	file write fh "else local reps = `csize'" _n
+	file write fh "m parallel_eststore_start()" _n
+	file write fh "forval i=1/\`reps' {" _n
+	file write fh `"qui use \`"`tmpdta'"', clear"' _n
+	file write fh `"qui bsample "'_n
+	file write fh `"qui `model' `argopt'"' _n
+	file write fh `"qui m parallel_eststore()"' _n
+	file write fh "}"
+	file close fh 
+
+	qui parallel do `simul', keep
+
+	m parallel_eststore_append("`saving'")
+	parallel clean 
+	preserve
+	qui use `saving', clear
+	mean _all
+	restore
+
+	*type `"`simul'"'
+	rm `"`simul'"'
+	rm `"`tmpdta'"'
+
 end
 
 ////////////////////////////////////////////////////////////////////////////////

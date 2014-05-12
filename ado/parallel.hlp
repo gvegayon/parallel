@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.14.3.27 27mar2014}{...}
+{* *! version 1.14.5 11may2014}{...}
 {cmd:help parallel}{right:also see:  {net "describe miparallel, from(http://fmwww.bc.edu/RePEc/bocode/m)":miparallel}}
 {hline}
 
@@ -13,16 +13,13 @@
 {p2colset 5 29 29 2}
 {p2col:{bf:{ul:Sections}}}{p_end}
 
-{p2col:1. Syntax}Command syntax.{p_end}
-{p2col:2. Description}Commands description.{p_end}
-{p2col:3. Details}How does parellel works.{p_end}
-{p2col:4. Parallel Append}Using -parallel append- syntax.{p_end}
-{p2col:5. Caveates}Things to consider before unsing parallel.{p_end}
-{p2col:6. Technical note}{p_end}
-{p2col:7. Examples}Some examples using parallel{p_end}
-
-{p2colset 5 29 29 2}
-{p2col:{bf:{ul:Examples}}}{p_end}
+{p2col:1. {help parallel##syntax:Syntax}}Command syntax.{p_end}
+{p2col:2. {help parallel##description:Description}}Commands description.{p_end}
+{p2col:3. {help parallel##details:Details}}How does parellel works.{p_end}
+{p2col:4. {help parallel##append_how:Parallel Append}}Using -parallel append- syntax.{p_end}
+{p2col:5. {help parallel##caveates:Caveates}}Things to consider before unsing parallel.{p_end}
+{p2col:6. {help parallel##tech:Technical note}}Some details under the hood.{p_end}
+{p2col:7. {help parallel##examples:Examples}}Some examples using parallel{p_end}
 
 {p2colset 5 29 29 2}
 {p2col:{bf:{ul:Available commands}}}{p_end}
@@ -32,7 +29,7 @@
 {p2col:3. {help parallel##prefix:parallel : (prefix)}}Parallelizing a stata command (parallel prefix).{p_end}
 {p2col:4. {help parallel##append:parallel append}}Multiple file processing and appending.{p_end}
 {p2col:5. {help parallel##clean:parallel clean}}Removing auziliary files.{p_end}
-{p2col:6. {help parallel##seelog:parallel seelog}}Printing logfiles (of instances with errors) on screen.{p_end}
+{p2col:6. {help parallel##seelog:parallel seelog}}Printing clusters' logfiles on screen.{p_end}
 {p2col:7. {help parallel##version:parallel version}}Query parallel current version.{p_end}
 {p2col:8. {help parallel##break:parallel break}}Query if the mother process has requested to break.{p_end}
 
@@ -86,7 +83,7 @@
 {cmdab:parallel clean} [, {opt e:vent(pll_id)} {opt a:ll} {opt f:orce}]
 
 {col 5}{hline}{marker seelog}{...}
-{pstd}Printing logfiles (of instances with errors) on screen
+{pstd}Printing clusters' logfiles on screen
 
 {p 8 17 2}
 {cmdab:parallel seelog} [{it:#}]
@@ -372,19 +369,14 @@ write an expresion such as {it:"%g_%02.0f/income.dta, 2008/2012, 1/12"} {p_end}
 When the {it:stata_cmd} or {it:do-file} {help saved_results:saves results},
 as {cmd: parallel} runs Stata in {browse "http://www.stata.com/support/faqs/windows/batch-mode/":batch mode},
 none of the results will be kept. This is also true for {help matrix:matrices},
-{help scalar:scalars} and {help mata:mata objects}.
+{help scalar:scalars}, {help mata:mata objects}, {help return:returns}, or whatever
+other object different from data.
 {p_end}
 
 {pstd}
 Although {cmd:parallel} passes-through {help program list:programs}, {help macro:macros}
 and {help mata:mata objects}, in the current version it is not capable of doing the same with
 {help matrix:matrices} or {help scalar:scalars}.
-{p_end}
-
-{pstd}
-Including {cmd:parallel} within ado-files which contains locally-defined programs it
-is not recommended due to known issues. By now parallel can not correctly
-interpret these kind of programs during the loading process causing errors.
 {p_end}
 
 
@@ -557,8 +549,8 @@ and attendees to the Stata conference 2013 (New Orleans).
 
 {pstd}
 Most of {cmd:parallel} has been programmed in {cmd:mata}. This means that, as a difference
-from typical ado files, {cmd:parallel} is distributed in {cmd:lcnu} mata library
-(compiled code)and thus source code can not be reached directly by users. Given
+from typical ado files, {cmd:parallel} is distributed in {cmd:lparallel} mata library
+(compiled code) and thus source code can not be reached directly by users. Given
 this, the help file {cmd:{help parallel_source:parallel_source.sthlp}} is included
 in the package, help file which contains the source code in a fancy way.
 
