@@ -92,7 +92,7 @@ program def parallel_append
 	local err = 1
 	while (`err') {
 		mata: (void) parallel_randomid(10,"",1,1,1)
-		local tmpid = "__pllappend`r(id1)'"
+		local tmpid = "__pll`r(id1)'_append"
 		cap mkdir `tmpid'	
 		local err = _rc
 	}
@@ -109,9 +109,9 @@ program def parallel_append
 		local k = 0
 		file write fh "cd `c(pwd)'" _newline
 		while (`"``++j''"' != "") {
-			file write fh "if (\`pll_instance' == `++k') {" _newline
-			file write fh "    use ``j'' `if' `in'" _newline 
-			file write fh `"    local tmpn = string(`++nsave',"%04.0f")"' _newline "}" _newline
+			file write fh `"if (\`pll_instance' == `++k') {"' _newline
+			file write fh `"    use ``j'' `if' `in'"' _newline 
+			file write fh `"    local tmpn = string(`++nsave',"%04.0f")"'_newline _newline "}" _newline
 		}
 		
 		cap findfile `do'
@@ -119,6 +119,7 @@ program def parallel_append
 			file write fh `"`do'"' _newline
 		}
 		
+		file write fh `"gen filename = "``j''""'
 		file write fh "compress" _newline
 		file write fh "save `tmpid'/`tmpid'\`tmpn', replace" _newline
 		
