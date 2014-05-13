@@ -26,7 +26,7 @@ program def parallel_bootstrap, rclass
 		Timeout(integer 60)
 		PRocessors(integer 0)
 		argopt(string) 
-		Saving(string asis) Reps(integer 100) *];
+		SAVing(string asis) Reps(integer 100) *];
 	#delimit cr
 
 	/* Checking whereas parallel has been config */	
@@ -61,7 +61,7 @@ program def parallel_bootstrap, rclass
 	file write fh "if (\`pll_instance'==\$PLL_CLUSTERS) local reps = `lsize'" _n
 	file write fh "else local reps = `csize'" _n
 	file write fh `"local pll_instance : di %04.0f \`pll_instance'"' _n
-	file write fh `"qui bs `express', sav(__pll\`pll_id'_eststore\`pll_instance', replace) `options' rep(\`reps'): `model' `argopt'"' _n
+	file write fh `"bs `express', sav(__pll\`pll_id'_eststore\`pll_instance', replace) `options' rep(\`reps'): `model' `argopt'"' _n
 	file close fh 
 
 	/* Running parallel */

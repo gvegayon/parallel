@@ -25,7 +25,6 @@ program def parallel_append
 		mata: st_local("files",parallel_expand_expr(`"`expression'"'))
 	}
 
-			
 	/* Checking out the number of files */
 	tokenize `files'
 	local n = 0
@@ -35,10 +34,14 @@ program def parallel_append
 		
 		/* Checking whether it exists*/
 		local fn = `"``n''"'
-		if (!regexm(`"`fn'"',"dta[\s ]*$")) cap confirm file `"``n''.dta"'
+		if (!regexm(`"`fn'"',"\.dta$")) cap confirm file `"``n''.dta"'
 		else cap confirm file `"``n''"'
 
-		if (!_rc) local file`++i' = "``n''"
+		if (!_rc) {
+			if (!regexm(`"`fn'"',"\.dta$")) local ext = ".dta"
+			else local ext = ""
+			local file`++i' = "``n''`ext'"
+		}
 		else {
 			di as result "{it:Warning:}{text:The file -``n''.dta- couldn't be found.}"
 		}
@@ -48,12 +51,13 @@ program def parallel_append
 	/* If no files had been found */
 	if (!`n') {
 		di as error "No files found"
+		error 1
 	}
 
 	/* Showing the files that will be used */
 	di "{result:The following files will be processed:}"
 	forval i=1/`n' {
-		di as text "`i' `file`i''"
+		di as text %03.0f "`i'" as result " `file`i''"
 	}
 	
 	/* Checking the groups clusters */
@@ -80,7 +84,8 @@ program def parallel_append
 	local ng = ceil(`size')
 	
 	forval i=1/`ng' {
-		di "`group`i''"
+		di "{result:The files will be processed in the following order:}"
+		di as text " Group " %02.0f "`i':" as result "`group`i''"
 	}
 	
 	/* Getting a common id for the files */
@@ -97,7 +102,7 @@ program def parallel_append
 		
 		/* Writing the file */	
 		local f `tmpid'.do
-		file open fh using `f', w replace
+		qui file open fh using `f', w replace
 		
 		tokenize `group`i''
 		local j = 0
@@ -126,7 +131,7 @@ program def parallel_append
 		!less __pll`=r(pll_id)'_do1.log*/
 		rm `f'
 	}
-	noi ls `tmpid'/
+	
 	qui clear
 	
 	/* Appending all the results */
