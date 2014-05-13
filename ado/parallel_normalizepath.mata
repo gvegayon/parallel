@@ -67,7 +67,10 @@ transmorphic function parallel_normalizepath(
 	
 	// Extracting details
 	pathsplit(fullpath, filedir, filename)
-	fileext = pathsuffix(filename)	
+	fileext = pathsuffix(filename)
+	
+	/* Checking last-bar */
+	if (!regexm(filedir,"(\/|\\)$")) filedir = filedir+"/"
 		
 	if (exportaslocal) {
 		st_local("filedir",filedir)

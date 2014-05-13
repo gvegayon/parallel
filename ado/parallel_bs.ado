@@ -17,11 +17,12 @@ end
 program def parallel_bootstrap, rclass 
 	#delimit ;
 	syntax anything(name=model equalok everything) [,
-		programs(namelist)
+		EXPress(string asis) 
+		programs(passthru)
 		Mata 
 		NOGlobals 
-		Seeds(string)
-		Randtype(string)
+		Seeds(passthru)
+		Randtype(passthru)
 		Timeout(integer 60)
 		PRocessors(integer 0)
 		argopt(string) 
@@ -33,15 +34,7 @@ program def parallel_bootstrap, rclass
 		di "{error:You haven't set the number of clusters}" _n "{error:Please set it with: {cmd:parallel setclusters} {it:#}}"
 		exit 198
 	}
-	
-	/* Chequeando reps 
-	if (regexm(`"`options'"',"re?p?s?\(([0-9]*)\)")) {
-		local reps = regexs(1)
-		if ("`reps'" == "") local reps = 100
-		local options = regexr(`"`options'"',"(re?p?s?\([0-9]*\))","")
-	}
-	else local reps = 100*/
-	
+		
 	/* Setting sizes */
 	local csize = floor(`reps'/$PLL_CLUSTERS)
 	if (`csize' == 0) error 1
@@ -68,18 +61,36 @@ program def parallel_bootstrap, rclass
 	file write fh "if (\`pll_instance'==\$PLL_CLUSTERS) local reps = `lsize'" _n
 	file write fh "else local reps = `csize'" _n
 	file write fh `"local pll_instance : di %04.0f \`pll_instance'"' _n
-	file write fh `"qui bs, sav(__pll\`pll_id'_eststore\`pll_instance', replace) `options' rep(\`reps'): `model' `argopt'"' _n
+	file write fh `"qui bs `express', sav(__pll\`pll_id'_eststore\`pll_instance', replace) `options' rep(\`reps'): `model' `argopt'"' _n
 	file close fh 
 
-	parallel do `simul', keep nodata
-	local pll_id = r(pll_id)
+	/* Running parallel */
+	cap noi parallel do `simul', keep nodata `programs' `mata' `noglobals' `seeds' ///
+		`randtype' timeout(`timeout') processors(`processors')
+	
+	if (_rc) {
+		rm `"`simul'"'
+		rm `"`tmpdta'"'
+		qui parallel clean, e($LAST_PLL_ID) force
+		
+		exit _rc
+	}
+
+	if (r(pll_errs)) {
+		rm `"`simul'"'
+		rm `"`tmpdta'"'
+		qui parallel clean, e($LAST_PLL_ID) force
+
+		exit 1
+	}
+
 	preserve
 	
 	/* Appending datasets */
 	forval i=1/$PLL_CLUSTERS {
 		quietly {
 			local pll_instance : di %04.0f `i'
-			use `"__pll`pll_id'_eststore`pll_instance'"', clear
+			use `"__pll$LAST_PLL_ID`'_eststore`pll_instance'"', clear
 			
 			if ((`=`i'-1')) append using `saving'
 			save `saving', replace
@@ -97,7 +108,7 @@ program def parallel_bootstrap, rclass
 	}
 	
 	/* Cleaning up */
-	parallel clean , e(`pll_id')
+	parallel clean // , e(`pll_id')
 	
 	restore
 	

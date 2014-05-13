@@ -74,7 +74,7 @@ void parallel_clean(|string scalar parallelid, real scalar cleanall, real scalar
 	string colvector files, sbfiles;
 	
 	// Checking arguments
-	if (parallelid == J(1,1,"")) parallelid = st_global("r(pll_id)");
+	if (parallelid == J(1,1,"")) parallelid = st_global("LAST_PLL_ID");
 	if (cleanall == J(1,1,.)) cleanall = 0;
 	if (force==J(1,1,.)) force = 0;
 	

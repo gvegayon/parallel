@@ -71,11 +71,11 @@
 
 {p 8 17 2}
 {cmdab:parallel bs}
-[, {opt p:rograms}({it:{help namelist}}) {opt m:ata} {opt nog:lobal} {opt s:eeds}({it:{help numlist}})
+[, {opt exp:ression}({it:{help exp_list}}) {opt p:rograms}({it:{help namelist}}) {opt m:ata} {opt nog:lobal} {opt s:eeds}({it:{help numlist}})
  {opt r:andtype}({it:{help strings:datetime|random.org}}) 
  {opt t:imeout}({it:integer}) 
  {opt pr:ocessors}({it:integer})
- {it:{help bs:...further bootstrap options...}}
+ {it:{help bs:bs_options}}
  ] [{cmd::} {it:command}]
 
 {col 5}{hline}{marker append}{...}
@@ -152,6 +152,10 @@ should not try to split or append anything.{p_end}
 {synopt:{opt randt:ype}}String. Tells parallel whether to use the current seed to
 generate the seeds for each clusters (default option) or use the current datetime -datetime-
 or random.org API -random.org- (please read the Description section).{p_end}
+
+{syntab:Parallel bootstrap}
+{synopt:{opt exp:ression}}An {help exp_list} to be passed to the {help bootstrap} command.{p_end}
+{synopt:{opt bs_options}} Further options to be passed to the {help bootstrap} command.
 
 {syntab:Multiple file processing and appending}
 {synopt:{opt d:o}}Stata cmd or dofile.{p_end}
@@ -488,7 +492,6 @@ syntax
 {tab}{tab}{cmd:{c )-}}
 {tab}{hline 35} end of the do-file {hline 10}
 
-{marker examples}{...}
 {title:Example 3: setting the right path}
 
 {pstd}In the case of {cmd:parallel} setting the stata.exe's path wrongly, using
@@ -497,6 +500,22 @@ syntax
 to write:
 
 {tab}{cmd:. parallel setclusters 2, s("C:\Archivos de programa\Stata12/stata.exe")}
+
+{title:Example 4: Using -parallel bs-}
+
+{pstd}In this example we'll evaluate a regression model using bootstrapping{p_end}
+
+{pstd}Setup for a quad-core computer{p_end}
+{tab}{cmd:. sysuse auto, clear}
+	
+{tab}{cmd:. parallel setclusters 4}
+
+{pstd}Running parallel bs.{p_end}
+{tab}{cmd:. parallel bs: reg price c.weig##c.weigh foreign rep}
+	
+{pstd}Which is the ``parallel way'' to do:{p_end}
+
+{tab}{cmd:. bs: reg price c.weig##c.weigh foreign rep}
 
 {marker saved_results}{...}
 {title:Saved results}
@@ -512,9 +531,20 @@ to write:
 {synopt:{cmd:r(pll_t_calc)}}Time took to complete the parallel job{p_end}
 {synopt:{cmd:r(pll_t_fini)}}Time took to appending and cleaning{p_end}
 {synopt:{cmd:r(pll_t_reps)}}In the case of {opt keeptime}, the number of time measures performed.{p_end}
+{synopt:{cmd:r(pll_errs)}}Number of clusters which stopped with an error.{p_end}
 
 {p2col 5 20 24 2: Macros}{p_end}
 {synopt:{cmd:r(pll_dir)}}Directory where parallel ran and stored the auxiliary files.{p_end}
+
+{pstd}Stores the following global macros:{p_end}
+
+{synoptset 20 tabbed}{...}
+{synopt:{cmd:$LAST_PLL_DIR}}A copy of {cmd:r(pll_dir)}{p_end}
+{synopt:{cmd:$LAST_PLL_N}}A copy of {cmd:r(pll_n)}{p_end}
+{synopt:{cmd:$LAST_PLL_ID}}A copy of {cmd:r(pll_id)}{p_end}
+{synopt:{cmd:$PLL_LASTRNG}}Number of times that -{cmd:parallel_randomid()}- has
+been executed.{p_end}
+
 
 {marker references}{...}
 

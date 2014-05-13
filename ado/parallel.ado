@@ -79,14 +79,14 @@ end
 program def parallel_seelog
 	args pll_instance
 	
-	if ("`=r(pll_id)'"!=".") {
+	if ("$LAST_PLL_ID"!=".") {
 		/* By default uses 1 */
 		if ("`pll_instance'" == "") local pll_instance 1
 
 		local pll_instance : di %04.0f `pll_instance'
 
 		/* Does de file exists */
-		local logname = "__pll`r(pll_id)'_do`pll_instance'.log"
+		local logname = "__pll$LAST_PLL_ID`'_do`pll_instance'.log"
 
 		if (c(os) == "Windows") local logname = "`c(tmpdir)'`logname'"
 		else local logname = "`c(tmpdir)'/`logname'"
@@ -94,7 +94,7 @@ program def parallel_seelog
 		/* If the logfile does not exists, do nothing*/
 		cap confirm file "`logname'"
 		if (_rc) {
-			di as result "No logfile for instance -`pll_instance'- of parallel process -`r(pll_id)'- found"
+			di as result "No logfile for instance -`pll_instance'- of parallel process -$LAST_PLL_ID`'- found"
 			exit
 		}
 
@@ -102,7 +102,6 @@ program def parallel_seelog
 		di as result "{hline 80}"
 		di as result %~80s "beginning of file -`logname'-"
 		di as result "{hline 80}"
-		
 		type `"`logname'"'
 		di as result "{hline 80}"
 		di as result %~80s "end of file -`logname'-"
@@ -334,6 +333,10 @@ program def parallel_do, rclass
 	return scalar pll_t_fini = `pll_t_fini'
 	return local pll_id = "`parallelid'"
 	return scalar pll_n = $PLL_CLUSTERS
+	
+	global LAST_PLL_ID = "`parallelid'"
+	global LAST_PLL_N = $PLL_CLUSTERS
+	global LAST_PLL_DIR = "`pll_dir'"
 	
 	qui cd "`initialdir'"
 end
