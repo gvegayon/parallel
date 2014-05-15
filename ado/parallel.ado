@@ -187,6 +187,7 @@ program def parallel_do, rclass
 		PRocessors(integer 0)
 		argopt(string)
 		KEEPUsing(string)
+		SETparallelid(string)
 		];
 	#delimit cr
 	
@@ -227,7 +228,8 @@ program def parallel_do, rclass
 		local pll_dir = "`filedir'"
 		local dofile = "`filename'"
 	}
-	else local pll_dir = c(pwd)
+	else local pll_dir = c(pwd)+"/"
+		
 	
 	local initialdir = c(pwd)
 	qui cd "`pll_dir'"
@@ -238,12 +240,9 @@ program def parallel_do, rclass
 	}
 	else local sorting = 0
 	
-	// Creates a unique ID for the process
-	mata: st_local("parallelid", parallel_randomid(10, "`randtype'", 1, 1, 1))
-	
-	/* Creates a blocking file (in order to avoid -parallel clean- remove the
-	files in use */
-	mata: parallel_sandbox(0, "`parallelid'")
+	/* Creates a unique ID for the process and secures it */
+	if ("`setparallelid'"=="") mata: parallel_sandbox(5)
+	else local parallelid = "`setparallelid'"
 		
 	/* Generates database clusters */
 	if (!`nodata') parallel_spliter `by' , parallelid(`parallelid') sorting(`sorting') force(`force') keepusing(`keepusing')
@@ -315,9 +314,10 @@ program def parallel_do, rclass
 	}
 
 	/* Removes the sandbox file (unprotect the files) */
-	mata: parallel_sandbox(2, "`parallelid'")
-
-	if (!`keep' & !`keeplast') parallel_clean, e("`parallelid'")
+	if ("`setparallelid'" == "") {
+		mata: parallel_sandbox(2, "`parallelid'")
+		if (!`keep' & !`keeplast') parallel_clean, e("`parallelid'")
+	}
 	
 	timer off 97
 	cap timer list

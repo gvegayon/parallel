@@ -25,13 +25,13 @@ real scalar parallel_run(
 	if (paralleldir == J(1,1,"")) paralleldir = st_global("PLL_DIR")
 	
 	// Message
-	display("{text:Parallel Computing with Stata} {result:(by GVY)}")
+	display(sprintf("{hline %g}",c("linesize") > 80?80:c("linesize")))
+	display("{result:Parallel Computing with Stata} (by GVY)")
 	display("{text:Clusters   :} {result:"+strofreal(nclusters)+"}")
 	display("{text:pll_id     :} {result:"+parallelid+"}")
 	display("{text:Running at :} {result:"+c("pwd")+"}")
+	display("{text:Randtype   :} {result:"+st_local("randtype")+"}")
 	
-	if (strlen(st_local("randtype"))) display("{text:{it:Note: randtype = "+st_local("randtype")+"}}")
-
 	if (c("os") != "Windows") { // MACOS/UNIX
 		unlink("__pll"+parallelid+"_shell.sh")
 		fh = fopen("__pll"+parallelid+"_shell.sh","w", 1)

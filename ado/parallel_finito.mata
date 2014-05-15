@@ -54,7 +54,7 @@ real scalar parallel_finito(
 			
 		if (!fileexists(fname))
 		{
-			display(sprintf("{it:cluster %04.0f} {error:has finished with a connection error -601- (timeout) ({stata search r(601):see more})...}", i))
+			display(sprintf("{it:cluster %04.0f} {text:has finished with a connection error -601- (timeout) ({stata search r(601):see more})...}", i))
 			suberrors++
 			continue
 		}
@@ -111,11 +111,11 @@ real scalar parallel_finito(
 				if ((errornum=strtoreal(fget(in_fh))))
 				{
 					msg = fget(in_fh)
-					if (msg == J(0,0,"")) display(sprintf(`"{it:cluster %04.0f} {error:has finished with an error -%g- ({stata view "\`c("tmpdir")'%s":view log})...}"', i, errornum, logfilename))
-					else display(sprintf(`"{it:cluster %04.0f} {error:has finished with an error -%g- %s ({stata view "\`c(tmpdir)'%s":view log})...}"', i, errornum, msg, logfilename))
+					if (msg == J(0,0,"")) display(sprintf(`"{it:cluster %04.0f} {text:Exited with error -%g- ({stata view "\`c("tmpdir")'%s":view log})...}"', i, errornum, logfilename))
+					else display(sprintf(`"{it:cluster %04.0f} {text:Exited with error -%g- %s ({stata view "\`c(tmpdir)'%s":view log})...}"', i, errornum, msg, logfilename))
 					suberrors++
 				}
-				else display(sprintf("{it:cluster %04.0f} {text:has finished without any error...}", i))
+				else display(sprintf("{it:cluster %04.0f} {text:has exited without error...}", i))
 				fclose(in_fh)
 				
 				/* Taking the finished cluster out of the list */
@@ -133,8 +133,10 @@ real scalar parallel_finito(
 		breakkeyreset()
 		(void) setbreakintr(bk)
 	}
-
-	display(sprintf("{hline 80}{break}{text:{it:Enter -parallel seelog #- to checkout logfiles.}}{break}{hline 80}"))
+	
+	real scalar linesize
+	linesize = c("linesize") > 80 ? 80 : c("linesize")
+	display(sprintf("{hline %g}{break}{text:Enter -{stata parallel seelog 1:parallel seelog #}- to checkout logfiles.}{break}{hline %g}", linesize, linesize))
 	
 	return(suberrors)
 	

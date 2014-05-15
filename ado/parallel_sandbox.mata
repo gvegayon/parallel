@@ -14,6 +14,8 @@ void parallel_sandbox(
 		1: Returns a list of files that can be erased 
 		2: Delets the respective sandbox file 
 		3: Updates the status of a sandbox file
+		4:
+		5: Retrieves a parallelid as a scalar
 		*/
 	|string scalar pll_id,
 	pointer(scalar) scalar result
@@ -112,6 +114,23 @@ void parallel_sandbox(
 
 		return
 
+	}
+	
+	if (action==5)
+	{
+		real scalar idtaken
+		idtaken=1
+		while(idtaken)
+		{
+			pll_id = parallel_randomid(10, "datetime", 1, 1, 1)
+			idtaken    = fileexists(tmpdir+"__pll"+pll_id+"sandbox")
+		}
+		
+		/* Securing the pllid */
+		parallel_sandbox(0, pll_id)
+		st_local("parallelid", pll_id)
+		
+		return
 	}
 	
 }

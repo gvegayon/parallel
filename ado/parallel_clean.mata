@@ -55,7 +55,7 @@ void function parallel_clean_tmp(
 	else 
 	{
 		for(i=1;i<=length(tmpdirs);i++)
-			stata("cap shell rm -R "+tmpdirs[i])
+			stata("cap shell rm -R -f "+tmpdirs[i])
 	}
 	
 	return

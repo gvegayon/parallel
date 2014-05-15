@@ -5,13 +5,13 @@ program def parallel_append
 
 	vers 11.0
 
-	syntax [anything(name=files)] , Do(string asis)[ in(string asis) if (string asis) Expression(string) *]
+	syntax [anything(name=files)] , Do(string asis) [in(string asis) if (string asis) Expression(string) *]
 			
 	if ("`in'" != "") local in in `in'
 	if ("`if'" != "") local if if `if'
 
 	/* Checking arguments */
-	if (`"`anything'"' == "" & `"`expression'"' == "") {
+	if (`"`files'"' == "" & `"`expression'"' == "") {
 		di as error "One of -files- or -expr()- must be specified."
 		error 1
 	}
@@ -24,9 +24,22 @@ program def parallel_append
 	if (`"`expression'"' != "") {
 		mata: st_local("files",parallel_expand_expr(`"`expression'"'))
 	}
+	else if (regexm(`"`files'"', "[*]")) local files : dir . files "`files'"
+	
+	/* Checking cmd/dofile */
+	cap confirm file `"`do'"'
+	if (_rc) cap confirm file `"`do'.do"'
+	if (!_rc) local do = `"`do'.do"'
+	else {
+		cap `do'
+		if (_rc == 199) {
+			di as error `"Error: No file or cmd nammed -`do'-"'
+			exit 199
+		}
+	}
 
 	/* Checking out the number of files */
-	tokenize `files'
+	tokenize `"`files'"'
 	local n = 0
 	local i = 0
 	local nerr = 0
@@ -43,7 +56,7 @@ program def parallel_append
 			local file`++i' = "``n''`ext'"
 		}
 		else {
-			di as result "{it:Warning:}{text:The file -``n''.dta- couldn't be found.}"
+			di as result " {it:Warning:}{text:The file -``n''.dta- couldn't be found.}"
 		}
 	}
 	local n = `i'
@@ -57,7 +70,7 @@ program def parallel_append
 	/* Showing the files that will be used */
 	di "{result:The following files will be processed:}"
 	forval i=1/`n' {
-		di as text %03.0f "`i'" as result " `file`i''"
+		di " " as result %03.0f `i' as text " `file`i''"
 	}
 	
 	/* Checking the groups clusters */
@@ -85,17 +98,21 @@ program def parallel_append
 	
 	forval i=1/`ng' {
 		di "{result:The files will be processed in the following order:}"
-		di as text " Group " %02.0f "`i':" as result "`group`i''"
+		di " " as result %03.0f `i' as text " `group`i''"
 	}
 	
 	/* Getting a common id for the files */
-	local err = 1
+	mata: parallel_sandbox(5)
+	local tmpid = "__pll`parallelid'_append"
+	mkdir `tmpid'
+	
+	/*local err = 1
 	while (`err') {
 		mata: (void) parallel_randomid(10,"",1,1,1)
 		local tmpid = "__pll`r(id1)'_append"
 		cap mkdir `tmpid'	
 		local err = _rc
-	}
+	}*/
 	
 	local nsave = 0
 	forval i=1/`ng' {
@@ -111,6 +128,7 @@ program def parallel_append
 		while (`"``++j''"' != "") {
 			file write fh `"if (\`pll_instance' == `++k') {"' _newline
 			file write fh `"    use ``j'' `if' `in'"' _newline 
+			file write fh `"    local filename = `"``j''"'"' _newline
 			file write fh `"    local tmpn = string(`++nsave',"%04.0f")"'_newline _newline "}" _newline
 		}
 		
@@ -119,17 +137,15 @@ program def parallel_append
 			file write fh `"`do'"' _newline
 		}
 		
-		file write fh `"gen filename = "``j''""'
+		file write fh `"gen dta_souorce = "\`filename'""' _newline
 		file write fh "compress" _newline
 		file write fh "save `tmpid'/`tmpid'\`tmpn', replace" _newline
 		
 		file close fh
 
 		qui parallel setclusters `--j', s(`olddir') f
-		parallel do `f', `options'
+		parallel do `f', `options' nodata setparallelid(`parallelid')
 
-		/*!less __pll`=r(pll_id)'_do1.do
-		!less __pll`=r(pll_id)'_do1.log*/
 		rm `f'
 	}
 	
@@ -144,14 +160,25 @@ program def parallel_append
 		}
 		
 		if (!c(N)) cap use `tmpid'/`tmpn'
-		
 		if (_rc) local err `err' `file`i''
 	}
 	
-	/* Removing the tmp dir */
+	/* Labeling */
+	quietly {
+		if (c(N)) {
+			encode dta_souorce, gen(dta_souorce2)
+			drop dta_souorce
+			ren dta_souorce2 dta_souorce 
+			lab var dta_souorce "Original dataset of the observation"
+		}
+	}
+	
+	/* Removing the tmp dir and free id */
 	cap rmdir `tmpid'
+	mata: parallel_sandbox(2, "`parallelid'")
+	qui parallel clean, e("`parallelid'")
 
-	if (length("`err'")) di as result "{it:Warning:The following files could't be found}" _newline as text "`err'"
+	if (`"`err'"'!="0") di as result "{it:Warning:The following files could't be found}" _newline as text `"`=regexr(`"`err'"',"^[0]","")'"'
 
 	qui parallel setclusters `oldclusters', s(`olddir') f
 	

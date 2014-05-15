@@ -176,7 +176,7 @@ void function parallel_clean_tmp(
     else 
     {
         for(i=1;i<=length(tmpdirs);i++)
-            stata("cap shell rm -R "+tmpdirs[i])
+            stata("cap shell rm -R -f "+tmpdirs[i])
     }
     
     return
@@ -1142,7 +1142,7 @@ real scalar parallel_finito(
             
         if (!fileexists(fname))
         {
-            display(sprintf("{it:cluster %04.0f} {error:has finished with a connection error -601- (timeout) ({stata search r(601):see more})...}", i))
+            display(sprintf("{it:cluster %04.0f} {text:has finished with a connection error -601- (timeout) ({stata search r(601):see more})...}", i))
             suberrors++
             continue
         }
@@ -1199,11 +1199,11 @@ real scalar parallel_finito(
                 if ((errornum=strtoreal(fget(in_fh))))
                 {
                     msg = fget(in_fh)
-                    if (msg == J(0,0,"")) display(sprintf(`"{it:cluster %04.0f} {error:has finished with an error -%g- ({stata view "\`c("tmpdir")'%s":view log})...}"', i, errornum, logfilename))
-                    else display(sprintf(`"{it:cluster %04.0f} {error:has finished with an error -%g- %s ({stata view "\`c(tmpdir)'%s":view log})...}"', i, errornum, msg, logfilename))
+                    if (msg == J(0,0,"")) display(sprintf(`"{it:cluster %04.0f} {text:Exited with error -%g- ({stata view "\`c("tmpdir")'%s":view log})...}"', i, errornum, logfilename))
+                    else display(sprintf(`"{it:cluster %04.0f} {text:Exited with error -%g- %s ({stata view "\`c(tmpdir)'%s":view log})...}"', i, errornum, msg, logfilename))
                     suberrors++
                 }
-                else display(sprintf("{it:cluster %04.0f} {text:has finished without any error...}", i))
+                else display(sprintf("{it:cluster %04.0f} {text:has exited without error...}", i))
                 fclose(in_fh)
                 
                 /* Taking the finished cluster out of the list */
@@ -1221,8 +1221,10 @@ real scalar parallel_finito(
         breakkeyreset()
         (void) setbreakintr(bk)
     }
-
-    display(sprintf("{hline 80}{break}{text:{it:Enter -parallel seelog #- to checkout logfiles.}}{break}{hline 80}"))
+    
+    real scalar linesize
+    linesize = c("linesize") > 80 ? 80 : c("linesize")
+    display(sprintf("{hline %g}{break}{text:Enter -{stata parallel seelog 1:parallel seelog #}- to checkout logfiles.}{break}{hline %g}", linesize, linesize))
     
     return(suberrors)
     
@@ -1602,13 +1604,13 @@ real scalar parallel_run(
     if (paralleldir == J(1,1,"")) paralleldir = st_global("PLL_DIR")
     
     // Message
-    display("{text:Parallel Computing with Stata} {result:(by GVY)}")
+    display(sprintf("{hline %g}",c("linesize") > 80?80:c("linesize")))
+    display("{result:Parallel Computing with Stata} (by GVY)")
     display("{text:Clusters   :} {result:"+strofreal(nclusters)+"}")
     display("{text:pll_id     :} {result:"+parallelid+"}")
     display("{text:Running at :} {result:"+c("pwd")+"}")
+    display("{text:Randtype   :} {result:"+st_local("randtype")+"}")
     
-    if (strlen(st_local("randtype"))) display("{text:{it:Note: randtype = "+st_local("randtype")+"}}")
-
     if (c("os") != "Windows") { // MACOS/UNIX
         unlink("__pll"+parallelid+"_shell.sh")
         fh = fopen("__pll"+parallelid+"_shell.sh","w", 1)
@@ -1689,6 +1691,8 @@ void parallel_sandbox(
         1: Returns a list of files that can be erased 
         2: Delets the respective sandbox file 
         3: Updates the status of a sandbox file
+        4:
+        5: Retrieves a parallelid as a scalar
         */
     |string scalar pll_id,
     pointer(scalar) scalar result
@@ -1787,6 +1791,23 @@ void parallel_sandbox(
 
         return
 
+    }
+    
+    if (action==5)
+    {
+        real scalar idtaken
+        idtaken=1
+        while(idtaken)
+        {
+            pll_id = parallel_randomid(10, "datetime", 1, 1, 1)
+            idtaken    = fileexists(tmpdir+"__pll"+pll_id+"sandbox")
+        }
+        
+        /* Securing the pllid */
+        parallel_sandbox(0, pll_id)
+        st_local("parallelid", pll_id)
+        
+        return
     }
     
 }
@@ -2090,9 +2111,9 @@ real scalar parallel_write_do(
         fput(output_fh, sprintf(`"noi di \`"cmd/dofile   : "%s""'"', inputname))
         fput(output_fh, sprintf(`"noi di "pll_id       : %s""',parallelid))
         fput(output_fh, sprintf(`"noi di "pll_instance : %g/%g""',i,nclusters))
-        fput(output_fh,         `"noi di "TMPDIR       : \`c(tmpdir)'""')
-        fput(output_fh,         `"noi di "Date-time    : \`c(current_time)' \`c(current_date)'""')
-        fput(output_fh,         `"noi di "Seed         : \`c(seed)'""')
+        fput(output_fh,         `"noi di "tmpdir       : \`c(tmpdir)'""')
+        fput(output_fh,         `"noi di "date-time    : \`c(current_time)' \`c(current_date)'""')
+        fput(output_fh,         `"noi di "seed         : \`c(seed)'""')
         fput(output_fh, `"noi di "{hline 80}""')
         fput(output_fh, "local pll_instance "+strofreal(i))
         fput(output_fh, "local pll_id "+parallelid)
@@ -2212,7 +2233,7 @@ real scalar parallel_write_do(
         
         // Step 3
         fput(output_fh, `"cd ""'+folder+`"""')
-        fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while running the command/dofile")"')
+        fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while executing the command")"')
         fclose(output_fh)
     }
     return(0)

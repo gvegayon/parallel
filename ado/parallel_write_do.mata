@@ -107,9 +107,9 @@ real scalar parallel_write_do(
 		fput(output_fh, sprintf(`"noi di \`"cmd/dofile   : "%s""'"', inputname))
 		fput(output_fh, sprintf(`"noi di "pll_id       : %s""',parallelid))
 		fput(output_fh, sprintf(`"noi di "pll_instance : %g/%g""',i,nclusters))
-		fput(output_fh,         `"noi di "TMPDIR       : \`c(tmpdir)'""')
-		fput(output_fh,         `"noi di "Date-time    : \`c(current_time)' \`c(current_date)'""')
-		fput(output_fh,         `"noi di "Seed         : \`c(seed)'""')
+		fput(output_fh,         `"noi di "tmpdir       : \`c(tmpdir)'""')
+		fput(output_fh,         `"noi di "date-time    : \`c(current_time)' \`c(current_date)'""')
+		fput(output_fh,         `"noi di "seed         : \`c(seed)'""')
 		fput(output_fh, `"noi di "{hline 80}""')
 		fput(output_fh, "local pll_instance "+strofreal(i))
 		fput(output_fh, "local pll_id "+parallelid)
@@ -229,7 +229,7 @@ real scalar parallel_write_do(
 		
 		// Step 3
 		fput(output_fh, `"cd ""'+folder+`"""')
-		fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while running the command/dofile")"')
+		fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while executing the command")"')
 		fclose(output_fh)
 	}
 	return(0)
