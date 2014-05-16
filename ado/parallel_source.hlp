@@ -121,68 +121,6 @@ end
 mata:
 
 {smcl}
-*! {marker parallel_clean_tmp}{bf:function -{it:parallel_clean_tmp}- in file -{it:parallel_clean.mata}-}
-*! {back:{it:(previous page)}}
-*!{dup 78:{c -}}
-*!{col 4}{it:Removes tmpfolders}
-*!{col 4}{bf:parameters:}
-*!{col 6}{bf:parallelid}{col 20}Id of the paralallel process
-*!{dup 78:{c -}}{asis}
-void function parallel_clean_tmp(
-    |string scalar parallelid,
-    real scalar force
-)
-{
-    /* Getting the temppath */
-    string scalar tmpdirs, dirslist
-    string colvector sbfiles
-    real scalar i
-    
-    string scalar tmpbat
-    real scalar fh
-    
-    tmpdirs = dir(c("tmpdir"),"dirs","__pll"+ (parallelid == "" ? "" : parallelid)+"*" , 1)
-    
-    /* Getting the list of folders that should not be removed */
-    sbfiles = J(0,1,"")
-    if (!force)
-    {
-        parallel_sandbox(4,"",&sbfiles)
-        for(i=1;i<=length(sbfiles);i++)
-            tmpdirs = select(tmpdirs, tmpdirs :!= sbfiles[i])
-    }
-    
-    /* If no dir left, continue */
-    if (!length(tmpdirs)) return
-    
-    /* Removing the dirs */
-    if (c("os") == "Windows")
-    {
-        /* Getting a file name for the tmp.bat */
-        while(fileexists(tmpbat = regexr(tmpfilename(),"\.tmp$",".bat")) )
-            continue
-
-        fh = fopen(tmpbat, "w")
-        
-        for(i=1;i<=length(tmpdirs);i++)
-        {
-            tmpdirs[i] = subinstr(tmpdirs[i],"/","\",.)
-            fput(fh, "rmdir /s /q "+tmpdirs[i])
-        }
-        fclose(fh)
-        stata("shell "+tmpbat+"&erase /f "+tmpbat+"&exit")
-        
-    }
-    else 
-    {
-        for(i=1;i<=length(tmpdirs);i++)
-            stata("cap shell rm -R -f "+tmpdirs[i])
-    }
-    
-    return
-}
-
-{smcl}
 *! {marker parallel_clean}{bf:function -{it:parallel_clean}- in file -{it:parallel_clean.mata}-}
 *! {back:{it:(previous page)}}
 *!{dup 78:{c -}}
@@ -197,39 +135,41 @@ void function parallel_clean_tmp(
 void parallel_clean(|string scalar parallelid, real scalar cleanall, real scalar force) {
     
     real scalar i ;
-    string colvector files, sbfiles;
+    string colvector parallelids, sbfiles;
     
     // Checking arguments
     if (parallelid == J(1,1,"")) parallelid = st_global("LAST_PLL_ID");
     if (cleanall == J(1,1,.)) cleanall = 0;
     if (force==J(1,1,.)) force = 0;
     
-    if (!cleanall & strlen(parallelid)) // If its not all
-    { 
-        files = dir(pwd(),"files","__pll"+parallelid+"_*",1) \ dir(pwd(),"files","l__pll"+parallelid+"_*",1) \ dir(c("tmpdir"),"files","__pll"+parallelid+"sandbox",1)
+    /* Getting the list of parallel ids that should be removed */
+    if (cleanall)
+    {
+        parallelids = dir(pwd(),"files","__pll*") \ dir(pwd(),"files","l__pll*") \ dir(pwd(),"dirs","__pll*")
+
+        for(i=1;i<=length(parallelids);i++)
+            parallelids = regexr(regexr(parallelids,"^l?__pll",""),"_.+$","")
+        parallelids = uniqrows(parallelids)
     }
-    else if (cleanall)
-    {           // If its all
-        files = dir(pwd(),"files","__pll*",1) \ dir(pwd(),"files","l__pll*",1)\dir(c("tmpdir"),"files","__pll*sandbox",1)
-    }
+    else parallelids = parallelid
+
     
     /* Extracting files that are in use */
-    if (!force) parallel_sandbox(1,"",&sbfiles)
-    
-    /* Checking if there is anything to clean */
-    if (files == J(0,1,"")) display(sprintf("{text:parallel clean:} {result: nothing to clean...}"))
-    else {
-        /* Checking sandbox files */
-        for(i=1;i<=length(sbfiles);i++)
-            files = select(files, files:!=sbfiles[i])
-    
-        /* Looping over file names */
-        for(i=1;i<=rows(files);i++)
-            unlink(files[i])
+    if (!force) parallel_sandbox(6,"",&sbfiles)
+
+    for(i=1;i<=length(sbfiles);i++)
+        parallelids = select(parallelids, parallelids:!=sbfiles[i])
+
+    /* Cleaning up */
+    if (length(parallelids))
+    {
+        for(i=1;i<=length(parallelids);i++)
+        {
+            parallel_recursively_rm(parallelids[i],pwd())
+            parallel_recursively_rm(parallelids[i],c("tmpdir"))
+        }
     }
-    
-    /* Removing temp files */
-    parallel_clean_tmp(parallelid, force)
+    else display(sprintf("{text:parallel clean:} {result: nothing to clean...}"))
     
     return
 }
@@ -1154,7 +1094,7 @@ real scalar parallel_finito(
     /* If there are as many errors as clusters, then exit */
     if (suberrors == nclusters) return(suberrors)
     
-    string scalar logfilename
+    string scalar logfilename, tmpdirname
 
     while(length(pendingcl)>0)
     {
@@ -1194,6 +1134,7 @@ real scalar parallel_finito(
                 /* Copying log file */
                 logfilename = sprintf("%s__pll%s_do%04.0f.log", (c("os") == "Windows" ? "" : "/"), parallelid, i)
                 stata(sprintf(`"cap copy __pll%s_do%04.0f.log "\`c(tmpdir)'%s", replace"', parallelid, i, logfilename))
+                unlink(pwd()+logfilename)
 
                 in_fh = fopen(fname, "r", 1)
                 if ((errornum=strtoreal(fget(in_fh))))
@@ -1205,6 +1146,11 @@ real scalar parallel_finito(
                 }
                 else display(sprintf("{it:cluster %04.0f} {text:has exited without error...}", i))
                 fclose(in_fh)
+
+                /* Checking tmpdir */
+                tmpdirname = sprintf("%s"+ (c("os")=="Windows" ? "" : "/") + "__pll%s_tmpdir%04.0f", c("tmpdir"),parallelid,i)
+                parallel_recursively_rm(parallelid,tmpdirname,1)
+                rmdir(tmpdirname)
                 
                 /* Taking the finished cluster out of the list */
                 pendingcl = select(pendingcl, pendingcl :!= i)
@@ -1224,7 +1170,7 @@ real scalar parallel_finito(
     
     real scalar linesize
     linesize = c("linesize") > 80 ? 80 : c("linesize")
-    display(sprintf("{hline %g}{break}{text:Enter -{stata parallel seelog 1:parallel seelog #}- to checkout logfiles.}{break}{hline %g}", linesize, linesize))
+    display(sprintf("{hline %g}{break}{text:Enter -{stata parallel seelog 1, e(%s):parallel seelog #}- to checkout logfiles.}{break}{hline %g}", linesize, parallelid, linesize))
     
     return(suberrors)
     
@@ -1570,6 +1516,72 @@ end
 *! {c BLC}{dup 78:{c -}}{c BRC}
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
+*! {c |} {bf:Beginning of file -parallel_recursively_rm.mata-}{col 83}{c |}
+*! {c BLC}{dup 78:{c -}}{c BRC}
+
+mata
+
+/*
+ *@brief Recursively removes parallel tmpfiles
+ *@param parallelid Id of the parallel process to clean
+ *@param path Path where to search for auxiliary files
+ */
+{smcl}
+*! {marker parallel_recursively_rm}{bf:function -{it:parallel_recursively_rm}- in file -{it:parallel_recursively_rm.mata}-}
+*! {back:{it:(previous page)}}
+*!{dup 78:{c -}}{asis}
+void function parallel_recursively_rm(string scalar parallelid ,| string scalar path, real scalar atomic)
+{
+    if (path==J(1,1,"")) path = pwd()
+    else if (!regexm(path,"[/\]$")) path = path+"/"
+
+    // display("{hline}{break}Entering folder "+path)
+    
+    if (atomic == J(1,1,.)) atomic = 0
+    
+    string scalar pattern
+    if (!atomic) pattern = "__pll"+parallelid+"_*"
+    else pattern = "*"
+
+    string colvector dirs
+    string colvector files
+
+    /* Listing files */
+    dirs  = dir(path,"dirs",pattern,1)
+    files = dir(path,"files",pattern,1)\dir(path,"files","l"+pattern,1)
+    
+    real scalar i
+    if (atomic)
+    {
+        for(i=1;i<=length(files);i++)
+            unlink(files[i])
+    }
+    else
+    {
+        /* We don't want to remove logfiles */
+        for(i=1;i<=length(files);i++)
+            if (!regexm(files[i],"do[0-9]+\.log$")) unlink(files[i])
+    }
+
+    /* Entering each folder */
+    for(i=1;i<=length(dirs);i++)
+        parallel_recursively_rm(parallelid, dirs[i], 1)
+
+    /* Removing empty folders */
+    for(i=1;i<=length(dirs);i++)
+        rmdir(dirs[i])
+
+
+    return
+}
+
+end
+*! {smcl}
+*! {c TLC}{dup 78:{c -}}{c TRC}
+*! {c |} {bf:End of file -parallel_recursively_rm.mata-}{col 83}{c |}
+*! {c BLC}{dup 78:{c -}}{c BRC}
+*! {smcl}
+*! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:Beginning of file -parallel_run.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
 *! version 0.14.4.17 17apr2014
@@ -1619,13 +1631,13 @@ real scalar parallel_run(
         if (c("os") != "Unix") {
             for(i=1;i<=nclusters;i++) {
                 mkdir(c("tmpdir")+"/__pll"+parallelid+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
-                fput(fh, "export TMPDIR="+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
+                fput(fh, "export TMPDIR="+c("tmpdir")+"/__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f"))
                 fput(fh, paralleldir+`" -e -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
             }
         }
         else {
             for(i=1;i<=nclusters;i++) {
-                mkdir(c("tmpdir")+"/__pll"+parallelid+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
+                mkdir(c("tmpdir")+"/__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
                 fput(fh, "export TMPDIR="+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
                 fput(fh, paralleldir+`" -b -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
             }
@@ -1644,7 +1656,7 @@ real scalar parallel_run(
         // Writing file
         for(i=1;i<=nclusters;i++) {
             mkdir(c("tmpdir")+"__pll"+parallelid+strofreal(i, "%04.0f"),1)
-            fwrite(fh, "start /MIN /HIGH set TEMP="+c("tmpdir")+"__pll"+parallelid+strofreal(i,"%04.0f")+" ^& ")
+            fwrite(fh, "start /MIN /HIGH set TEMP="+c("tmpdir")+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")+" ^& ")
             fput(fh, paralleldir+`" /e /q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do"^&exit"')
         }
         
@@ -1693,6 +1705,7 @@ void parallel_sandbox(
         3: Updates the status of a sandbox file
         4:
         5: Retrieves a parallelid as a scalar
+        6: Retrieves a list of parallelids that have a sandboxfile
         */
     |string scalar pll_id,
     pointer(scalar) scalar result
@@ -1808,6 +1821,16 @@ void parallel_sandbox(
         st_local("parallelid", pll_id)
         
         return
+    }
+    
+    if (action == 6)
+    {
+        sbids = dir(tmpdir,"files","__pll*sandbox");
+        for(i=1;i<=length(sbids);i++)
+            sbids[i] = regexr(regexr(sbids[i],"^__pll",""),"sandbox$","")
+            
+        /* Assigning the value */
+        (*result) = sbfnames
     }
     
 }

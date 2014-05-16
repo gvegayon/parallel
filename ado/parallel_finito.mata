@@ -66,7 +66,7 @@ real scalar parallel_finito(
 	/* If there are as many errors as clusters, then exit */
 	if (suberrors == nclusters) return(suberrors)
 	
-	string scalar logfilename
+	string scalar logfilename, tmpdirname
 
 	while(length(pendingcl)>0)
 	{
@@ -106,6 +106,7 @@ real scalar parallel_finito(
 				/* Copying log file */
 				logfilename = sprintf("%s__pll%s_do%04.0f.log", (c("os") == "Windows" ? "" : "/"), parallelid, i)
 				stata(sprintf(`"cap copy __pll%s_do%04.0f.log "\`c(tmpdir)'%s", replace"', parallelid, i, logfilename))
+				unlink(pwd()+logfilename)
 
 				in_fh = fopen(fname, "r", 1)
 				if ((errornum=strtoreal(fget(in_fh))))
@@ -117,6 +118,11 @@ real scalar parallel_finito(
 				}
 				else display(sprintf("{it:cluster %04.0f} {text:has exited without error...}", i))
 				fclose(in_fh)
+
+				/* Checking tmpdir */
+				tmpdirname = sprintf("%s"+ (c("os")=="Windows" ? "" : "/") + "__pll%s_tmpdir%04.0f", c("tmpdir"),parallelid,i)
+				parallel_recursively_rm(parallelid,tmpdirname,1)
+				rmdir(tmpdirname)
 				
 				/* Taking the finished cluster out of the list */
 				pendingcl = select(pendingcl, pendingcl :!= i)
@@ -136,7 +142,7 @@ real scalar parallel_finito(
 	
 	real scalar linesize
 	linesize = c("linesize") > 80 ? 80 : c("linesize")
-	display(sprintf("{hline %g}{break}{text:Enter -{stata parallel seelog 1:parallel seelog #}- to checkout logfiles.}{break}{hline %g}", linesize, linesize))
+	display(sprintf("{hline %g}{break}{text:Enter -{stata parallel seelog 1, e(%s):parallel seelog #}- to checkout logfiles.}{break}{hline %g}", linesize, parallelid, linesize))
 	
 	return(suberrors)
 	

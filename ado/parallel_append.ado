@@ -96,24 +96,17 @@ program def parallel_append
 	
 	local ng = ceil(`size')
 	
+	di "{result:The files will be processed in the following order:}"
 	forval i=1/`ng' {
-		di "{result:The files will be processed in the following order:}"
 		di " " as result %03.0f `i' as text " `group`i''"
 	}
 	
 	/* Getting a common id for the files */
 	mata: parallel_sandbox(5)
+	local parallelid0 = "`parallelid'"
 	local tmpid = "__pll`parallelid'_append"
 	mkdir `tmpid'
-	
-	/*local err = 1
-	while (`err') {
-		mata: (void) parallel_randomid(10,"",1,1,1)
-		local tmpid = "__pll`r(id1)'_append"
-		cap mkdir `tmpid'	
-		local err = _rc
-	}*/
-	
+		
 	local nsave = 0
 	forval i=1/`ng' {
 		
@@ -144,11 +137,14 @@ program def parallel_append
 		file close fh
 
 		qui parallel setclusters `--j', s(`olddir') f
+
+		mata: parallel_sandbox(5)
+		local parallelid`i' = "`parallelid'"
 		parallel do `f', `options' nodata setparallelid(`parallelid')
 
 		rm `f'
 	}
-	
+
 	qui clear
 	
 	/* Appending all the results */
@@ -174,11 +170,12 @@ program def parallel_append
 	}
 	
 	/* Removing the tmp dir and free id */
-	cap rmdir `tmpid'
-	mata: parallel_sandbox(2, "`parallelid'")
-	qui parallel clean, e("`parallelid'")
+	forval i = 0/`ng' {
+		mata: parallel_sandbox(2, "`parallelid`i''")
+		qui parallel clean, e(`parallelid`i'')
+	}
 
-	if (`"`err'"'!="0") di as result "{it:Warning:The following files could't be found}" _newline as text `"`=regexr(`"`err'"',"^[0]","")'"'
+	if (`"`err'"'!="") di as result "{it:Warning:The following files could't be found}" _newline as text `"`=regexr(`"`err'"',"^[0]","")'"'
 
 	qui parallel setclusters `oldclusters', s(`olddir') f
 	

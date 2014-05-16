@@ -77,16 +77,18 @@ end
 
 /* Checks a logfile */
 program def parallel_seelog
-	args pll_instance
+	syntax [anything(name=pll_instance)] [, Event(string)] 
+
+	if ("`event'"=="") local event = "$LAST_PLL_ID"
 	
-	if ("$LAST_PLL_ID"!=".") {
+	if ("`event'"!=".") {
 		/* By default uses 1 */
 		if ("`pll_instance'" == "") local pll_instance 1
 
 		local pll_instance : di %04.0f `pll_instance'
 
 		/* Does de file exists */
-		local logname = "__pll$LAST_PLL_ID`'_do`pll_instance'.log"
+		local logname = "__pll`event'_do`pll_instance'.log"
 
 		if (c(os) == "Windows") local logname = "`c(tmpdir)'`logname'"
 		else local logname = "`c(tmpdir)'/`logname'"
@@ -94,7 +96,7 @@ program def parallel_seelog
 		/* If the logfile does not exists, do nothing*/
 		cap confirm file "`logname'"
 		if (_rc) {
-			di as result "No logfile for instance -`pll_instance'- of parallel process -$LAST_PLL_ID`'- found"
+			di as result "No logfile for instance -`pll_instance'- of parallel process -`event'- found"
 			exit
 		}
 
@@ -317,6 +319,7 @@ program def parallel_do, rclass
 	if ("`setparallelid'" == "") {
 		mata: parallel_sandbox(2, "`parallelid'")
 		if (!`keep' & !`keeplast') parallel_clean, e("`parallelid'")
+		di "ENTREEE {hline}"
 	}
 	
 	timer off 97

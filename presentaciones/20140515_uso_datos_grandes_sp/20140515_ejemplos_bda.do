@@ -1,3 +1,6 @@
+cd ~/parallel/ado
+do compile
+
 clear all
 set more off
 set trace off
@@ -27,6 +30,10 @@ clear
 // EJEMPLO PARALLEL APPEND
 //////////////////////////////////////////////////////////////////////
 /* Ejemplo BDA 1 */
+set trace on
+parallel append 2013_01/mcci 2013_02/mcci 2013_03/mcci, ///
+	do(collapse (mean) monto_pe, by(perdev) fast) ///
+	if(inlist(cod_mov, 11001, 11010))
 
 
 /* Ejemplo BDA 2*/
@@ -42,7 +49,7 @@ end
 
 /* Aplicando programa */
 parallel append, do(miprograma) programs(miprograma) ///
-	e("%g_%02.0f/mcci.dta, 2010/2013, 1 6") if(inlist(cod_mov, 11001, 11010))
+	e("%g_%02.0f/mcci.dta, 2010/2013, 1 6 12") if(inlist(cod_mov, 11001, 11010))
 
 summ
 d

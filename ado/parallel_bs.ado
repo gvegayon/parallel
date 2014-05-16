@@ -43,15 +43,16 @@ program def parallel_bootstrap, rclass
 	}
 
 	/* Saving the tmpfile */
-	m st_local("simul",parallel_randomid(10, "datetime", 1, 1, 1))
-	local tmpdta = "__pll`simul'_bsdta.dta"
+	mata: parallel_sandbox(5)
+//	m st_local("simul",parallel_randomid(10, "datetime", 1, 1, 1))
+	local tmpdta = "__pll`parallelid'_bs_dta.dta"
 	if (`"`saving'"' == "") {
-		if (c(os)=="Windows") local saving = `"`c(tmpdir)'__pll`simul'_outdta.dta"'
-		else local saving = `"`c(tmpdir)'/__pll`simul'_outdta.dta"'
+		if (c(os)=="Windows") local saving = `"`c(tmpdir)'__pll`parallelid'_bs_outdta.dta"'
+		else local saving = `"`c(tmpdir)'/__pll`parallelid'_bs_outdta.dta"'
 		local save = 0
 	}
 	else local save = 1
-	local simul = `"__pll`simul'_simul.do"'
+	local simul = `"__pll`parallelid'_bs_simul.do"'
 	
 	qui save `tmpdta'
 
@@ -61,26 +62,26 @@ program def parallel_bootstrap, rclass
 	file write fh "if (\`pll_instance'==\$PLL_CLUSTERS) local reps = `lsize'" _n
 	file write fh "else local reps = `csize'" _n
 	file write fh `"local pll_instance : di %04.0f \`pll_instance'"' _n
-	file write fh `"bs `express', sav(__pll\`pll_id'_eststore\`pll_instance', replace) `options' rep(\`reps'): `model' `argopt'"' _n
+	file write fh `"bs `express', sav(__pll\`pll_id'_bs_eststore\`pll_instance', replace) `options' rep(\`reps'): `model' `argopt'"' _n
 	file close fh 
 
 	/* Running parallel */
-	cap noi parallel do `simul', keep nodata `programs' `mata' `noglobals' `seeds' ///
-		`randtype' timeout(`timeout') processors(`processors')
+	cap noi parallel do `simul', nodata `programs' `mata' `noglobals' `seeds' ///
+		`randtype' timeout(`timeout') processors(`processors') setparallelid(`parallelid')
 	
 	if (_rc) {
-		rm `"`simul'"'
-		rm `"`tmpdta'"'
+		cap rm `"`simul'"'
+		cap rm `"`tmpdta'"'
 		qui parallel clean, e($LAST_PLL_ID) force
-		
+		mata: parallel_sandbox(2, "`parallelid'")
 		exit _rc
 	}
 
 	if (r(pll_errs)) {
-		rm `"`simul'"'
-		rm `"`tmpdta'"'
+		cap rm `"`simul'"'
+		cap rm `"`tmpdta'"'
 		qui parallel clean, e($LAST_PLL_ID) force
-
+		mata: parallel_sandbox(2,"`parallelid'")
 		exit 1
 	}
 
@@ -90,7 +91,7 @@ program def parallel_bootstrap, rclass
 	forval i=1/$PLL_CLUSTERS {
 		quietly {
 			local pll_instance : di %04.0f `i'
-			use `"__pll$LAST_PLL_ID`'_eststore`pll_instance'"', clear
+			use `"__pll$LAST_PLL_ID`'_bs_eststore`pll_instance'"', clear
 			
 			if ((`=`i'-1')) append using `saving'
 			save `saving', replace
@@ -108,12 +109,10 @@ program def parallel_bootstrap, rclass
 	}
 	
 	/* Cleaning up */
-	parallel clean // , e(`pll_id')
+	parallel clean, e($LAST_PLL_ID)
+	mata: parallel_sandbox(2, "`parallelid'")
 	
 	restore
-	
-	rm `"`simul'"'
-	rm `"`tmpdta'"'
 	
 	bstat using `saving', title(parallel bootstrapping)
 	

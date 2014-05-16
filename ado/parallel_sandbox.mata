@@ -16,6 +16,7 @@ void parallel_sandbox(
 		3: Updates the status of a sandbox file
 		4:
 		5: Retrieves a parallelid as a scalar
+		6: Retrieves a list of parallelids that have a sandboxfile
 		*/
 	|string scalar pll_id,
 	pointer(scalar) scalar result
@@ -131,6 +132,16 @@ void parallel_sandbox(
 		st_local("parallelid", pll_id)
 		
 		return
+	}
+	
+	if (action == 6)
+	{
+		sbids = dir(tmpdir,"files","__pll*sandbox");
+		for(i=1;i<=length(sbids);i++)
+			sbids[i] = regexr(regexr(sbids[i],"^__pll",""),"sandbox$","")
+			
+		/* Assigning the value */
+		(*result) = sbfnames
 	}
 	
 }

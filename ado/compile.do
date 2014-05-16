@@ -35,6 +35,7 @@ run parallel_break.mata
 run parallel_sandbox.mata
 run parallel_expand_expr.mata
 run parallel_eststore.mata
+run parallel_recursively_rm.mata
 
 rm lparallel.mlib
 mata: mata mlib create lparallel, replace
