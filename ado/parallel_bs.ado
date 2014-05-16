@@ -107,16 +107,16 @@ program def parallel_bootstrap, rclass
 	foreach s of local scalars {
 		local `s' = r(`s')
 	}
+		
+	restore
+	
+	bstat using `saving', title(parallel bootstrapping)
 	
 	/* Cleaning up */
 	parallel clean, e($LAST_PLL_ID)
 	mata: parallel_sandbox(2, "`parallelid'")
 	
-	restore
-	
-	bstat using `saving', title(parallel bootstrapping)
-	
-	if (!`save') rm `"`saving'"'
+//	if (!`save') rm `"`saving'"'
 	
 	parallel_bs_ereturn
 	

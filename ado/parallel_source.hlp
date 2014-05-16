@@ -1655,7 +1655,7 @@ real scalar parallel_run(
         
         // Writing file
         for(i=1;i<=nclusters;i++) {
-            mkdir(c("tmpdir")+"__pll"+parallelid+strofreal(i, "%04.0f"),1)
+            mkdir(c("tmpdir")+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1)
             fwrite(fh, "start /MIN /HIGH set TEMP="+c("tmpdir")+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")+" ^& ")
             fput(fh, paralleldir+`" /e /q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do"^&exit"')
         }

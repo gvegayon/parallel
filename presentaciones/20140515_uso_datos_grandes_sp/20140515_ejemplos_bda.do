@@ -12,8 +12,8 @@ log using logbda.txt, replace text
 global bda ~/../shared_bd/bases/bda/bases_stata
 cd $bda
 
-parallel clean, all
-parallel setclusters 8, f
+parallel clean, all force
+parallel setclusters 2, f
 
 //////////////////////////////////////////////////////////////////////
 // EJEMPLO PARALLEL BY
