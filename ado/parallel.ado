@@ -1,4 +1,4 @@
-*! version 1.14.5  11may2014
+*! version 1.14.5.19  19may2014
 *! PARALLEL: Stata module for parallel computing
 *! by George G. Vega (g.vegayon at gmail)
 /*
@@ -37,7 +37,7 @@ program def parallel
     version 10.0
 
 	// Checks wether if is parallel prefix or not
-	if  (regexm(`"`0'"', "^(do|clean|setclusters|break|version|append|seelog)")) { /* If not prefix */
+	if  (regexm(`"`0'"', "^(do|clean|setclusters|break|version|append|printlog|viewlog)")) { /* If not prefix */
 		parallel_`0'
 	}
 	else if (regexm(`"`0'"', "^bs[,]?[\s ]?")) {              /* Bootstrap */
@@ -75,9 +75,19 @@ program def parallel_version, rclass
 	return local pll_vers = "1.14.5"
 end
 
-/* Checks a logfile */
-program def parallel_seelog
-	syntax [anything(name=pll_instance)] [, Event(string)] 
+/* Take a look to logfiles */
+program def parallel_printlog
+	syntax [anything(name=pll_instance)] , [Event(string)] 
+	parallel_checklog `pll_instance', e(`event') action(print)
+end
+
+program def parallel_viewlog
+	syntax [anything(name=pll_instance)] , [Event(string)] 
+	parallel_checklog `pll_instance', e(`event') action(view)
+end
+
+program def parallel_checklog
+	syntax [anything(name=pll_instance)] , [Event(string)] action(string)
 
 	if ("`event'"=="") local event = "$LAST_PLL_ID"
 	
@@ -101,19 +111,24 @@ program def parallel_seelog
 		}
 
 		/* Showing the log in screen */
-		di as result "{hline 80}"
-		di as result %~80s "beginning of file -`logname'-"
-		di as result "{hline 80}"
-		type `"`logname'"'
-		di as result "{hline 80}"
-		di as result %~80s "end of file -`logname'-"
-		di as result "{hline 80}"
+		if ("`action'"=="print") {
+			di as result "{hline 80}"
+			di as result %~80s "beginning of file -`logname'-"
+			di as result "{hline 80}"
+			type `"`logname'"'
+			di as result "{hline 80}"
+			di as result %~80s "end of file -`logname'-"
+			di as result "{hline 80}"
+		}
+		else view `"`logname'"'
 	}
 	else {
 		di as error "It seems that you haven't use -parallel- yet."
 		exit 601
 	}
+
 end
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Splits the dataset into clusters
@@ -245,7 +260,11 @@ program def parallel_do, rclass
 	/* Creates a unique ID for the process and secures it */
 	if ("`setparallelid'"=="") mata: parallel_sandbox(5)
 	else local parallelid = "`setparallelid'"
-		
+
+	global LAST_PLL_ID = "`parallelid'"
+	global LAST_PLL_N = $PLL_CLUSTERS
+	global LAST_PLL_DIR = "`pll_dir'"		
+
 	/* Generates database clusters */
 	if (!`nodata') parallel_spliter `by' , parallelid(`parallelid') sorting(`sorting') force(`force') keepusing(`keepusing')
 	
@@ -319,7 +338,6 @@ program def parallel_do, rclass
 	if ("`setparallelid'" == "") {
 		mata: parallel_sandbox(2, "`parallelid'")
 		if (!`keep' & !`keeplast') parallel_clean, e("`parallelid'")
-		di "ENTREEE {hline}"
 	}
 	
 	timer off 97
@@ -336,10 +354,7 @@ program def parallel_do, rclass
 	return scalar pll_t_fini = `pll_t_fini'
 	return local pll_id = "`parallelid'"
 	return scalar pll_n = $PLL_CLUSTERS
-	
-	global LAST_PLL_ID = "`parallelid'"
-	global LAST_PLL_N = $PLL_CLUSTERS
-	global LAST_PLL_DIR = "`pll_dir'"
+
 	
 	qui cd "`initialdir'"
 end

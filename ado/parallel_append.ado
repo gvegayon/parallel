@@ -130,7 +130,7 @@ program def parallel_append
 			file write fh `"`do'"' _newline
 		}
 		
-		file write fh `"gen dta_souorce = "\`filename'""' _newline
+		file write fh `"gen dta_source = "\`filename'""' _newline
 		file write fh "compress" _newline
 		file write fh "save `tmpid'/`tmpid'\`tmpn', replace" _newline
 		
@@ -140,7 +140,34 @@ program def parallel_append
 
 		mata: parallel_sandbox(5)
 		local parallelid`i' = "`parallelid'"
-		parallel do `f', `options' nodata setparallelid(`parallelid')
+		cap noi parallel do `f', `options' nodata setparallelid(`parallelid')
+
+		/* Checking if an error has occurred */
+		if (_rc) {
+			/*
+			mata: parallel_sandbox(2, "$LAST_PLL_ID")
+			qui parallel clean, e($LAST_PLL_ID)
+			forval j=0/`i' {
+				mata: parallel_sandbox(2, "`parallelid`j''")
+				qui parallel clean, e(`parallelid`j'')
+			}
+			qui parallel setclusters `oldclusters', s(`olddir') f
+			exit 1
+			*/
+			di "{result:Warning:}{text: Group -`g'- couldn't be processed}"
+			
+		}
+		else if (r(pll_errs)) {
+			/*
+			forval j=0/`i' {
+				mata: parallel_sandbox(2, "`parallelid`j''")
+				qui parallel clean, e(`parallelid`j'')
+			}
+			qui parallel setclusters `oldclusters', s(`olddir') f
+			exit 1
+			*/
+			di "{result:Warning:}{text: Some datasets in group -`g'- couldn't be processed}"
+		}
 
 		rm `f'
 	}
@@ -162,10 +189,10 @@ program def parallel_append
 	/* Labeling */
 	quietly {
 		if (c(N)) {
-			encode dta_souorce, gen(dta_souorce2)
-			drop dta_souorce
-			ren dta_souorce2 dta_souorce 
-			lab var dta_souorce "Original dataset of the observation"
+			encode dta_source, gen(dta_source2)
+			drop dta_source
+			ren dta_source2 dta_source 
+			lab var dta_source "Original dataset of the observation"
 		}
 	}
 	

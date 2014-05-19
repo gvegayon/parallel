@@ -26,14 +26,11 @@ void parallel_export_programs(
 	// Writing log
 	oldsettrace =c("trace")
 	if (oldsettrace == "on") stata("set trace off")
-	stata("cap log close "+inname)
-	stata("log using "+inname+".txt, text replace name(log"+inname+")")
+	stata("log using "+inname+", text replace name(plllog"+st_local("parallelid")+")")
 
 	stata("noisily program list "+programlist)
-	stata("log close log"+inname)
+	stata("log close plllog"+st_local("parallelid"))
 	stata("set trace "+oldsettrace)
-	
-	inname = inname+".txt"
 	
 	// Opening files
 	in_fh =_fopen(inname, "r")
@@ -50,10 +47,11 @@ void parallel_export_programs(
 	// REGEX Patterns
 	string scalar space
 	space = "[\s ]*"+sprintf("\t")+"*"
-	pathead = "^"+space+"[^0-9][a-zA-Z_]+(,"+space+"[a-zA-Z]*)?[:]"+space+"$"
+	pathead = "^"+space+"[^0-9][a-zA-Z_]+([a-zA-Z0-9_]*)(,"+space+"[a-zA-Z]*)?[:]"+space+"$"
 	patnext = "^[>] "
 	
 	while ((line = fget(in_fh))!=J(0,0,"")) {
+		
 		// Enters if it is a start of a program
 		if(regexm(line, pathead)) {
 			// Writes the header

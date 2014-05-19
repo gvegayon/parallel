@@ -1,4 +1,4 @@
-*! parallel_bs vers 0.14.5 12may2014
+*! parallel_bs vers 0.14.5.19 19may2014
 *! auth George G. Vega
 
 program def parallel_bs, eclass
@@ -44,7 +44,7 @@ program def parallel_bootstrap, rclass
 
 	/* Saving the tmpfile */
 	mata: parallel_sandbox(5)
-//	m st_local("simul",parallel_randomid(10, "datetime", 1, 1, 1))
+
 	local tmpdta = "__pll`parallelid'_bs_dta.dta"
 	if (`"`saving'"' == "") {
 		if (c(os)=="Windows") local saving = `"`c(tmpdir)'__pll`parallelid'_bs_outdta.dta"'
@@ -68,18 +68,14 @@ program def parallel_bootstrap, rclass
 	/* Running parallel */
 	cap noi parallel do `simul', nodata `programs' `mata' `noglobals' `seeds' ///
 		`randtype' timeout(`timeout') processors(`processors') setparallelid(`parallelid')
-	
+
 	if (_rc) {
-		cap rm `"`simul'"'
-		cap rm `"`tmpdta'"'
 		qui parallel clean, e($LAST_PLL_ID) force
 		mata: parallel_sandbox(2, "`parallelid'")
 		exit _rc
 	}
 
 	if (r(pll_errs)) {
-		cap rm `"`simul'"'
-		cap rm `"`tmpdta'"'
 		qui parallel clean, e($LAST_PLL_ID) force
 		mata: parallel_sandbox(2,"`parallelid'")
 		exit 1
@@ -110,13 +106,12 @@ program def parallel_bootstrap, rclass
 		
 	restore
 	
+	/* Returning bs data */
 	bstat using `saving', title(parallel bootstrapping)
 	
 	/* Cleaning up */
 	parallel clean, e($LAST_PLL_ID)
 	mata: parallel_sandbox(2, "`parallelid'")
-	
-//	if (!`save') rm `"`saving'"'
 	
 	parallel_bs_ereturn
 	

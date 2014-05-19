@@ -112,8 +112,8 @@ real scalar parallel_finito(
 				if ((errornum=strtoreal(fget(in_fh))))
 				{
 					msg = fget(in_fh)
-					if (msg == J(0,0,"")) display(sprintf(`"{it:cluster %04.0f} {text:Exited with error -%g- ({stata view "\`c("tmpdir")'%s":view log})...}"', i, errornum, logfilename))
-					else display(sprintf(`"{it:cluster %04.0f} {text:Exited with error -%g- %s ({stata view "\`c(tmpdir)'%s":view log})...}"', i, errornum, msg, logfilename))
+					if (msg == J(0,0,"")) display(sprintf(`"{it:cluster %04.0f} {text:Exited with error -%g- ({stata parallel viewlog %g, e(%s):view log})...}"', i, errornum, i, parallelid))
+					else display(sprintf(`"{it:cluster %04.0f} {text:Exited with error -%g- %s ({stata parallel viewlog %g, e(%s):view log})...}"', i, errornum, msg, i, parallelid))
 					suberrors++
 				}
 				else display(sprintf("{it:cluster %04.0f} {text:has exited without error...}", i))
@@ -142,7 +142,7 @@ real scalar parallel_finito(
 	
 	real scalar linesize
 	linesize = c("linesize") > 80 ? 80 : c("linesize")
-	display(sprintf("{hline %g}{break}{text:Enter -{stata parallel seelog 1, e(%s):parallel seelog #}- to checkout logfiles.}{break}{hline %g}", linesize, parallelid, linesize))
+	display(sprintf("{hline %g}{break}{text:Enter -{stata parallel printlog 1, e(%s):parallel printlog #}- to checkout logfiles.}{break}{hline %g}", linesize, parallelid, linesize))
 	
 	return(suberrors)
 	

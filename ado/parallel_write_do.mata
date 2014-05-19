@@ -82,7 +82,7 @@ real scalar parallel_write_do(
 	if (!c("MP") & processors != 0 & processors != J(1,1,.)) display("{it:{result:Warning:} processors option ignored...}")
 	else if (processors == J(1,1,.) | processors == 0) processors = 1
 
-	if (progsave) parallel_export_programs(folder+"__pll"+parallelid+"_prog.do", programs)
+	if (progsave) parallel_export_programs(folder+"__pll"+parallelid+"_prog.do", programs, folder+"__pll"+parallelid+"_prog.log")
 	if (getmacros) parallel_export_globals(folder+"__pll"+parallelid+"_glob.do")
 	
 	for(i=1;i<=nclusters;i++) 

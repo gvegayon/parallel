@@ -952,14 +952,11 @@ void parallel_export_programs(
     // Writing log
     oldsettrace =c("trace")
     if (oldsettrace == "on") stata("set trace off")
-    stata("cap log close "+inname)
-    stata("log using "+inname+".txt, text replace name(log"+inname+")")
+    stata("log using "+inname+", text replace name(plllog"+st_local("parallelid")+")")
 
     stata("noisily program list "+programlist)
-    stata("log close log"+inname)
+    stata("log close plllog"+st_local("parallelid"))
     stata("set trace "+oldsettrace)
-    
-    inname = inname+".txt"
     
     // Opening files
     in_fh =_fopen(inname, "r")
@@ -976,10 +973,11 @@ void parallel_export_programs(
     // REGEX Patterns
     string scalar space
     space = "[\s ]*"+sprintf("\t")+"*"
-    pathead = "^"+space+"[^0-9][a-zA-Z_]+(,"+space+"[a-zA-Z]*)?[:]"+space+"$"
+    pathead = "^"+space+"[^0-9][a-zA-Z_]+([a-zA-Z0-9_]*)(,"+space+"[a-zA-Z]*)?[:]"+space+"$"
     patnext = "^[>] "
     
     while ((line = fget(in_fh))!=J(0,0,"")) {
+        
         // Enters if it is a start of a program
         if(regexm(line, pathead)) {
             // Writes the header
@@ -1140,8 +1138,8 @@ real scalar parallel_finito(
                 if ((errornum=strtoreal(fget(in_fh))))
                 {
                     msg = fget(in_fh)
-                    if (msg == J(0,0,"")) display(sprintf(`"{it:cluster %04.0f} {text:Exited with error -%g- ({stata view "\`c("tmpdir")'%s":view log})...}"', i, errornum, logfilename))
-                    else display(sprintf(`"{it:cluster %04.0f} {text:Exited with error -%g- %s ({stata view "\`c(tmpdir)'%s":view log})...}"', i, errornum, msg, logfilename))
+                    if (msg == J(0,0,"")) display(sprintf(`"{it:cluster %04.0f} {text:Exited with error -%g- ({stata parallel viewlog %g, e(%s):view log})...}"', i, errornum, i, parallelid))
+                    else display(sprintf(`"{it:cluster %04.0f} {text:Exited with error -%g- %s ({stata parallel viewlog %g, e(%s):view log})...}"', i, errornum, msg, i, parallelid))
                     suberrors++
                 }
                 else display(sprintf("{it:cluster %04.0f} {text:has exited without error...}", i))
@@ -1170,7 +1168,7 @@ real scalar parallel_finito(
     
     real scalar linesize
     linesize = c("linesize") > 80 ? 80 : c("linesize")
-    display(sprintf("{hline %g}{break}{text:Enter -{stata parallel seelog 1, e(%s):parallel seelog #}- to checkout logfiles.}{break}{hline %g}", linesize, parallelid, linesize))
+    display(sprintf("{hline %g}{break}{text:Enter -{stata parallel printlog 1, e(%s):parallel printlog #}- to checkout logfiles.}{break}{hline %g}", linesize, parallelid, linesize))
     
     return(suberrors)
     
@@ -2109,7 +2107,7 @@ real scalar parallel_write_do(
     if (!c("MP") & processors != 0 & processors != J(1,1,.)) display("{it:{result:Warning:} processors option ignored...}")
     else if (processors == J(1,1,.) | processors == 0) processors = 1
 
-    if (progsave) parallel_export_programs(folder+"__pll"+parallelid+"_prog.do", programs)
+    if (progsave) parallel_export_programs(folder+"__pll"+parallelid+"_prog.do", programs, folder+"__pll"+parallelid+"_prog.log")
     if (getmacros) parallel_export_globals(folder+"__pll"+parallelid+"_glob.do")
     
     for(i=1;i<=nclusters;i++) 
