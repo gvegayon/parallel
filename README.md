@@ -27,7 +27,7 @@ For accessing the lastest version of parallel (dev)
 
 Once installed it is suggested to restart Stata.
 
-Auhtor
+Author
 ======
 George G. Vega
 g dot vegayon (at) gmail dot com
