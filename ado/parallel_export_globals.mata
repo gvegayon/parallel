@@ -11,33 +11,50 @@ mata:
 */
 void parallel_export_globals(|string scalar outname, real scalar ou_fh) {
 	
-    real   scalar isnewfile, glob_ind
-    string scalar macname, macvalu, FORBIDDEN, line
-	string colvector global_names
+	real   scalar forbidden, isnewfile
+	string scalar logname, macname, macvalu, typeofmacro, FORBIDDEN
 
-    if (outname == J(1,1,"")) outname = parallel_randomid(10,"",1,1,1)
-    
-    if (ou_fh == J(1,1,.)) {
-        if (fileexists(outname)) unlink(outname)
-        ou_fh = fopen(outname, "w", 1)
-        isnewfile = 1
-    }
-    else isnewfile = 0
+	if (outname == J(1,1,"")) outname = parallel_randomid(10,"",1,1,1)
+	
+	if (ou_fh == J(1,1,.)) {
+		if (fileexists(outname)) unlink(outname)
+		ou_fh = fopen(outname, "w", 1)
+		isnewfile = 1
+	}
+	else isnewfile = 0
+	
+	// Writing log
+	logname = parallel_randomid(10,"",1,1,1)
 
-    // Step 1
-    FORBIDDEN = "^(S[_]FNDATE|S[_]FN|F[0-9]|S[_]level|S[_]ADO|S[_]FLAVOR|S[_]OS|S[_]MACH)([ ]*.*$)"
+	// Step 1
+	FORBIDDEN = "^(S\_FNDATE|S\_FN|F[0-9]|S\_level|S\_ADO|S\_FLAVOR|S\_OS|S\_MACH)"
+/* local x : all globals 	
+this should work in a cleaner way
+*/
+	stata("local "+logname+" : all globals")
 
-	global_names = st_dir("global", "macro", "*")
-	for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++){
-		macname = global_names[glob_ind,1]
-		if (!regexm(macname, FORBIDDEN)){
-			macvalu = st_global(macname)
-            line = "global "+macname+" "+macvalu
-            fput(ou_fh, line)
+	string rowvector globals
+	real scalar i
+	globals = tokens(st_local(logname))
+	st_local(logname, "")
+
+	if (length(globals))
+	{
+		for(i=1;i<=length(globals);i++)
+		{
+			macname = globals[i]
+			// Check wheater it is a macro or not (and not system macros)
+			if (!regexm(macname, FORBIDDEN))
+			{		
+				macvalu = st_macroexpand("$"+macname)
+				typeofmacro = "global "
+				macname = typeofmacro+macname+" "+macvalu
+				fput(ou_fh, macname)
+
+			}
 		}
 	}
-
-    
-    if (isnewfile) fclose(ou_fh)
+	
+	if (isnewfile) fclose(ou_fh)
 }
 end
