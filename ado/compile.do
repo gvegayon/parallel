@@ -11,6 +11,7 @@ set matastrict on
 vers 10.0
 
 /* Build documentation */
+do ../../devtools/dt_moxygen.mata
 mata:
 archmata = dir(".","files","*.mata")
 _sort(archmata,1)
@@ -54,9 +55,9 @@ foreach g in ayuda ados {
 checksum lparallel.mlib, save replace
 */
 
-cd ..
+*cd ..
 
-mata: dt_install_on_the_fly("parallel")
+*mata: dt_install_on_the_fly("parallel")
 
 
 

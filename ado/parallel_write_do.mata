@@ -97,6 +97,11 @@ real scalar parallel_write_do(
 		fput(output_fh, "clear")
 		if (c("MP")) fput(output_fh, "set processors "+strofreal(processors))
 		fput(output_fh, `"cd ""'+folder+`"""')
+		
+		//Copy over the adopath & matalibs order
+		fput(output_fh, "global S_ADO = `"+`"""'+st_global("S_ADO")+`"""'+"'")
+		fput(output_fh, "mata: mata mlib index")
+		fput(output_fh, `"mata: mata set matalibs ""'+st_global("c(matalibs)")+`"""')
 			
 		fput(output_fh, "set seed "+seeds[i])
 
