@@ -1,0 +1,4 @@
+v 3
+d Parallel Stata module by George Vega (forked by Brian Quistorff)
+
+p parallel Stata module for parallel computing
