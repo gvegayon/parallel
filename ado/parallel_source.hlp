@@ -1390,6 +1390,51 @@ end
 *! {c BLC}{dup 78:{c -}}{c BRC}
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
+*! {c |} {bf:Beginning of file -parallel_parsefor.mata-}{col 83}{c |}
+*! {c BLC}{dup 78:{c -}}{c BRC}
+set trace off
+mata
+mata clear
+
+{smcl}
+*! {marker parallel_parsefor}{bf:function -{it:parallel_parsefor}- in file -{it:parallel_parsefor.mata}-}
+*! {back:{it:(previous page)}}
+*!{dup 78:{c -}}{asis}
+string scalar function parallel_parsefor(string scalar expr) 
+{
+    string scalar fortype, itervar
+    expr = st_local(expr)
+    printf(expr)
+    
+    /* Parsing the type of loop */
+    if (regexm(expr,"^(forval|foreach)[ ]([a-zA-Z0-9_]+)"))
+    {
+        fortype = regexs(1)
+        itervar = regexs(2)
+    }
+    else return("")
+}
+end
+
+cap program drop parallel_for
+program def parallel_for
+    syntax anything(equalok)
+    mata: parallel_parsefor("anything")
+end
+
+
+// set trace on
+parallel_for i=1/1000 { \n ///
+        di x + \`i' \n ///
+    }
+    
+
+*! {smcl}
+*! {c TLC}{dup 78:{c -}}{c TRC}
+*! {c |} {bf:End of file -parallel_parsefor.mata-}{col 83}{c |}
+*! {c BLC}{dup 78:{c -}}{c BRC}
+*! {smcl}
+*! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:Beginning of file -parallel_randomid.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
 *! vers 1.14.5 06may2014
@@ -1636,7 +1681,7 @@ real scalar parallel_run(
         else {
             for(i=1;i<=nclusters;i++) {
                 mkdir(c("tmpdir")+"/__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
-                fput(fh, "export TMPDIR="+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
+                fput(fh, "export TMPDIR="+c("tmpdir")+"/__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f"))
                 fput(fh, paralleldir+`" -b -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
             }
         }

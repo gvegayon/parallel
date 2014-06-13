@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.14.5 11may2014}{...}
+{* *! version 1.14.6 13jun2014}{...}
 {cmd:help parallel}{right:also see:  {net "describe miparallel, from(http://fmwww.bc.edu/RePEc/bocode/m)":miparallel}}
 {hline}
 
@@ -13,26 +13,27 @@
 {p2colset 5 29 29 2}
 {p2col:{bf:{ul:Sections}}}{p_end}
 
-{p2col:1. {help parallel##syntax:Syntax}}Command syntax.{p_end}
-{p2col:2. {help parallel##description:Description}}Commands description.{p_end}
-{p2col:3. {help parallel##details:Details}}How does parellel works.{p_end}
-{p2col:4. {help parallel##append_how:Parallel Append}}Using -parallel append- syntax.{p_end}
-{p2col:5. {help parallel##caveates:Caveates}}Things to consider before unsing parallel.{p_end}
-{p2col:6. {help parallel##tech:Technical note}}Some details under the hood.{p_end}
-{p2col:7. {help parallel##examples:Examples}}Some examples using parallel{p_end}
+{p2col: 1. {help parallel##syntax:Syntax}}Command syntax.{p_end}
+{p2col: 2. {help parallel##description:Description}}Commands description.{p_end}
+{p2col: 3. {help parallel##details:Details}}How does parellel works.{p_end}
+{p2col: 4. {help parallel##append_how:Parallel Append}}Using -parallel append- syntax.{p_end}
+{p2col: 5. {help parallel##caveates:Caveates}}Things to consider before unsing parallel.{p_end}
+{p2col: 6. {help parallel##tech:Technical note}}Some details under the hood.{p_end}
+{p2col: 7. {help parallel##examples:Examples}}Some examples using parallel{p_end}
 
 {p2colset 5 29 29 2}
 {p2col:{bf:{ul:Available commands}}}{p_end}
 
-{p2col:1. {help parallel##setclusters:parallel setclusters}}Setting the number of clusters.{p_end}
-{p2col:2. {help parallel##do:parallel do}}Parallelizing a do-file.{p_end}
-{p2col:3. {help parallel##prefix:parallel : (prefix)}}Parallelizing a stata command (parallel prefix).{p_end}
-{p2col:4. {help parallel##bs:parallel bs}}Parallel bootstrapping.{p_end}
-{p2col:5. {help parallel##append:parallel append}}Multiple file processing and appending.{p_end}
-{p2col:6. {help parallel##clean:parallel clean}}Removing auziliary files.{p_end}
-{p2col:7. {help parallel##seelog:parallel seelog}}Printing clusters' logfiles on screen.{p_end}
-{p2col:8. {help parallel##version:parallel version}}Query parallel current version.{p_end}
-{p2col:9. {help parallel##break:parallel break}}Query if the mother process has requested to break.{p_end}
+{p2col: 1. {help parallel##setclusters:parallel setclusters}}Setting the number of clusters.{p_end}
+{p2col: 2. {help parallel##do:parallel do}}Parallelizing a do-file.{p_end}
+{p2col: 3. {help parallel##prefix:parallel : (prefix)}}Parallelizing a stata command (parallel prefix).{p_end}
+{p2col: 4. {help parallel##bs:parallel bs}}Parallel bootstrapping.{p_end}
+{p2col: 5. {help parallel##bs:parallel sim}}Parallel simulate.{p_end}
+{p2col: 6. {help parallel##append:parallel append}}Multiple file processing and appending.{p_end}
+{p2col: 7. {help parallel##clean:parallel clean}}Removing auziliary files.{p_end}
+{p2col: 8. {help parallel##seelog:parallel seelog}}Printing clusters' logfiles on screen.{p_end}
+{p2col: 9. {help parallel##version:parallel version}}Query parallel current version.{p_end}
+{p2col:10. {help parallel##break:parallel break}}Query if the mother process has requested to break.{p_end}
 
 
 {marker syntax}{...}
@@ -52,8 +53,8 @@
 {cmdab:parallel do}
 {it:{help filename}} [, {opt by}({it:{help varlist}}) {opt f:orce} {opt k:eep} {opt keepl:ast} {opt p:rograms}({it:{help namelist}}) {opt m:ata} {opt nog:lobal} {opt s:eeds}({it:{help numlist}}) {opt nod:ata}
  {opt r:andtype}({it:{help strings:datetime|random.org}}) 
- {opt t:imeout}({it:integer}) 
- {opt pr:ocessors}({it:integer})]
+ {opt t:imeout}({it:#}) 
+ {opt pr:ocessors}({it:#})]
 
 {col 5}{hline}{marker prefix}{...}
 {pstd}Parallelizing a stata command (parallel prefix)
@@ -61,8 +62,8 @@
 {p 8 17 2}
 {cmdab:parallel} [, {opt by}({it:{help varlist}}) {opt f:orce} {opt k:eep} {opt keepl:ast} {opt p:rograms}({it:{help namelist}}) {opt m:ata} {opt nog:lobal} {opt s:eeds}({it:{help numlist}}) {opt nod:ata} 
  {opt r:andtype}({it:{help strings:datetime|random.org}}) 
- {opt t:imeout}({it:integer}) 
- {opt pr:ocessors}({it:integer})
+ {opt t:imeout}({it:#}) 
+ {opt pr:ocessors}({it:#})
  {opt keepu:sing}({it:{help varlist}})]:
 {it:stata_cmd}
 
@@ -78,6 +79,18 @@
  {it:{help bs:bs_options}}
  ] [{cmd::} {it:command}]
 
+{col 5}{hline}{marker sim}{...}
+{pstd}Parallel simulate
+
+{p 8 17 2}
+{cmdab:parallel sim}
+, {opt r:eps}({it:#}) [ {opt exp:ression}({it:{help exp_list}}) {opt p:rograms}({it:{help namelist}}) {opt m:ata} {opt nog:lobal} {opt s:eeds}({it:{help numlist}})
+ {opt r:andtype}({it:{help strings:datetime|random.org}}) 
+ {opt t:imeout}({it:#}) 
+ {opt pr:ocessors}({it:#})
+ {it:{help simulate:sim_options}}
+ ] [{cmd::} {it:command}]
+
 {col 5}{hline}{marker append}{...}
 {pstd} Multiple file processing and appending
 
@@ -85,9 +98,9 @@
 {cmdab:parallel append}
  [{it:{help filename:file(s)}}] ,
  {opt d:o}({it:cmd|dofile}) [{opt in}({it:{help in}}) {opt if}({it:{help if}})
- {opt e:xpression}({it:expand expression (see details)}) {opt pr:ocessors}({it:integer})
+ {opt e:xpression}({it:expand expression (see details)}) {opt pr:ocessors}({it:#})
  {opt r:andtype}({it:{help strings:datetime|random.org}}) 
- {opt t:imeout}({it:integer})]
+ {opt t:imeout}({it:#})]
 
 {col 5}{hline}{marker clean}{...}
 {pstd}Removing auxiliary files
@@ -157,6 +170,10 @@ or random.org API -random.org- (please read the Description section).{p_end}
 {synopt:{opt exp:ression}}An {help exp_list} to be passed to the {help bootstrap} command.{p_end}
 {synopt:{opt bs_options}} Further options to be passed to the {help bootstrap} command.
 
+{syntab:Parallel simulate}
+{synopt:{opt exp:ression}}An {help exp_list} to be passed to the {help simulate} command.{p_end}
+{synopt:{opt sim_options}} Further options to be passed to the {help simulate} command.
+
 {syntab:Multiple file processing and appending}
 {synopt:{opt d:o}}Stata cmd or dofile.{p_end}
 {synopt:{opt e:xpression}}String. Expression representing file names in the form of
@@ -194,7 +211,7 @@ in description).
 {p_end}
 
 {pstd}
-{cmd:parallel do} is the equivalent to {cmd:do}. By using this syntax, the
+{cmd:parallel do} is the equivalent (wrapper) to {cmd:do}. By using this syntax, the
 loaded dataset will be splitted in the number of clusters specified by {cmd:parallel setclusters}
 and the {mansection U 16Do-files:do-file} will be executed independently over
 each and every one of the data clusters. After all the parallel-instances stops, the datasets will be appended.
@@ -208,6 +225,15 @@ stops, the datasets will be appended.
 {p_end}
 
 {pstd}
+{cmd:parallel bs} and {cmd:parallel sim} are parallel wrappers for the commands
+-{help bootstrap}- and -{help simulate}-. Specially suited for these algorithms,
+{cmd:parallel} allows conducting embarrassingly parallel computing. In terms of
+syntax, besides cmd names, the only difference that these two commands have with
+their serial versions is how are {help exp_list:expressions} passed (please refer
+to the {help parallel##examples:examples} section for this).
+{p_end}
+
+{pstd}
 Every time that {cmd:parallel} runs several auxiliary files are generated which,
 after finishing, are automatically deleted. In the case that the user sets {opt k:eep}
 or {opt keepl:last} the auxiliar files are kept, thus the syntax {cmd:parallel clean}
@@ -215,7 +241,7 @@ becomes handy. With {cmd:parallel clean} the user can remove the last generated
 auxiliar files (default option), an specific parallel instance files (using
 {it:#pll_id} number), or every stored auxiliar file (with {opt all}). For
 security reasons, in-use auxiliary files will not be deleted unless the user
-specifies it through the option {opt:force}, which will override not deleting
+specifies it through the option {opt force}, which will override not deleting
 in-use auxiliary files (see the {help parallel##tech:Technical note} section for
 more information about it)}.
 
@@ -306,9 +332,12 @@ to the machines physical cores versus it logical's shows small though significan
 
 {pstd}
 {cmd:parallel} is especially handy when it comes to implementing loop-based
-simulation models (or simply loops), Stata commands such as reshape, or any job
+simulation models (or simply loops), Stata commands such as reshape , or any job
 that (a) can be repeated through data-blocks, and (b) routines that processes big
-datasets.
+datasets (see the {help parallel##append_how:append section}). Furthermore, the commands
+-{help parallel##bs:parallel bs}- and -{help parallel##sim:parallel sim}- are
+specially designed to easily implement bootstrapping and (monte carlo) simulations
+in parallel fashion.
 {p_end}
 
 {pstd}
@@ -348,22 +377,25 @@ which may look something like this: {p_end}
 {col 10}{it:2012_11/income.dta}
 {col 10}{it:2012_12/income.dta}
 
-{pstd}by using the {opt e:xpression}() option of {cmd:parallel append}, we could
-write an expresion such as {it:"%g_%02.0f/income.dta, 2008/2012, 1/12"} {p_end}
-
-{pstd}So the routine that we would like to run on each income.dta file is:{p_end}
+{pstd}All of over which we would like to execute the following program:{p_end}
 
 {tab}{cmd: program def myprogram}
 {tab}{cmd:{tab} gen female = gender == "female"}
 {tab}{cmd:{tab} collapse (mean) income, by(female) fast}
 {tab}{cmd: end}
 
-{pstd}So, the last step is{p_end}
+{pstd}Instead of writing a forval/foreach loop, -{cmd:parallel append}- allows us
+to smoothly solve this with the following command.{p_end}
 
 {tab}{cmd:. parallel append, do(myprogram) p(myprogram)} ///
 {tab}{tab}{cmd:e("%g_%02.0f/income.dta, 2008/2012, 1/12")}
 
-{pstd}So, in brief what {cmd:parallel append} does:{p_end}
+{pstd}Where element by element, we are telling parallel:{p_end}
+{tab}(1) {cmd:do(myprogram)}: execute the command -{cmd:myprogram}-,
+{tab}(1) {cmd:p(myprogram)}: -{cmd:myprogram}- is a usr written program, and
+{tab}(1) {cmd:e("%g_%02.0f/income.dta, 2008/2012, 1/12")}: this should process files 2008_01/income.dta up to 2012_12/income.dta.
+
+{pstd}Step-by-step, what {cmd:parallel append} does is:{p_end}
 {p2colset 8 11 11 4}
 {p2col:1.}Distribute groups of files accross clusters{p_end}
 
@@ -376,7 +408,6 @@ write an expresion such as {it:"%g_%02.0f/income.dta, 2008/2012, 1/12"} {p_end}
 {tab}For each dta file
 
 {p2col:4.}Appends all the resulting files.{p_end}
-
 
 
 {marker caveats}{...}
@@ -501,6 +532,7 @@ to write:
 
 {tab}{cmd:. parallel setclusters 2, s("C:\Archivos de programa\Stata12/stata.exe")}
 
+
 {title:Example 4: Using -parallel bs-}
 
 {pstd}In this example we'll evaluate a regression model using bootstrapping{p_end}
@@ -516,6 +548,35 @@ to write:
 {pstd}Which is the ``parallel way'' to do:{p_end}
 
 {tab}{cmd:. bs: reg price c.weig##c.weigh foreign rep}
+
+
+{title:Example 5: Using -parallel sim-}
+
+{pstd}Example from {help simulate##examples:simulate}{p_end}
+
+{pstd}Setup for a quad-core computer{p_end}
+{tab}{cmd:. parallel setclusters 4}
+
+{pstd}Experiment that will be performed{p_end}
+{tab}{cmd:program define lnsim, rclass}
+{tab}{tab}{cmd:version {ccl stata_version}}
+{tab}{tab}{cmd:syntax [, obs(integer 1) mu(real 0) sigma(real 1) ]}
+{tab}{tab}{cmd:drop _all}
+{tab}{tab}{cmd:set obs `obs'}
+{tab}{tab}{cmd:tempvar z}
+{tab}{tab}{cmd:gen `z' = exp(rnormal(`mu',`sigma'))}
+{tab}{tab}{cmd:summarize `z'}
+{tab}{tab}{cmd:return scalar mean = r(mean)}
+{tab}{tab}{cmd:return scalar Var  = r(Var)}
+{tab}{cmd:end}
+
+{pstd}Running parallel sim.{p_end}
+{tab}{cmd:. parallel sim, expr(mean=r(mean) var=r(Var)) reps(10000): lnsim, obs(100)}
+	
+{pstd}Which is the ``parallel way'' to do:{p_end}
+
+{tab}{cmd:. simulate mean=r(mean) var=r(Var), reps(10000): lnsim, obs(100)}
+
 
 {marker saved_results}{...}
 {title:Saved results}

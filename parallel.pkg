@@ -1,10 +1,39 @@
-v 3
-d parallel Stata module for parallel computing
-d Distribution-Date:20140415
-d Author: George Vega
+d
+d   Inspired in the R library "snow" and to be used in multicore
+d CPUs, parallel implements parallel computing methods through 
+d OS's shell scripting (using Stata in batch mode) to accelerate
+d computations. By starting a determined number of new Stata
+d instances (child processes), this module allows the user to
+d implement parallel computing methods without the need of having
+d StataMP installed. Common tasks include vectorized operations,
+d reshaping big data, running simulations (monte carlo experiments)
+d or bootstrapping estimations. Depending on the number of cores of
+d the CPU, parallel can reach linear speed ups significantly
+d reducing computing wall-clock time. Finally parallel is, to the
+d author's knowledge, the first user contributed Stata module to
+d implement parallel computing. 
+d
+d KW: parallel computing
+d KW: timming
+d KW: high performance computing
+d KW: HPC
+d KW: big data
+d KW: simulations
+d KW: bootstrapping
+d KW: monte carlo
+d KW: multiple imputations
+d
+d Requires: Stata version 10
+d
+d Distribution-Date: 20140613
+d
+d Author: George Vega Yon , California Institute of Technology, USA
+d Support: email gvegayon@@caltech.edu
+d
 F ado/parallel.ado
 F ado/parallel_append.ado
 F ado/parallel_bs.ado
+F ado/parallel_sim.ado
 F ado/parallel.hlp
 F ado/parallel_source.hlp
 F ado/lparallel.mlib

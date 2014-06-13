@@ -47,7 +47,7 @@ real scalar parallel_run(
 		else {
 			for(i=1;i<=nclusters;i++) {
 				mkdir(c("tmpdir")+"/__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
-				fput(fh, "export TMPDIR="+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
+				fput(fh, "export TMPDIR="+c("tmpdir")+"/__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f"))
 				fput(fh, paralleldir+`" -b -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
 			}
 		}

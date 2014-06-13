@@ -1,4 +1,4 @@
-*! version 1.14.5.19  19may2014
+*! version 1.14.6.13  13jun2014
 *! PARALLEL: Stata module for parallel computing
 *! by George G. Vega (g.vegayon at gmail)
 /*
@@ -37,19 +37,23 @@ program def parallel
     version 10.0
 
 	// Checks wether if is parallel prefix or not
-	if  (regexm(`"`0'"', "^(do|clean|setclusters|break|version|append|printlog|viewlog)")) { /* If not prefix */
+	if  (regexm(`"`0'"', "^(do|clean|setclusters|break|version|append|printlog|viewlog)")) {
+	/* If not prefix */
 		parallel_`0'
-	}
-	else if (regexm(`"`0'"', "^bs[,]?[\s ]?")) {              /* Bootstrap */
-		local 0 = regexr(`"`0'"', "^bs", "")
+	} 
+	else if (regexm(`"`0'"', "^(bs|sim)[,]?[\s ]?")) {
+	/* Prefix bootstrap or simulate */
+		local cmd = regexs(1)
+		local 0   = regexr(`"`0'"', "^(bs|sim)", "")
 		gettoken x 0 : 0, parse(":")
 		local 0 = regexr(`"`0'"', "^[:]", "")
 		gettoken x options : x, parse(",") bind
 
 		gettoken 0 argopt : 0, parse(",") bind
-		parallel_bs `0', argopt(`argopt') `options'
-	}
-	else if (regexm(`"`0'"',"^([,]?.*[:])")) {               /* if prefix */
+		parallel_`cmd' `0', argopt(`argopt') `options'
+	} 
+	else if (regexm(`"`0'"',"^([,]?.*[:])")) {              
+	/* if prefix */
 		gettoken x 0 : 0, parse(":") 
 		local 0 = regexr(`"`0'"', "^[:]", "")
 		// Gets the options (if these exists) of parallel

@@ -144,7 +144,7 @@ program def parallel_append
 
 		/* Checking if an error has occurred */
 		if (_rc) {
-			/*
+			
 			mata: parallel_sandbox(2, "$LAST_PLL_ID")
 			qui parallel clean, e($LAST_PLL_ID)
 			forval j=0/`i' {
@@ -152,9 +152,8 @@ program def parallel_append
 				qui parallel clean, e(`parallelid`j'')
 			}
 			qui parallel setclusters `oldclusters', s(`olddir') f
+			di as error "An error -`=_rc'- has occured while running parallel"
 			exit 1
-			*/
-			di "{result:Warning:}{text: Group -`g'- couldn't be processed}"
 			
 		}
 		else if (r(pll_errs)) {

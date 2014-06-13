@@ -1,9 +1,12 @@
-*! parallel_bs vers 0.14.6.13 13jun2014
+*! parallel_sim vers 0.14.6.13 13jun2014
 *! auth George G. Vega
 
-program def parallel_bs, eclass
+program def parallel_sim, eclass
+	parallel_simulate `0'
+	
+	/*
 	if !replay() { // If it is a replay, 
-		parallel_bootstrap `0'
+		parallel_simulate `0'
 	}
 	else if ("`e(prefix)'" != "bootstrap" | !inlist("`e(pll)'","1") ) { // If the last command runned wasn't nnmatch2
 		di as error "Last estimation was not {bf:parallel bs}, was -{bf:`=e(prefix)'}-" 
@@ -11,14 +14,14 @@ program def parallel_bs, eclass
 	}
 	else { // if the last command was pll bootstrap, it replays the results
 		bs, title(parallel bootstrapping)
-	}
+	}*/
 end
 
-program def parallel_bootstrap, rclass 
+program def parallel_simulate, rclass 
 	#delimit ;
 	syntax anything(name=model equalok everything) [,
 		EXPress(string asis) 
-		programs(passthru)
+		programs(string)
 		Mata 
 		NOGlobals 
 		Seeds(passthru)
@@ -26,7 +29,7 @@ program def parallel_bootstrap, rclass
 		Timeout(integer 60)
 		PRocessors(integer 0)
 		argopt(string) 
-		SAVing(string) Reps(integer 100) *];
+		SAVing(string) Reps(integer -1) *];
 	#delimit cr
 
 	/* Checking whereas parallel has been config */	
@@ -34,6 +37,13 @@ program def parallel_bootstrap, rclass
 		di "{error:You haven't set the number of clusters}" _n "{error:Please set it with: {cmd:parallel setclusters} {it:#}}"
 		exit 198
 	}
+	
+	/* Checking reps */
+	if (`reps' < 1) {
+			di as err "reps() is required, and must be a positive integer"
+			exit 198
+	}
+
 		
 	/* Setting sizes */
 	local csize = floor(`reps'/$PLL_CLUSTERS)
@@ -45,17 +55,17 @@ program def parallel_bootstrap, rclass
 	/* Saving the tmpfile */
 	mata: parallel_sandbox(5)
 
-	local tmpdta = "__pll`parallelid'_bs_dta.dta"
+	local tmpdta = "__pll`parallelid'_sim_dta.dta"
 	if (`"`saving'"' == "") {
-		if (c(os)=="Windows") local saving = `"`c(tmpdir)'__pll`parallelid'_bs_outdta.dta"'
-		else local saving = `"`c(tmpdir)'/__pll`parallelid'_bs_outdta.dta"'
+		if (c(os)=="Windows") local saving = `"`c(tmpdir)'__pll`parallelid'_sim_outdta.dta"'
+		else local saving = `"`c(tmpdir)'/__pll`parallelid'_sim_outdta.dta"'
 		local save = 0
 	}
 	else local save = 1
-	local simul = `"__pll`parallelid'_bs_simul.do"'
+	local simul = `"__pll`parallelid'_sim_simul.do"'
 	
 	qui save `tmpdta'
-	
+
 	/* Parsing saving */
 	_prefix_saving `saving'
 	local saving    `"`s(filename)'"'
@@ -70,19 +80,23 @@ program def parallel_bootstrap, rclass
 		di "{error:File -`saving'- already exists, use the -replace- option}"
 		exit 602
 	}
-
+	
+	/* Getting the name of the program */
+	if (regexm(`"`model'"',"^([a-zA-Z0-9_]+)")) local cmd = regexs(1)
+	
 	/* Creating a tmp program */	
 	cap file open fh using `"`simul'"', w replace
 	file write fh `"use `tmpdta', clear"' _n
 	file write fh "if (\`pll_instance'==\$PLL_CLUSTERS) local reps = `lsize'" _n
 	file write fh "else local reps = `csize'" _n
 	file write fh `"local pll_instance : di %04.0f \`pll_instance'"' _n
-	file write fh `"bs `express', sav(__pll\`pll_id'_bs_eststore\`pll_instance', replace `double' `every') `options' rep(\`reps'): `model' `argopt'"' _n
+	file write fh `"simulate `express', sav(__pll\`pll_id'_sim_eststore\`pll_instance', replace `double' `every') `options' rep(\`reps'): `model' `argopt'"' _n
 	file close fh 
 
 	/* Running parallel */
-	cap noi parallel do `simul', nodata `programs' `mata' `noglobals' `seeds' ///
-		`randtype' timeout(`timeout') processors(`processors') setparallelid(`parallelid')
+	cap noi parallel do `simul', nodata programs(`programs' `cmd') `mata' `noglobals' ///
+		`randtype' timeout(`timeout') processors(`processors') setparallelid(`parallelid') ///
+		 `seeds'
 
 	if (_rc) {
 		qui parallel clean, e($LAST_PLL_ID) force
@@ -95,51 +109,42 @@ program def parallel_bootstrap, rclass
 		mata: parallel_sandbox(2,"`parallelid'")
 		exit 1
 	}
-
-	preserve
 	
 	/* Appending datasets */
 	forval i=1/$PLL_CLUSTERS {
 		quietly {
 			local pll_instance : di %04.0f `i'
-			use `"__pll$LAST_PLL_ID`'_bs_eststore`pll_instance'"', clear
+			use `"__pll$LAST_PLL_ID`'_sim_eststore`pll_instance'"', clear
 			
 			if ((`=`i'-1')) append using `saving'
 			save `saving', replace
 		}
 	}
-	
-	/* Storing macros */
-	local macros : r(macros)
-	local scalars : r(scalars)
-	foreach m of local macros {
-		local `m' = r(`m')
-	}
-	foreach s of local scalars {
-		local `s' = r(`s')
-	}
 		
-	restore
+	/* Returning expr data */
+	foreach v of varlist _all {
+		qui summ `v', meanonly
+		return scalar `v' = r(mean)
+	}
 	
-	/* Returning bs data */
-	bstat using `saving', title(parallel bootstrapping)
-	
+	return local command = "`model'"
+			
 	/* Cleaning up */
 	parallel clean, e($LAST_PLL_ID)
 	mata: parallel_sandbox(2, "`parallelid'")
 	
-	parallel_bs_ereturn
-	
+	parallel_sim_ereturn
+	/*
 	/* Getting macros back */
 	foreach m of local macros {
 		return local `m'  `"``m''"'
 	}
 	foreach s of local scalars {
 		return scalar `s' = ``s''
-	}
+	}*/
 	
 end
 
-program def parallel_bs_ereturn, eclass
+program def parallel_sim_ereturn, eclass
 	ereturn local pll 1
 end
