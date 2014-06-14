@@ -2,6 +2,7 @@
 *! auth George G. Vega
 
 program def parallel_sim, eclass
+	vers 10.0
 	parallel_simulate `0'
 	
 	/*
@@ -18,6 +19,7 @@ program def parallel_sim, eclass
 end
 
 program def parallel_simulate, rclass 
+	vers 10.0
 	#delimit ;
 	syntax anything(name=model equalok everything) [,
 		EXPress(string asis) 
@@ -146,5 +148,6 @@ program def parallel_simulate, rclass
 end
 
 program def parallel_sim_ereturn, eclass
+	vers 10.0
 	ereturn local pll 1
 end

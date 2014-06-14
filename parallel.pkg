@@ -1,3 +1,4 @@
+d 'PARALLEL': module for Parallel Computing
 d
 d   Inspired in the R library "snow" and to be used in multicore
 d CPUs, parallel implements parallel computing methods through 
@@ -9,9 +10,17 @@ d StataMP installed. Common tasks include vectorized operations,
 d reshaping big data, running simulations (monte carlo experiments)
 d or bootstrapping estimations. Depending on the number of cores of
 d the CPU, parallel can reach linear speed ups significantly
-d reducing computing wall-clock time. Finally parallel is, to the
-d author's knowledge, the first user contributed Stata module to
-d implement parallel computing. 
+d reducing computing wall-clock time.
+d
+d   This current version includes the following commands:
+d    - parallel do     for running dofiles.
+d    - parallel :      for vectorized commands.
+d    - parallel bs     for bootstrapping.
+d    - parallel sim    for simulations.
+d    - parallel append for handlying multiple dta files.
+d
+d   Finally parallel is, to the d author's knowledge, the first user
+d contributed Stata module to implement parallel computing. 
 d
 d KW: parallel computing
 d KW: timming
@@ -30,10 +39,11 @@ d
 d Author: George Vega Yon , California Institute of Technology, USA
 d Support: email gvegayon@@caltech.edu
 d
-F ado/parallel.ado
-F ado/parallel_append.ado
-F ado/parallel_bs.ado
-F ado/parallel_sim.ado
-F ado/parallel.hlp
-F ado/parallel_source.hlp
-F ado/lparallel.mlib
+f ado/parallel.ado
+f ado/parallel_append.ado
+f ado/parallel_bs.ado
+f ado/parallel_sim.ado
+f ado/parallel.hlp
+f ado/parallel_source.hlp
+f ado/lparallel.mlib
+

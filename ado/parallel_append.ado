@@ -3,7 +3,7 @@
 
 program def parallel_append
 
-	vers 11.0
+	vers 10.0
 
 	syntax [anything(name=files)] , Do(string asis) [in(string asis) if (string asis) Expression(string) *]
 			

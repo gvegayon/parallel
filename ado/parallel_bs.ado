@@ -2,6 +2,9 @@
 *! auth George G. Vega
 
 program def parallel_bs, eclass
+
+	vers 10.0
+
 	if !replay() { // If it is a replay, 
 		parallel_bootstrap `0'
 	}
@@ -15,6 +18,9 @@ program def parallel_bs, eclass
 end
 
 program def parallel_bootstrap, rclass 
+
+	vers 10.0
+
 	#delimit ;
 	syntax anything(name=model equalok everything) [,
 		EXPress(string asis) 
@@ -141,5 +147,6 @@ program def parallel_bootstrap, rclass
 end
 
 program def parallel_bs_ereturn, eclass
+	vers 10.0
 	ereturn local pll 1
 end
