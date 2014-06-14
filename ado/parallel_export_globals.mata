@@ -40,3 +40,4 @@ void parallel_export_globals(|string scalar outname, real scalar ou_fh) {
 	if (isnewfile) fclose(ou_fh)
 }
 end
+

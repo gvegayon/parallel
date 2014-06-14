@@ -1,6 +1,6 @@
 *! version 1.14.6.13  13jun2014
 *! PARALLEL: Stata module for parallel computing
-*! by George G. Vega (g.vegayon at gmail)
+*! by George G. Vega (gvegayon at caltech.edu)
 /*
 ////////////////////////////////////////////////////////////////////////////////
 CHANGE LOG
@@ -74,10 +74,10 @@ end
 program def parallel_version, rclass
 	vers 10.0
 	di as result "parallel" as text " Stata module for parallel computing"
-	di as result "vers" as text " 1.14.5 (9may2014)"
-	di as result "auth" as text " George G. Vega (g.vegayon at gmail.com)"
+	di as result "vers" as text " 1.14.6.13 (13jun2014)"
+	di as result "auth" as text " George G. Vega (gvegayon at caltech.edu)"
 	
-	return local pll_vers = "1.14.5"
+	return local pll_vers = "1.14.6.13"
 end
 
 /* Take a look to logfiles */

@@ -10,7 +10,7 @@ sysuse auto
 local nreps 1000
 
 
-forval i=1/100 {
+forval i=1/1 {
 	timer on 2
 	parallel bs, sav(pllbs, replace) reps(`nreps') nodots  : reg price c.weig##c.weigh foreign rep, robust
 	timer off 2
