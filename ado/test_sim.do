@@ -10,7 +10,7 @@ save truth, replace
 
 cap program drop hetero1
 program hetero1
-	version 12
+	version 11.0
 	args c
 	use truth, clear
 	gen y = true_y + (rnormal() + `c'*x)

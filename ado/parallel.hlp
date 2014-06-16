@@ -63,8 +63,7 @@
 {cmdab:parallel} [, {opt by}({it:{help varlist}}) {opt f:orce} {opt k:eep} {opt keepl:ast} {opt p:rograms}({it:{help namelist}}) {opt m:ata} {opt nog:lobal} {opt s:eeds}({it:{help numlist}}) {opt nod:ata} 
  {opt r:andtype}({it:{help strings:datetime|random.org}}) 
  {opt t:imeout}({it:#}) 
- {opt pr:ocessors}({it:#})
- {opt keepu:sing}({it:{help varlist}})]:
+ {opt pr:ocessors}({it:#})]:
 {it:stata_cmd}
 
 {col 5}{hline}{marker bs}{...}
@@ -195,7 +194,6 @@ does {cmd:parallel} has to wait until assume that there was a connection error a
 the child process (cluster) won't start. Default value is 60.{p_end}
 {synopt:{opt pr:ocessors}}Integer. If running on StataMP, sets the number of processors
 each cluster should use. Default value is 0 (do nothing).{p_end}
-{synopt:{opt keepu:sing}}Varlist. Subset of variables to be passed to each cluster.{p_end}
 
 {marker description}{...}
 {title:Description}
@@ -214,10 +212,14 @@ in description).
 {p_end}
 
 {pstd}
--{cmd:parallel do}- is the equivalent (wrapper) to -{cmd:do}-. By using this syntax, the
+-{cmd:parallel do}- is the equivalent (wrapper) to -{cmd:do}-. When using this syntax
+parallel runs the dofile in as many clusters as there where specified by the user, this is,
+start {cmd:$PLL_CLUSTERS} Stata instances in batch mode. By default the
 loaded dataset will be splitted in the number of clusters specified by -{cmd:parallel setclusters}-
 and the {mansection U 16Do-files:do-file} will be executed independently over
-each and every one of the data clusters. After all the parallel-instances stops, the datasets will be appended.
+each and every one of the data clusters, so once after all the parallel-instances
+stops, the datasets will be appended. In order to avoid loading the current
+dataset in the clusters, the user should specify the -{opt nodata}- option.
 {p_end}
 
 {pstd}
@@ -292,13 +294,6 @@ seeds, {cmd:parallel} generates its own numlist of seeds using three diferent op
 generate each seed, restoring the original seed afterwards; or
 (3) using random.org API (requires internet conection) to directly generate each
 seed.
-{p_end}
-
-{pstd}
-For large datasets it may be convenient to work only with the necessary variables,
-this is, to pass only a group of variables to each clusters; this can be done through
-the {opt keepusing} option. This option tells {cmd:parallel} what variables are
-to be passed to each cluster, by doing this the memory load can be reduced.
 {p_end}
 
 {pstd}
@@ -629,8 +624,8 @@ been executed.{p_end}
 {title:Author}
 
 {pstd}
-George Vega Yon, Superindentencia de Pensiones. {browse "mailto:gvega@spensiones.cl"}
-{browse "mailto:g.vegayon@gmail.com"}
+George Vega Yon, California Institute of Technology. {browse "mailto:gvegayon@caltech.edu"}
+{browse "http://ggvega.cl"}
 {p_end}
 
 {title:Up-to-date versions}
