@@ -1,4 +1,4 @@
-*! version 1.14.6.13  13jun2014
+*! version 1.14.6.17  17jun2014
 *! PARALLEL: Stata module for parallel computing
 *! by George G. Vega (gvegayon at caltech.edu)
 /*
@@ -74,7 +74,7 @@ end
 program def parallel_version, rclass
 	vers 10.0
 	di as result "parallel" as text " Stata module for parallel computing"
-	di as result "vers" as text " 1.14.6.13 (13jun2014)"
+	di as result "vers" as text " 1.14.6.17 (17jun2014)"
 	di as result "auth" as text " George G. Vega (gvegayon at caltech.edu)"
 	
 	return local pll_vers = "1.14.6.13"

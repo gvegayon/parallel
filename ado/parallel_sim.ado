@@ -1,4 +1,4 @@
-*! parallel_sim vers 0.14.6.13 13jun2014
+*! parallel_sim vers 0.14.6.17 17jun2014
 *! auth George G. Vega
 
 program def parallel_sim, eclass
@@ -66,8 +66,10 @@ program def parallel_simulate, rclass
 	else local save = 1
 	local simul = `"__pll`parallelid'_sim_simul.do"'
 	
-	qui save `tmpdta'
-
+	/* Only save if there is data */
+	if (c(N)) qui save `tmpdta'
+	else di "{result:Warning:}{text: No data loaded.}"
+	
 	/* Parsing saving */
 	_prefix_saving `saving'
 	local saving    `"`s(filename)'"'
@@ -88,7 +90,7 @@ program def parallel_simulate, rclass
 	
 	/* Creating a tmp program */	
 	cap file open fh using `"`simul'"', w replace
-	file write fh `"use `tmpdta', clear"' _n
+	if (c(N)) file write fh `"use `tmpdta', clear"' _n
 	file write fh "if (\`pll_instance'==\$PLL_CLUSTERS) local reps = `lsize'" _n
 	file write fh "else local reps = `csize'" _n
 	file write fh `"local pll_instance : di %04.0f \`pll_instance'"' _n
