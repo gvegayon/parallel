@@ -34,9 +34,9 @@ void function parallel_recursively_rm(string scalar parallelid ,| string scalar 
 	}
 	else
 	{
-		/* We don't want to remove logfiles */
+		/* We don't want to remove logfiles in tmpdir */
 		for(i=1;i<=length(files);i++)
-			if (!regexm(files[i],"do[0-9]+\.log$")) unlink(files[i])
+			if (!regexm(files[i],"do[0-9]+\.log$") | (c("tmpdir") != pwd()) ) unlink(files[i])
 	}
 
 	/* Entering each folder */

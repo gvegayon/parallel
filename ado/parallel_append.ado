@@ -3,9 +3,13 @@
 
 program def parallel_append
 
-	vers 10.0
+	vers 11.0
 
-	syntax [anything(name=files)] , Do(string asis) [in(string asis) if (string asis) Expression(string) *]
+	#delimit ;
+	syntax [anything(name=files)] , Do(string asis) [
+		in(string asis) 
+		if(string asis)
+		Expression(string) *]
 			
 	if ("`in'" != "") local in in `in'
 	if ("`if'" != "") local if if `if'
@@ -77,7 +81,7 @@ program def parallel_append
 	local size = `n'/$PLL_CLUSTERS
 
 	local oldclusters = $PLL_CLUSTERS
-	local olddir = $PLL_DIR
+	local olddir = $PLL_STATA_DIR
 	if (`size' < 1) {
 		qui parallel setclusters `n', statadir(`olddir') f
 		local g = 1

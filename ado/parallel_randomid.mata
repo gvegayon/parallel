@@ -26,7 +26,7 @@ string colvector parallel_randomid(|real scalar n, string scalar randtype, real 
 	if (silent == J(1,1,.)) silent = 0
 	
 	// Checking if randtype is supported
-	if (!regexm(randtype,"^(random.org|datetime)$") & strlen(randtype) > 0) {
+	if (!regexm(randtype,"^(current|random.org|datetime)$") & strlen(randtype) > 0) {
 		errprintf("randtype -%s- not supported\nPlease try with -random.org- or -datetime-\n", randtype)
 		exit(198)
 	}

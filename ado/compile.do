@@ -14,7 +14,7 @@ vers 10.0
 mata:
 archmata = dir(".","files","*.mata")
 _sort(archmata,1)
-dt_moxygen(archmata, "parallel_source.hlp", 1)
+dt_moxygen(archmata, "parallel_source.sthlp", 1)
 
 end
 
@@ -26,7 +26,7 @@ run parallel_export_programs.mata
 run parallel_export_globals.mata  
 run parallel_randomid.mata     	
 run parallel_finito.mata
-run parallel_setstatadir.mata
+run parallel_setstatapath.mata
 run parallel_normalizepath.mata
 run parallel_clean.mata
 run parallel_divide_index.mata

@@ -1,4 +1,4 @@
-*! version 0.13.10.7  7oct2013
+*! version 0.14.6.23  23jun2014
 * Generates the corresponding dofiles
 
 /**oxygen
@@ -52,12 +52,14 @@ real scalar parallel_write_do(
 	}
 	
 	/* Check seeds and seeds length */
-	if (seed == J(1,0,"") | seed == "")
+	if (seed == J(1,1,""))
 	{
 		seeds = parallel_randomid(5, randtype, 0, nclusters, 1)
+		st_local("pllseeds", invtokens(seeds'))
 	}
 	else
 	{
+		st_local("pllseeds", seed)
 		seeds = tokens(seed)
 		/* Checking seeds length */
 		if (length(seeds) > nclusters)
@@ -230,7 +232,7 @@ real scalar parallel_write_do(
 		
 		fput(output_fh, "}")
 		fput(output_fh, "}")
-		if (!nodata) fput(output_fh, "save "+folder+"__pll"+parallelid+"_dta"+strofreal(i,"%04.0f")+", replace")
+		if (!nodata) fput(output_fh, "noi cap save "+folder+"__pll"+parallelid+"_dta"+strofreal(i,"%04.0f")+", replace")
 		
 		// Step 3
 		fput(output_fh, `"cd ""'+folder+`"""')

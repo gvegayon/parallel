@@ -1453,7 +1453,7 @@ string colvector parallel_randomid(|real scalar n, string scalar randtype, real 
     if (silent == J(1,1,.)) silent = 0
     
     // Checking if randtype is supported
-    if (!regexm(randtype,"^(random.org|datetime)$") & strlen(randtype) > 0) {
+    if (!regexm(randtype,"^(current|random.org|datetime)$") & strlen(randtype) > 0) {
         errprintf("randtype -%s- not supported\nPlease try with -random.org- or -datetime-\n", randtype)
         exit(198)
     }
@@ -1584,9 +1584,9 @@ void function parallel_recursively_rm(string scalar parallelid ,| string scalar 
     }
     else
     {
-        /* We don't want to remove logfiles */
+        /* We don't want to remove logfiles in tmpdir */
         for(i=1;i<=length(files);i++)
-            if (!regexm(files[i],"do[0-9]+\.log$")) unlink(files[i])
+            if (!regexm(files[i],"do[0-9]+\.log$") | (c("tmpdir") != pwd()) ) unlink(files[i])
     }
 
     /* Entering each folder */
@@ -1639,7 +1639,7 @@ real scalar parallel_run(
     
     // Setting default parameters
     if (nclusters == J(1,1,.)) nclusters = strtoreal(st_global("PLL_CLUSTERS"))
-    if (paralleldir == J(1,1,"")) paralleldir = st_global("PLL_DIR")
+    if (paralleldir == J(1,1,"")) paralleldir = st_global("PLL_STATA_PATH")
     
     // Message
     display(sprintf("{hline %g}",c("linesize") > 80?80:c("linesize")))
@@ -1925,7 +1925,7 @@ end
 *! {c BLC}{dup 78:{c -}}{c BRC}
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
-*! {c |} {bf:Beginning of file -parallel_setstatadir.mata-}{col 83}{c |}
+*! {c |} {bf:Beginning of file -parallel_setstatapath.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
 *! vers 0.14.3 18mar2014
 *! author: George G. Vega Yon
@@ -1933,7 +1933,7 @@ end
 
 mata:
 {smcl}
-*! {marker parallel_setstatadir}{bf:function -{it:parallel_setstatadir}- in file -{it:parallel_setstatadir.mata}-}
+*! {marker parallel_setstatapath}{bf:function -{it:parallel_setstatapath}- in file -{it:parallel_setstatapath.mata}-}
 *! {back:{it:(previous page)}}
 *!{dup 78:{c -}}
 *!{col 4}{it:Sets the path where stata exe is installed.}
@@ -1941,9 +1941,9 @@ mata:
 *!{col 6}{bf:tatadir}{col 20}If the user wants to set it manually
 *!{col 6}{bf:force}{col 20}Avoids path checking.
 *!{col 4}{bf:returns:}
-*!{col 6}{it:A global PLL_DIR.}
+*!{col 6}{it:A global PLL_STATA_PATH.}
 *!{dup 78:{c -}}{asis}
-real scalar parallel_setstatadir(string scalar statadir, | real scalar force) {
+real scalar parallel_setstatapath(string scalar statadir, | real scalar force) {
 
     string scalar bit, flv
 
@@ -1986,13 +1986,13 @@ real scalar parallel_setstatadir(string scalar statadir, | real scalar force) {
         }
     }
 
-    // Setting PLL_DIR
+    // Setting PLL_STATA_PATH
     if (force == J(1,1,.) | force == 1)    {
         if (!fileexists(statadir)) return(601)
     }
     
-    if (!regexm(statadir, `"^["]"')) st_global("PLL_DIR", `"""'+statadir+`"""')
-    else st_global("PLL_DIR", statadir)
+    if (!regexm(statadir, `"^["]"')) st_global("PLL_STATA_PATH", `"""'+statadir+`"""')
+    else st_global("PLL_STATA_PATH", statadir)
     
     display(sprintf("{text:Stata dir:} {result: %s}" ,statadir))
     return(0)
@@ -2001,7 +2001,7 @@ end
 
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
-*! {c |} {bf:End of file -parallel_setstatadir.mata-}{col 83}{c |}
+*! {c |} {bf:End of file -parallel_setstatapath.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
@@ -2046,7 +2046,7 @@ end
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:Beginning of file -parallel_write_do.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
-*! version 0.13.10.7  7oct2013
+*! version 0.14.6.23  23jun2014
 * Generates the corresponding dofiles
 
 mata:
@@ -2105,12 +2105,14 @@ real scalar parallel_write_do(
     }
     
     /* Check seeds and seeds length */
-    if (seed == J(1,0,"") | seed == "")
+    if (seed == J(1,1,""))
     {
         seeds = parallel_randomid(5, randtype, 0, nclusters, 1)
+        st_local("pllseeds", invtokens(seeds'))
     }
     else
     {
+        st_local("pllseeds", seed)
         seeds = tokens(seed)
         /* Checking seeds length */
         if (length(seeds) > nclusters)
@@ -2283,7 +2285,7 @@ real scalar parallel_write_do(
         
         fput(output_fh, "}")
         fput(output_fh, "}")
-        if (!nodata) fput(output_fh, "save "+folder+"__pll"+parallelid+"_dta"+strofreal(i,"%04.0f")+", replace")
+        if (!nodata) fput(output_fh, "noi cap save "+folder+"__pll"+parallelid+"_dta"+strofreal(i,"%04.0f")+", replace")
         
         // Step 3
         fput(output_fh, `"cd ""'+folder+`"""')

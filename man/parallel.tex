@@ -128,6 +128,18 @@ Parallelizing a stata command
 parallel [, \emph{options}]:  stata_cmd
 \end{Verbatim}
 
+Parallel bootstrapping
+
+\begin{Verbatim}[commandchars=\\\{\}]
+parallel bs [, expression(exp) \emph{options}]:  stata_cmd
+\end{Verbatim}
+
+Parallel simulations
+
+\begin{Verbatim}[commandchars=\\\{\}]
+parallel sim , reps(#) [expression(exp) \emph{options}]:  stata_cmd
+\end{Verbatim}
+
 Removing auxiliary files
 
 \begin{Verbatim}[commandchars=\\\{\}]

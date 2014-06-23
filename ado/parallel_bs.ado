@@ -1,9 +1,9 @@
-*! parallel_bs vers 0.14.6.13 13jun2014
+*! parallel_bs vers 0.14.6.23 23jun2014
 *! auth George G. Vega
 
 program def parallel_bs, eclass
 
-	vers 10.0
+	vers 11.0
 
 	if !replay() { // If it is a replay, 
 		parallel_bootstrap `0'
@@ -19,18 +19,18 @@ end
 
 program def parallel_bootstrap, rclass 
 
-	vers 10.0
+	vers 11.0
 
 	#delimit ;
 	syntax anything(name=model equalok everything) [,
-		EXPress(string asis) 
-		programs(passthru)
+		EXPression(string asis) 
+		PROGrams(passthru)
 		Mata 
 		NOGlobals 
 		Seeds(passthru)
 		Randtype(passthru)
 		Timeout(integer 60)
-		PRocessors(integer 0)
+		PROCessors(integer 0)
 		argopt(string) 
 		SAVing(string) Reps(integer 100) *];
 	#delimit cr
@@ -48,9 +48,11 @@ program def parallel_bootstrap, rclass
 		local lsize = `csize' + (`reps' - `csize'*$PLL_CLUSTERS)
 	}
 
-	/* Saving the tmpfile */
+	/* Reserving a pll_id. This will be stored in the -parallelid- local
+	macro */	
 	mata: parallel_sandbox(5)
 
+	/* Saving the tmpfile */
 	local tmpdta = "__pll`parallelid'_bs_dta.dta"
 	if (`"`saving'"' == "") {
 		if (c(os)=="Windows") local saving = `"`c(tmpdir)'__pll`parallelid'_bs_outdta.dta"'
@@ -83,7 +85,7 @@ program def parallel_bootstrap, rclass
 	file write fh "if (\`pll_instance'==\$PLL_CLUSTERS) local reps = `lsize'" _n
 	file write fh "else local reps = `csize'" _n
 	file write fh `"local pll_instance : di %04.0f \`pll_instance'"' _n
-	file write fh `"bs `express', sav(__pll\`pll_id'_bs_eststore\`pll_instance', replace `double' `every') `options' rep(\`reps'): `model' `argopt'"' _n
+	file write fh `"bs `expression', sav(__pll\`pll_id'_bs_eststore\`pll_instance', replace `double' `every') `options' rep(\`reps'): `model' `argopt'"' _n
 	file close fh 
 
 	/* Running parallel */
@@ -147,6 +149,6 @@ program def parallel_bootstrap, rclass
 end
 
 program def parallel_bs_ereturn, eclass
-	vers 10.0
+	vers 11.0
 	ereturn local pll 1
 end

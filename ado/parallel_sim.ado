@@ -1,8 +1,8 @@
-*! parallel_sim vers 0.14.6.17 17jun2014
+*! parallel_sim vers 0.14.6.23 23jun2014
 *! auth George G. Vega
 
 program def parallel_sim, eclass
-	vers 10.0
+	vers 11.0
 	parallel_simulate `0'
 	
 	/*
@@ -19,17 +19,17 @@ program def parallel_sim, eclass
 end
 
 program def parallel_simulate, rclass 
-	vers 10.0
+	vers 11.0
 	#delimit ;
 	syntax anything(name=model equalok everything) [,
-		EXPress(string asis) 
-		programs(string)
+		EXPression(string asis) 
+		PROGrams(string)
 		Mata 
 		NOGlobals 
 		Seeds(passthru)
 		Randtype(passthru)
 		Timeout(integer 60)
-		PRocessors(integer 0)
+		PROCessors(integer 0)
 		argopt(string) 
 		SAVing(string) Reps(integer -1) *];
 	#delimit cr
@@ -54,9 +54,11 @@ program def parallel_simulate, rclass
 		local lsize = `csize' + (`reps' - `csize'*$PLL_CLUSTERS)
 	}
 
-	/* Saving the tmpfile */
+	/* Reserving a pll_id. This will be stored in the -parallelid- local
+	macro */
 	mata: parallel_sandbox(5)
 
+	/* Saving the tmpfile */
 	local tmpdta = "__pll`parallelid'_sim_dta.dta"
 	if (`"`saving'"' == "") {
 		if (c(os)=="Windows") local saving = `"`c(tmpdir)'__pll`parallelid'_sim_outdta.dta"'
@@ -94,13 +96,14 @@ program def parallel_simulate, rclass
 	file write fh "if (\`pll_instance'==\$PLL_CLUSTERS) local reps = `lsize'" _n
 	file write fh "else local reps = `csize'" _n
 	file write fh `"local pll_instance : di %04.0f \`pll_instance'"' _n
-	file write fh `"simulate `express', sav(__pll\`pll_id'_sim_eststore\`pll_instance', replace `double' `every') `options' rep(\`reps'): `model' `argopt'"' _n
+	file write fh `"simulate `expression', sav(__pll\`pll_id'_sim_eststore\`pll_instance', replace `double' `every') `options' rep(\`reps'): `model' `argopt'"' _n
 	file close fh 
 
 	/* Running parallel */
 	cap noi parallel do `simul', nodata programs(`programs' `cmd') `mata' `noglobals' ///
 		`randtype' timeout(`timeout') processors(`processors') setparallelid(`parallelid') ///
 		 `seeds'
+	local seeds = r(pll_seeds)
 
 	if (_rc) {
 		qui parallel clean, e($LAST_PLL_ID) force
@@ -130,7 +133,7 @@ program def parallel_simulate, rclass
 		qui summ `v', meanonly
 		return scalar `v' = r(mean)
 	}
-	
+	return local pll_seeds = "`seeds'"
 	return local command = "`model'"
 			
 	/* Cleaning up */
@@ -150,6 +153,7 @@ program def parallel_simulate, rclass
 end
 
 program def parallel_sim_ereturn, eclass
-	vers 10.0
+	vers 11.0
 	ereturn local pll 1
 end
+

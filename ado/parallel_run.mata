@@ -22,7 +22,7 @@ real scalar parallel_run(
 	
 	// Setting default parameters
 	if (nclusters == J(1,1,.)) nclusters = strtoreal(st_global("PLL_CLUSTERS"))
-	if (paralleldir == J(1,1,"")) paralleldir = st_global("PLL_DIR")
+	if (paralleldir == J(1,1,"")) paralleldir = st_global("PLL_STATA_PATH")
 	
 	// Message
 	display(sprintf("{hline %g}",c("linesize") > 80?80:c("linesize")))

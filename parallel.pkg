@@ -43,7 +43,7 @@ f ado/parallel.ado
 f ado/parallel_append.ado
 f ado/parallel_bs.ado
 f ado/parallel_sim.ado
-f ado/parallel.hlp
-f ado/parallel_source.hlp
+f ado/parallel.sthlp
+f ado/parallel_source.sthlp
 f ado/lparallel.mlib
 

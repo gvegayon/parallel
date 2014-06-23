@@ -1,40 +1,35 @@
-*! version 1.14.6.17  17jun2014
+*! version 1.14.6.23  23jun2014
 *! PARALLEL: Stata module for parallel computing
 *! by George G. Vega (gvegayon at caltech.edu)
+*! 
+*! Project website: 
+*!   https://github.com/gvegayon/parallel
 /*
-////////////////////////////////////////////////////////////////////////////////
-CHANGE LOG
-- Rewrite parallel_finito, parallel_setclusters from stata to mata (speed gains)
-- New parallel_run (mata) runs stata in batch mode (speed gains)
-version 0.13.05 08may2013
- NEW FEATURES
- - Real random strings generation for pll_id through random.org API
- IMPROVEMENTS
- - reach programs replaced by program_export (more efficient and cleanner)
-version 0.13.04 09apr2013
- NEW FEATURES
- - MacOSX support
-version 0.12.12 11dec2012
- Thanks to professor Eric Melse who did great contributions on bugs detection
- for this version.
- BUGS
- - "different folder" issue fixed: Now, users should be able to run do files 
-   outside the current directory without having any problem
- - "stata path" issue fixed: Adding the "64" ending text to Stata64bit edision
-   automatically.
- - "parallel clean" systax issue: Documentation correction
- NEW FEATURES
- - "parallel setstatadir" command: with which you should avoid handling the ado)
+Copyright (c) 2014  <George G. Vega>
 
-version 0.12.10  18oct2012
- - First public version uploaded to SSC
- ////////////////////////////////////////////////////////////////////////////////
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
 */
 
 // Syntax parser
 cap program drop parallel
 program def parallel
-    version 10.0
+    version 11.0
 
 	// Checks wether if is parallel prefix or not
 	if  (regexm(`"`0'"', "^(do|clean|setclusters|break|version|append|printlog|viewlog)")) {
@@ -45,7 +40,7 @@ program def parallel
 	/* Prefix bootstrap or simulate */
 		local cmd = regexs(1)
 		local 0   = regexr(`"`0'"', "^(bs|sim)", "")
-		gettoken x 0 : 0, parse(":")
+		gettoken x 0 : 0, parse(":") bind
 		local 0 = regexr(`"`0'"', "^[:]", "")
 		gettoken x options : x, parse(",") bind
 
@@ -54,7 +49,7 @@ program def parallel
 	} 
 	else if (regexm(`"`0'"',"^([,]?.*[:])")) {              
 	/* if prefix */
-		gettoken x 0 : 0, parse(":") 
+		gettoken x 0 : 0, parse(":") bind 
 		local 0 = regexr(`"`0'"', "^[:]", "")
 		// Gets the options (if these exists) of parallel
 		gettoken x options : x, parse(",") bind
@@ -72,29 +67,29 @@ end
 
 /* Returns the version of parallel */
 program def parallel_version, rclass
-	vers 10.0
+	version 11.0
 	di as result "parallel" as text " Stata module for parallel computing"
-	di as result "vers" as text " 1.14.6.17 (17jun2014)"
+	di as result "vers" as text " 1.14.6.23 (23jun2014)"
 	di as result "auth" as text " George G. Vega (gvegayon at caltech.edu)"
 	
-	return local pll_vers = "1.14.6.13"
+	return local pll_vers = "1.14.6.23"
 end
 
 /* Take a look to logfiles */
 program def parallel_printlog
-	vers 10.0
+	version 11.0
 	syntax [anything(name=pll_instance)] , [Event(string)] 
 	parallel_checklog `pll_instance', e(`event') action(print)
 end
 
 program def parallel_viewlog
-	vers 10.0
+	version 11.0
 	syntax [anything(name=pll_instance)] , [Event(string)] 
 	parallel_checklog `pll_instance', e(`event') action(view)
 end
 
 program def parallel_checklog
-	vers 10.0
+	version 11.0
 	syntax [anything(name=pll_instance)] , [Event(string)] action(string)
 
 	if ("`event'"=="") local event = "$LAST_PLL_ID"
@@ -142,7 +137,7 @@ end
 // Splits the dataset into clusters
 cap program drop parallel_spliter
 program def parallel_spliter
-	vers 10.0
+	version 11.0
 	syntax [namelist(name=xtstructure)] [,parallelid(string) sorting(integer 0) force(integer 0) keepusing(varlist)]
 	//args xtstructure parallelid Sorting Force
 	
@@ -196,7 +191,7 @@ end
 *cap program drop parallel_do
 program def parallel_do, rclass
 
-	vers 10.0
+	version 11.0
 
 	#delimit ;
 	syntax anything(name=dofile equalok everything) 
@@ -205,7 +200,7 @@ program def parallel_do, rclass
 		KEEPLast 
 		prefix 
 		Force 
-		programs(namelist)
+		PROGrams(namelist)
 		Mata 
 		NOGlobals 
 		KEEPTiming 
@@ -213,7 +208,7 @@ program def parallel_do, rclass
 		NOData 
 		Randtype(string)
 		Timeout(integer 60)
-		PRocessors(integer 0)
+		PROCessors(integer 0)
 		argopt(string)
 		KEEPUsing(string)
 		SETparallelid(string)
@@ -320,7 +315,7 @@ program def parallel_do, rclass
 	
 	/* Running the dofiles */
 	timer on 99
-	mata: st_local("nerrors", strofreal(parallel_run("`parallelid'",$PLL_CLUSTERS,`"$PLL_DIR"',`=`timeout'*1000')))
+	mata: st_local("nerrors", strofreal(parallel_run("`parallelid'",$PLL_CLUSTERS,`"$PLL_STATA_PATH"',`=`timeout'*1000')))
 	timer off 99
 	
 	/* If parallel finished with an error it restores the dataset */
@@ -358,6 +353,8 @@ program def parallel_do, rclass
 	else local pll_t_fini = r(t97)
 	
 	qui timer list
+	return local  pll_seeds="`pllseeds'"
+	local pllseeds ""
 	return scalar pll_errs = `nerrors'
 	return local  pll_dir "`pll_dir'"
 	return scalar pll_t_reps = `pll_t_reps'
@@ -375,7 +372,7 @@ end
 // Cleans all files generated by parallel
 *cap program drop parallel_clean
 program def parallel_clean
-	vers 10.0
+	version 11.0
 	syntax [, Event(string) All Force]
 		
 	if (length("`event'") != 0 & length("`all'") != 0) {
@@ -388,9 +385,10 @@ end
 
 ////////////////////////////////////////////////////////////////////////////////
 // Sets the number of clusters as a global macro
-cap program drop parallel_setclusters
+*cap program drop parallel_setclusters
 program parallel_setclusters
-	syntax anything(name=nclusters)  [, Force Statadir(string asis)]
+	version 11.0
+	syntax anything(name=nclusters)  [, Force Statapath(string asis)]
 	
 	local nclusters = real(`"`nclusters'"')
 	if (`nclusters' == .) {
@@ -399,8 +397,8 @@ program parallel_setclusters
 	}
 	local force = length("`force'")>0
 	mata: parallel_setclusters(`nclusters', `force')
-	mata: st_local("error", strofreal(parallel_setstatadir(`"`statadir'"', `force')))
-	if (`error') di as error `"Can not set Stata directory, try using -statadir()- option"'
+	mata: st_local("error", strofreal(parallel_setstatapath(`"`statapath'"', `force')))
+	if (`error') di as error `"Can not set Stata directory, try using -statapath()- option"'
 	exit `error'
 end
 
@@ -409,9 +407,9 @@ end
 // Exports
 
 // Exports a copy of programs
-cap program drop program_export
+*cap program drop program_export
 program def program_export
-	vers 10.0
+	version 11.0
 	syntax using/ [,Programlist(string) Inname(string)]
 	
 	mata: program_export("`using'", "`programlist'", "`inname'")
@@ -420,16 +418,18 @@ end
 
 ////////////////////////////////////////////////////////////////////////////////
 // Appends the clusterized dataset
-cap program drop parallel_fusion
+*cap program drop parallel_fusion
 program def parallel_fusion
-	vers 10.0
+	version 11.0
 	syntax anything(name=parallelid) , clusters(integer) [keepusing(string)]
 	
 	capture {
-		use "__pll`parallelid'_dta0001.dta", clear
+		cap use "__pll`parallelid'_dta0001.dta", clear
+		if (_rc) di "{error:No dataset for instance 0001.}"
 		
 		forval i = 2/`clusters' {
-			append using `"__pll`parallelid'_dta`=string(`i',"%04.0f")'.dta"'
+			cap append using `"__pll`parallelid'_dta`=string(`i',"%04.0f")'.dta"'
+			if (_rc) di "{error:No dataset for instance `=string(`i',"%04.0f")'.}"
 		}
 		
 		/* If it just used a set of variables */
@@ -445,8 +445,9 @@ end
 
 ////////////////////////////////////////////////////////////////////////////////
 // Checks whether the user pressed break inside a loop
-cap program drop parallel_break
+*cap program drop parallel_break
 program def parallel_break
-	vers 10.0
+	version 11.0
 	mata: parallel_break()
 end
+
