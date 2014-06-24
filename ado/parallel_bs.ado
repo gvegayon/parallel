@@ -1,4 +1,4 @@
-*! parallel_bs vers 0.14.6.23 23jun2014
+*! parallel_bs vers 0.14.6.24 24jun2014
 *! auth George G. Vega
 
 program def parallel_bs, eclass
@@ -24,7 +24,7 @@ program def parallel_bootstrap, rclass
 	#delimit ;
 	syntax anything(name=model equalok everything) [,
 		EXPression(string asis) 
-		PROGrams(passthru)
+		PROGrams(string)
 		Mata 
 		NOGlobals 
 		Seeds(passthru)
@@ -79,6 +79,11 @@ program def parallel_bootstrap, rclass
 		exit 602
 	}
 
+	/* Parsing a program */
+	if (regexm(`"`model'"', "^([a-zA-Z0-9_]+)")) local cmd = regexs(1)
+	cap findfile `cmd'.ado
+	if (_rc) local programs `programs' `cmd'
+
 	/* Creating a tmp program */	
 	cap file open fh using `"`simul'"', w replace
 	file write fh `"use `tmpdta', clear"' _n
@@ -89,8 +94,9 @@ program def parallel_bootstrap, rclass
 	file close fh 
 
 	/* Running parallel */
-	cap noi parallel do `simul', nodata `programs' `mata' `noglobals' `seeds' ///
+	cap noi parallel do `simul', nodata programs(`programs') `mata' `noglobals' `seeds' ///
 		`randtype' timeout(`timeout') processors(`processors') setparallelid(`parallelid')
+	local pllseeds = r(pll_seeds)
 
 	if (_rc) {
 		qui parallel clean, e($LAST_PLL_ID) force
@@ -145,6 +151,7 @@ program def parallel_bootstrap, rclass
 	foreach s of local scalars {
 		return scalar `s' = ``s''
 	}
+	return local pll_seeds = "`pllseeds'"
 	
 end
 
@@ -152,3 +159,4 @@ program def parallel_bs_ereturn, eclass
 	vers 11.0
 	ereturn local pll 1
 end
+

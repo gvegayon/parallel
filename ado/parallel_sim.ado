@@ -25,7 +25,8 @@ program def parallel_simulate, rclass
 		EXPression(string asis) 
 		PROGrams(string)
 		Mata 
-		NOGlobals 
+		NOGlobals
+		keep  
 		Seeds(passthru)
 		Randtype(passthru)
 		Timeout(integer 60)
@@ -89,6 +90,8 @@ program def parallel_simulate, rclass
 	
 	/* Getting the name of the program */
 	if (regexm(`"`model'"',"^([a-zA-Z0-9_]+)")) local cmd = regexs(1)
+	cap findfile `cmd'.ado
+	if (_rc) local programs `programs' `cmd'
 	
 	/* Creating a tmp program */	
 	cap file open fh using `"`simul'"', w replace
@@ -100,19 +103,19 @@ program def parallel_simulate, rclass
 	file close fh 
 
 	/* Running parallel */
-	cap noi parallel do `simul', nodata programs(`programs' `cmd') `mata' `noglobals' ///
+	cap noi parallel do `simul', nodata programs(`programs') `mata' `noglobals' ///
 		`randtype' timeout(`timeout') processors(`processors') setparallelid(`parallelid') ///
 		 `seeds'
 	local seeds = r(pll_seeds)
 
 	if (_rc) {
-		qui parallel clean, e($LAST_PLL_ID) force
+		if ("`keep'" == "") qui parallel clean, e($LAST_PLL_ID) force
 		mata: parallel_sandbox(2, "`parallelid'")
 		exit _rc
 	}
 
 	if (r(pll_errs)) {
-		qui parallel clean, e($LAST_PLL_ID) force
+		if ("`keep'" == "") qui parallel clean, e($LAST_PLL_ID) force
 		mata: parallel_sandbox(2,"`parallelid'")
 		exit 1
 	}
@@ -137,7 +140,7 @@ program def parallel_simulate, rclass
 	return local command = "`model'"
 			
 	/* Cleaning up */
-	parallel clean, e($LAST_PLL_ID)
+	if ("`keep'" == "") parallel clean, e($LAST_PLL_ID)
 	mata: parallel_sandbox(2, "`parallelid'")
 	
 	parallel_sim_ereturn

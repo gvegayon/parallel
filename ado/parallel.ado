@@ -1,4 +1,4 @@
-*! version 1.14.6.23  23jun2014
+*! version 1.14.6.24  24jun2014
 *! PARALLEL: Stata module for parallel computing
 *! by George G. Vega (gvegayon at caltech.edu)
 *! 
@@ -294,13 +294,15 @@ program def parallel_do, rclass
 	
 	/* Checking if every thing is ok */
 	if (`errornum') {
-		qui use __pll`parallelid'_dataset, clear
-		
-		// Restores original S_FN (file name) value
-		global S_FN = "`sfn'"
-		
-		/* Removing the cut variable */
-		qui drop _`parallelid'cut
+		if (!`nodata') {
+			qui use __pll`parallelid'_dataset, clear
+			
+			// Restores original S_FN (file name) value
+			global S_FN = "`sfn'"
+			
+			/* Removing the cut variable */
+			qui drop _`parallelid'cut
+		}
 		
 		/* Removes the sandbox file (unprotect the files) */
 		mata: parallel_sandbox(2, "`parallelid'")

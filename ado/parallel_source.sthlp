@@ -918,7 +918,7 @@ mata:
 *!{col 4}{bf:return:}
 *!{col 6}{it:A do-file ready to be runned to load programs.}
 *!{dup 78:{c -}}{asis}
-void parallel_export_programs(
+real scalar parallel_export_programs(
     string scalar ouname ,
     |string scalar programlist,
     string scalar inname
@@ -935,10 +935,19 @@ void parallel_export_programs(
     // Writing log
     oldsettrace =c("trace")
     if (oldsettrace == "on") stata("set trace off")
-    stata("log using "+inname+", text replace name(plllog"+st_local("parallelid")+")")
+    stata("qui log using "+inname+", text replace name(plllog"+st_local("parallelid")+")")
+    display(sprintf("{hline 80}{break}{result:Exporting the following program(s): %s}",programlist))
+    stata("capture noisily program list "+programlist)
+    stata("local err = _rc")
 
-    stata("noisily program list "+programlist)
-    stata("log close plllog"+st_local("parallelid"))
+    real scalar err
+    if ( (err = strtoreal(st_local("err"))) ) {
+        stata("qui log close plllog"+st_local("parallelid"))
+        stata("set trace "+oldsettrace)    
+        return(err);
+    }
+
+    stata("qui log close plllog"+st_local("parallelid"))
     stata("set trace "+oldsettrace)
     
     // Opening files
@@ -956,7 +965,7 @@ void parallel_export_programs(
     // REGEX Patterns
     string scalar space
     space = "[\s ]*"+sprintf("\t")+"*"
-    pathead = "^"+space+"[^0-9][a-zA-Z_]+([a-zA-Z0-9_]*)(,"+space+"[a-zA-Z]*)?[:]"+space+"$"
+    pathead = "^"+"[^0-9][a-zA-Z_]+([a-zA-Z0-9_]*)(,"+space+"[a-zA-Z]*)?[:]"+space+"$"
     patnext = "^[>] "
     
     while ((line = fget(in_fh))!=J(0,0,"")) {
@@ -969,12 +978,13 @@ void parallel_export_programs(
         
             // While it is whithin the program
             while (line!=J(0,0,"")) {
-                if (regexm(line, patnext)) { // If it is a trimmed version of the program
+                 // If it is a trimmed version of the program
+                if (regexm(line, patnext)) {
                     fwrite(ou_fh, regexr(line, patnext,""))
                 }
-                else if (strlen(line) == 0 | !regexm(line, "^"+space+"[0-9]+\.")) { // If it is the last line of the program
+                // If it is the last line of the program
+                else if (strlen(line) == 0) {
                     fput(ou_fh, sprintf("\nend"))
-                    line = fget(in_fh)
                     break
                 }
                 else { // If it is ok
@@ -989,11 +999,13 @@ void parallel_export_programs(
     // Cleaning the files
     fclose(in_fh)
     unlink(inname)
-    fwrite(ou_fh,sprintf("\n"))
+    fwrite(ou_fh,sprintf("\nend\n"))
     fclose(ou_fh)
-    return
+    display("{hline 80}")
+    return(0)
 }
 end
+
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:End of file -parallel_export_programs.mata-}{col 83}{c |}
@@ -1586,7 +1598,8 @@ void function parallel_recursively_rm(string scalar parallelid ,| string scalar 
     {
         /* We don't want to remove logfiles in tmpdir */
         for(i=1;i<=length(files);i++)
-            if (!regexm(files[i],"do[0-9]+\.log$") | (c("tmpdir") != pwd()) ) unlink(files[i])
+            if ( !regexm(files[i],"do[0-9]+\.log$") )
+                unlink(files[i])
     }
 
     /* Entering each folder */
@@ -2130,15 +2143,23 @@ real scalar parallel_write_do(
     if (folder == J(1,1,"")) folder = c("pwd")
 
     real scalar progsave
-    if (strlen(programs)) progsave = 1
+    if (programs !="") progsave = 1
     else progsave = 0
     
     /* Checks for the MP version */
-    if (!c("MP") & processors != 0 & processors != J(1,1,.)) display("{it:{result:Warning:} processors option ignored...}")
+    if (!c("MP") & processors != 0 & processors != J(1,1,.)) display("{result:Warning:}{text: processors option ignored...}")
     else if (processors == J(1,1,.) | processors == 0) processors = 1
 
-    if (progsave) parallel_export_programs(folder+"__pll"+parallelid+"_prog.do", programs, folder+"__pll"+parallelid+"_prog.log")
+    real scalar err
+    err = 0
+    if (progsave)  err = parallel_export_programs(folder+"__pll"+parallelid+"_prog.do", programs, folder+"__pll"+parallelid+"_prog.log")
     if (getmacros) parallel_export_globals(folder+"__pll"+parallelid+"_glob.do")
+
+    if (err)
+    {
+        errprintf("An error has occurred while exporting -programs-")
+        return(err)
+    }
     
     for(i=1;i<=nclusters;i++) 
     {

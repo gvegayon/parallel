@@ -77,15 +77,23 @@ real scalar parallel_write_do(
 	if (folder == J(1,1,"")) folder = c("pwd")
 
 	real scalar progsave
-	if (strlen(programs)) progsave = 1
+	if (programs !="") progsave = 1
 	else progsave = 0
 	
 	/* Checks for the MP version */
-	if (!c("MP") & processors != 0 & processors != J(1,1,.)) display("{it:{result:Warning:} processors option ignored...}")
+	if (!c("MP") & processors != 0 & processors != J(1,1,.)) display("{result:Warning:}{text: processors option ignored...}")
 	else if (processors == J(1,1,.) | processors == 0) processors = 1
 
-	if (progsave) parallel_export_programs(folder+"__pll"+parallelid+"_prog.do", programs, folder+"__pll"+parallelid+"_prog.log")
+	real scalar err
+	err = 0
+	if (progsave)  err = parallel_export_programs(folder+"__pll"+parallelid+"_prog.do", programs, folder+"__pll"+parallelid+"_prog.log")
 	if (getmacros) parallel_export_globals(folder+"__pll"+parallelid+"_glob.do")
+
+	if (err)
+	{
+		errprintf("An error has occurred while exporting -programs-")
+		return(err)
+	}
 	
 	for(i=1;i<=nclusters;i++) 
 	{

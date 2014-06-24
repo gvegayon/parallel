@@ -1,4 +1,4 @@
-*! vers 0.14.5 9may2014
+*! vers 0.14.6.24 24jun2014
 *! auth George G. Vega
 
 program def parallel_append
@@ -9,7 +9,8 @@ program def parallel_append
 	syntax [anything(name=files)] , Do(string asis) [
 		in(string asis) 
 		if(string asis)
-		Expression(string) *]
+		Expression(string) *];
+	#delimit cr
 			
 	if ("`in'" != "") local in in `in'
 	if ("`if'" != "") local if if `if'
@@ -60,7 +61,7 @@ program def parallel_append
 			local file`++i' = "``n''`ext'"
 		}
 		else {
-			di as result " {it:Warning:}{text:The file -``n''.dta- couldn't be found.}"
+			di "{result:Warning:}{text:The file -``n''.dta- couldn't be found.}"
 		}
 	}
 	local n = `i'
@@ -205,7 +206,7 @@ program def parallel_append
 		qui parallel clean, e(`parallelid`i'')
 	}
 
-	if (`"`err'"'!="") di as result "{it:Warning:The following files could't be found}" _newline as text `"`=regexr(`"`err'"',"^[0]","")'"'
+	if (`"`err'"'!="") di "{result:Warning:}{text:The following files could't be found}" _newline as text `"`=regexr(`"`err'"',"^[0]","")'"'
 
 	qui parallel setclusters `oldclusters', s(`olddir') f
 	
