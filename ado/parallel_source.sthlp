@@ -1554,6 +1554,56 @@ end
 *! {c BLC}{dup 78:{c -}}{c BRC}
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
+*! {c |} {bf:Beginning of file -parallel_recursive_file_search.mata-}{col 83}{c |}
+*! {c BLC}{dup 78:{c -}}{c BRC}
+
+mata:
+{smcl}
+*! {marker parallel_recursive_file_search}{bf:function -{it:parallel_recursive_file_search}- in file -{it:parallel_recursive_file_search.mata}-}
+*! {back:{it:(previous page)}}
+*!{dup 78:{c -}}{asis}
+string scalar function parallel_recursive_file_search(
+    string scalar expr,
+    | string scalar curpath,
+    real scalar abspath
+) {
+    real scalar i
+    string colvector dirfiles, dirfile
+    string scalar tmpexpr, out
+
+    if (args()==1) 
+    {
+        if (args()<=2) curpath = "."
+        else if (abspath) curpath = ""
+        else curpath ="."
+    }
+
+    tmpexpr = expr
+    string scalar regex
+    regex = "([a-zA-Z0-9]*\*)[^$]"
+    while(regexm(tmpexpr,regex))
+    {
+        dirfile = regexs(1)
+        tmpexpr = regexr(tmpexpr, regex, dirfile)
+        dirfiles = dir(curpath,"dirs",dirfile)
+
+        /* Start recursive search */
+        for(i=1;i<length(dirfiles);i++)
+            out = out + " " +
+                parallel_recursive_file_search(    tmpexpr, dirfiles[i])
+
+
+    }
+
+    return(out);
+}
+end
+*! {smcl}
+*! {c TLC}{dup 78:{c -}}{c TRC}
+*! {c |} {bf:End of file -parallel_recursive_file_search.mata-}{col 83}{c |}
+*! {c BLC}{dup 78:{c -}}{c BRC}
+*! {smcl}
+*! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:Beginning of file -parallel_recursively_rm.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
 
