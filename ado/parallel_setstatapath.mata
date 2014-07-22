@@ -1,4 +1,4 @@
-*! vers 0.14.3 18mar2014
+*! vers 0.14.7 22jul2014
 *! author: George G. Vega Yon
 
 /**oxygen
@@ -53,9 +53,8 @@ real scalar parallel_setstatapath(string scalar statadir, | real scalar force) {
 	}
 
 	// Setting PLL_STATA_PATH
-	if (force == J(1,1,.) | force == 1)	{
-		if (!fileexists(statadir)) return(601)
-	}
+	if (force == J(1,1,.)) force = 0
+	if (!force) if (!fileexists(statadir)) return(601)
 	
 	if (!regexm(statadir, `"^["]"')) st_global("PLL_STATA_PATH", `"""'+statadir+`"""')
 	else st_global("PLL_STATA_PATH", statadir)
