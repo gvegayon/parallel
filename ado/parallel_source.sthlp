@@ -1385,51 +1385,6 @@ end
 *! {c BLC}{dup 78:{c -}}{c BRC}
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
-*! {c |} {bf:Beginning of file -parallel_parsefor.mata-}{col 83}{c |}
-*! {c BLC}{dup 78:{c -}}{c BRC}
-set trace off
-mata
-mata clear
-
-{smcl}
-*! {marker parallel_parsefor}{bf:function -{it:parallel_parsefor}- in file -{it:parallel_parsefor.mata}-}
-*! {back:{it:(previous page)}}
-*!{dup 78:{c -}}{asis}
-string scalar function parallel_parsefor(string scalar expr) 
-{
-    string scalar fortype, itervar
-    expr = st_local(expr)
-    printf(expr)
-    
-    /* Parsing the type of loop */
-    if (regexm(expr,"^(forval|foreach)[ ]([a-zA-Z0-9_]+)"))
-    {
-        fortype = regexs(1)
-        itervar = regexs(2)
-    }
-    else return("")
-}
-end
-
-cap program drop parallel_for
-program def parallel_for
-    syntax anything(equalok)
-    mata: parallel_parsefor("anything")
-end
-
-
-// set trace on
-parallel_for i=1/1000 { \n ///
-        di x + \`i' \n ///
-    }
-    
-
-*! {smcl}
-*! {c TLC}{dup 78:{c -}}{c TRC}
-*! {c |} {bf:End of file -parallel_parsefor.mata-}{col 83}{c |}
-*! {c BLC}{dup 78:{c -}}{c BRC}
-*! {smcl}
-*! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:Beginning of file -parallel_randomid.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
 *! vers 1.14.5 06may2014
@@ -1551,56 +1506,6 @@ end
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:End of file -parallel_randomid.mata-}{col 83}{c |}
-*! {c BLC}{dup 78:{c -}}{c BRC}
-*! {smcl}
-*! {c TLC}{dup 78:{c -}}{c TRC}
-*! {c |} {bf:Beginning of file -parallel_recursive_file_search.mata-}{col 83}{c |}
-*! {c BLC}{dup 78:{c -}}{c BRC}
-
-mata:
-{smcl}
-*! {marker parallel_recursive_file_search}{bf:function -{it:parallel_recursive_file_search}- in file -{it:parallel_recursive_file_search.mata}-}
-*! {back:{it:(previous page)}}
-*!{dup 78:{c -}}{asis}
-string scalar function parallel_recursive_file_search(
-    string scalar expr,
-    | string scalar curpath,
-    real scalar abspath
-) {
-    real scalar i
-    string colvector dirfiles, dirfile
-    string scalar tmpexpr, out
-
-    if (args()==1) 
-    {
-        if (args()<=2) curpath = "."
-        else if (abspath) curpath = ""
-        else curpath ="."
-    }
-
-    tmpexpr = expr
-    string scalar regex
-    regex = "([a-zA-Z0-9]*\*)[^$]"
-    while(regexm(tmpexpr,regex))
-    {
-        dirfile = regexs(1)
-        tmpexpr = regexr(tmpexpr, regex, dirfile)
-        dirfiles = dir(curpath,"dirs",dirfile)
-
-        /* Start recursive search */
-        for(i=1;i<length(dirfiles);i++)
-            out = out + " " +
-                parallel_recursive_file_search(    tmpexpr, dirfiles[i])
-
-
-    }
-
-    return(out);
-}
-end
-*! {smcl}
-*! {c TLC}{dup 78:{c -}}{c TRC}
-*! {c |} {bf:End of file -parallel_recursive_file_search.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
@@ -2324,10 +2229,10 @@ real scalar parallel_write_do(
             /* Checking programs loading is just fine */
             fput(output_fh, "}")
             fput(output_fh, "if (c(rc)) {")
-            fput(output_fh, `"cd ""'+folder+`"""')
-            fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while loading globals")"')
-            fput(output_fh, "clear")
-            fput(output_fh, "exit")
+            fput(output_fh, `"  cd ""'+folder+`"""')
+            fput(output_fh, `"  mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while loading globals")"')
+            fput(output_fh, "  clear")
+            fput(output_fh, "  exit")
             fput(output_fh, "}")
         }
         
@@ -2337,10 +2242,10 @@ real scalar parallel_write_do(
                 
         // Step 2        
         fput(output_fh, "capture {")
-        fput(output_fh, "noisily {")
+        fput(output_fh, "  noisily {")
         
         // If it is not a command, i.e. a dofile
-        if (!nodata) fput(output_fh, "use "+folder+"__pll"+parallelid+"_dataset if _"+parallelid+"cut == "+strofreal(i))
+        if (!nodata) fput(output_fh, "    use "+folder+"__pll"+parallelid+"_dataset if _"+parallelid+"cut == "+strofreal(i))
         
         /* Checking for break key */
         fput(output_fh, sprintf("\n/* Checking for break */"))
@@ -2349,14 +2254,31 @@ real scalar parallel_write_do(
         if (!prefix) {
             input_fh = fopen(inputname, "r", 1)
             
-            while ((line=fget(input_fh))!=J(0,0,"")) fput(output_fh, line)    
+            while ((line=fget(input_fh))!=J(0,0,"")) fput(output_fh, "    "+line)    
             fclose(input_fh)
         } // if it is a command
-        else fput(output_fh, inputname)
+        else fput(output_fh, "    "+inputname)
         
+        fput(output_fh, "  }")
         fput(output_fh, "}")
+
+        /* Checking programs loading is just fine */
+        fput(output_fh, "if (c(rc)) {")
+        fput(output_fh, `"  cd ""'+folder+`"""')
+        fput(output_fh, `"  mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while running the command/dofile")"')
+        fput(output_fh, "  clear")
+        fput(output_fh, "  exit")
         fput(output_fh, "}")
+
         if (!nodata) fput(output_fh, "noi cap save "+folder+"__pll"+parallelid+"_dta"+strofreal(i,"%04.0f")+", replace")
+
+        /* Checking programs loading is just fine */
+        fput(output_fh, "if (c(rc)) {")
+        fput(output_fh, `"  cd ""'+folder+`"""')
+        fput(output_fh, `"  mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while saving the results")"')
+        fput(output_fh, "  clear")
+        fput(output_fh, "  exit")
+        fput(output_fh, "}")
         
         // Step 3
         fput(output_fh, `"cd ""'+folder+`"""')

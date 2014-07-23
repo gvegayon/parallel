@@ -208,10 +208,10 @@ real scalar parallel_write_do(
 			/* Checking programs loading is just fine */
 			fput(output_fh, "}")
 			fput(output_fh, "if (c(rc)) {")
-			fput(output_fh, `"cd ""'+folder+`"""')
-			fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while loading globals")"')
-			fput(output_fh, "clear")
-			fput(output_fh, "exit")
+			fput(output_fh, `"  cd ""'+folder+`"""')
+			fput(output_fh, `"  mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while loading globals")"')
+			fput(output_fh, "  clear")
+			fput(output_fh, "  exit")
 			fput(output_fh, "}")
 		}
 		
@@ -221,10 +221,10 @@ real scalar parallel_write_do(
 				
 		// Step 2		
 		fput(output_fh, "capture {")
-		fput(output_fh, "noisily {")
+		fput(output_fh, "  noisily {")
 		
 		// If it is not a command, i.e. a dofile
-		if (!nodata) fput(output_fh, "use "+folder+"__pll"+parallelid+"_dataset if _"+parallelid+"cut == "+strofreal(i))
+		if (!nodata) fput(output_fh, "    use "+folder+"__pll"+parallelid+"_dataset if _"+parallelid+"cut == "+strofreal(i))
 		
 		/* Checking for break key */
 		fput(output_fh, sprintf("\n/* Checking for break */"))
@@ -233,14 +233,31 @@ real scalar parallel_write_do(
 		if (!prefix) {
 			input_fh = fopen(inputname, "r", 1)
 			
-			while ((line=fget(input_fh))!=J(0,0,"")) fput(output_fh, line)	
+			while ((line=fget(input_fh))!=J(0,0,"")) fput(output_fh, "    "+line)	
 			fclose(input_fh)
 		} // if it is a command
-		else fput(output_fh, inputname)
+		else fput(output_fh, "    "+inputname)
 		
+		fput(output_fh, "  }")
 		fput(output_fh, "}")
+
+		/* Checking programs loading is just fine */
+		fput(output_fh, "if (c(rc)) {")
+		fput(output_fh, `"  cd ""'+folder+`"""')
+		fput(output_fh, `"  mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while running the command/dofile")"')
+		fput(output_fh, "  clear")
+		fput(output_fh, "  exit")
 		fput(output_fh, "}")
+
 		if (!nodata) fput(output_fh, "noi cap save "+folder+"__pll"+parallelid+"_dta"+strofreal(i,"%04.0f")+", replace")
+
+		/* Checking programs loading is just fine */
+		fput(output_fh, "if (c(rc)) {")
+		fput(output_fh, `"  cd ""'+folder+`"""')
+		fput(output_fh, `"  mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while saving the results")"')
+		fput(output_fh, "  clear")
+		fput(output_fh, "  exit")
+		fput(output_fh, "}")
 		
 		// Step 3
 		fput(output_fh, `"cd ""'+folder+`"""')

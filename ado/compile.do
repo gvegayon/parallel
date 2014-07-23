@@ -21,7 +21,7 @@ end
 /* Compiling */
 run parallel_setclusters.mata
 run parallel_run.mata 
-run parallel_write_do.mata
+do parallel_write_do.mata
 run parallel_export_programs.mata
 run parallel_export_globals.mata  
 run parallel_randomid.mata     	
