@@ -1125,8 +1125,8 @@ real scalar parallel_finito(
                 (which is clear) */
 
                 /* Copying log file */
-                logfilename = sprintf("%s__pll%s_do%04.0f.log", (c("os") == "Windows" ? "" : "/"), parallelid, i)
-                stata(sprintf(`"cap copy __pll%s_do%04.0f.log "\`c(tmpdir)'%s", replace"', parallelid, i, logfilename))
+                logfilename = sprintf("%s__pll%s_do%04.0f.log", (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/"), parallelid, i)
+                stata(sprintf(`"cap copy __pll%s_do%04.0f.log "`c(tmpdir)'%s", replace"', parallelid, i, logfilename))
                 unlink(pwd()+logfilename)
 
                 in_fh = fopen(fname, "r", 1)
@@ -1141,7 +1141,7 @@ real scalar parallel_finito(
                 fclose(in_fh)
 
                 /* Checking tmpdir */
-                tmpdirname = sprintf("%s"+ (c("os")=="Windows" ? "" : "/") + "__pll%s_tmpdir%04.0f", c("tmpdir"),parallelid,i)
+                tmpdirname = sprintf("%s"+ (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/") + "__pll%s_tmpdir%04.0f", c("tmpdir"),parallelid,i)
                 parallel_recursively_rm(parallelid,tmpdirname,1)
                 rmdir(tmpdirname)
                 
@@ -1616,6 +1616,9 @@ real scalar parallel_run(
     display("{text:pll_id     :} {result:"+parallelid+"}")
     display("{text:Running at :} {result:"+c("pwd")+"}")
     display("{text:Randtype   :} {result:"+st_local("randtype")+"}")
+
+    string scalar tmpdir
+    tmpdir = c("tmpdir") + (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/")
     
     if (c("os") != "Windows") { // MACOS/UNIX
         unlink("__pll"+parallelid+"_shell.sh")
@@ -1624,15 +1627,15 @@ real scalar parallel_run(
         // Writing file
         if (c("os") != "Unix") {
             for(i=1;i<=nclusters;i++) {
-                mkdir(c("tmpdir")+"/__pll"+parallelid+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
-                fput(fh, "export TMPDIR="+c("tmpdir")+"/__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f"))
+                mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
+                fput(fh, "export TMPDIR="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f"))
                 fput(fh, paralleldir+`" -e -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
             }
         }
         else {
             for(i=1;i<=nclusters;i++) {
-                mkdir(c("tmpdir")+"/__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
-                fput(fh, "export TMPDIR="+c("tmpdir")+"/__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f"))
+                mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
+                fput(fh, "export TMPDIR="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f"))
                 fput(fh, paralleldir+`" -b -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
             }
         }
@@ -1649,8 +1652,8 @@ real scalar parallel_run(
         
         // Writing file
         for(i=1;i<=nclusters;i++) {
-            mkdir(c("tmpdir")+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1)
-            fwrite(fh, "start /MIN /HIGH set TEMP="+c("tmpdir")+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")+" ^& ")
+            mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1)
+            fwrite(fh, "start /MIN /HIGH set TEMP="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")+" ^& ")
             fput(fh, paralleldir+`" /e /q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do"^&exit"')
         }
         
@@ -1895,7 +1898,7 @@ end
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:Beginning of file -parallel_setstatapath.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
-*! vers 0.14.3 18mar2014
+*! vers 0.14.7 22jul2014
 *! author: George G. Vega Yon
 
 
@@ -1955,9 +1958,8 @@ real scalar parallel_setstatapath(string scalar statadir, | real scalar force) {
     }
 
     // Setting PLL_STATA_PATH
-    if (force == J(1,1,.) | force == 1)    {
-        if (!fileexists(statadir)) return(601)
-    }
+    if (force == J(1,1,.)) force = 0
+    if (!force) if (!fileexists(statadir)) return(601)
     
     if (!regexm(statadir, `"^["]"')) st_global("PLL_STATA_PATH", `"""'+statadir+`"""')
     else st_global("PLL_STATA_PATH", statadir)
@@ -2270,19 +2272,12 @@ real scalar parallel_write_do(
         fput(output_fh, "  exit")
         fput(output_fh, "}")
 
-        if (!nodata) fput(output_fh, "noi cap save "+folder+"__pll"+parallelid+"_dta"+strofreal(i,"%04.0f")+", replace")
+        fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while executing the command")"')
 
-        /* Checking programs loading is just fine */
-        fput(output_fh, "if (c(rc)) {")
-        fput(output_fh, `"  cd ""'+folder+`"""')
-        fput(output_fh, `"  mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while saving the results")"')
-        fput(output_fh, "  clear")
-        fput(output_fh, "  exit")
-        fput(output_fh, "}")
+        if (!nodata) fput(output_fh, "save "+folder+"__pll"+parallelid+"_dta"+strofreal(i,"%04.0f")+", replace")
         
         // Step 3
         fput(output_fh, `"cd ""'+folder+`"""')
-        fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while executing the command")"')
         fclose(output_fh)
     }
     return(0)

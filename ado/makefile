@@ -11,3 +11,6 @@ clean:
 	rm -f compile.log
 	rm -f __pll*
 	rm -f -r /tmp/__pll*
+
+test:
+	cd ../tests;stata-mp -b do test.do && less test.log 

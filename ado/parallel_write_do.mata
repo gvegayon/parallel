@@ -1,4 +1,4 @@
-*! version 0.14.6.23  23jun2014
+*! version 0.14.7.22  22jul2014
 * Generates the corresponding dofiles
 
 /**oxygen
@@ -249,19 +249,12 @@ real scalar parallel_write_do(
 		fput(output_fh, "  exit")
 		fput(output_fh, "}")
 
-		if (!nodata) fput(output_fh, "noi cap save "+folder+"__pll"+parallelid+"_dta"+strofreal(i,"%04.0f")+", replace")
+		fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while executing the command")"')
 
-		/* Checking programs loading is just fine */
-		fput(output_fh, "if (c(rc)) {")
-		fput(output_fh, `"  cd ""'+folder+`"""')
-		fput(output_fh, `"  mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while saving the results")"')
-		fput(output_fh, "  clear")
-		fput(output_fh, "  exit")
-		fput(output_fh, "}")
+		if (!nodata) fput(output_fh, "save "+folder+"__pll"+parallelid+"_dta"+strofreal(i,"%04.0f")+", replace")
 		
 		// Step 3
 		fput(output_fh, `"cd ""'+folder+`"""')
-		fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while executing the command")"')
 		fclose(output_fh)
 	}
 	return(0)

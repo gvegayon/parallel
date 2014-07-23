@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.14.6.23 23jun2014}{...}
+{* *! version 1.14.7.22 22jul2014}{...}
 {cmd:help parallel}{right:also see:  {net "describe miparallel, from(http://fmwww.bc.edu/RePEc/bocode/m)":miparallel}}
 {hline}
 
@@ -813,8 +813,9 @@ Eduardo Fajnzylber (Universidad Adolfo Ib{c a'}{c n~}ez, Chile), Eric Melse (CAR
 Tom{c a'}s Rau (Universidad Cat{c o'}lica, Chile), 
 Research Division (Superindentendia de Pensiones, Chile), 
 attendees to the Stata conference 2013 (New Orleans),
-Brian Quistorff (University of Maryland) and
-Timothy Mak (University of Hong Kong).
+Brian Quistorff (University of Maryland),
+Timothy Mak (University of Hong Kong) and
+Philippe Ruh (University of Zurich).
 {p_end}
 
 
