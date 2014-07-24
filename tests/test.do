@@ -45,4 +45,6 @@ if ("$S_OS" != "Windows") {
 	parallel, nog keepl: mata: for(i=1;i<=1e6;i++) parallel_break()
 }
 
+parallel clean, all
+
 
