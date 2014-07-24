@@ -881,7 +881,10 @@ void parallel_export_globals(|string scalar outname, real scalar ou_fh) {
     FORBIDDEN = "^(S\_FNDATE|S\_FN|F[0-9]|S\_level|S\_ADO|S\_FLAVOR|S\_OS|S\_MACH)"
 
     global_names = st_dir("global", "macro", "*")
-    for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++){
+    for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++) {
+        /* Only pic globals with a-zA-Z names */
+        if (!regexm(global_names[glob_ind,1], "^[a-zA-Z]")) continue
+
         macname = global_names[glob_ind,1]
         if (!regexm(macname, FORBIDDEN)){
             macvalu = st_global(macname)
@@ -1014,7 +1017,7 @@ end
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:Beginning of file -parallel_finito.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
-*! version 0.14.4  17apr2014
+*! version 0.14.7.22  22jul2014
 *! author: George G. Vega Yon
 
 mata:
@@ -1578,7 +1581,7 @@ end
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:Beginning of file -parallel_run.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
-*! version 0.14.4.17 17apr2014
+*! version 0.14.7.22 22jul2014
 *! author: George G. Vega Yon
 
 
@@ -2016,7 +2019,7 @@ end
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:Beginning of file -parallel_write_do.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
-*! version 0.14.6.23  23jun2014
+*! version 0.14.7.22  22jul2014
 * Generates the corresponding dofiles
 
 mata:
