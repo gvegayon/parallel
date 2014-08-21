@@ -846,7 +846,7 @@ m parallel_expand_expr("%02.0fa%02.0fb%02.0fc%02.0fd, 1/2,3/4,5/6,7/8")
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:Beginning of file -parallel_export_globals.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
-*! parallel_export_globals vers 0.14.3
+*! parallel_export_globals vers 0.14.7.23 23jul2014 @ 22:10:27
 *! author: George G. Vega Yon
 
 mata:
@@ -878,7 +878,7 @@ void parallel_export_globals(|string scalar outname, real scalar ou_fh) {
     else isnewfile = 0
 
     // Step 1
-    FORBIDDEN = "^(S\_FNDATE|S\_FN|F[0-9]|S\_level|S\_ADO|S\_FLAVOR|S\_OS|S\_MACH)"
+    FORBIDDEN = "^(S\_FNDATE|S\_FN|F[0-9]|S\_level|S\_ADO|S\_FLAVOR|S\_OS|S\_MACH|!)"
 
     global_names = st_dir("global", "macro", "*")
     for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++) {
@@ -1048,7 +1048,7 @@ real scalar parallel_finito(
     
     // Variable definitios
     real scalar in_fh, out_fh, time
-    real scalar suberrors, i, errornum
+    real scalar suberrors, i, errornum, retcode
     string scalar fname
     string scalar msg
     real scalar bk, pressed
@@ -1130,7 +1130,12 @@ real scalar parallel_finito(
                 /* Copying log file */
                 logfilename = sprintf("%s__pll%s_do%04.0f.log", (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/"), parallelid, i)
                 stata(sprintf(`"cap copy __pll%s_do%04.0f.log "`c(tmpdir)'%s", replace"', parallelid, i, logfilename))
-                unlink(pwd()+logfilename)
+                retcode = _unlink(pwd()+logfilename)
+                /* Sometimes Stata hasn't released the file yet. Either way, don't error out  */
+                if (retcode !=0){
+                    stata("sleep 2000")
+                    _unlink(pwd()+logfilename)
+                }
 
                 in_fh = fopen(fname, "r", 1)
                 if ((errornum=strtoreal(fget(in_fh))))
