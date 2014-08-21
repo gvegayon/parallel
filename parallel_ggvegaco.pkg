@@ -39,11 +39,11 @@ d
 d Author: George Vega Yon , California Institute of Technology, USA
 d Support: email gvegayon@@caltech.edu
 d
-f ado/parallel.ado
-f ado/parallel_append.ado
-f ado/parallel_bs.ado
-f ado/parallel_sim.ado
-f ado/parallel.sthlp
-f ado/parallel_source.sthlp
-f ado/lparallel.mlib
+f parallel/ado/parallel.ado
+f parallel/ado/parallel_append.ado
+f parallel/ado/parallel_bs.ado
+f parallel/ado/parallel_sim.ado
+f parallel/ado/parallel.sthlp
+f parallel/ado/parallel_source.sthlp
+f parallel/ado/lparallel.mlib
 

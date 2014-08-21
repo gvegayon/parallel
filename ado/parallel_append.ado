@@ -1,11 +1,16 @@
-*! vers 0.14.5 9may2014
+*! vers 0.14.6.24 24jun2014
 *! auth George G. Vega
 
 program def parallel_append
 
 	vers 11.0
 
-	syntax [anything(name=files)] , Do(string asis) [in(string asis) if (string asis) Expression(string) *]
+	#delimit ;
+	syntax [anything(name=files)] , Do(string asis) [
+		in(string asis) 
+		if(string asis)
+		Expression(string) *];
+	#delimit cr
 			
 	if ("`in'" != "") local in in `in'
 	if ("`if'" != "") local if if `if'
@@ -56,7 +61,7 @@ program def parallel_append
 			local file`++i' = "``n''`ext'"
 		}
 		else {
-			di as result " {it:Warning:}{text:The file -``n''.dta- couldn't be found.}"
+			di "{result:Warning:}{text:The file -``n''.dta- couldn't be found.}"
 		}
 	}
 	local n = `i'
@@ -77,9 +82,9 @@ program def parallel_append
 	local size = `n'/$PLL_CLUSTERS
 
 	local oldclusters = $PLL_CLUSTERS
-	local olddir = $PLL_DIR
+	local olddir = $PLL_STATA_PATH
 	if (`size' < 1) {
-		qui parallel setclusters `n', statadir(`olddir') f
+		qui parallel setclusters `n', statapath(`olddir') f
 		local g = 1
 		forval i=1/`n' {
 			local group`g' `group`g'' `file`i''
@@ -144,7 +149,7 @@ program def parallel_append
 
 		/* Checking if an error has occurred */
 		if (_rc) {
-			/*
+			
 			mata: parallel_sandbox(2, "$LAST_PLL_ID")
 			qui parallel clean, e($LAST_PLL_ID)
 			forval j=0/`i' {
@@ -152,9 +157,8 @@ program def parallel_append
 				qui parallel clean, e(`parallelid`j'')
 			}
 			qui parallel setclusters `oldclusters', s(`olddir') f
+			di as error "An error -`=_rc'- has occured while running parallel"
 			exit 1
-			*/
-			di "{result:Warning:}{text: Group -`g'- couldn't be processed}"
 			
 		}
 		else if (r(pll_errs)) {
@@ -202,7 +206,7 @@ program def parallel_append
 		qui parallel clean, e(`parallelid`i'')
 	}
 
-	if (`"`err'"'!="") di as result "{it:Warning:The following files could't be found}" _newline as text `"`=regexr(`"`err'"',"^[0]","")'"'
+	if (`"`err'"'!="") di "{result:Warning:}{text:The following files could't be found}" _newline as text `"`=regexr(`"`err'"',"^[0]","")'"'
 
 	qui parallel setclusters `oldclusters', s(`olddir') f
 	

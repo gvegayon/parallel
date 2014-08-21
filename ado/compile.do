@@ -14,19 +14,19 @@ vers 10.0
 mata:
 archmata = dir(".","files","*.mata")
 _sort(archmata,1)
-dt_moxygen(archmata, "parallel_source.hlp", 1)
+dt_moxygen(archmata, "parallel_source.sthlp", 1)
 
 end
 
 /* Compiling */
 run parallel_setclusters.mata
 run parallel_run.mata 
-run parallel_write_do.mata
+do parallel_write_do.mata
 run parallel_export_programs.mata
 run parallel_export_globals.mata  
 run parallel_randomid.mata     	
 run parallel_finito.mata
-run parallel_setstatadir.mata
+run parallel_setstatapath.mata
 run parallel_normalizepath.mata
 run parallel_clean.mata
 run parallel_divide_index.mata
@@ -37,7 +37,7 @@ run parallel_expand_expr.mata
 run parallel_eststore.mata
 run parallel_recursively_rm.mata
 
-rm lparallel.mlib
+cap rm lparallel.mlib
 mata: mata mlib create lparallel, replace
 mata: mata mlib add lparallel parallel_*() _parallel_*()
 

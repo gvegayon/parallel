@@ -1,4 +1,4 @@
-*! version 0.14.4  17apr2014
+*! version 0.14.7.22  22jul2014
 *! author: George G. Vega Yon
 
 /**oxygen
@@ -104,8 +104,8 @@ real scalar parallel_finito(
 				(which is clear) */
 
 				/* Copying log file */
-				logfilename = sprintf("%s__pll%s_do%04.0f.log", (c("os") == "Windows" ? "" : "/"), parallelid, i)
-				stata(sprintf(`"cap copy __pll%s_do%04.0f.log "\`c(tmpdir)'%s", replace"', parallelid, i, logfilename))
+				logfilename = sprintf("%s__pll%s_do%04.0f.log", (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/"), parallelid, i)
+				stata(sprintf(`"cap copy __pll%s_do%04.0f.log "`c(tmpdir)'%s", replace"', parallelid, i, logfilename))
 				unlink(pwd()+logfilename)
 
 				in_fh = fopen(fname, "r", 1)
@@ -120,7 +120,7 @@ real scalar parallel_finito(
 				fclose(in_fh)
 
 				/* Checking tmpdir */
-				tmpdirname = sprintf("%s"+ (c("os")=="Windows" ? "" : "/") + "__pll%s_tmpdir%04.0f", c("tmpdir"),parallelid,i)
+				tmpdirname = sprintf("%s"+ (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/") + "__pll%s_tmpdir%04.0f", c("tmpdir"),parallelid,i)
 				parallel_recursively_rm(parallelid,tmpdirname,1)
 				rmdir(tmpdirname)
 				

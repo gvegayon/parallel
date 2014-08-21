@@ -1,4 +1,4 @@
-*! version 0.13.10.7  7oct2013
+*! version 0.14.7.22  22jul2014
 * Generates the corresponding dofiles
 
 /**oxygen
@@ -52,12 +52,14 @@ real scalar parallel_write_do(
 	}
 	
 	/* Check seeds and seeds length */
-	if (seed == J(1,0,"") | seed == "")
+	if (seed == J(1,1,""))
 	{
 		seeds = parallel_randomid(5, randtype, 0, nclusters, 1)
+		st_local("pllseeds", invtokens(seeds'))
 	}
 	else
 	{
+		st_local("pllseeds", seed)
 		seeds = tokens(seed)
 		/* Checking seeds length */
 		if (length(seeds) > nclusters)
@@ -75,15 +77,23 @@ real scalar parallel_write_do(
 	if (folder == J(1,1,"")) folder = c("pwd")
 
 	real scalar progsave
-	if (strlen(programs)) progsave = 1
+	if (programs !="") progsave = 1
 	else progsave = 0
 	
 	/* Checks for the MP version */
-	if (!c("MP") & processors != 0 & processors != J(1,1,.)) display("{it:{result:Warning:} processors option ignored...}")
+	if (!c("MP") & processors != 0 & processors != J(1,1,.)) display("{result:Warning:}{text: processors option ignored...}")
 	else if (processors == J(1,1,.) | processors == 0) processors = 1
 
-	if (progsave) parallel_export_programs(folder+"__pll"+parallelid+"_prog.do", programs, folder+"__pll"+parallelid+"_prog.log")
+	real scalar err
+	err = 0
+	if (progsave)  err = parallel_export_programs(folder+"__pll"+parallelid+"_prog.do", programs, folder+"__pll"+parallelid+"_prog.log")
 	if (getmacros) parallel_export_globals(folder+"__pll"+parallelid+"_glob.do")
+
+	if (err)
+	{
+		errprintf("An error has occurred while exporting -programs-")
+		return(err)
+	}
 	
 	for(i=1;i<=nclusters;i++) 
 	{
@@ -198,10 +208,10 @@ real scalar parallel_write_do(
 			/* Checking programs loading is just fine */
 			fput(output_fh, "}")
 			fput(output_fh, "if (c(rc)) {")
-			fput(output_fh, `"cd ""'+folder+`"""')
-			fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while loading globals")"')
-			fput(output_fh, "clear")
-			fput(output_fh, "exit")
+			fput(output_fh, `"  cd ""'+folder+`"""')
+			fput(output_fh, `"  mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while loading globals")"')
+			fput(output_fh, "  clear")
+			fput(output_fh, "  exit")
 			fput(output_fh, "}")
 		}
 		
@@ -211,10 +221,10 @@ real scalar parallel_write_do(
 				
 		// Step 2		
 		fput(output_fh, "capture {")
-		fput(output_fh, "noisily {")
+		fput(output_fh, "  noisily {")
 		
 		// If it is not a command, i.e. a dofile
-		if (!nodata) fput(output_fh, "use "+folder+"__pll"+parallelid+"_dataset if _"+parallelid+"cut == "+strofreal(i))
+		if (!nodata) fput(output_fh, "    use "+folder+"__pll"+parallelid+"_dataset if _"+parallelid+"cut == "+strofreal(i))
 		
 		/* Checking for break key */
 		fput(output_fh, sprintf("\n/* Checking for break */"))
@@ -223,18 +233,28 @@ real scalar parallel_write_do(
 		if (!prefix) {
 			input_fh = fopen(inputname, "r", 1)
 			
-			while ((line=fget(input_fh))!=J(0,0,"")) fput(output_fh, line)	
+			while ((line=fget(input_fh))!=J(0,0,"")) fput(output_fh, "    "+line)	
 			fclose(input_fh)
 		} // if it is a command
-		else fput(output_fh, inputname)
+		else fput(output_fh, "    "+inputname)
 		
+		fput(output_fh, "  }")
 		fput(output_fh, "}")
+
+		/* Checking programs loading is just fine */
+		fput(output_fh, "if (c(rc)) {")
+		fput(output_fh, `"  cd ""'+folder+`"""')
+		fput(output_fh, `"  mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while running the command/dofile")"')
+		fput(output_fh, "  clear")
+		fput(output_fh, "  exit")
 		fput(output_fh, "}")
+
+		fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while executing the command")"')
+
 		if (!nodata) fput(output_fh, "save "+folder+"__pll"+parallelid+"_dta"+strofreal(i,"%04.0f")+", replace")
 		
 		// Step 3
 		fput(output_fh, `"cd ""'+folder+`"""')
-		fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while executing the command")"')
 		fclose(output_fh)
 	}
 	return(0)

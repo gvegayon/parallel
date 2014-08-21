@@ -1,4 +1,4 @@
-*! version 0.14.4.17 17apr2014
+*! version 0.14.7.22 22jul2014
 *! author: George G. Vega Yon
 
 /**
@@ -22,7 +22,7 @@ real scalar parallel_run(
 	
 	// Setting default parameters
 	if (nclusters == J(1,1,.)) nclusters = strtoreal(st_global("PLL_CLUSTERS"))
-	if (paralleldir == J(1,1,"")) paralleldir = st_global("PLL_DIR")
+	if (paralleldir == J(1,1,"")) paralleldir = st_global("PLL_STATA_PATH")
 	
 	// Message
 	display(sprintf("{hline %g}",c("linesize") > 80?80:c("linesize")))
@@ -31,6 +31,9 @@ real scalar parallel_run(
 	display("{text:pll_id     :} {result:"+parallelid+"}")
 	display("{text:Running at :} {result:"+c("pwd")+"}")
 	display("{text:Randtype   :} {result:"+st_local("randtype")+"}")
+
+	string scalar tmpdir
+	tmpdir = c("tmpdir") + (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/")
 	
 	if (c("os") != "Windows") { // MACOS/UNIX
 		unlink("__pll"+parallelid+"_shell.sh")
@@ -39,15 +42,15 @@ real scalar parallel_run(
 		// Writing file
 		if (c("os") != "Unix") {
 			for(i=1;i<=nclusters;i++) {
-				mkdir(c("tmpdir")+"/__pll"+parallelid+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
-				fput(fh, "export TMPDIR="+c("tmpdir")+"/__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f"))
+				mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
+				fput(fh, "export TMPDIR="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f"))
 				fput(fh, paralleldir+`" -e -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
 			}
 		}
 		else {
 			for(i=1;i<=nclusters;i++) {
-				mkdir(c("tmpdir")+"/__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
-				fput(fh, "export TMPDIR="+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
+				mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
+				fput(fh, "export TMPDIR="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f"))
 				fput(fh, paralleldir+`" -b -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
 			}
 		}
@@ -64,8 +67,8 @@ real scalar parallel_run(
 		
 		// Writing file
 		for(i=1;i<=nclusters;i++) {
-			mkdir(c("tmpdir")+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1)
-			fwrite(fh, "start /MIN /HIGH set TEMP="+c("tmpdir")+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")+" ^& ")
+			mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1)
+			fwrite(fh, "start /MIN /HIGH set TEMP="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")+" ^& ")
 			fput(fh, paralleldir+`" /e /q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do"^&exit"')
 		}
 		

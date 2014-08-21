@@ -9,7 +9,7 @@
  * @return A do-file ready to be runned to load programs.
  */
 mata:
-void parallel_export_programs(
+real scalar parallel_export_programs(
 	string scalar ouname ,
 	|string scalar programlist,
 	string scalar inname
@@ -26,10 +26,19 @@ void parallel_export_programs(
 	// Writing log
 	oldsettrace =c("trace")
 	if (oldsettrace == "on") stata("set trace off")
-	stata("log using "+inname+", text replace name(plllog"+st_local("parallelid")+")")
+	stata("qui log using "+inname+", text replace name(plllog"+st_local("parallelid")+")")
+	display(sprintf("{hline 80}{break}{result:Exporting the following program(s): %s}",programlist))
+	stata("capture noisily program list "+programlist)
+	stata("local err = _rc")
 
-	stata("noisily program list "+programlist)
-	stata("log close plllog"+st_local("parallelid"))
+	real scalar err
+	if ( (err = strtoreal(st_local("err"))) ) {
+		stata("qui log close plllog"+st_local("parallelid"))
+		stata("set trace "+oldsettrace)	
+		return(err);
+	}
+
+	stata("qui log close plllog"+st_local("parallelid"))
 	stata("set trace "+oldsettrace)
 	
 	// Opening files
@@ -47,7 +56,7 @@ void parallel_export_programs(
 	// REGEX Patterns
 	string scalar space
 	space = "[\s ]*"+sprintf("\t")+"*"
-	pathead = "^"+space+"[^0-9][a-zA-Z_]+([a-zA-Z0-9_]*)(,"+space+"[a-zA-Z]*)?[:]"+space+"$"
+	pathead = "^"+"[^0-9][a-zA-Z_]+([a-zA-Z0-9_]*)(,"+space+"[a-zA-Z]*)?[:]"+space+"$"
 	patnext = "^[>] "
 	
 	while ((line = fget(in_fh))!=J(0,0,"")) {
@@ -60,12 +69,13 @@ void parallel_export_programs(
 		
 			// While it is whithin the program
 			while (line!=J(0,0,"")) {
-				if (regexm(line, patnext)) { // If it is a trimmed version of the program
+				 // If it is a trimmed version of the program
+				if (regexm(line, patnext)) {
 					fwrite(ou_fh, regexr(line, patnext,""))
 				}
-				else if (strlen(line) == 0 | !regexm(line, "^"+space+"[0-9]+\.")) { // If it is the last line of the program
+				// If it is the last line of the program
+				else if (strlen(line) == 0) {
 					fput(ou_fh, sprintf("\nend"))
-					line = fget(in_fh)
 					break
 				}
 				else { // If it is ok
@@ -80,8 +90,10 @@ void parallel_export_programs(
 	// Cleaning the files
 	fclose(in_fh)
 	unlink(inname)
-	fwrite(ou_fh,sprintf("\n"))
+	fwrite(ou_fh,sprintf("\nend\n"))
 	fclose(ou_fh)
-	return
+	display("{hline 80}")
+	return(0)
 }
 end
+

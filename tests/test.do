@@ -42,7 +42,9 @@ parallel, by(rep78) nog f:collapse (mean) price foreign, by(rep78)
 cf _all using `cllps1'
 
 if ("$S_OS" != "Windows") {
-	parallel, nog nop keepl: mata: for(i=1;i<=1e6;i++) parallel_break()
+	parallel, nog keepl: mata: for(i=1;i<=1e6;i++) parallel_break()
 }
+
+parallel clean, all
 
 

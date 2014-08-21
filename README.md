@@ -30,4 +30,4 @@ Once installed it is suggested to restart Stata.
 Author
 ======
 George G. Vega
-g dot vegayon (at) gmail dot com
+gvegayon (at) caltech dot edu

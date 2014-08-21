@@ -881,7 +881,10 @@ void parallel_export_globals(|string scalar outname, real scalar ou_fh) {
     FORBIDDEN = "^(S\_FNDATE|S\_FN|F[0-9]|S\_level|S\_ADO|S\_FLAVOR|S\_OS|S\_MACH)"
 
     global_names = st_dir("global", "macro", "*")
-    for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++){
+    for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++) {
+        /* Only pic globals with a-zA-Z names */
+        if (!regexm(global_names[glob_ind,1], "^[a-zA-Z]")) continue
+
         macname = global_names[glob_ind,1]
         if (!regexm(macname, FORBIDDEN)){
             macvalu = st_global(macname)
@@ -893,6 +896,7 @@ void parallel_export_globals(|string scalar outname, real scalar ou_fh) {
     if (isnewfile) fclose(ou_fh)
 }
 end
+
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:End of file -parallel_export_globals.mata-}{col 83}{c |}
@@ -917,7 +921,7 @@ mata:
 *!{col 4}{bf:return:}
 *!{col 6}{it:A do-file ready to be runned to load programs.}
 *!{dup 78:{c -}}{asis}
-void parallel_export_programs(
+real scalar parallel_export_programs(
     string scalar ouname ,
     |string scalar programlist,
     string scalar inname
@@ -934,10 +938,19 @@ void parallel_export_programs(
     // Writing log
     oldsettrace =c("trace")
     if (oldsettrace == "on") stata("set trace off")
-    stata("log using "+inname+", text replace name(plllog"+st_local("parallelid")+")")
+    stata("qui log using "+inname+", text replace name(plllog"+st_local("parallelid")+")")
+    display(sprintf("{hline 80}{break}{result:Exporting the following program(s): %s}",programlist))
+    stata("capture noisily program list "+programlist)
+    stata("local err = _rc")
 
-    stata("noisily program list "+programlist)
-    stata("log close plllog"+st_local("parallelid"))
+    real scalar err
+    if ( (err = strtoreal(st_local("err"))) ) {
+        stata("qui log close plllog"+st_local("parallelid"))
+        stata("set trace "+oldsettrace)    
+        return(err);
+    }
+
+    stata("qui log close plllog"+st_local("parallelid"))
     stata("set trace "+oldsettrace)
     
     // Opening files
@@ -955,7 +968,7 @@ void parallel_export_programs(
     // REGEX Patterns
     string scalar space
     space = "[\s ]*"+sprintf("\t")+"*"
-    pathead = "^"+space+"[^0-9][a-zA-Z_]+([a-zA-Z0-9_]*)(,"+space+"[a-zA-Z]*)?[:]"+space+"$"
+    pathead = "^"+"[^0-9][a-zA-Z_]+([a-zA-Z0-9_]*)(,"+space+"[a-zA-Z]*)?[:]"+space+"$"
     patnext = "^[>] "
     
     while ((line = fget(in_fh))!=J(0,0,"")) {
@@ -968,12 +981,13 @@ void parallel_export_programs(
         
             // While it is whithin the program
             while (line!=J(0,0,"")) {
-                if (regexm(line, patnext)) { // If it is a trimmed version of the program
+                 // If it is a trimmed version of the program
+                if (regexm(line, patnext)) {
                     fwrite(ou_fh, regexr(line, patnext,""))
                 }
-                else if (strlen(line) == 0 | !regexm(line, "^"+space+"[0-9]+\.")) { // If it is the last line of the program
+                // If it is the last line of the program
+                else if (strlen(line) == 0) {
                     fput(ou_fh, sprintf("\nend"))
-                    line = fget(in_fh)
                     break
                 }
                 else { // If it is ok
@@ -988,11 +1002,13 @@ void parallel_export_programs(
     // Cleaning the files
     fclose(in_fh)
     unlink(inname)
-    fwrite(ou_fh,sprintf("\n"))
+    fwrite(ou_fh,sprintf("\nend\n"))
     fclose(ou_fh)
-    return
+    display("{hline 80}")
+    return(0)
 }
 end
+
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:End of file -parallel_export_programs.mata-}{col 83}{c |}
@@ -1001,7 +1017,7 @@ end
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:Beginning of file -parallel_finito.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
-*! version 0.14.4  17apr2014
+*! version 0.14.7.22  22jul2014
 *! author: George G. Vega Yon
 
 mata:
@@ -1112,8 +1128,8 @@ real scalar parallel_finito(
                 (which is clear) */
 
                 /* Copying log file */
-                logfilename = sprintf("%s__pll%s_do%04.0f.log", (c("os") == "Windows" ? "" : "/"), parallelid, i)
-                stata(sprintf(`"cap copy __pll%s_do%04.0f.log "\`c(tmpdir)'%s", replace"', parallelid, i, logfilename))
+                logfilename = sprintf("%s__pll%s_do%04.0f.log", (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/"), parallelid, i)
+                stata(sprintf(`"cap copy __pll%s_do%04.0f.log "`c(tmpdir)'%s", replace"', parallelid, i, logfilename))
                 unlink(pwd()+logfilename)
 
                 in_fh = fopen(fname, "r", 1)
@@ -1128,7 +1144,7 @@ real scalar parallel_finito(
                 fclose(in_fh)
 
                 /* Checking tmpdir */
-                tmpdirname = sprintf("%s"+ (c("os")=="Windows" ? "" : "/") + "__pll%s_tmpdir%04.0f", c("tmpdir"),parallelid,i)
+                tmpdirname = sprintf("%s"+ (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/") + "__pll%s_tmpdir%04.0f", c("tmpdir"),parallelid,i)
                 parallel_recursively_rm(parallelid,tmpdirname,1)
                 rmdir(tmpdirname)
                 
@@ -1407,7 +1423,7 @@ string colvector parallel_randomid(|real scalar n, string scalar randtype, real 
     if (silent == J(1,1,.)) silent = 0
     
     // Checking if randtype is supported
-    if (!regexm(randtype,"^(random.org|datetime)$") & strlen(randtype) > 0) {
+    if (!regexm(randtype,"^(current|random.org|datetime)$") & strlen(randtype) > 0) {
         errprintf("randtype -%s- not supported\nPlease try with -random.org- or -datetime-\n", randtype)
         exit(198)
     }
@@ -1538,9 +1554,10 @@ void function parallel_recursively_rm(string scalar parallelid ,| string scalar 
     }
     else
     {
-        /* We don't want to remove logfiles */
+        /* We don't want to remove logfiles in tmpdir */
         for(i=1;i<=length(files);i++)
-            if (!regexm(files[i],"do[0-9]+\.log$")) unlink(files[i])
+            if ( !regexm(files[i],"do[0-9]+\.log$") )
+                unlink(files[i])
     }
 
     /* Entering each folder */
@@ -1564,7 +1581,7 @@ end
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:Beginning of file -parallel_run.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
-*! version 0.14.4.17 17apr2014
+*! version 0.14.7.22 22jul2014
 *! author: George G. Vega Yon
 
 
@@ -1593,7 +1610,7 @@ real scalar parallel_run(
     
     // Setting default parameters
     if (nclusters == J(1,1,.)) nclusters = strtoreal(st_global("PLL_CLUSTERS"))
-    if (paralleldir == J(1,1,"")) paralleldir = st_global("PLL_DIR")
+    if (paralleldir == J(1,1,"")) paralleldir = st_global("PLL_STATA_PATH")
     
     // Message
     display(sprintf("{hline %g}",c("linesize") > 80?80:c("linesize")))
@@ -1602,6 +1619,9 @@ real scalar parallel_run(
     display("{text:pll_id     :} {result:"+parallelid+"}")
     display("{text:Running at :} {result:"+c("pwd")+"}")
     display("{text:Randtype   :} {result:"+st_local("randtype")+"}")
+
+    string scalar tmpdir
+    tmpdir = c("tmpdir") + (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/")
     
     if (c("os") != "Windows") { // MACOS/UNIX
         unlink("__pll"+parallelid+"_shell.sh")
@@ -1610,15 +1630,15 @@ real scalar parallel_run(
         // Writing file
         if (c("os") != "Unix") {
             for(i=1;i<=nclusters;i++) {
-                mkdir(c("tmpdir")+"/__pll"+parallelid+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
-                fput(fh, "export TMPDIR="+c("tmpdir")+"/__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f"))
+                mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
+                fput(fh, "export TMPDIR="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f"))
                 fput(fh, paralleldir+`" -e -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
             }
         }
         else {
             for(i=1;i<=nclusters;i++) {
-                mkdir(c("tmpdir")+"/__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
-                fput(fh, "export TMPDIR="+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
+                mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
+                fput(fh, "export TMPDIR="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f"))
                 fput(fh, paralleldir+`" -b -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
             }
         }
@@ -1635,8 +1655,8 @@ real scalar parallel_run(
         
         // Writing file
         for(i=1;i<=nclusters;i++) {
-            mkdir(c("tmpdir")+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1)
-            fwrite(fh, "start /MIN /HIGH set TEMP="+c("tmpdir")+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")+" ^& ")
+            mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1)
+            fwrite(fh, "start /MIN /HIGH set TEMP="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")+" ^& ")
             fput(fh, paralleldir+`" /e /q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do"^&exit"')
         }
         
@@ -1879,15 +1899,15 @@ end
 *! {c BLC}{dup 78:{c -}}{c BRC}
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
-*! {c |} {bf:Beginning of file -parallel_setstatadir.mata-}{col 83}{c |}
+*! {c |} {bf:Beginning of file -parallel_setstatapath.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
-*! vers 0.14.3 18mar2014
+*! vers 0.14.7 22jul2014
 *! author: George G. Vega Yon
 
 
 mata:
 {smcl}
-*! {marker parallel_setstatadir}{bf:function -{it:parallel_setstatadir}- in file -{it:parallel_setstatadir.mata}-}
+*! {marker parallel_setstatapath}{bf:function -{it:parallel_setstatapath}- in file -{it:parallel_setstatapath.mata}-}
 *! {back:{it:(previous page)}}
 *!{dup 78:{c -}}
 *!{col 4}{it:Sets the path where stata exe is installed.}
@@ -1895,9 +1915,9 @@ mata:
 *!{col 6}{bf:tatadir}{col 20}If the user wants to set it manually
 *!{col 6}{bf:force}{col 20}Avoids path checking.
 *!{col 4}{bf:returns:}
-*!{col 6}{it:A global PLL_DIR.}
+*!{col 6}{it:A global PLL_STATA_PATH.}
 *!{dup 78:{c -}}{asis}
-real scalar parallel_setstatadir(string scalar statadir, | real scalar force) {
+real scalar parallel_setstatapath(string scalar statadir, | real scalar force) {
 
     string scalar bit, flv
 
@@ -1940,13 +1960,12 @@ real scalar parallel_setstatadir(string scalar statadir, | real scalar force) {
         }
     }
 
-    // Setting PLL_DIR
-    if (force == J(1,1,.) | force == 1)    {
-        if (!fileexists(statadir)) return(601)
-    }
+    // Setting PLL_STATA_PATH
+    if (force == J(1,1,.)) force = 0
+    if (!force) if (!fileexists(statadir)) return(601)
     
-    if (!regexm(statadir, `"^["]"')) st_global("PLL_DIR", `"""'+statadir+`"""')
-    else st_global("PLL_DIR", statadir)
+    if (!regexm(statadir, `"^["]"')) st_global("PLL_STATA_PATH", `"""'+statadir+`"""')
+    else st_global("PLL_STATA_PATH", statadir)
     
     display(sprintf("{text:Stata dir:} {result: %s}" ,statadir))
     return(0)
@@ -1955,7 +1974,7 @@ end
 
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
-*! {c |} {bf:End of file -parallel_setstatadir.mata-}{col 83}{c |}
+*! {c |} {bf:End of file -parallel_setstatapath.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
@@ -2000,7 +2019,7 @@ end
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:Beginning of file -parallel_write_do.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
-*! version 0.13.10.7  7oct2013
+*! version 0.14.7.22  22jul2014
 * Generates the corresponding dofiles
 
 mata:
@@ -2059,12 +2078,14 @@ real scalar parallel_write_do(
     }
     
     /* Check seeds and seeds length */
-    if (seed == J(1,0,"") | seed == "")
+    if (seed == J(1,1,""))
     {
         seeds = parallel_randomid(5, randtype, 0, nclusters, 1)
+        st_local("pllseeds", invtokens(seeds'))
     }
     else
     {
+        st_local("pllseeds", seed)
         seeds = tokens(seed)
         /* Checking seeds length */
         if (length(seeds) > nclusters)
@@ -2082,15 +2103,23 @@ real scalar parallel_write_do(
     if (folder == J(1,1,"")) folder = c("pwd")
 
     real scalar progsave
-    if (strlen(programs)) progsave = 1
+    if (programs !="") progsave = 1
     else progsave = 0
     
     /* Checks for the MP version */
-    if (!c("MP") & processors != 0 & processors != J(1,1,.)) display("{it:{result:Warning:} processors option ignored...}")
+    if (!c("MP") & processors != 0 & processors != J(1,1,.)) display("{result:Warning:}{text: processors option ignored...}")
     else if (processors == J(1,1,.) | processors == 0) processors = 1
 
-    if (progsave) parallel_export_programs(folder+"__pll"+parallelid+"_prog.do", programs, folder+"__pll"+parallelid+"_prog.log")
+    real scalar err
+    err = 0
+    if (progsave)  err = parallel_export_programs(folder+"__pll"+parallelid+"_prog.do", programs, folder+"__pll"+parallelid+"_prog.log")
     if (getmacros) parallel_export_globals(folder+"__pll"+parallelid+"_glob.do")
+
+    if (err)
+    {
+        errprintf("An error has occurred while exporting -programs-")
+        return(err)
+    }
     
     for(i=1;i<=nclusters;i++) 
     {
@@ -2205,10 +2234,10 @@ real scalar parallel_write_do(
             /* Checking programs loading is just fine */
             fput(output_fh, "}")
             fput(output_fh, "if (c(rc)) {")
-            fput(output_fh, `"cd ""'+folder+`"""')
-            fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while loading globals")"')
-            fput(output_fh, "clear")
-            fput(output_fh, "exit")
+            fput(output_fh, `"  cd ""'+folder+`"""')
+            fput(output_fh, `"  mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while loading globals")"')
+            fput(output_fh, "  clear")
+            fput(output_fh, "  exit")
             fput(output_fh, "}")
         }
         
@@ -2218,10 +2247,10 @@ real scalar parallel_write_do(
                 
         // Step 2        
         fput(output_fh, "capture {")
-        fput(output_fh, "noisily {")
+        fput(output_fh, "  noisily {")
         
         // If it is not a command, i.e. a dofile
-        if (!nodata) fput(output_fh, "use "+folder+"__pll"+parallelid+"_dataset if _"+parallelid+"cut == "+strofreal(i))
+        if (!nodata) fput(output_fh, "    use "+folder+"__pll"+parallelid+"_dataset if _"+parallelid+"cut == "+strofreal(i))
         
         /* Checking for break key */
         fput(output_fh, sprintf("\n/* Checking for break */"))
@@ -2230,18 +2259,28 @@ real scalar parallel_write_do(
         if (!prefix) {
             input_fh = fopen(inputname, "r", 1)
             
-            while ((line=fget(input_fh))!=J(0,0,"")) fput(output_fh, line)    
+            while ((line=fget(input_fh))!=J(0,0,"")) fput(output_fh, "    "+line)    
             fclose(input_fh)
         } // if it is a command
-        else fput(output_fh, inputname)
+        else fput(output_fh, "    "+inputname)
         
+        fput(output_fh, "  }")
         fput(output_fh, "}")
+
+        /* Checking programs loading is just fine */
+        fput(output_fh, "if (c(rc)) {")
+        fput(output_fh, `"  cd ""'+folder+`"""')
+        fput(output_fh, `"  mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while running the command/dofile")"')
+        fput(output_fh, "  clear")
+        fput(output_fh, "  exit")
         fput(output_fh, "}")
+
+        fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while executing the command")"')
+
         if (!nodata) fput(output_fh, "save "+folder+"__pll"+parallelid+"_dta"+strofreal(i,"%04.0f")+", replace")
         
         // Step 3
         fput(output_fh, `"cd ""'+folder+`"""')
-        fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while executing the command")"')
         fclose(output_fh)
     }
     return(0)

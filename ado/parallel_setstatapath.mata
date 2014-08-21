@@ -1,15 +1,15 @@
-*! vers 0.14.3 18mar2014
+*! vers 0.14.7 22jul2014
 *! author: George G. Vega Yon
 
 /**oxygen
  * @brief Sets the path where stata exe is installed.
  * @param statadir If the user wants to set it manually
  * @param force Avoids path checking.
- * @returns A global PLL_DIR.
+ * @returns A global PLL_STATA_PATH.
  */
 
 mata:
-real scalar parallel_setstatadir(string scalar statadir, | real scalar force) {
+real scalar parallel_setstatapath(string scalar statadir, | real scalar force) {
 
 	string scalar bit, flv
 
@@ -52,13 +52,12 @@ real scalar parallel_setstatadir(string scalar statadir, | real scalar force) {
 		}
 	}
 
-	// Setting PLL_DIR
-	if (force == J(1,1,.) | force == 1)	{
-		if (!fileexists(statadir)) return(601)
-	}
+	// Setting PLL_STATA_PATH
+	if (force == J(1,1,.)) force = 0
+	if (!force) if (!fileexists(statadir)) return(601)
 	
-	if (!regexm(statadir, `"^["]"')) st_global("PLL_DIR", `"""'+statadir+`"""')
-	else st_global("PLL_DIR", statadir)
+	if (!regexm(statadir, `"^["]"')) st_global("PLL_STATA_PATH", `"""'+statadir+`"""')
+	else st_global("PLL_STATA_PATH", statadir)
 	
 	display(sprintf("{text:Stata dir:} {result: %s}" ,statadir))
 	return(0)

@@ -1,4 +1,4 @@
-*! parallel_export_globals vers 0.14.3
+*! parallel_export_globals vers 0.14.7.23 23jul2014 @ 22:10:27
 *! author: George G. Vega Yon
 
 mata:
@@ -28,7 +28,10 @@ void parallel_export_globals(|string scalar outname, real scalar ou_fh) {
 	FORBIDDEN = "^(S\_FNDATE|S\_FN|F[0-9]|S\_level|S\_ADO|S\_FLAVOR|S\_OS|S\_MACH|!)"
 
 	global_names = st_dir("global", "macro", "*")
-	for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++){
+	for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++) {
+		/* Only pic globals with a-zA-Z names */
+		if (!regexm(global_names[glob_ind,1], "^[a-zA-Z]")) continue
+
 		macname = global_names[glob_ind,1]
 		if (!regexm(macname, FORBIDDEN)){
 			macvalu = st_global(macname)
@@ -40,3 +43,4 @@ void parallel_export_globals(|string scalar outname, real scalar ou_fh) {
 	if (isnewfile) fclose(ou_fh)
 }
 end
+
