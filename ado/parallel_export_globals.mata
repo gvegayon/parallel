@@ -25,7 +25,7 @@ void parallel_export_globals(|string scalar outname, real scalar ou_fh) {
 	else isnewfile = 0
 
 	// Step 1
-	FORBIDDEN = "^(S\_FNDATE|S\_FN|F[0-9]|S\_level|S\_ADO|S\_FLAVOR|S\_OS|S\_MACH)"
+	FORBIDDEN = "^(S\_FNDATE|S\_FN|F[0-9]|S\_level|S\_ADO|S\_FLAVOR|S\_OS|S\_MACH|!)"
 
 	global_names = st_dir("global", "macro", "*")
 	for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++){
