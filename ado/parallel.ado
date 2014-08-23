@@ -390,7 +390,7 @@ end
 *cap program drop parallel_setclusters
 program parallel_setclusters
 	version 11.0
-	syntax anything(name=nclusters)  [, Force Statapath(string asis)]
+	syntax anything(name=nclusters)  [, Force Statapath(string asis) Gateway(string)]
 	
 	local nclusters = real(`"`nclusters'"')
 	if (`nclusters' == .) {
@@ -400,8 +400,25 @@ program parallel_setclusters
 	local force = length("`force'")>0
 	mata: parallel_setclusters(`nclusters', `force')
 	mata: st_local("error", strofreal(parallel_setstatapath(`"`statapath'"', `force')))
-	if (`error') di as error `"Can not set Stata directory, try using -statapath()- option"'
-	exit `error'
+	if (`error'){
+        di as error `"Can not set Stata directory, try using -statapath()- option"'
+        exit `error'
+    }
+    
+    if "`c(mode)'"=="batch" & "`c(os)'"=="Windows" {
+        if "`gateway'"!=""{
+            cap confirm file "`gateway'"
+            if _rc {
+                di as error `"Gateway file does not exist."'
+                exit _rc
+            }
+            global PLL_GATEWAY_FNAME "`gateway'"
+        }
+        else {
+            di as error `"On Windows in batch-mode, parallel requires a gateway file."'
+            exit 198 //"invalid syntax"
+        }
+    }
 end
 
 

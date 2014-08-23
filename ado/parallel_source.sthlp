@@ -1601,6 +1601,7 @@ mata:
 *!{col 6}{bf:nclusters}{col 20}Number of clusters.
 *!{col 6}{bf:paralleldir}{col 20}Dir where the process should be running.
 *!{col 6}{bf:timeout}{col 20}Number of seconds to wait until stop the process for no conextion.
+*!{col 6}{bf:gateway_fname}{col 20}Name of file that a Cygwin process is listen to will execute from (Windows batch).
 *!{col 4}{bf:returns:}
 *!{col 6}{it:Number of clusters that stopped with an error.}
 *!{dup 78:{c -}}{asis}
@@ -1608,10 +1609,12 @@ real scalar parallel_run(
     string scalar parallelid, 
     |real scalar nclusters, 
     string scalar paralleldir,
-    real scalar timeout
+    real scalar timeout,
+    string scalar gateway_fname
     ) {
 
     real scalar fh, i
+    string scalar tmpdir_i
     
     // Setting default parameters
     if (nclusters == J(1,1,.)) nclusters = strtoreal(st_global("PLL_CLUSTERS"))
@@ -1654,22 +1657,34 @@ real scalar parallel_run(
         stata("winexec sh __pll"+parallelid+"_shell.sh")
     }
     else { // WINDOWS
-        
-        unlink("__pll"+parallelid+"_shell.bat")
-        fh = fopen("__pll"+parallelid+"_shell.bat","w", 1)
-        
-        // Writing file
-        for(i=1;i<=nclusters;i++) {
-            mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1)
-            fwrite(fh, "start /MIN /HIGH set TEMP="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")+" ^& ")
-            fput(fh, paralleldir+`" /e /q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do"^&exit"')
+        if (c("mode")=="batch"){ //Execute commands via Cygwin process
+            gateway_fname = st_global("PLL_GATEWAY_FNAME")
+            fh = fopen(gateway_fname,"a", 1)
+            for(i=1;i<=nclusters;i++) {
+                tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f")
+                mkdir(tmpdir_i,1) // fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
+                fput(fh, `"export TEMP=""'+tmpdir_i+`"""')
+                fput(fh, paralleldir+`" -e -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
+            }
+            fclose(fh)
         }
-        
-        fput(fh, "exit")
-        
-        fclose(fh)
-        
-        stata("winexec __pll"+parallelid+"_shell.bat")
+        else{
+            unlink("__pll"+parallelid+"_shell.bat")
+            fh = fopen("__pll"+parallelid+"_shell.bat","w", 1)
+            
+            // Writing file
+            for(i=1;i<=nclusters;i++) {
+                mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1)
+                fwrite(fh, "start /MIN /HIGH set TEMP="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")+" ^& ")
+                fput(fh, paralleldir+`" /e /q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do"^&exit"')
+            }
+            
+            fput(fh, "exit")
+            
+            fclose(fh)
+            
+            stata("winexec __pll"+parallelid+"_shell.bat")
+        }
     }
     
     /* Waits until each process ends */
