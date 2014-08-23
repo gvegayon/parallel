@@ -7,6 +7,7 @@
  * @param nclusters Number of clusters.
  * @param paralleldir Dir where the process should be running.
  * @param timeout Number of seconds to wait until stop the process for no conextion.
+ * @param gateway_fname Name of file that a Cygwin process is listen to will execute from (Windows batch).
  * @returns Number of clusters that stopped with an error.
  */
 
@@ -15,10 +16,12 @@ real scalar parallel_run(
 	string scalar parallelid, 
 	|real scalar nclusters, 
 	string scalar paralleldir,
-	real scalar timeout
+	real scalar timeout,
+	string scalar gateway_fname
 	) {
 
 	real scalar fh, i
+	string scalar tmpdir_i
 	
 	// Setting default parameters
 	if (nclusters == J(1,1,.)) nclusters = strtoreal(st_global("PLL_CLUSTERS"))
@@ -61,22 +64,34 @@ real scalar parallel_run(
 		stata("winexec sh __pll"+parallelid+"_shell.sh")
 	}
 	else { // WINDOWS
-		
-		unlink("__pll"+parallelid+"_shell.bat")
-		fh = fopen("__pll"+parallelid+"_shell.bat","w", 1)
-		
-		// Writing file
-		for(i=1;i<=nclusters;i++) {
-			mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1)
-			fwrite(fh, "start /MIN /HIGH set TEMP="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")+" ^& ")
-			fput(fh, paralleldir+`" /e /q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do"^&exit"')
+		if (c("mode")=="batch"){ //Execute commands via Cygwin process
+			gateway_fname = st_global("PLL_GATEWAY_FNAME")
+			fh = fopen(gateway_fname,"a", 1)
+			for(i=1;i<=nclusters;i++) {
+				tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f")
+				mkdir(tmpdir_i,1) // fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
+				fput(fh, `"export TEMP=""'+tmpdir_i+`"""')
+				fput(fh, paralleldir+`" -e -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
+			}
+			fclose(fh)
 		}
-		
-		fput(fh, "exit")
-		
-		fclose(fh)
-		
-		stata("winexec __pll"+parallelid+"_shell.bat")
+		else{
+			unlink("__pll"+parallelid+"_shell.bat")
+			fh = fopen("__pll"+parallelid+"_shell.bat","w", 1)
+			
+			// Writing file
+			for(i=1;i<=nclusters;i++) {
+				mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1)
+				fwrite(fh, "start /MIN /HIGH set TEMP="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")+" ^& ")
+				fput(fh, paralleldir+`" /e /q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do"^&exit"')
+			}
+			
+			fput(fh, "exit")
+			
+			fclose(fh)
+			
+			stata("winexec __pll"+parallelid+"_shell.bat")
+		}
 	}
 	
 	/* Waits until each process ends */

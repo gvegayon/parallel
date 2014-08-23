@@ -47,7 +47,8 @@
 
 {p 8 17 2}
 {cmdab:parallel setclusters} # [, {opt f:orce} 
-{opt s:tatapath}({it:{help filename:stata_path}})]
+{opt s:tatapath}({it:{help filename:stata_path}})
+{opt g:ateway}({it:{help filename:gateway_path}})]
 
 {col 5}{hline}{col 2}{marker do}{...}
 {pstd}Parallelizing a do-file
@@ -151,6 +152,8 @@
 {synopt:{opt s:tatapath}}File path. {cmd:parallel} tries to automatically identify
 Stata's exe path. By using this option you will override this and force 
 {cmd:parallel} to use a specific path to stata.exe.{p_end}
+{synopt:{opt g:ateway}}File path. For Windows, a file that a Cygwin process
+is listening to in order to execute the parallel instances. See example below.{p_end}
 
 {syntab:Byable parallelization}
 {synopt:{opt by}}Varlist. Tells the command through which observations the current dataset 
@@ -678,6 +681,42 @@ depending on the value (number) of -pll_instance-. For those observation in the
 first cluster, -{cmd:parallel}- will generate -z- equal to exp(2), for those in 
 the second cluster it will compute -z- equal to the average price and for the
 rest of the clusters it will generate -z- equal to zero.
+{p_end}
+
+{title:Example 7: Using -parallel- on Windows in batch-mode}
+
+{pstd}
+Normally, the parallel intances of Stata are executed using -{cmd:winexec}-. This
+command is ignored on Windows, however, when in batch-mode. A work-around for
+this environment is to have Stata write out the commands to be executed to a file
+(called the gateway) and have a separate process read new inputs to this file and 
+execute the commands. This latter part requires the user to install Cygwin and run 
+a few commands prior to starting Stata. In a Cygwin terminal, do the following
+in (with an appropriate {it:gateway_path}):
+{p_end}
+
+{tab}{cmd:$ rm {it:gateway_path}}
+{tab}{cmd:$ touch {it:gateway_path}}
+{tab}{cmd:$ tail -f {it:gateway_path} | bash}
+
+{pstd}Since Cygwin is going to execute the commands to start the parallel Stata instances
+you will have to give -{cmd:parallel}- the statapath in a way that Cygwin can understand.
+An example would be (but it depends on your Cygwin setup) the following:{p_end}
+
+{tab}{cmd:if "`c(os)'"=="Windows" & "`c(mode)'"=="batch"  {c -(}}
+{tab}{tab}{cmd:parallel setclusters 2, statapath("/cygdrive/c/Program Files (x86)/STATA13/StataSE-64.exe") gateway({it:gateway_path})}
+{tab}{cmd:{c )-}}
+{tab}{cmd:else  {c -(}}
+{tab}{tab}{cmd: parallel setclusters 2}
+{tab}{cmd:{c )-}}
+
+{pstd}Then you can execute your script in batch-mode on Windows. The Cygwin tail
+process can stay running through multiple uses. Note that the parallel instances
+will inherit the working directory from the Cygwin process, so make sure you execute
+the Cygwin tail process in an appropriate location. {p_end}
+
+{pstd} This simplistic form of inter-process communication can be used for other 
+situations where Windows batch-mode code would like the ability of -{cmd:winexec}-.
 {p_end}
 
 

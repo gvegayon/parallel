@@ -846,7 +846,7 @@ m parallel_expand_expr("%02.0fa%02.0fb%02.0fc%02.0fd, 1/2,3/4,5/6,7/8")
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:Beginning of file -parallel_export_globals.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
-*! parallel_export_globals vers 0.14.3
+*! parallel_export_globals vers 0.14.7.23 23jul2014 @ 22:10:27
 *! author: George G. Vega Yon
 
 mata:
@@ -878,7 +878,7 @@ void parallel_export_globals(|string scalar outname, real scalar ou_fh) {
     else isnewfile = 0
 
     // Step 1
-    FORBIDDEN = "^(S\_FNDATE|S\_FN|F[0-9]|S\_level|S\_ADO|S\_FLAVOR|S\_OS|S\_MACH)"
+    FORBIDDEN = "^(S\_FNDATE|S\_FN|F[0-9]|S\_level|S\_ADO|S\_FLAVOR|S\_OS|S\_MACH|!)"
 
     global_names = st_dir("global", "macro", "*")
     for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++) {
@@ -1048,7 +1048,7 @@ real scalar parallel_finito(
     
     // Variable definitios
     real scalar in_fh, out_fh, time
-    real scalar suberrors, i, errornum
+    real scalar suberrors, i, errornum, retcode
     string scalar fname
     string scalar msg
     real scalar bk, pressed
@@ -1130,7 +1130,12 @@ real scalar parallel_finito(
                 /* Copying log file */
                 logfilename = sprintf("%s__pll%s_do%04.0f.log", (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/"), parallelid, i)
                 stata(sprintf(`"cap copy __pll%s_do%04.0f.log "`c(tmpdir)'%s", replace"', parallelid, i, logfilename))
-                unlink(pwd()+logfilename)
+                retcode = _unlink(pwd()+logfilename)
+                /* Sometimes Stata hasn't released the file yet. Either way, don't error out  */
+                if (retcode !=0){
+                    stata("sleep 2000")
+                    _unlink(pwd()+logfilename)
+                }
 
                 in_fh = fopen(fname, "r", 1)
                 if ((errornum=strtoreal(fget(in_fh))))
@@ -1596,6 +1601,7 @@ mata:
 *!{col 6}{bf:nclusters}{col 20}Number of clusters.
 *!{col 6}{bf:paralleldir}{col 20}Dir where the process should be running.
 *!{col 6}{bf:timeout}{col 20}Number of seconds to wait until stop the process for no conextion.
+*!{col 6}{bf:gateway_fname}{col 20}Name of file that a Cygwin process is listen to will execute from (Windows batch).
 *!{col 4}{bf:returns:}
 *!{col 6}{it:Number of clusters that stopped with an error.}
 *!{dup 78:{c -}}{asis}
@@ -1603,10 +1609,12 @@ real scalar parallel_run(
     string scalar parallelid, 
     |real scalar nclusters, 
     string scalar paralleldir,
-    real scalar timeout
+    real scalar timeout,
+    string scalar gateway_fname
     ) {
 
     real scalar fh, i
+    string scalar tmpdir_i
     
     // Setting default parameters
     if (nclusters == J(1,1,.)) nclusters = strtoreal(st_global("PLL_CLUSTERS"))
@@ -1649,22 +1657,34 @@ real scalar parallel_run(
         stata("winexec sh __pll"+parallelid+"_shell.sh")
     }
     else { // WINDOWS
-        
-        unlink("__pll"+parallelid+"_shell.bat")
-        fh = fopen("__pll"+parallelid+"_shell.bat","w", 1)
-        
-        // Writing file
-        for(i=1;i<=nclusters;i++) {
-            mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1)
-            fwrite(fh, "start /MIN /HIGH set TEMP="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")+" ^& ")
-            fput(fh, paralleldir+`" /e /q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do"^&exit"')
+        if (c("mode")=="batch"){ //Execute commands via Cygwin process
+            gateway_fname = st_global("PLL_GATEWAY_FNAME")
+            fh = fopen(gateway_fname,"a", 1)
+            for(i=1;i<=nclusters;i++) {
+                tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f")
+                mkdir(tmpdir_i,1) // fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
+                fput(fh, `"export TEMP=""'+tmpdir_i+`"""')
+                fput(fh, paralleldir+`" -e -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
+            }
+            fclose(fh)
         }
-        
-        fput(fh, "exit")
-        
-        fclose(fh)
-        
-        stata("winexec __pll"+parallelid+"_shell.bat")
+        else{
+            unlink("__pll"+parallelid+"_shell.bat")
+            fh = fopen("__pll"+parallelid+"_shell.bat","w", 1)
+            
+            // Writing file
+            for(i=1;i<=nclusters;i++) {
+                mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1)
+                fwrite(fh, "start /MIN /HIGH set TEMP="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")+" ^& ")
+                fput(fh, paralleldir+`" /e /q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do"^&exit"')
+            }
+            
+            fput(fh, "exit")
+            
+            fclose(fh)
+            
+            stata("winexec __pll"+parallelid+"_shell.bat")
+        }
     }
     
     /* Waits until each process ends */

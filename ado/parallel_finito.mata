@@ -24,7 +24,7 @@ real scalar parallel_finito(
 	
 	// Variable definitios
 	real scalar in_fh, out_fh, time
-	real scalar suberrors, i, errornum
+	real scalar suberrors, i, errornum, retcode
 	string scalar fname
 	string scalar msg
 	real scalar bk, pressed
@@ -106,7 +106,12 @@ real scalar parallel_finito(
 				/* Copying log file */
 				logfilename = sprintf("%s__pll%s_do%04.0f.log", (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/"), parallelid, i)
 				stata(sprintf(`"cap copy __pll%s_do%04.0f.log "`c(tmpdir)'%s", replace"', parallelid, i, logfilename))
-				unlink(pwd()+logfilename)
+				retcode = _unlink(pwd()+logfilename)
+				/* Sometimes Stata hasn't released the file yet. Either way, don't error out  */
+				if (retcode !=0){
+					stata("sleep 2000")
+					_unlink(pwd()+logfilename)
+				}
 
 				in_fh = fopen(fname, "r", 1)
 				if ((errornum=strtoreal(fget(in_fh))))
