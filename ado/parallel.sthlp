@@ -166,7 +166,7 @@ during the current session.{p_end}
 {syntab:Passing Stata/Mata objects}
 {synopt:{opt prog:rams}}A list of programs to be passed to each cluster. {p_end}
 {synopt:{opt m:ata}}If the algorithm needs to use mata objects, this option allows
-to pass to each cluster every mata object loaded in the current session (including functions).{p_end}
+to pass to each cluster every mata object loaded in the current session (including functions). Note that when mata objects are loaded into the child processes they will have different locations and therefore pointers may no longer be accurate.{p_end}
 {synopt:{opt nog:lobal}}Avoid passing current session's globals to the clusters.{p_end}
 
 {syntab:Simulation options}
