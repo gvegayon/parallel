@@ -59,7 +59,7 @@ foreach a of numlist 0 1 2 {
 		*set trace on
 		parallel append `f1' `f2', do (egen tot=total(n))
 		*set trace off
-		macro dir
+		*macro dir
 	} // b
 } // a
 

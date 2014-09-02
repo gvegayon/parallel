@@ -846,7 +846,7 @@ m parallel_expand_expr("%02.0fa%02.0fb%02.0fc%02.0fd, 1/2,3/4,5/6,7/8")
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:Beginning of file -parallel_export_globals.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
-*! parallel_export_globals vers 0.14.3
+*! parallel_export_globals vers 0.14.7.23 23jul2014 @ 22:10:27
 *! author: George G. Vega Yon
 
 mata:
@@ -2209,7 +2209,7 @@ real scalar parallel_write_do(
         {
             fput(output_fh, sprintf("\n/* Loading Mata Objects */"))
             fput(output_fh, "capture {")
-            fput(output_fh, "mata: mata matuse "+folder+"__pll"+parallelid+"_mata.mmat")
+            fput(output_fh, `"mata: mata matuse ""'+folder+"__pll"+parallelid+`"_mata.mmat""')
             /* Checking programs loading is just fine */
             fput(output_fh, "}")
             fput(output_fh, "local result = _rc")
@@ -2230,7 +2230,7 @@ real scalar parallel_write_do(
         {
             fput(output_fh, sprintf("\n/* Loading Globals */"))
             fput(output_fh, "capture {")
-            fput(output_fh, "cap run "+folder+"__pll"+parallelid+"_glob.do")
+            fput(output_fh, `"cap run ""'+folder+"__pll"+parallelid+`"_glob.do""')
             /* Checking programs loading is just fine */
             fput(output_fh, "}")
             fput(output_fh, "if (c(rc)) {")
@@ -2250,7 +2250,7 @@ real scalar parallel_write_do(
         fput(output_fh, "  noisily {")
         
         // If it is not a command, i.e. a dofile
-        if (!nodata) fput(output_fh, "    use "+folder+"__pll"+parallelid+"_dataset if _"+parallelid+"cut == "+strofreal(i))
+        if (!nodata) fput(output_fh, `"    use ""'+folder+"__pll"+parallelid+`"_dataset" if _"'+parallelid+"cut == "+strofreal(i))
         
         /* Checking for break key */
         fput(output_fh, sprintf("\n/* Checking for break */"))
@@ -2277,7 +2277,7 @@ real scalar parallel_write_do(
 
         fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while executing the command")"')
 
-        if (!nodata) fput(output_fh, "save "+folder+"__pll"+parallelid+"_dta"+strofreal(i,"%04.0f")+", replace")
+        if (!nodata) fput(output_fh, `"save ""'+folder+"__pll"+parallelid+"_dta"+strofreal(i,"%04.0f")+`"", replace"')
         
         // Step 3
         fput(output_fh, `"cd ""'+folder+`"""')
