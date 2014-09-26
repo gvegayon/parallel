@@ -31,3 +31,5 @@ bysort pll: summ
 
 timer list
 
+erase pllbs.dta
+erase bs.dta

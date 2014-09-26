@@ -31,3 +31,7 @@ return list
 timer off 2
 
 timer list	
+
+erase truth.dta
+erase truth_sim.dta
+erase truth_sim_pll.dta

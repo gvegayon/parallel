@@ -1,6 +1,5 @@
 set matadebug off
 set trace off
-local oldcd = c(pwd)
 
 *clear all
 program drop _all
@@ -53,8 +52,6 @@ foreach g in ayuda ados {
 }
 checksum lparallel.mlib, save replace
 */
-
-cd ..
 
 mata: dt_install_on_the_fly("parallel")
 

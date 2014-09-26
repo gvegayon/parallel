@@ -1,6 +1,6 @@
 *! auth: Philippe Ruh
 *! Version 0.14.7.23 23jul2014 @ 21:57:05
-capt log close parallelnumlist
+cap log close parallelnumlist
 cap log close _all
 log using parallelnumlist.log, replace
 clear all
@@ -63,6 +63,8 @@ foreach a of numlist 0 1 2 {
 	} // b
 } // a
 
-!rm -f `f0'.dta `f1'.dta `f2'.dta
+erase `f0'.dta 
+erase `f1'.dta 
+erase `f2'.dta
 
 log close

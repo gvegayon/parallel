@@ -1,6 +1,5 @@
 set matadebug off
 set trace off
-local oldcd = c(pwd)
 
 
 *clear all
@@ -20,7 +19,7 @@ parallel, by(foreign) f keepl nog : egen maxp = max(price)
 parallel, by(foreign) f keepl nog: egen maxp2 = max(price)
 parallel, by(foreign) f keepl nog: gen n = _N
 
-!less __pll`r(pll_id)'_do1.do
+type __pll`r(pll_id)'_do0001.do
 
 parallel clean, all
 
@@ -41,9 +40,7 @@ use `original'
 parallel, by(rep78) nog f:collapse (mean) price foreign, by(rep78)
 cf _all using `cllps1'
 
-if ("$S_OS" != "Windows") {
-	parallel, nog keepl: mata: for(i=1;i<=1e6;i++) parallel_break()
-}
+parallel, nog keepl: mata: for(i=1;i<=1e6;i++) parallel_break()
 
 parallel clean, all
 
