@@ -11,7 +11,7 @@
 mata:
 real scalar parallel_setstatapath(string scalar statadir, | real scalar force) {
 
-	string scalar bit, flv
+	string scalar bit, flv, fname, sys_dir
 
 	// Is it 64bits?
 	if (c("osdtl") != "" | c("bit") == 64) bit = "-64"
@@ -26,9 +26,18 @@ real scalar parallel_setstatapath(string scalar statadir, | real scalar force) {
 			else if (c("flavor") == "IC") flv = ""
 		
 			/* If the version is less than eleven */
-			if (c("stata_version") < 11) statadir = c("sysdir_stata")+"w"+flv+"Stata.exe"
-			else statadir = c("sysdir_stata")+"Stata"+flv+bit+".exe"
-		
+			if (c("stata_version") < 11) fname = "w"+flv+"Stata.exe"
+			else fname = "Stata"+flv+bit+".exe"
+			
+			statadir = c("sysdir_stata") + fname
+			
+			//might need to convert to cygwin path-name
+			if (c("mode")=="batch"){
+				if (!force) if (!fileexists(statadir)) return(601)
+				statadir = "/cygdrive/"+substr(c("sysdir_stata"),1,1)+"/"+substr(c("sysdir_stata"),4,.) + fname
+				force=1
+			}
+			
 		}
 		else if (regexm(c("os"), "^MacOS.*")) { // MACOS
 		
