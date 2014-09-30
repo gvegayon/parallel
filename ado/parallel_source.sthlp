@@ -855,20 +855,22 @@ mata:
 *! {marker parallel_export_globals}{bf:function -{it:parallel_export_globals}- in file -{it:parallel_export_globals.mata}-}
 *! {back:{it:(previous page)}}
 *!{dup 78:{c -}}
-*!{col 4}{it:Looks for global macros and writes to the dofile.}
+*!{col 4}{it:Writes out global macros and scalrs to the dofile.}
 *!{col 4}{bf:parameters:}
 *!{col 6}{bf:outname}{col 20}Name of the new do-file.
 *!{col 6}{bf:out_fh}{col 20}If a file is already open, the user can export the globals to it.
 *!{col 4}{bf:returns:}
 *!{col 6}{it:A do-file eady to be runned and define globals.}
 *!{dup 78:{c -}}{asis}
-void parallel_export_globals(|string scalar outname, real scalar ou_fh) {
+void parallel_export_globals(|string scalar outname, real scalar ou_fh, 
+                            string scalar mat_outname) {
     
     real   scalar isnewfile, glob_ind
-    string scalar macname, macvalu, FORBIDDEN, line
+    string scalar gname, gvalue, FORBIDDEN, line
     string colvector global_names
+    pointer scalar mat_p
 
-    if (outname == J(1,1,"")) outname = parallel_randomid(10,"",1,1,1)
+    if (outname == J(1,1,"")) outname = parallel_randomid(10,"",1,1,1)+".do"
     
     if (ou_fh == J(1,1,.)) {
         if (fileexists(outname)) unlink(outname)
@@ -877,23 +879,70 @@ void parallel_export_globals(|string scalar outname, real scalar ou_fh) {
     }
     else isnewfile = 0
 
-    // Step 1
     FORBIDDEN = "^(S\_FNDATE|S\_FN|F[0-9]|S\_level|S\_ADO|S\_FLAVOR|S\_OS|S\_MACH|!)"
 
+    // Global macros
     global_names = st_dir("global", "macro", "*")
     for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++) {
-        /* Only pic globals with a-zA-Z names */
-        if (!regexm(global_names[glob_ind,1], "^[a-zA-Z]")) continue
-
-        macname = global_names[glob_ind,1]
-        if (!regexm(macname, FORBIDDEN)){
-            macvalu = st_global(macname)
-            line = "global "+macname+" "+macvalu
-            fput(ou_fh, line)
-        }
+        gname = global_names[glob_ind,1]
+        if (regexm(gname, FORBIDDEN) | !regexm(gname, "^[a-zA-Z]")) continue
+        
+        gvalue = st_global(gname)
+        line = "global "+gname+" "+gvalue
+        fput(ou_fh, line)
+    }
+    
+    // Numerical Scalars
+    global_names = st_dir("global", "numscalar", "*")
+    for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++) {
+        gname = global_names[glob_ind,1]
+        if (regexm(gname, FORBIDDEN) | !regexm(gname, "^[a-zA-Z]")) continue
+        
+        gvalue = strofreal(st_numscalar(gname))
+        line = "scalar "+gname+" = "+gvalue
+        fput(ou_fh, line)
+    }
+    
+    // String Scalars
+    global_names = st_dir("global", "strscalar", "*")
+    for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++) {
+        gname = global_names[glob_ind,1]
+        if (regexm(gname, FORBIDDEN) | !regexm(gname, "^[a-zA-Z]")) continue
+        
+        gvalue = st_strscalar(gname)
+        line = "scalar "+gname+`" = ""'+gvalue+`"""'
+        fput(ou_fh, line)
     }
     
     if (isnewfile) fclose(ou_fh)
+    
+    // Matrices
+    
+    if (mat_outname == J(1,1,"")) mat_outname = "mat"+parallel_randomid(10,"",1,1,1)+".mmat"
+    
+    global_names = st_dir("global", "matrix", "*")
+    for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++) {
+        gname = global_names[glob_ind,1]
+        if (regexm(gname, FORBIDDEN) | !regexm(gname, "^[a-zA-Z]")) continue
+        
+        mat_p = crexternal("pll_mt_val_"+gname)
+        (*mat_p) = st_matrix(gname)
+        mat_p = crexternal("pll_mt_rstripe_"+gname)
+        (*mat_p) = st_matrixrowstripe(gname)
+        mat_p = crexternal("pll_mt_cstripe_"+gname)
+        (*mat_p) = st_matrixcolstripe(gname)
+    }
+    stata("qui mata: mata matsave "+mat_outname+" pll_mt_*, replace")
+    //Cleanup global namespace
+    for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++) {
+        gname = global_names[glob_ind,1]
+        if (regexm(gname, FORBIDDEN) | !regexm(gname, "^[a-zA-Z]")) continue
+        
+        rmexternal("pll_mt_val_"+gname)
+        rmexternal("pll_mt_rstripe_"+gname)
+        rmexternal("pll_mt_cstripe_"+gname)
+    }
+    
 }
 end
 
@@ -2063,7 +2112,7 @@ mata:
 *!{col 6}{bf:ncluster}{col 20}Number of clusters (files).
 *!{col 6}{bf:prefix}{col 20}Whether this is a command (prefix != 0) or a do-file.
 *!{col 6}{bf:matsave}{col 20}Whether to include or not MATA objects.
-*!{col 6}{bf:getmacros}{col 20}Whete to include or not Globals.
+*!{col 6}{bf:getglobals}{col 20}Whete to include or not Globals.
 *!{col 6}{bf:eed}{col 20}Seed to be used (list)
 *!{col 6}{bf:randtype}{col 20}If no seeds provided, type of algorithm used to generate the seeds
 *!{col 6}{bf:nodata}{col 20}Wheter to load (1) data or not.
@@ -2079,7 +2128,7 @@ real scalar parallel_write_do(
     | real scalar nclusters,
     real   scalar prefix,
     real   scalar matasave,
-    real   scalar getmacros,
+    real   scalar getglobals,
     string scalar seed,
     string scalar randtype,
     real   scalar nodata,
@@ -2097,7 +2146,7 @@ real scalar parallel_write_do(
     // Checking optargs
     if (matasave == J(1,1,.)) matasave = 0
     if (prefix == J(1,1,.)) prefix = 1
-    if (getmacros == J(1,1,.)) getmacros = 0
+    if (getglobals == J(1,1,.)) getglobals = 0
     if (nclusters == J(1,1,.)) {
         if (strlen(st_global("PLL_CLUSTERS"))) nclusters = strtoreal(st_global("PLL_CLUSTERS"))
         else {
@@ -2142,7 +2191,7 @@ real scalar parallel_write_do(
     real scalar err
     err = 0
     if (progsave)  err = parallel_export_programs(folder+"__pll"+parallelid+"_prog.do", programs, folder+"__pll"+parallelid+"_prog.log")
-    if (getmacros) parallel_export_globals(folder+"__pll"+parallelid+"_glob.do")
+    if (getglobals) parallel_export_globals(folder+"__pll"+parallelid+"_glob.do", ., folder+"__pll"+parallelid+"_smats.mmat")
 
     if (err)
     {
@@ -2206,10 +2255,10 @@ real scalar parallel_write_do(
         fput(output_fh, "}")
         fput(output_fh, "local result = _rc")
         fput(output_fh, "if (c(rc)) {")
-        fput(output_fh, `"cd ""'+folder+`"""')
-        fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while setting memory")"')
-        fput(output_fh, "clear")
-        fput(output_fh, "exit")
+        fput(output_fh, `"    cd ""'+folder+`"""')
+        fput(output_fh, `"    mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while setting memory")"')
+        fput(output_fh, "    clear")
+        fput(output_fh, "    exit")
         fput(output_fh, "}")
         
         // Loading programs
@@ -2222,10 +2271,10 @@ real scalar parallel_write_do(
             fput(output_fh, "}")
             fput(output_fh, "local result = _rc")
             fput(output_fh, "if (c(rc)) {")
-            fput(output_fh, `"cd ""'+folder+`"""')
-            fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while loading programs")"')
-            fput(output_fh, "clear")
-            fput(output_fh, "exit")
+            fput(output_fh, `"    cd ""'+folder+`"""')
+            fput(output_fh, `"    mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while loading programs")"')
+            fput(output_fh, "    clear")
+            fput(output_fh, "    exit")
             fput(output_fh, "}")
         }
         
@@ -2239,14 +2288,14 @@ real scalar parallel_write_do(
             fput(output_fh, sprintf("\n/* Loading Mata Objects */"))
             fput(output_fh, "capture {")
             fput(output_fh, `"mata: mata matuse ""'+folder+"__pll"+parallelid+`"_mata.mmat""')
-            /* Checking programs loading is just fine */
+            /* Checking mata object loading is just fine */
             fput(output_fh, "}")
             fput(output_fh, "local result = _rc")
             fput(output_fh, "if (c(rc)) {")
-            fput(output_fh, `"cd ""'+folder+`"""')
-            fput(output_fh, `"mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while loading mata objects")"')
-            fput(output_fh, "clear")
-            fput(output_fh, "exit")
+            fput(output_fh, `"    cd ""'+folder+`"""')
+            fput(output_fh, `"    mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while loading mata objects")"')
+            fput(output_fh, "    clear")
+            fput(output_fh, "    exit")
             fput(output_fh, "}")
         }
         
@@ -2255,12 +2304,30 @@ real scalar parallel_write_do(
         fput(output_fh, "mata: parallel_break()")
         
         // Globals loading
-        if (getmacros)
+        if (getglobals)
         {
             fput(output_fh, sprintf("\n/* Loading Globals */"))
             fput(output_fh, "capture {")
             fput(output_fh, `"cap run ""'+folder+"__pll"+parallelid+`"_glob.do""')
-            /* Checking programs loading is just fine */
+            
+            fput(output_fh, "mata:")
+            fput(output_fh, `"mata matuse ""'+folder+"__pll"+parallelid+`"_smats.mmat""')
+            fput(output_fh, `"pll_smats = direxternal("pll_mt_val*")"')
+            fput(output_fh, "for(i=1; i<=rows(pll_smats); i++){")
+            fput(output_fh, "    matname = substr(pll_smats[i],12,.)")
+            fput(output_fh, `"    st_matrix(matname, valofexternal("pll_mt_val_"+matname))"')
+            fput(output_fh, `"    st_matrixrowstripe(matname, valofexternal("pll_mt_rstripe_"+matname))"')
+            fput(output_fh, `"    st_matrixcolstripe(matname, valofexternal("pll_mt_cstripe_"+matname))"')
+            fput(output_fh, `"    rmexternal("pll_mt_val_"+matname)"')
+            fput(output_fh, `"    rmexternal("pll_mt_rstripe_"+matname)"')
+            fput(output_fh, `"    rmexternal("pll_mt_cstripe_"+matname)"')
+            fput(output_fh, "}")
+            fput(output_fh, `"rmexternal("pll_smats")"')
+            fput(output_fh, "end")
+            
+            
+            
+            /* Checking globals loading is just fine */
             fput(output_fh, "}")
             fput(output_fh, "if (c(rc)) {")
             fput(output_fh, `"  cd ""'+folder+`"""')
@@ -2296,7 +2363,7 @@ real scalar parallel_write_do(
         fput(output_fh, "  }")
         fput(output_fh, "}")
 
-        /* Checking programs loading is just fine */
+        /* Checking that the running is just fine */
         fput(output_fh, "if (c(rc)) {")
         fput(output_fh, `"  cd ""'+folder+`"""')
         fput(output_fh, `"  mata: parallel_write_diagnosis(strofreal(c("rc")),""'+folder+"__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")+`"","while running the command/dofile")"')

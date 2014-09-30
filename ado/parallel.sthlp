@@ -172,7 +172,8 @@ during the current session.{p_end}
 to pass to each cluster every mata object loaded in the current session (including functions). 
 Note that when mata objects are loaded into the child processes they will have different 
 locations and therefore pointers may no longer be accurate.{p_end}
-{synopt:{opt nog:lobal}}Avoid passing current session's globals to the clusters.{p_end}
+{synopt:{opt nog:lobal}}Avoid passing current session's globals (including global macros, 
+scalars and Stata matrices) to the clusters.{p_end}
 
 {syntab:Simulation options}
 {synopt:{opt s:eeds}}Numlist. With this option the user can pass an specific seed to be
@@ -294,7 +295,7 @@ code. These commands/functions check whether the user has pressed the
 Given {it:N} clusters, within each cluster -{cmd:parallel}- creates the macros 
 {it:pll_id} (equal for all the clusters) and {it:pll_instance} (ranging
 1 up to {it:N}, equalling 1 inside the first cluster and {it:N} inside the last cluster), 
-both as globals and locals macros. This allows the user setting different
+both as global and local macros. This allows the user setting different
 tasks/actions depending on the cluster. Also the global macro {it:PLL_CLUSTERS}
 (equal to {it:N}) is available within each cluster. For an example using this
 macros, please refer to the {help parallel##examples:Examples section}.
@@ -448,12 +449,6 @@ as -{cmd:parallel}- runs Stata in {browse "http://www.stata.com/support/faqs/win
 none of the results will be kept. This is also true for {help matrix:matrices},
 {help scalar:scalars}, {help mata:mata objects}, {help return:returns}, or whatever
 other object different from data.
-{p_end}
-
-{pstd}
-Although -{cmd:parallel}- passes-through {help program list:programs}, {help macro:macros}
-and {help mata:mata objects}, in the current version it is not capable of doing the same with
-{help matrix:matrices} or {help scalar:scalars}.
 {p_end}
 
 
@@ -804,7 +799,7 @@ links:
         Stops a cluster after the user pressed break {col 58} {help parallel_source##parallel_break:parallel_break.mata}
         Remove auxiliary files {col 58} {help parallel_source##parallel_clean:parallel_clean.mata}
         Distributes observations across clusters {col 58} {help parallel_source##parallel_divide_index:parallel_divide_index.mata}
-        Export global macros {col 58} {help parallel_source##parallel_export_globals:parallel_export_globals.mata}
+        Export global macros, scalars, and Stata matrices {col 58}{help parallel_source##parallel_export_globals:parallel_export_globals.mata}
         Export programs {col 58} {help parallel_source##parallel_export_programs:parallel_export_programs.mata}
         Wait until a cluster finishes {col 58} {help parallel_source##parallel_finito:parallel_finito.mata}
         (on development) {col 58} {help parallel_source##parallel_for:parallel_for.mata}
