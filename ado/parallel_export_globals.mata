@@ -79,7 +79,9 @@ void parallel_export_globals(|string scalar outname, real scalar ou_fh,
 		mat_p = crexternal("pll_mt_cstripe_"+gname)
 		(*mat_p) = st_matrixcolstripe(gname)
 	}
-	stata("qui mata: mata matsave "+mat_outname+" pll_mt_*, replace")
+	if(rows(global_names)>0){
+		stata("qui mata: mata matsave "+mat_outname+" pll_mt_*, replace")
+	}
 	//Cleanup global namespace
 	for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++) {
 		gname = global_names[glob_ind,1]

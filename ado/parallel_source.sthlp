@@ -932,7 +932,9 @@ void parallel_export_globals(|string scalar outname, real scalar ou_fh,
         mat_p = crexternal("pll_mt_cstripe_"+gname)
         (*mat_p) = st_matrixcolstripe(gname)
     }
-    stata("qui mata: mata matsave "+mat_outname+" pll_mt_*, replace")
+    if(rows(global_names)>0){
+        stata("qui mata: mata matsave "+mat_outname+" pll_mt_*, replace")
+    }
     //Cleanup global namespace
     for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++) {
         gname = global_names[glob_ind,1]
@@ -2311,16 +2313,18 @@ real scalar parallel_write_do(
             fput(output_fh, `"cap run ""'+folder+"__pll"+parallelid+`"_glob.do""')
             
             fput(output_fh, "mata:")
-            fput(output_fh, `"mata matuse ""'+folder+"__pll"+parallelid+`"_smats.mmat""')
-            fput(output_fh, `"pll_smats = direxternal("pll_mt_val*")"')
-            fput(output_fh, "for(i=1; i<=rows(pll_smats); i++){")
-            fput(output_fh, "    matname = substr(pll_smats[i],12,.)")
-            fput(output_fh, `"    st_matrix(matname, valofexternal("pll_mt_val_"+matname))"')
-            fput(output_fh, `"    st_matrixrowstripe(matname, valofexternal("pll_mt_rstripe_"+matname))"')
-            fput(output_fh, `"    st_matrixcolstripe(matname, valofexternal("pll_mt_cstripe_"+matname))"')
-            fput(output_fh, `"    rmexternal("pll_mt_val_"+matname)"')
-            fput(output_fh, `"    rmexternal("pll_mt_rstripe_"+matname)"')
-            fput(output_fh, `"    rmexternal("pll_mt_cstripe_"+matname)"')
+            fput(output_fh, `"if(fileexists(""'+folder+"__pll"+parallelid+`"_smats.mmat"){"')
+            fput(output_fh, `"    mata matuse ""'+folder+"__pll"+parallelid+`"_smats.mmat""')
+            fput(output_fh, `"    pll_smats = direxternal("pll_mt_val*")"')
+            fput(output_fh, "    for(i=1; i<=rows(pll_smats); i++){")
+            fput(output_fh, "        matname = substr(pll_smats[i],12,.)")
+            fput(output_fh, `"        st_matrix(matname, valofexternal("pll_mt_val_"+matname))"')
+            fput(output_fh, `"        st_matrixrowstripe(matname, valofexternal("pll_mt_rstripe_"+matname))"')
+            fput(output_fh, `"        st_matrixcolstripe(matname, valofexternal("pll_mt_cstripe_"+matname))"')
+            fput(output_fh, `"        rmexternal("pll_mt_val_"+matname)"')
+            fput(output_fh, `"        rmexternal("pll_mt_rstripe_"+matname)"')
+            fput(output_fh, `"        rmexternal("pll_mt_cstripe_"+matname)"')
+            fput(output_fh, "    }")
             fput(output_fh, "}")
             fput(output_fh, `"rmexternal("pll_smats")"')
             fput(output_fh, "end")
