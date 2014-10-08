@@ -43,7 +43,6 @@ void parallel_export_globals(|string scalar outname, real scalar ou_fh,
 	global_names = st_dir("global", "numscalar", "*")
 	for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++) {
 		gname = global_names[glob_ind,1]
-		if (regexm(gname, FORBIDDEN) | !regexm(gname, "^[a-zA-Z]")) continue
 		
 		gvalue = strofreal(st_numscalar(gname))
 		line = "scalar "+gname+" = "+gvalue
@@ -54,7 +53,6 @@ void parallel_export_globals(|string scalar outname, real scalar ou_fh,
 	global_names = st_dir("global", "strscalar", "*")
 	for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++) {
 		gname = global_names[glob_ind,1]
-		if (regexm(gname, FORBIDDEN) | !regexm(gname, "^[a-zA-Z]")) continue
 		
 		gvalue = st_strscalar(gname)
 		line = "scalar "+gname+`" = ""'+gvalue+`"""'
@@ -68,28 +66,17 @@ void parallel_export_globals(|string scalar outname, real scalar ou_fh,
 	if (mat_outname == J(1,1,"")) mat_outname = "mat"+parallel_randomid(10,"",1,1,1)+".mmat"
 	
 	global_names = st_dir("global", "matrix", "*")
-	for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++) {
-		gname = global_names[glob_ind,1]
-		if (regexm(gname, FORBIDDEN) | !regexm(gname, "^[a-zA-Z]")) continue
-		
-		mat_p = crexternal("pll_mt_val_"+gname)
-		(*mat_p) = st_matrix(gname)
-		mat_p = crexternal("pll_mt_rstripe_"+gname)
-		(*mat_p) = st_matrixrowstripe(gname)
-		mat_p = crexternal("pll_mt_cstripe_"+gname)
-		(*mat_p) = st_matrixcolstripe(gname)
-	}
 	if(rows(global_names)>0){
-		stata("qui mata: mata matsave "+mat_outname+" pll_mt_*, replace")
-	}
-	//Cleanup global namespace
-	for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++) {
-		gname = global_names[glob_ind,1]
-		if (regexm(gname, FORBIDDEN) | !regexm(gname, "^[a-zA-Z]")) continue
-		
-		rmexternal("pll_mt_val_"+gname)
-		rmexternal("pll_mt_rstripe_"+gname)
-		rmexternal("pll_mt_cstripe_"+gname)
+		ou_fh = fopen(mat_outname, "w")
+		fputmatrix(ou_fh, global_names)
+		for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++) {
+			gname = global_names[glob_ind,1]
+			
+			fputmatrix(ou_fh, st_matrix(gname))
+			fputmatrix(ou_fh, st_matrixrowstripe(gname))
+			fputmatrix(ou_fh, st_matrixcolstripe(gname))
+		}
+		fclose(ou_fh)
 	}
 	
 }

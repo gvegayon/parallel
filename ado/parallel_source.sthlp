@@ -896,7 +896,6 @@ void parallel_export_globals(|string scalar outname, real scalar ou_fh,
     global_names = st_dir("global", "numscalar", "*")
     for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++) {
         gname = global_names[glob_ind,1]
-        if (regexm(gname, FORBIDDEN) | !regexm(gname, "^[a-zA-Z]")) continue
         
         gvalue = strofreal(st_numscalar(gname))
         line = "scalar "+gname+" = "+gvalue
@@ -907,7 +906,6 @@ void parallel_export_globals(|string scalar outname, real scalar ou_fh,
     global_names = st_dir("global", "strscalar", "*")
     for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++) {
         gname = global_names[glob_ind,1]
-        if (regexm(gname, FORBIDDEN) | !regexm(gname, "^[a-zA-Z]")) continue
         
         gvalue = st_strscalar(gname)
         line = "scalar "+gname+`" = ""'+gvalue+`"""'
@@ -921,28 +919,17 @@ void parallel_export_globals(|string scalar outname, real scalar ou_fh,
     if (mat_outname == J(1,1,"")) mat_outname = "mat"+parallel_randomid(10,"",1,1,1)+".mmat"
     
     global_names = st_dir("global", "matrix", "*")
-    for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++) {
-        gname = global_names[glob_ind,1]
-        if (regexm(gname, FORBIDDEN) | !regexm(gname, "^[a-zA-Z]")) continue
-        
-        mat_p = crexternal("pll_mt_val_"+gname)
-        (*mat_p) = st_matrix(gname)
-        mat_p = crexternal("pll_mt_rstripe_"+gname)
-        (*mat_p) = st_matrixrowstripe(gname)
-        mat_p = crexternal("pll_mt_cstripe_"+gname)
-        (*mat_p) = st_matrixcolstripe(gname)
-    }
     if(rows(global_names)>0){
-        stata("qui mata: mata matsave "+mat_outname+" pll_mt_*, replace")
-    }
-    //Cleanup global namespace
-    for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++) {
-        gname = global_names[glob_ind,1]
-        if (regexm(gname, FORBIDDEN) | !regexm(gname, "^[a-zA-Z]")) continue
-        
-        rmexternal("pll_mt_val_"+gname)
-        rmexternal("pll_mt_rstripe_"+gname)
-        rmexternal("pll_mt_cstripe_"+gname)
+        ou_fh = fopen(mat_outname, "w")
+        fputmatrix(ou_fh, global_names)
+        for(glob_ind=1; glob_ind<=rows(global_names); glob_ind++) {
+            gname = global_names[glob_ind,1]
+            
+            fputmatrix(ou_fh, st_matrix(gname))
+            fputmatrix(ou_fh, st_matrixrowstripe(gname))
+            fputmatrix(ou_fh, st_matrixcolstripe(gname))
+        }
+        fclose(ou_fh)
     }
     
 }
@@ -2209,7 +2196,7 @@ real scalar parallel_write_do(
         output_fh = fopen(fname, "w", 1)
         
         // Step 1
-        fput(output_fh, "capture {")
+        fput(output_fh, "capture noisily {")
         fput(output_fh, "clear")
         if (c("MP")) fput(output_fh, "set processors "+strofreal(processors))
         fput(output_fh, `"cd ""'+folder+`"""')
@@ -2267,7 +2254,7 @@ real scalar parallel_write_do(
         if (progsave)
         {
             fput(output_fh, sprintf("\n/* Loading Programs */"))
-            fput(output_fh, "capture {")
+            fput(output_fh, "capture noisily {")
             fput(output_fh, "run "+folder+"__pll"+parallelid+"_prog.do")
             /* Checking programs loading is just fine */
             fput(output_fh, "}")
@@ -2288,7 +2275,7 @@ real scalar parallel_write_do(
         if (matasave)
         {
             fput(output_fh, sprintf("\n/* Loading Mata Objects */"))
-            fput(output_fh, "capture {")
+            fput(output_fh, "capture noisily {")
             fput(output_fh, `"mata: mata matuse ""'+folder+"__pll"+parallelid+`"_mata.mmat""')
             /* Checking mata object loading is just fine */
             fput(output_fh, "}")
@@ -2309,24 +2296,23 @@ real scalar parallel_write_do(
         if (getglobals)
         {
             fput(output_fh, sprintf("\n/* Loading Globals */"))
-            fput(output_fh, "capture {")
+            fput(output_fh, "capture noisily {")
             fput(output_fh, `"cap run ""'+folder+"__pll"+parallelid+`"_glob.do""')
             
             fput(output_fh, "mata:")
-            fput(output_fh, `"if(fileexists(""'+folder+"__pll"+parallelid+`"_smats.mmat"){"')
-            fput(output_fh, `"    mata matuse ""'+folder+"__pll"+parallelid+`"_smats.mmat""')
-            fput(output_fh, `"    pll_smats = direxternal("pll_mt_val*")"')
-            fput(output_fh, "    for(i=1; i<=rows(pll_smats); i++){")
-            fput(output_fh, "        matname = substr(pll_smats[i],12,.)")
-            fput(output_fh, `"        st_matrix(matname, valofexternal("pll_mt_val_"+matname))"')
-            fput(output_fh, `"        st_matrixrowstripe(matname, valofexternal("pll_mt_rstripe_"+matname))"')
-            fput(output_fh, `"        st_matrixcolstripe(matname, valofexternal("pll_mt_cstripe_"+matname))"')
-            fput(output_fh, `"        rmexternal("pll_mt_val_"+matname)"')
-            fput(output_fh, `"        rmexternal("pll_mt_rstripe_"+matname)"')
-            fput(output_fh, `"        rmexternal("pll_mt_cstripe_"+matname)"')
-            fput(output_fh, "    }")
+            fput(output_fh, `"if(fileexists(""'+folder+"__pll"+parallelid+`"_smats.mmat")){"')
+            
+            fput(output_fh, `"pll_fh = fopen(""'+folder+"__pll"+parallelid+`"_smats.mmat", "r")"')
+            fput(output_fh, "pll_global_names = fgetmatrix(pll_fh)")
+            fput(output_fh, "for(glob_ind=1; glob_ind<=rows(pll_global_names); glob_ind++) {")
+            fput(output_fh, "    pll_gname = pll_global_names[glob_ind,1]")
+            fput(output_fh, "    st_matrix(pll_gname, fgetmatrix(pll_fh))")
+            fput(output_fh, "    st_matrixrowstripe(pll_gname, fgetmatrix(pll_fh))")
+            fput(output_fh, "    st_matrixcolstripe(pll_gname, fgetmatrix(pll_fh))")
             fput(output_fh, "}")
-            fput(output_fh, `"rmexternal("pll_smats")"')
+            fput(output_fh, "fclose(pll_fh)")
+            fput(output_fh, "};") /*need this semicolon*/
+            /*fput(output_fh, `"rmexternal("pll_smats")"')*/
             fput(output_fh, "end")
             
             
@@ -2346,7 +2332,7 @@ real scalar parallel_write_do(
         fput(output_fh, "mata: parallel_break()")
                 
         // Step 2        
-        fput(output_fh, "capture {")
+        fput(output_fh, "capture noisily {")
         fput(output_fh, "  noisily {")
         
         // If it is not a command, i.e. a dofile

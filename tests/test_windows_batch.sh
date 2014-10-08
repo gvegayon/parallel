@@ -3,7 +3,12 @@
 # The working directory should be in the tests folder.
 
 # Windows setup
-rm pll_gateway.sh
+function cleanup {
+  rm -f pll_gateway.sh
+}
+trap cleanup EXIT
+
+rm -f pll_gateway.sh
 touch pll_gateway.sh
 tail -f pll_gateway.sh | bash &
 
@@ -12,4 +17,4 @@ $STATAEXE /e do test.do
 
 # Cleanup
 kill $!
-rm pll_gateway.sh
+rm -f pll_gateway.sh
