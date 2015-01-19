@@ -1,23 +1,30 @@
-DIR=~/parallel/ado
-PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/stata12/
+PATH:=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/stata12/:$(PATH)
 TESTS=test_bs.do test_append.do test_sim.do test_prefix.do test.do \
 	test_append_loop.do
+
+#Provide an override for stata location
+ifeq "$(STATABATCH)" ""
+  STATABATCH:=stata-mp -b
+endif
+
 sp :
-	stata-mp -b do compile.do;cp -u -r ~/parallel ~/../investigacion/george/comandos_paquetes_librerias/stata
+	$(STATABATCH) do compile.do;cp -u -r ~/parallel ~/../investigacion/george/comandos_paquetes_librerias/stata
 	make clean
 home:
-	stata -b do compile.do
+	$(STATABATCH) do compile.do
 	make clean
 clean:
 	less compile.log
 	rm -f compile.log
 	rm -f __pll*
-	rm -f -r /tmp/__pll*
+	-rm -f -r /tmp/__pll*
 
-tests:
-	echo Running tests &
-	for i in $(TESTS) ; do \
-		cd ../tests/ && stata -b do $${i}&&echo test $${i} done; \
-	done ; \
-	stata -b do merge_all_tests.do;\
-	less all_tests_results.txt
+tests: 
+	@echo Running tests 
+	cd ../tests && \
+		for i in $(TESTS) ; do \
+			$(STATABATCH) do $${i}; \
+			echo test $${i} done; \
+		done ; \
+		cat *.log > all_tests_results.txt; \
+		less all_tests_results.txt;
