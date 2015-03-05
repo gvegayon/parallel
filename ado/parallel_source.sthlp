@@ -2164,6 +2164,8 @@ real scalar parallel_write_do(
         fput(output_fh, `"cd ""'+folder+`"""')
         
         //Copy over the adopath & matalibs order
+        //PERSONAL is the most likely to be overwritten and referenced in S_ADO. (could do others)
+        fput(output_fh, `"sysdir set PERSONAL ""' + st_global("c(sysdir_personal)") +`"""')
         fput(output_fh, "global S_ADO = `"+`"""'+st_global("S_ADO")+`"""'+"'")
         fput(output_fh, "mata: mata mlib index")
         fput(output_fh, `"mata: mata set matalibs ""'+st_global("c(matalibs)")+`"""')
