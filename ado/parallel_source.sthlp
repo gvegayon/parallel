@@ -1129,7 +1129,7 @@ real scalar parallel_finito(
 
                 /* Copying log file */
                 logfilename = sprintf("%s__pll%s_do%04.0f.log", (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/"), parallelid, i)
-                stata(sprintf(`"cap copy __pll%s_do%04.0f.log "`c(tmpdir)'%s", replace"', parallelid, i, logfilename))
+                stata(sprintf(`"cap copy __pll%s_do%04.0f.log "%s%s", replace"', parallelid, i, c("tmpdir"),logfilename))
                 retcode = _unlink(pwd()+logfilename)
                 /* Sometimes Stata hasn't released the file yet. Either way, don't error out  */
                 if (retcode !=0){
