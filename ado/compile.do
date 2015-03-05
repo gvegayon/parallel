@@ -53,7 +53,6 @@ foreach g in ayuda ados {
 checksum lparallel.mlib, save replace
 */
 
-mata: dt_install_on_the_fly("parallel")
 
 
 
