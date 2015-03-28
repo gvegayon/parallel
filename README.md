@@ -18,14 +18,21 @@ For accessing SSC version of parallel
 . mata mata mlib index
 ```
 
-For accessing the lastest version of parallel (dev)
+For accessing the lastest stable version of parallel
 
 ```
 . net install parallel, from(http://software.ggvega.com/stata) replace
 . mata mata mlib index
 ```
 
-Once installed it is suggested to restart Stata.
+For accessing the lastest development version of parallel (from here)
+
+```
+. net install parallel, from(https://raw.github.com/gvegayon/parallel/master/) replace
+. mata mata mlib index
+```
+
+Once installed it is suggested to restart Stata. If you had a previous installation of -parallel- installed from a different source you should uninstall that first.
 
 Author
 ======
