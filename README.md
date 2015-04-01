@@ -25,11 +25,17 @@ For accessing the lastest stable version of parallel
 . mata mata mlib index
 ```
 
-For accessing the lastest development version of parallel (from here)
+For accessing the latest development version of parallel (from here) using Stata version >=13
 
 ```
 . net install parallel, from(https://raw.github.com/gvegayon/parallel/master/) replace
 . mata mata mlib index
+```
+
+For Stata version <13, download as zip, unzip, and then replace the above -net install- with
+
+```
+. net install parallel, from(full_local_path_to_files) replace
 ```
 
 Once installed it is suggested to restart Stata. If you had a previous installation of -parallel- installed from a different source you should uninstall that first.
