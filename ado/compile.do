@@ -17,6 +17,8 @@ dt_moxygen(archmata, "parallel_source.sthlp", 1)
 
 end
 
+if `c(stata_version)'>=12 di "WARNING: compiled mlib will only work on Stata version >=`c(stata_version)'"
+
 /* Compiling */
 run parallel_setclusters.mata
 run parallel_run.mata 
