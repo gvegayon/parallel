@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 PATH:=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/stata12/:$(PATH)
 TESTS=test_bs.do test_append.do test_sim.do test_prefix.do test.do \
 	test_append_loop.do
@@ -22,9 +23,11 @@ clean:
 tests: 
 	@echo Running tests 
 	cd ../tests && \
+		if [ "$$OS" = "Windows_NT" ]; then rm -f pll_gateway.sh; touch pll_gateway.sh; tail -f pll_gateway.sh > >( bash ) & tail_pid=$$!; fi; \
 		for i in $(TESTS) ; do \
 			$(STATABATCH) do $${i}; \
 			echo test $${i} done; \
 		done ; \
+		if [ "$$OS" = "Windows_NT" ]; then kill $$tail_pid; rm -f pll_gateway.sh; fi; \
 		cat *.log > all_tests_results.txt; \
 		less all_tests_results.txt;

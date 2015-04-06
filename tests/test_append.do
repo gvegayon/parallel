@@ -45,12 +45,12 @@ forval i=1/$F {
 }
 
 /* Setting the tests */
-cd test_append
-local filelist : dir "." files "*.dta"
-local test1 parallel append `filelist', do(collapse _all)
-local test2 parallel append, do(collapse _all) exp("part%g,1/$F")
-local test3 parallel append, do(collapse _all) exp("part%g.dta,1/$F")
-local test4 parallel append, do(collapse _all) exp("../test_append/part%g.dta,1/$F")
+local filelist : dir "test_append" files "*.dta"
+local filelist_rpath : subinstr local filelist "part" "test_append/part", all
+local test1 parallel append `filelist_rpath', do(collapse _all)
+local test2 parallel append, do(collapse _all) exp("test_append/part%g,1/$F")
+local test3 parallel append, do(collapse _all) exp("test_append/part%g.dta,1/$F")
+local test4 parallel append, do(collapse _all) exp("../tests/test_append/part%g.dta,1/$F")
 
 foreach c of global clusters {
 
@@ -66,8 +66,6 @@ foreach c of global clusters {
 	}
 	
 }
-
-cd ..
 
 forval i=1/$F {
 	rm test_append/part`i'.dta

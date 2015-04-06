@@ -8,7 +8,7 @@ touch pll_gateway.sh
 tail -f pll_gateway.sh | bash &
 
 # Do the parallel jobs
-$STATAEXE /e do test.do
+$STATABATCH do test.do
 
 # Cleanup
 kill $!
