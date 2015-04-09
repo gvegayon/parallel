@@ -48,7 +48,8 @@
 {p 8 17 2}
 {cmdab:parallel setclusters} # [, {opt f:orce} 
 {opt s:tatapath}({it:{help filename:stata_path}})
-{opt g:ateway}({it:{help filename:gateway_path}})]
+{opt g:ateway}({it:{help filename:gateway_path}})
+{opt i:ncludefile}({it:{help filename:filename}})]
 
 {col 5}{hline}{col 2}{marker do}{...}
 {pstd}Parallelizing a do-file
@@ -154,6 +155,9 @@ Stata's exe path. By using this option you will override this and force
 {cmd:parallel} to use a specific path to stata.exe.{p_end}
 {synopt:{opt g:ateway}}File path. For Windows, a file that a Cygwin process
 is listening to in order to execute the parallel instances. See example below.{p_end}
+{synopt:{opt i:ncludefile}}File path. This file will be included before parallel commands
+are executed. The target purpose for this is to allow one to copy over preferences that
+{cmd:parallel} does not copy automatically.{p_end}
 
 {syntab:Byable parallelization}
 {synopt:{opt by}}Varlist. Tells the command through which observations the current dataset 
