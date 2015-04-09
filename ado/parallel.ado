@@ -390,7 +390,7 @@ end
 *cap program drop parallel_setclusters
 program parallel_setclusters
 	version 11.0
-	syntax anything(name=nclusters)  [, Force Statapath(string asis) Gateway(string)]
+	syntax anything(name=nclusters)  [, Force Statapath(string asis) Gateway(string) Includefile(string)]
 	
 	local nclusters = real(`"`nclusters'"')
 	if (`nclusters' == .) {
@@ -403,10 +403,10 @@ program parallel_setclusters
 	if (`error'){
         di as error `"Can not set Stata directory, try using -statapath()- option"'
         exit `error'
-    }
-    
-    if "`c(mode)'"=="batch" & "`c(os)'"=="Windows" {
-        if `"`gateway'"'==""{
+	}
+	
+	if "`c(mode)'"=="batch" & "`c(os)'"=="Windows" {
+		if `"`gateway'"'==""{
 			local gateway "pll_gateway.sh"
 		}
 		cap confirm file `"`gateway'"'
@@ -416,7 +416,16 @@ program parallel_setclusters
 			exit _rc
 		}
 		global PLL_GATEWAY_FNAME `"`gateway'"'
-    }
+	}
+	
+	if `"`includefile'"'!=""{
+		cap confirm file `"`includefile'"'
+		if _rc {
+			di as error `"Can not find the include file (`includefile')."'
+			exit _rc
+		}
+		global PLL_INCLUDE_FILE `"`includefile'"'
+	}
 end
 
 

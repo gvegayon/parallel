@@ -116,6 +116,10 @@ real scalar parallel_write_do(
 		fput(output_fh, `"mata: mata set matalibs ""'+st_global("c(matalibs)")+`"""')
 			
 		fput(output_fh, "set seed "+seeds[i])
+		
+		if (st_global("PLL_INCLUDE_FILE")!=""){
+			fput(output_fh, `"include ""'+st_global("PLL_INCLUDE_FILE")+`"""')
+		}
 
 		/* Parallel macros to be used by the current user */
 		fput(output_fh, `"noi di "{hline 80}""')
