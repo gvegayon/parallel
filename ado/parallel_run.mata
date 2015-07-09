@@ -79,13 +79,16 @@ real scalar parallel_run(
 			unlink("__pll"+parallelid+"_shell.bat")
 			fh = fopen("__pll"+parallelid+"_shell.bat","w", 1)
 			
+			fput(fh, "pushd "+pwd())
+
 			// Writing file
 			for(i=1;i<=nclusters;i++) {
 				mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1)
 				fwrite(fh, "start /MIN /HIGH set STATATMP="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")+" ^& ")
-				fput(fh, paralleldir+`" /e /q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do"^&exit"')
+				fput(fh, paralleldir+`" /e /q do ""'+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do"^&exit"')
 			}
 			
+			fput(fh, "popd")
 			fput(fh, "exit")
 			
 			fclose(fh)
