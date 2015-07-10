@@ -20,14 +20,18 @@ clean:
 	rm -f __pll*
 	-rm -f -r /tmp/__pll*
 
+#in the Win part below, it's hard to easily get the PID of 'tail' in 'tail -f file| bash'.
+# see http://stackoverflow.com/questions/1652680/. 
+#  The "redirect to a subshell" doesn't seem to work any more on Cygwin
 tests: 
 	@echo Running tests 
+	echo PATH > temp.txt
 	cd ../tests && \
-		if [ "$$OS" = "Windows_NT" ]; then rm -f pll_gateway.sh; touch pll_gateway.sh; tail -f pll_gateway.sh > >( bash ) & tail_pid=$$!; fi; \
+		if [ "$$OS" = "Windows_NT" ]; then rm -f pll_gateway.sh; touch pll_gateway.sh; ( tail -f pll_gateway.sh & echo $$! >&3 ) 3>pid | bash & fi; \
 		for i in $(TESTS) ; do \
 			$(STATABATCH) do $${i}; \
 			echo test $${i} done; \
 		done ; \
-		if [ "$$OS" = "Windows_NT" ]; then kill $$tail_pid; rm -f pll_gateway.sh; fi; \
+		if [ "$$OS" = "Windows_NT" ]; then kill $$(<pid); rm -f pll_gateway.sh pid; fi; \
 		cat *.log > all_tests_results.txt; \
 		less all_tests_results.txt;
