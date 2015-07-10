@@ -43,8 +43,8 @@ void parallel_clean(|string scalar parallelid, real scalar cleanall, real scalar
 	{
 		for(i=1;i<=length(parallelids);i++)
 		{
-			parallel_recursively_rm(parallelids[i],pwd())
-			parallel_recursively_rm(parallelids[i],c("tmpdir"))
+			parallel_recursively_rm(parallelids[i],pwd(),., 1)
+			parallel_recursively_rm(parallelids[i],c("tmpdir"),., 1)
 		}
 	}
 	else display(sprintf("{text:parallel clean:} {result: nothing to clean...}"))
