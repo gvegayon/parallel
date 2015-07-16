@@ -10,7 +10,7 @@ mata:
 * @param force Forces parallel to remove files even if sandbox is working.
 * @returns Removes all auxiliary files.
 */
-void parallel_clean(|string scalar parallelid, real scalar cleanall, real scalar force) {
+void parallel_clean(|string scalar parallelid, real scalar cleanall, real scalar force, real scalar logs) {
 	
 	real scalar i ;
 	string colvector parallelids, sbfiles;
@@ -19,6 +19,7 @@ void parallel_clean(|string scalar parallelid, real scalar cleanall, real scalar
 	if (parallelid == J(1,1,"")) parallelid = st_global("LAST_PLL_ID");
 	if (cleanall == J(1,1,.)) cleanall = 0;
 	if (force==J(1,1,.)) force = 0;
+	if (logs==J(1,1,.)) logs = 0;
 	
 	/* Getting the list of parallel ids that should be removed */
 	if (cleanall)
@@ -43,8 +44,8 @@ void parallel_clean(|string scalar parallelid, real scalar cleanall, real scalar
 	{
 		for(i=1;i<=length(parallelids);i++)
 		{
-			parallel_recursively_rm(parallelids[i],pwd(),., 1)
-			parallel_recursively_rm(parallelids[i],c("tmpdir"),., 1)
+			parallel_recursively_rm(parallelids[i],pwd(),., logs)
+			parallel_recursively_rm(parallelids[i],c("tmpdir"),., logs)
 		}
 	}
 	else display(sprintf("{text:parallel clean:} {result: nothing to clean...}"))

@@ -34,7 +34,9 @@ program def parallel
 	// Checks wether if is parallel prefix or not
 	if  (regexm(`"`0'"', "^(do|clean|setclusters|break|version|append|printlog|viewlog)")) {
 	/* If not prefix */
-		parallel_`0'
+		*If user initiated, clean the logs
+		if regexs(0)=="clean" local add_on = cond(regexm(`"`0'"',","), "logs", ", logs")
+		parallel_`0' `add_on'
 	} 
 	else if (regexm(`"`0'"', "^(bs|sim)[,]?[\s ]?")) {
 	/* Prefix bootstrap or simulate */
@@ -375,14 +377,14 @@ end
 *cap program drop parallel_clean
 program def parallel_clean
 	version 11.0
-	syntax [, Event(string) All Force]
+	syntax [, Event(string) All Force Logs]
 		
 	if (length("`event'") != 0 & length("`all'") != 0) {
 		di as error `"invalid syntax: Using -pll_id- and -all- jointly is not allowed."'
 		exit 198
 	}
 	
-	mata: parallel_clean("`event'", `=length("`all'") > 0', `=length("`force'") > 0')
+	mata: parallel_clean("`event'", `=length("`all'") > 0', `=length("`force'") > 0', `=length("`logs'") > 0')
 end
 
 ////////////////////////////////////////////////////////////////////////////////
