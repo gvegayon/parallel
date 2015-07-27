@@ -42,5 +42,8 @@ Once installed it is suggested to restart Stata. If you had a previous installat
 
 Author
 ======
-George G. Vega
+George G. Vega [aut,cre]
+
 gvegayon (at) caltech dot edu
+
+Brian Quistorff [ctb]
