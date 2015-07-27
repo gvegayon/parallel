@@ -773,9 +773,9 @@ is from its github repo (on-development source code):
 
 {pmore}{browse "https://github.com/gvegayon/parallel"}{p_end}
 
-{pstd} Or from the author's personal website:{p_end}
+{pstd} Or from the project's website:{p_end}
 
-	{cmd:. net install parallel, from(http://software.ggvega.com/stata) replace}
+	{cmd:. net install parallel, from(https://raw.github.com/gvegayon/parallel/master/) replace}
 	{cmd:. mata mata mlib index}
 
 
@@ -836,7 +836,7 @@ links:
 
 {pstd}
 George Vega Yon [cre,aut], California Institute of Technology. {browse "mailto:gvegayon@caltech.edu"}
-{browse "http://ggvega.cl"}
+{browse "http://www.its.caltech.edu/~gvegayon"}
 
 Brian Quistorff [ctb], University of Maryland
 {p_end}
