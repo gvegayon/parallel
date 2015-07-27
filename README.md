@@ -13,28 +13,21 @@ Install
 =======
 
 For accessing SSC version of parallel
-```
+```Stata
 . ssc install parallel, replace
-. mata mata mlib index
-```
-
-For accessing the lastest stable version of parallel
-
-```
-. net install parallel, from(http://software.ggvega.com/stata) replace
 . mata mata mlib index
 ```
 
 For accessing the latest development version of parallel (from here) using Stata version >=13
 
-```
+```Stata
 . net install parallel, from(https://raw.github.com/gvegayon/parallel/master/) replace
 . mata mata mlib index
 ```
 
 For Stata version <13, download as zip, unzip, and then replace the above -net install- with
 
-```
+```Stata
 . net install parallel, from(full_local_path_to_files) replace
 ```
 
@@ -43,7 +36,6 @@ Once installed it is suggested to restart Stata. If you had a previous installat
 Author
 ======
 George G. Vega [aut,cre]
-
 gvegayon (at) caltech dot edu
 
 Brian Quistorff [ctb]
