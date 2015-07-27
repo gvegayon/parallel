@@ -835,8 +835,10 @@ links:
 {title:12. Author}
 
 {pstd}
-George Vega Yon, California Institute of Technology. {browse "mailto:gvegayon@caltech.edu"}
+George Vega Yon [cre,aut], California Institute of Technology. {browse "mailto:gvegayon@caltech.edu"}
 {browse "http://ggvega.cl"}
+
+Brian Quistorff [ctb], University of Maryland
 {p_end}
 
 
