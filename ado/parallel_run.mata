@@ -46,14 +46,14 @@ real scalar parallel_run(
 		if (c("os") != "Unix") {
 			for(i=1;i<=nclusters;i++) {
 				mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
-				fput(fh, "export TMPDIR="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f"))
+				fput(fh, "export STATATMP="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f"))
 				fput(fh, paralleldir+`" -e -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
 			}
 		}
 		else {
 			for(i=1;i<=nclusters;i++) {
 				mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
-				fput(fh, "export TMPDIR="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f"))
+				fput(fh, "export STATATMP="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f"))
 				fput(fh, paralleldir+`" -b -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
 			}
 		}
@@ -70,7 +70,7 @@ real scalar parallel_run(
 			for(i=1;i<=nclusters;i++) {
 				tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f")
 				mkdir(tmpdir_i,1) // fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
-				fput(fh, `"export TEMP=""'+tmpdir_i+`"""')
+				fput(fh, `"export STATATMP=""'+tmpdir_i+`"""')
 				fput(fh, paralleldir+`" -e -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
 			}
 			fclose(fh)
@@ -82,7 +82,7 @@ real scalar parallel_run(
 			// Writing file
 			for(i=1;i<=nclusters;i++) {
 				mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1)
-				fwrite(fh, "start /MIN /HIGH set TEMP="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")+" ^& ")
+				fwrite(fh, "start /MIN /HIGH set STATATMP="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")+" ^& ")
 				fput(fh, paralleldir+`" /e /q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do"^&exit"')
 			}
 			
@@ -99,5 +99,4 @@ real scalar parallel_run(
 }
 end
 
-// set TEMP=C:\Users\SPENSI~1\AppData\Local\Temp/ubslh38mmc1 & "C:\Program Files (x86)\Stata12/Stata-64.exe" /e /q do __pllubslh38mmc_do1.do
 
