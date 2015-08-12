@@ -8,12 +8,18 @@ ifeq "$(STATABATCH)" ""
   STATABATCH:=stata-mp -b
 endif
 
+.PHONY: sp home compile inc_dist_date clean tests
+
 sp :
 	$(STATABATCH) do compile_and_install.do;cp -u -r ~/parallel ~/../investigacion/george/comandos_paquetes_librerias/stata
 	make clean
 home:
 	$(STATABATCH) do compile_and_install.do
 	make clean
+inc_dist_date:
+	sed -ie "s/\(d Distribution-Date: \).\+/\1$$(date +%Y%m%d)/g" ../parallel.pkg
+compile: inc_dist_date
+	$(STATABATCH) do compile.do
 clean:
 	less compile_and_install.log
 	rm -f compile_and_install.log
