@@ -3,6 +3,8 @@ __pll*
 *~
 *.do
 
+tests/all_tests_results.txt
+
 *.log
 *.tex
 *.sty
