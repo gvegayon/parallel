@@ -1,4 +1,4 @@
-*! version 1.14.7.22  22jul2014
+*! version 1.15.8.19  19agol2015
 *! PARALLEL: Stata module for parallel computing
 *! by George G. Vega (gvegayon at caltech.edu)
 *! 
