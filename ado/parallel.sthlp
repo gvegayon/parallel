@@ -837,8 +837,10 @@ links:
 {pstd}
 George Vega Yon [cre,aut], California Institute of Technology. {browse "mailto:gvegayon@caltech.edu"}
 {browse "http://www.its.caltech.edu/~gvegayon"}
+{p_end}
 
-Brian Quistorff [ctb], University of Maryland
+{pstd}
+Brian Quistorff [ctb], University of Maryland. {browse "mailto:bquistorff@gmail.com"} {browse "http://econweb.umd.edu/~quistorff/index.html"}
 {p_end}
 
 
@@ -850,7 +852,6 @@ Eduardo Fajnzylber (Universidad Adolfo Ib{c a'}{c n~}ez, Chile), Eric Melse (CAR
 Tom{c a'}s Rau (Universidad Cat{c o'}lica, Chile), 
 Research Division (Superindentendia de Pensiones, Chile), 
 attendees to the Stata conference 2013 (New Orleans),
-Brian Quistorff (University of Maryland),
 Timothy Mak (University of Hong Kong) and
 Philippe Ruh (University of Zurich).
 {p_end}
