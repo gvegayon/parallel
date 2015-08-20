@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.14.7.22 22jul2014}{...}
+{* *! version 1.15.8.19 19ago2015}{...}
 {cmd:help parallel}{right:also see:  {net "describe miparallel, from(http://fmwww.bc.edu/RePEc/bocode/m)":miparallel}}
 {hline}
 
@@ -846,14 +846,21 @@ Brian Quistorff [ctb], University of Maryland. {browse "mailto:bquistorff@gmail.
 
 {title:13. Contributors}
 
+{pstd}{it:Special Thanks to:}
+Elan P. Kugelmass (aka as epkugelmass at github) [ctb],
+Timothy Mak (University of Hong Kong) (author of {net "describe miparallel, from(http://fmwww.bc.edu/RePEc/bocode/m)":miparallel})
+{p_end}
+
 {pstd}
-Damian C. Clarke (Oxford University, England), Felix Villatoro (Superintendencia de Pensiones, Chile),
-Eduardo Fajnzylber (Universidad Adolfo Ib{c a'}{c n~}ez, Chile), Eric Melse (CAREM, Netherlands),
+Damian C. Clarke (Oxford University, England), 
+Felix Villatoro (Superintendencia de Pensiones, Chile),
+Eduardo Fajnzylber (Universidad Adolfo Ib{c a'}{c n~}ez, Chile), 
+Eric Melse (CAREM, Netherlands),
 Tom{c a'}s Rau (Universidad Cat{c o'}lica, Chile), 
 Research Division (Superindentendia de Pensiones, Chile), 
 attendees to the Stata conference 2013 (New Orleans),
-Timothy Mak (University of Hong Kong) and
-Philippe Ruh (University of Zurich).
+Philippe Ruh (University of Zurich), 
+Michael Lacy (Colorado State).
 {p_end}
 
 
