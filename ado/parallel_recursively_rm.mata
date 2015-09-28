@@ -27,18 +27,28 @@ void function parallel_recursively_rm(string scalar parallelid ,| string scalar 
 	dirs  = dir(path,"dirs",pattern,1)
 	files = dir(path,"files",pattern,1)\dir(path,"files","l"+pattern,1)
 	
-	real scalar i
+	real scalar i, retcode
 	if (atomic)
 	{
-		for(i=1;i<=length(files);i++)
-			unlink(files[i])
+		for(i=1;i<=length(files);i++){
+			retcode = _unlink(files[i])
+			if (retcode !=0){
+				stata("sleep 2000")
+				_unlink(files[i])
+			}
+		}
 	}
 	else
 	{
 		/* We don't want to remove logfiles in tmpdir */
 		for(i=1;i<=length(files);i++)
-			if ( !regexm(files[i],"do[0-9]+\.log$") | rmlogs)
-				unlink(files[i])
+			if ( !regexm(files[i],"do[0-9]+\.log$") | rmlogs){
+				retcode = _unlink(files[i])
+				if (retcode !=0){
+					stata("sleep 2000")
+					_unlink(files[i])
+				}
+			}
 	}
 
 	/* Entering each folder */
@@ -46,8 +56,13 @@ void function parallel_recursively_rm(string scalar parallelid ,| string scalar 
 		parallel_recursively_rm(parallelid, dirs[i], 1)
 
 	/* Removing empty folders */
-	for(i=1;i<=length(dirs);i++)
-		rmdir(dirs[i])
+	for(i=1;i<=length(dirs);i++){
+		retcode = _rmdir(dirs[i])
+		if (retcode !=0){
+			stata("sleep 2000")
+			_rmdir(dirs[i])
+		}
+	}
 
 
 	return
