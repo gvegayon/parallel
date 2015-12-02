@@ -36,12 +36,10 @@
 
 % AUTHOR:  Change "readme" to your insert's file name.
 \inserttype[st0001]{article}
-\author{G. Vega and E. Melse}{%
-  George G. Vega\\Chilean Pension Supervisor\\Chile\\ gvega@spensiones.cl
-  \and
-  Eric Melse\\Centre for Applied Research on Economics \& Management (CAREM)\\Amsterdam University of Applied Sciences\\Netherlands\\eric.melse@planet.nl
+\author{G. Vega Yon}{%
+  George G. Vega Yon\\ g.vegayon@gmail.com
 }
-\title[parallel]{PARALLEL: Multicore Computing in Stata}
+\title[parallel]{PARALLEL: Stata Module for Parallel Computing}
 
 \maketitle
 
@@ -50,6 +48,33 @@ With a multicore CPU computer, Stata users can achieve a substantial performance
 
 \keywords{\inserttag, parallel computing, simulations, high performance computing}
 \end{abstract}
+
+Parallel computing is becoming reachable each day. Most modern computers processors consists in at least two cores. Frequently associated with \textit{multitasking} users, many single applications can, and do, take advantage of having more than one processor.
+
+A very close example, StataMP version. Making use of multi-processor computers, StataMP has managed to deliver out-of-the-box parallel computing capabilities to Stata without the user having to hold technical knowledge on parallel computing. That is how with StataMP users can do faster linear algebra, faster OLS estimation, and faster data management in general. Nevertheless, while quite a big advance, there is still space to improve its parallel computing capabilities.
+
+For a start, the Multiprocessor version of Stata will not improve neither simulations or bootstrapping estimators \textit{per se}, since the parallelization required to increase its performance relies on task and data-parallelization, this is, a higher (as in more simple, but specific) sort of parallelization. This is how \textit{parallel} is originated.
+
+\section{Features}
+
+The latest version of parallel includes several built-in commands to take advantage of multicore processors, in particular, appending several datasets, running simulations, bootstrapping estimation, and embarrassingly parallel computing. These are described as follows:
+
+\subsection{appending datasets}
+
+\begin{verbatim}
+parallel append [file(s)] , do(cmd|dofile) [in(in) if(if) expression(expand expression (see details)) processors(#) programs(namelist)
+randtype(current|datetime|random.org) timeout(#)]
+
+\end{verbatim}
+
+\subsection{simulations}
+
+\subsection{bootstrapping estimation}
+
+\subsection{embarrassingly parallel computing}
+
+
+\section{Extended example: Multiple imputation}
 
 \section{Introduction}
 

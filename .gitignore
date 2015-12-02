@@ -24,3 +24,4 @@ tests/all_tests_results.txt
 *.jpeg
 *.jpg
 
+.Rproj.user
