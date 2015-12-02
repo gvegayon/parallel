@@ -127,7 +127,11 @@ real scalar parallel_finito(
 				/* Checking tmpdir */
 				tmpdirname = sprintf("%s"+ (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/") + "__pll%s_tmpdir%04.0f", c("tmpdir"),parallelid,i)
 				parallel_recursively_rm(parallelid,tmpdirname,1)
-				rmdir(tmpdirname)
+				retcode = _rmdir(tmpdirname)
+				if (retcode !=0){
+					stata("sleep 2000")
+					_rmdir(tmpdirname)
+				}
 				
 				/* Taking the finished cluster out of the list */
 				pendingcl = select(pendingcl, pendingcl :!= i)
