@@ -1,0 +1,200 @@
+---
+title: "PARALLEL: Stata module for parallel computing"
+author: ""
+date: ""
+output: 
+  md_document:
+    variant: "markdown_github"
+---
+
+# PARALLEL: Stata module for parallel computing
+
+Parallel lets you **run Stata faster**, sometimes faster than MP itself. By organizing your job in several Stata instances, parallel allows you to work with out-of-the-box parallel computing. Using the the 'parallel' prefix, you can get **faster simulations, bootstrapping, reshaping big data**, etc. without having to know a thing about parallel computing. With **no need of having Stata/MP** installed on your computer, parallel has showed to dramatically speedup computations up to two, four, or more times depending on how many processors your computer has.
+
+Stata conference presentation: <http://ideas.repec.org/p/boc/norl13/4.html>
+
+SSC at Boston College: <http://ideas.repec.org/c/boc/bocode/s457527.html>
+
+1. [Installation](#installation)
+2. [Minimal examples](#minimal-examples)
+2. [Authors](#authors)
+
+Installation {#installation}
+=======
+
+For accessing SSC version of parallel
+```Stata
+. ssc install parallel, replace
+. mata mata mlib index
+```
+
+For accessing the latest development version of parallel (from here) using Stata version >=13
+
+```Stata
+. net install parallel, from(https://raw.github.com/gvegayon/parallel/master/) replace
+. mata mata mlib index
+```
+
+For Stata version <13, download as zip, unzip, and then replace the above -net install- with
+
+```Stata
+. net install parallel, from(full_local_path_to_files) replace
+```
+
+Once installed it is suggested to restart Stata. If you had a previous installation of -parallel- installed from a different source you should uninstall that first.
+
+Minimal examples {#minimal-examples}
+===============
+
+The following minimal examples have been written to introduce how to use the module. Please notice that the only examples actually designed to show potential speed gains are [parfor](#examples-parfor) and [bootstrap](#examples-bootstrap).
+
+The examples have been executed on a Dell Vostro 3300 notebook running Ubuntu 14.04 with an Intel Core i5 CPU M 560 (2 physical cores) with 8Gb of RAM, using Stata/IC 12.1 for Unix (Linux 64-bit x86-64).
+
+For more examples and details please refer to the module's help file.
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(autodep = TRUE, echo=FALSE, comment='')
+```
+
+## Simple parallelization of egen
+
+When conducted over groups, parallelizing `egen` can be useful. In the following example we show how to use `parallel` with `by: egen`.
+
+```{stata}
+parallel setclusters 2
+sysuse auto
+parallel, by(foreign): egen maxp = max(price)
+tab maxp
+```
+
+Which is the ``parallel'' way to do:
+
+```{stata}
+sysuse auto
+bysort foreign: egen maxp = max(price)
+tab maxp
+```
+
+
+## Bootstrapping {#examples-bootstrap}
+
+In this example we'll evaluate a regression model using bootstrapping which, together with simulations, is one of the best ways to use parallel
+
+```{stata}
+sysuse auto, clear
+parallel setclusters 4
+timer on 1
+parallel bs, reps(5000): reg price c.weig##c.weigh foreign rep
+timer off 1
+timer list
+```
+
+Which is the ``parallel way'' to do:
+
+```{stata}
+sysuse auto, clear
+timer on 2
+bs, reps(5000) nodots: reg price c.weig##c.weigh foreign rep
+timer off 2
+timer list
+```
+
+
+## Simulation
+
+From the `simulate` stata command:
+
+```{stata}
+parallel setclusters 2
+program define lnsim, rclass
+  version 12.1
+  syntax [, obs(integer 1) mu(real 0) sigma(real 1) ]
+  drop _all
+  set obs `obs'
+  tempvar z
+  gen `z' = exp(rnormal(`mu',`sigma'))
+  summarize `z'
+  return scalar mean = r(mean)
+  return scalar Var  = r(Var)
+end
+parallel sim, expr(mean=r(mean) var=r(Var)) reps(10000): lnsim, obs(100)
+
+summ
+```
+
+which is the parallel way to do
+
+```{stata}
+program define lnsim, rclass
+  version 12.1
+  syntax [, obs(integer 1) mu(real 0) sigma(real 1) ]
+  drop _all
+  set obs `obs'
+  tempvar z
+  gen `z' = exp(rnormal(`mu',`sigma'))
+  summarize `z'
+  return scalar mean = r(mean)
+  return scalar Var  = r(Var)
+end
+simulate mean=r(mean) var=r(Var), reps(10000) nodots: lnsim, obs(100)
+
+summ
+```
+
+## parfor {#examples-parfor}
+
+In this example we create a short program (`parfor`) which is intended to work as a `parfor` program, this is, looping through 1/N in a parallel fashion
+
+```{stata}
+// Cleaning working space
+clear all
+timer clear
+
+// Set up
+set seed 123
+local n = 5e6
+set obs `n'
+gen x = runiform()
+gen y_pll = .
+clonevar y_ser = y_pll
+
+// Loop replacement function
+prog def parfor
+	args var
+	forval i=1/`=_N' {
+		qui replace `var' = sqrt(x) in `i'
+	}
+end
+
+// Running the algorithm in parallel fashion
+timer on 1
+parallel setclusters 4
+parallel, prog(parfor): parfor y_pll
+timer off 1
+
+// Running the algorithm in a serial way
+timer on 2
+parfor y_ser
+timer off 2
+
+// Is there any difference?
+list in 1/10
+gen diff = y_pll != y_ser
+tab diff
+
+// Comparing time
+timer list
+di "Parallel is `=round(r(t2)/r(t1),.1)' times faster"
+
+```
+
+
+Authors {#authors}
+======
+George G. Vega [aut,cre]
+gvegayon (at) caltech dot edu
+
+Brian Quistorff [ctb]
+
+
+
