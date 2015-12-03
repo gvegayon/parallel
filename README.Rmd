@@ -46,7 +46,7 @@ Once installed it is suggested to restart Stata. If you had a previous installat
 Minimal examples {#minimal-examples}
 ===============
 
-The following minimal examples have been written to introduce how to use the module. Please notice that the only examples actually designed to show potential speed gains are [parfor](#examples-parfor) and [bootstrap](#examples-bootstrap).
+The following minimal examples have been written to introduce how to use the module. Please notice that the only examples actually designed to show potential speed gains are [parfor](#parfor) and [bootstrap](#bootstraping).
 
 The examples have been executed on a Dell Vostro 3300 notebook running Ubuntu 14.04 with an Intel Core i5 CPU M 560 (2 physical cores) with 8Gb of RAM, using Stata/IC 12.1 for Unix (Linux 64-bit x86-64).
 
