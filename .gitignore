@@ -6,12 +6,9 @@ __pll*
 tests/all_tests_results.txt
 
 *.log
-*.tex
-*.sty
 *.aux
 *.bib
 *.nav
-*.pdf
 *.out
 *.toc
 *.vrb

@@ -1,0 +1,131 @@
+%%
+%% This is file `pagedims.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% pagedims.dtx  (with options: `pagedims')
+%% ===========================================================================
+%% LaTeX 2e document class for Stata Press books
+%% 
+%% Copyright 2001--2006 StataCorp LP
+%% 4905 Lakeway Drive
+%% College Station, Texas 77845 USA
+%% http://www.stata.com
+%% stata@stata.com
+%% 
+%% Some macros and environments are modified versions of those given in
+%% classes.dtx v1.4a 1999/01/07, copyrighted by The LaTeX3 Project.
+%% 
+%% \CharacterTable
+%%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%%   Digits        \0\1\2\3\4\5\6\7\8\9
+%%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%%   Dollar        \$     Percent       \%     Ampersand     \&
+%%   Acute accent  \'     Left paren    \(     Right paren   \)
+%%   Asterisk      \*     Plus          \+     Comma         \,
+%%   Minus         \-     Point         \.     Solidus       \/
+%%   Colon         \:     Semicolon     \;     Less than     \<
+%%   Equals        \=     Greater than  \>     Question mark \?
+%%   Commercial at \@     Left bracket  \[     Backslash     \\
+%%   Right bracket \]     Circumflex    \^     Underscore    \_
+%%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%%   Right brace   \}     Tilde         \~}
+%%
+\NeedsTeXFormat{LaTeX2e}[1996/06/01]
+\ProvidesPackage{pagedims}
+  [2013/10/17 v1.02
+ Stata Press standard page dimensions]
+\def\pd@Warning#1{\PackageWarning{pagedims}{#1}}
+\def\pd@WarningNoLine#1{\PackageWarningNoLine{pagedims}{#1}}
+\def\pd@Info#1{\typeout{#1}\PackageInfo{pagedims}{#1}}
+\newif\ifpd@pdftex
+\ifx\pdfoutput\pd@undefined
+  \relax
+\else
+  \pd@pdftextrue
+\fi
+\newif\ifpd@opt@crop
+\def\pd@crop@type{cam}
+\def\pd@crop@center{center}
+\DeclareOption{crop}{\pd@opt@croptrue}
+\DeclareOption{nocrop}{\pd@opt@cropfalse}
+\DeclareOption{cam}{\def\pd@crop@type{cam}}
+\DeclareOption{frame}{\def\pd@crop@type{frame}}
+\DeclareOption{oldcenter}{\def\pd@crop@center{lettercenter}}
+\DeclareOption{newcenter}{\def\pd@crop@center{letter,center}}
+\DeclareOption{nocenter}{\def\pd@crop@center{}}
+\DeclareOption*{\pd@Warning{{\CurrentOption} is not a valid option}}
+\ProcessOptions\relax
+\newdimen\stockwidth \stockwidth=0pt
+\RequirePackage[\pd@crop@center]{crop}[1999/05/15]
+\renewcommand*\CROP@@info{\relax}
+\RequirePackage{calc}[1998/07/07]
+\newlength{\pdDefaultOffset}
+\newlength{\pdOutsideOffset}
+\newlength{\pd@pgheight}
+\newlength{\pd@pgwidth}
+\newlength{\pd@voffset}
+\newlength{\pd@hoffset}
+\newlength{\pd@topmargin}
+\newlength{\pd@letter@wd}
+\newlength{\pd@letter@ht}
+\gdef\pdSetDims{%
+  \setlength{\paperheight}{\pd@pgheight}%
+  \setlength{\paperwidth}{\pd@pgwidth}%
+  \ifpd@pdftex%
+    \setlength{\topmargin}%
+      {\pd@topmargin-\pdDefaultOffset-\pd@voffset}%
+  \else%
+    \setlength{\topmargin}%
+      {\pd@topmargin-\pdDefaultOffset}%
+  \fi%
+  \setlength{\textheight}{%
+    \pd@pgheight%
+      -\pd@voffset%
+      -\pd@topmargin%
+      -\headheight%
+      -\headsep%
+      -\footskip%
+  }%
+  \setlength{\textwidth}{%
+    \pd@pgwidth%
+      -2\pd@hoffset%
+      -\pdOutsideOffset%
+      -\marginparsep%
+      -\marginparwidth%
+  }%
+  \setlength{\evensidemargin}{-\pdOutsideOffset}%
+  \setlength{\hsize}{\textwidth}%
+  \setlength{\hoffset}{0.5\pd@letter@wd-0.5\pd@pgwidth}%
+  \setlength{\voffset}{0.5\pd@letter@ht-0.5\pd@pgheight}%
+}
+\setlength{\pdDefaultOffset}{1in}
+\setlength{\pd@pgheight}{9.25in}
+\setlength{\pd@pgwidth}{7.25in}
+\setlength{\pd@hoffset}{\pdDefaultOffset}
+\setlength{\pd@voffset}{0.25in}
+\setlength{\pd@letter@ht}{11in}
+\setlength{\pd@letter@wd}{8.5in}
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+\setlength{\pdOutsideOffset}{0pt}
+\setlength{\pd@topmargin}{\pd@voffset}
+\setlength{\headheight}{44pt}
+\setlength{\headsep}{14pt}
+\setlength{\marginparsep}{0pt}
+\setlength{\marginparwidth}{0pt}
+\setlength{\footskip}{30pt}
+\pdSetDims
+\AtBeginDocument{
+  \ifpd@opt@crop%
+    \crop[\pd@crop@type]
+  \else
+    \cropdef{\relax}{\relax}{\relax}{\relax}{sjnone}
+    \crop[sjnone]
+  \fi
+}
+\endinput
+%%
+%% End of file `pagedims.sty'.
