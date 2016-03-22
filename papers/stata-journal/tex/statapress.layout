@@ -8,8 +8,6 @@ Input book.layout
 #  Should I do something for stverbatim?
 
 # Need to check if \input{} works
-# Can't seem to get vertical ' in code.
-#    \stlog uses \alltt but \usepackage{upquote} doesn't work (nor just using it's innards)
 InsetLayout "Flex:Stlog"
 	#CopyStyle        Include:Listings
 	#LabelString           Stlog[[inset]]

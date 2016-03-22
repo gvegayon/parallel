@@ -43,8 +43,10 @@
 \def\unix1{Intel Xeon X470 (hexadeca-core)}
 \def\windows1{Intel i3 2120 (dual-core)}
 \end_preamble
-\options bib
 \use_default_options false
+\begin_modules
+graphicboxes
+\end_modules
 \maintain_unincluded_children false
 \begin_local_layout
 
@@ -289,13 +291,11 @@ appending datasets
 \end_layout
 
 \begin_layout Verbatim
-
 parallel append [file(s)] , do(cmd|dofile) [in(in) if(if) expression(expand
  expression (see details)) processors(#) programs(namelist)
 \end_layout
 
 \begin_layout Verbatim
-
 randtype(current|datetime|random.org) timeout(#)]
 \end_layout
 
@@ -392,15 +392,9 @@ http://cran.r-project.org/web/views/HighPerformanceComputing.html
  With its multiprocessor edition, Stata/MP, Stata Corp.
  offers bit level parallellization that makes it possible to achieve up
  to (or greater than) constant scale speed improvements (
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-citet{stata2010}
-\end_layout
+\begin_inset CommandInset citation
+LatexCommand cite
+key "stata2010"
 
 \end_inset
 
@@ -495,14 +489,15 @@ centering
 \end_inset
 
  
-\begin_inset ERT
-status collapsed
+\begin_inset Flex Scalebox
+status open
 
 \begin_layout Plain Layout
+\begin_inset Argument 1
+status open
 
-
-\backslash
-scalebox{1}{
+\begin_layout Plain Layout
+1
 \end_layout
 
 \end_inset
@@ -515,17 +510,11 @@ filename "tables_and_figures/diagram.tex"
 \end_inset
 
 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-}
 \end_layout
 
 \end_inset
 
- 
+
 \end_layout
 
 \end_inset
@@ -1677,15 +1666,9 @@ begin{stexample}[Extended Example 1: Montecarlo Simulation]
 
 \begin_layout Standard
 In 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-citet{baum2007}
-\end_layout
+\begin_inset CommandInset citation
+LatexCommand cite
+key "baum2007"
 
 \end_inset
 
@@ -1883,7 +1866,7 @@ nodata
 \end_layout
 
 \begin_layout Standard
-(INSERT CODE HERE)
+(INSERT CODE HERE) 
 \end_layout
 
 \begin_layout Standard
@@ -2033,17 +2016,6 @@ George G.
 \end_layout
 
 \begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-% Bib
-\end_layout
-
-\end_inset
-
- 
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 bibfiles "bib"
