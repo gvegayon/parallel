@@ -1,0 +1,2058 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass statapress
+\begin_preamble
+% main.tex - a driver for your Stata Journal insert
+%
+% This file should only be changed according to the AUTHOR notes below.
+%
+% The Stata Press document class
+
+
+% Page dimensions
+\usepackage[crop,newcenter,frame]{pagedims}
+
+
+% The Stata Journal styles
+\usepackage{sj}
+
+
+% Encapsulated PostScript figures
+\usepackage{epsfig}
+
+\usepackage{booktabs}
+
+% Stata Log listings and useful macros
+\usepackage{stata}
+\usepackage[english]{babel}
+
+% Shadow package to render technical note figure
+\usepackage{shadow}
+
+
+% Author packages
+\usepackage{tikz}
+\usepackage{tabularx}\usetikzlibrary{arrows, fit,positioning}
+
+
+% EDITORS: volume number, issue number, month, and year
+\sjsetissue{$vv$}{$ii$}{$mm$}{$yyyy$}
+
+\def\unix1{Intel Xeon X470 (hexadeca-core)}
+\def\windows1{Intel i3 2120 (dual-core)}
+\end_preamble
+\options bib
+\use_default_options false
+\maintain_unincluded_children false
+\begin_local_layout
+
+\end_local_layout
+\language english
+\language_package none
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 2
+\use_package amssymb 0
+\use_package cancel 0
+\use_package esint 1
+\use_package mathdots 0
+\use_package mathtools 0
+\use_package mhchem 0
+\use_package stackrel 0
+\use_package stmaryrd 0
+\use_package undertilde 0
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+inserttype[st0001]{article}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+To do: Add 'about authors' section.
+ Get bib file.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Title
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+parallel
+\end_layout
+
+\end_inset
+
+PARALLEL: Stata Module for Parallel Computing
+\end_layout
+
+\begin_layout Author
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+G.
+ Vega Yon
+\end_layout
+
+\end_inset
+
+George G.
+ Vega Yon
+\begin_inset Newline newline
+\end_inset
+
+g.vegayon@gmail.com
+\end_layout
+
+\begin_layout Abstract
+With a multicore CPU computer, Stata users can achieve a substantial performance
+ improvement using parallel: a module for parallel computing by means of
+ shell scripting.
+ Parallel can launch up as many Stata executables in batch mode as cores
+ the CPU has to accelerate computations.
+ By splitting the dataset, or repeated loading, into cluster parallel will
+ repeat a task simultaneously over each core, which results in an efficiency
+ improvement proportional to the number of CPU cores.
+ Parallel delivers 
+\begin_inset Quotes eld
+\end_inset
+
+kitchen sink
+\begin_inset Quotes erd
+\end_inset
+
+ parallel computing to the data scientist.
+ In this article we present its main features and show empirical applications
+ using the command.
+\end_layout
+
+\begin_layout Abstract
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+keywords{
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+inserttag
+\end_layout
+
+\end_inset
+
+, parallel computing, simulations, high performance computing
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Parallel computing is becoming reachable each day.
+ Most modern computers processors consists in at least two cores.
+ Frequently associated with 
+\shape italic
+multitasking
+\shape default
+ users, many single applications can, and do, take advantage of having more
+ than one processor.
+\end_layout
+
+\begin_layout Standard
+A very close example, StataMP version.
+ Making use of multi-processor computers, StataMP has managed to deliver
+ out-of-the-box parallel computing capabilities to Stata without the user
+ having to hold technical knowledge on parallel computing.
+ That is how with StataMP users can do faster linear algebra, faster OLS
+ estimation, and faster data management in general.
+ Nevertheless, while quite a big advance, there is still space to improve
+ its parallel computing capabilities.
+\end_layout
+
+\begin_layout Standard
+For a start, the Multiprocessor version of Stata will not improve neither
+ simulations or bootstrapping estimators 
+\shape italic
+per se
+\shape default
+, since the parallelization required to increase its performance relies
+ on task and data-parallelization, this is, a higher (as in more simple,
+ but specific) sort of parallelization.
+ This is how 
+\shape italic
+parallel
+\shape default
+ is originated.
+\end_layout
+
+\begin_layout Section
+Features
+\end_layout
+
+\begin_layout Standard
+The latest version of parallel includes several built-in commands to take
+ advantage of multicore processors, in particular, appending several datasets,
+ running simulations, bootstrapping estimation, and embarrassingly parallel
+ computing.
+ These are described as follows:
+\end_layout
+
+\begin_layout Subsection
+appending datasets
+\end_layout
+
+\begin_layout Verbatim
+
+parallel append [file(s)] , do(cmd|dofile) [in(in) if(if) expression(expand
+ expression (see details)) processors(#) programs(namelist)
+\end_layout
+
+\begin_layout Verbatim
+
+randtype(current|datetime|random.org) timeout(#)]
+\end_layout
+
+\begin_layout Verbatim
+
+\end_layout
+
+\begin_layout Subsection
+simulations
+\end_layout
+
+\begin_layout Subsection
+bootstrapping estimation
+\end_layout
+
+\begin_layout Subsection
+embarrassingly parallel computing
+\end_layout
+
+\begin_layout Section
+Extended example: Multiple imputation
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+Multicore CPUs are standard in today's personal computer industry, and potential
+ly move productivity upward for multi-tasking users.
+ Several mathematical and statistical packages make good use of multicore
+ CPUs, for example, MATLAB provides its own Parallel Computing Toolbox
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://www.mathworks.com/products/parallel-computing/
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ which makes it possible to implement parallel computing methods through
+ a multicore computer, GPUs and computer clusters.
+ Alternatively, the GNU open-source R software does offer several packages
+ to implement parallel computing algorithms such as 
+\begin_inset Quotes eld
+\end_inset
+
+parallel
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+snow
+\begin_inset Quotes erd
+\end_inset
+
+
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+For more details see CRAN Task View on High-Performance and Parallel Computing
+ With R 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://cran.r-project.org/web/views/HighPerformanceComputing.html
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+.
+ With its multiprocessor edition, Stata/MP, Stata Corp.
+ offers bit level parallellization that makes it possible to achieve up
+ to (or greater than) constant scale speed improvements (
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+citet{stata2010}
+\end_layout
+
+\end_inset
+
+).
+ However, besides of the fact that users must acquire special editions,
+ some times bit level parellelization is not enough.
+\end_layout
+
+\begin_layout Standard
+By using data or task parallelism, the module parallel allows the Stata
+ user to drastically decrease the time required to complete repetitive computati
+onal problems.
+ Parallel makes it possible to implement algorithms characterized by a large
+ number of calculations or, in the case of Stata, code interpretation such
+ as control-flow statements, like loops or simulation models.
+\end_layout
+
+\begin_layout Section
+Parallelization of Stata
+\end_layout
+
+\begin_layout Standard
+To speedup computations, a dataset can be split and distributed over a given
+ number of clusters and in so doing implement a data parallelism algorithm.
+ Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:howworks"
+
+\end_inset
+
+ illustrates this below the first block when parallel splits the dataset
+ into n clusters.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Or not, considering that the command also allows to work without data as
+ it the user can also take advantage from just calling n Stata batch mode
+ instances.
+\end_layout
+
+\end_inset
+
+ Parallel starts n new independent Stata instances in batch mode by which
+ the same task is simultaneously executed.
+ By default, all loaded instance globals and programs are passed through.
+ Optionally, mata programs (as mata libs) and objects are passed through
+ as well.
+ After every cluster stops, the result datasets are appended and returned
+ to the current Stata instance without modifying other elements.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement tb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+How parallel works
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:howworks"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset VSpace bigskip
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+scalebox{1}{
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset include
+LatexCommand input
+filename "tables_and_figures/diagram.tex"
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Parallel is especially helpful in performance a series of computations on
+ the same data sets but with different random samples.
+ Example 5.3 shows how to assess possible sample bias within a cohort using
+ parallel.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+When to use parallel
+\end_layout
+
+\begin_layout Standard
+Problems that are particularly suitable for data parallelization are:
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Control flow statement
+\series default
+ Mainly loops.
+ Most loops can be parallelized as these do not require all observations
+ to computer with.
+ Like serial replacing (from observation to observation), loops are a suitable
+ task to parallel computing.
+ In the case that a loop needs to compute with clustered data (loops within
+ individuals in a panel dataset), Stata users can ask parallel to avoid
+ splitting clusters.
+ Example 5.1 shows this.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Clustered computations
+\series default
+ Such as an byable egen.
+ Clustered egen can be parallelized without any problem as parallel can
+ avoid splitting clusters.
+ Stata users only have to declare it using the option by().
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Bootstrapping
+\series default
+ Since a bootstrapping process does not requires to work with all the generated
+ data until the end of it, it is perfect to be computed in parallel process.
+ Parallel allows to run simultaneously random data generation processes
+ using different seeds for each independent computational procedure with
+ reproducible results.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Monte Carlo Simulations
+\series default
+ Example 5.2 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Reshaping large datasets
+\series default
+ Better than Stata/MP, parallel has shown to efficiently reshape large administr
+ative datasets faster.
+ Even though speed gains are not that of the examples showed in this article,
+ parallel reaches speed improvements where Stata/MP does not.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Cohort sampling tasks like bias testing
+\series default
+ Example 5.3 
+\end_layout
+
+\begin_layout Section
+Syntax
+\end_layout
+
+\begin_layout Standard
+\noindent
+Setting the number of clusters (data blocks)
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{stsyntax}
+\end_layout
+
+\end_inset
+
+ parallel setclusters # 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+optional
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+, 
+\bar under
+f
+\bar default
+orce 
+\bar under
+s
+\bar default
+tatadir(
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+ststring
+\end_layout
+
+\end_inset
+
+) 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{stsyntax}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+Parallelizing a do-file
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{stsyntax}
+\end_layout
+
+\end_inset
+
+ parallel do 
+\shape italic
+filename
+\shape default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+optional
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+, by(
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+varlist
+\end_layout
+
+\end_inset
+
+) 
+\bar under
+f
+\bar default
+orce 
+\bar under
+k
+\bar default
+eep 
+\bar under
+keepl
+\bar default
+ast 
+\bar under
+p
+\bar default
+rograms 
+\bar under
+m
+\bar default
+ata 
+\bar under
+nog
+\bar default
+lobal 
+\bar under
+s
+\bar default
+eeds(
+\shape italic
+numlist
+\shape default
+) 
+\bar under
+nod
+\bar default
+ata 
+\bar under
+r
+\bar default
+andtype(
+\shape italic
+datetime
+\begin_inset Formula $|$
+\end_inset
+
+random.org
+\shape default
+) 
+\bar under
+t
+\bar default
+imeout(
+\shape italic
+integer
+\shape default
+) 
+\bar under
+pr
+\bar default
+ocessors(
+\shape italic
+integer
+\shape default
+)
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{stsyntax}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+Parallelizing a Stata command
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{stsyntax}
+\end_layout
+
+\end_inset
+
+ parallel 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+optional
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+, by(
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+varlist
+\end_layout
+
+\end_inset
+
+) 
+\bar under
+f
+\bar default
+orce 
+\bar under
+k
+\bar default
+eep 
+\bar under
+keepl
+\bar default
+ast 
+\bar under
+p
+\bar default
+rograms 
+\bar under
+m
+\bar default
+ata 
+\bar under
+nog
+\bar default
+lobal 
+\bar under
+s
+\bar default
+eeds(
+\shape italic
+numlist
+\shape default
+) 
+\bar under
+nod
+\bar default
+ata 
+\bar under
+r
+\bar default
+andtype(
+\shape italic
+datetime
+\begin_inset Formula $|$
+\end_inset
+
+random.org
+\shape default
+) 
+\bar under
+t
+\bar default
+imeout(
+\shape italic
+integer
+\shape default
+) 
+\bar under
+pr
+\bar default
+ocessors(
+\shape italic
+integer
+\shape default
+)
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+: 
+\shape italic
+stata_cmd
+\shape default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{stsyntax}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+Removing auxiliary files
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{stsyntax}
+\end_layout
+
+\end_inset
+
+ parallel clean 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+optional
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+, 
+\bar under
+e
+\bar default
+vent(
+\shape italic
+pll_id
+\shape default
+) 
+\bar under
+a
+\bar default
+ll 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{stsyntax}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Options
+\end_layout
+
+\begin_layout Standard
+\noindent
+Setting the number of clusters (data blocks)
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hangpara
+\end_layout
+
+\end_inset
+
+ 
+\family typewriter
+force
+\family default
+ In order to protect the users' computers, setting more than 8 clusters
+ it is not permitted (see the WARNING in description).
+ With this option the user can skip this restriction.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hangpara
+\end_layout
+
+\end_inset
+
+ 
+\family typewriter
+statadir
+\family default
+ File path.
+ parallel tries to automatically identify Stata's exe path.
+ By using this option you will override this and force parallel to use a
+ specific path of stata.exe.
+\end_layout
+
+\begin_layout Standard
+\noindent
+Byable parallelization
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hangpara
+\end_layout
+
+\end_inset
+
+ 
+\family typewriter
+by
+\family default
+ Varlist.
+ Tells the command through which observations the current dataset can be
+ splitted, avoiding stories splitting over two or more clusters (for example).
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hangpara
+\end_layout
+
+\end_inset
+
+ 
+\family typewriter
+force
+\family default
+ When using by, parallel checks whether if the dataset is properly sorted.
+ By using force the command skips this check.
+\end_layout
+
+\begin_layout Standard
+\noindent
+Keeping auxiliary files
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hangpara
+\end_layout
+
+\end_inset
+
+ 
+\family typewriter
+keep
+\family default
+ Keeps auxiliary files generated by parallel.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hangpara
+\end_layout
+
+\end_inset
+
+ 
+\family typewriter
+keeplast
+\family default
+ Keeps auxiliary files and remove those last time saved during the current
+ session.
+\end_layout
+
+\begin_layout Standard
+\noindent
+Passing Stata/Mata objects
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hangpara
+\end_layout
+
+\end_inset
+
+ 
+\family typewriter
+programs
+\family default
+ In the case of having temporal programs loaded in the session, using this
+ option parallel passes them to the clusters.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hangpara
+\end_layout
+
+\end_inset
+
+ 
+\family typewriter
+mata
+\family default
+ If the algorithm needs to use mata objects, this option allows to pass
+ to each cluster every mata object loaded in the current session (including
+ functions).
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hangpara
+\end_layout
+
+\end_inset
+
+ 
+\family typewriter
+noglobal
+\family default
+ By default parallel takes into account every global macro loaded in the
+ session.
+ If the user needs to not include globals in clusters, he should use this
+ option.
+\end_layout
+
+\begin_layout Standard
+\noindent
+Simulation options
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hangpara
+\end_layout
+
+\end_inset
+
+ 
+\family typewriter
+seeds
+\family default
+ Numlist.
+ With this option the user can pass an specific seed to be used within each
+ cluster.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hangpara
+\end_layout
+
+\end_inset
+
+ 
+\family typewriter
+nodata
+\family default
+ Tells parallel that there is no data loaded and thus should not try to
+ split or append anything.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hangpara
+\end_layout
+
+\end_inset
+
+ 
+\family typewriter
+randtype
+\family default
+ String.
+ Tells parallel whether to use the current seed to generate the seeds for
+ each clusters (default option) or use the current datetime -datetime- or
+ random.org API -random.org- (please read the Description section).
+\end_layout
+
+\begin_layout Standard
+\noindent
+Removing auxiliary files
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hangpara
+\end_layout
+
+\end_inset
+
+ 
+\family typewriter
+event
+\family default
+ Integer.
+ Specifies which executed (and stored) event's files should be removed.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hangpara
+\end_layout
+
+\end_inset
+
+ 
+\family typewriter
+all
+\family default
+ Tells parallel to remove every remanent auxiliary files generated by it
+ in the current directory.
+\end_layout
+
+\begin_layout Standard
+\noindent
+Other options
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hangpara
+\end_layout
+
+\end_inset
+
+ 
+\family typewriter
+timeout
+\family default
+ Integer.If a cluster hasn't start, how much time in seconds does parallel
+ has to wait until assume that there was a connection error and thus the
+ child process (cluster) won't start.
+ Default value is 60.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+hangpara
+\end_layout
+
+\end_inset
+
+ 
+\family typewriter
+processors
+\family default
+ Integer.
+ If running on StataMP, sets the number of processors each cluster should
+ use.
+ Default value is 0 (do nothing).
+\end_layout
+
+\begin_layout Section
+Examples
+\end_layout
+
+\begin_layout Standard
+Others examples are included in the Stata Help file of the command.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Serial replacing
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{stexample}[Example 1 - Serial Replacing]
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This first test consists on, after a generation of N pseudo-random values,
+ using Stata's 
+\family typewriter
+rnormal()
+\family default
+ function, replacing each and every one of the observations in a serial
+ way (loop) starting from 
+\begin_inset Formula $1$
+\end_inset
+
+ to 
+\begin_inset Formula $N$
+\end_inset
+
+.
+ The observation's variable was replaced using the PDF of the normal distributio
+n
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+f(x)=\frac{1}{\sqrt{2\pi}}e^{\frac{-x^{2}}{2}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The code to be parallelized is
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+% % % % 
+\end_layout
+
+\end_inset
+
+(INSERT CODE HERE)
+\end_layout
+
+\begin_layout Standard
+\noindent
+which is contained inside a do-file named 
+\begin_inset Quotes eld
+\end_inset
+
+myloop.do
+\begin_inset Quotes erd
+\end_inset
+
+, and can be executed through four clusters with parallel as it follows
+\end_layout
+
+\begin_layout Standard
+(INSERT CODE HERE)
+\end_layout
+
+\begin_layout Standard
+This algorithm was repeated over 
+\begin_inset Formula $N\in\{10000;100000;1000000;10000000\}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+placement !h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Serial replacing using a loop on a Linux Server (16 clusters)
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset include
+LatexCommand input
+filename "tables_and_figures/tab_serial_replacing.tex"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{stexample}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{stexample}[Extended Example 1: Montecarlo Simulation]
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+citet{baum2007}
+\end_layout
+
+\end_inset
+
+ a simple Monte Carlo experiment is perform which simulates the performance
+ of a estimator of sample mean, bar x, in a context of heteroskedasticity.
+\end_layout
+
+\begin_layout Standard
+The model to be
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+y_{i}=\mu+\epsilon_{i}\sim N(0,\sigma^{2})
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $\epsilon$
+\end_inset
+
+ be a 
+\begin_inset Formula $N(0,1)$
+\end_inset
+
+ variable multiplied by a factor 
+\begin_inset Formula $cz_{i}$
+\end_inset
+
+, where 
+\begin_inset Formula $z_{i}$
+\end_inset
+
+ varies over 
+\begin_inset Formula $i$
+\end_inset
+
+.
+ We will vary parameter 
+\begin_inset Formula $c$
+\end_inset
+
+ between 0.1 and 1.0 and determine its effect on the point and interval estimates
+ of 
+\begin_inset Formula $\mu$
+\end_inset
+
+; as a comparison, we will compute a second random variable which is homoskedast
+ic, with the scale factor equalling 
+\begin_inset Formula $c\bar{z}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+From web dataset 
+\family typewriter
+census2
+\family default
+ the variables 
+\family typewriter
+age
+\family default
+, 
+\family typewriter
+region
+\family default
+ (which can be 1, 2, 3 or 4) and the mean of 
+\family typewriter
+region
+\family default
+ are used as 
+\begin_inset Formula $\mu$
+\end_inset
+
+, 
+\begin_inset Formula $z_{i}$
+\end_inset
+
+ and 
+\begin_inset Formula $\bar{z}$
+\end_inset
+
+ respectively.
+\end_layout
+
+\begin_layout Standard
+The simulation program, stored in 
+\begin_inset Quotes eld
+\end_inset
+
+mcsimul1.ado
+\begin_inset Quotes erd
+\end_inset
+
+, is defined as
+\end_layout
+
+\begin_layout Standard
+(INSERT CODE HERE)
+\end_layout
+
+\begin_layout Standard
+In what is next, the do-file that runs the simulation, stored as 
+\begin_inset Quotes eld
+\end_inset
+
+montecarlo.do
+\begin_inset Quotes erd
+\end_inset
+
+, it is compound of two parts: (a) setting the iteration range by which
+ 
+\begin_inset Formula $c$
+\end_inset
+
+ is going to vary, and (b) looping over the selected range.
+ For the first part the do-file uses the local macro 
+\family typewriter
+pll_instance
+\family default
+ which is the numer of the parallel stata instance running, thus there are
+ as many as clusters have been declared, number available with the global
+ macro 
+\family typewriter
+PLL_CLUSTERS
+\family default
+.
+ This way, if the macro 
+\family typewriter
+PLL_CLUSTERS
+\family default
+ equals two and the macro 
+\family typewriter
+pll_instance
+\family default
+ equals une, then the range will be defined from one to five
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Note that if the local macro 
+\family typewriter
+pll_id
+\family default
+, which contains a special random number that identifies an specific 
+\family typewriter
+parallel
+\family default
+ run (more details in its help file), length is zero it means that the do-file
+ is not running in parallel mode, thus it is been executed in a serial way
+ where the loop range starts from one to ten.
+\end_layout
+
+\end_inset
+
+.
+ 
+\begin_inset VSpace bigskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+(INSERT CODE HERE)
+\end_layout
+
+\begin_layout Standard
+\noindent
+This do-file will be executed from stata using 
+\family typewriter
+parallel do
+\family default
+ syntax.
+ As there is no need of splitting any dataset (these are loaded every time
+ that the main 
+\family typewriter
+loop_simul.do
+\family default
+'s loop runs), we add the option 
+\family typewriter
+nodata
+\family default
+.
+ This way the main do-file will look like this Finally, the do-file from
+ which parallel runs the simulation
+\end_layout
+
+\begin_layout Standard
+(INSERT CODE HERE)
+\end_layout
+
+\begin_layout Standard
+By this 
+\family typewriter
+parallel
+\family default
+ will start, in this case, five new independent stata instances, each one
+ looping over the ranges 1/2, 3/4, 5/6, 7/8 and 9/10 respectively.
+\end_layout
+
+\begin_layout Standard
+Most of the code has been exactly copied with the exception of the addition
+ of a new code line 
+\family typewriter
+set seed
+\family default
+.
+ In order to be able to compare both serial and parallel implementations
+ of the algorithm it was necessary to set a particular seed for each loop,
+ inside 
+\begin_inset Quotes eld
+\end_inset
+
+montecarlo.do
+\begin_inset Quotes erd
+\end_inset
+
+ right before 
+\family typewriter
+simulate
+\family default
+ command.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+placement !h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Monte Carlo Experiment on a Windows Machine (4 clusters)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset include
+LatexCommand input
+filename "tables_and_figures/tab_monte_carlo_experiment_win.tex"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+placement !h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Monte Carlo Experiment on a Linux Server (16 clusters)
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset include
+LatexCommand input
+filename "tables_and_figures/tab_monte_carlo_experiment_unix.tex"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{stexample}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout AboutAuthors
+George G.
+ Vega Yon is a graduate student in Social Sciences at the California Institute
+ of Technology.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% Bib
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "bib"
+options "sj"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

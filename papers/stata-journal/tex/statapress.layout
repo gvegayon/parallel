@@ -1,0 +1,125 @@
+#% Do not delete the line below; configure depends on this
+#  \DeclareLaTeXClass[statapress,book]{statapress}
+Input book.layout
+# statapress.cls does a \LoadClass{book} so load that layout
+
+# To do:
+#  Work on Stlog environment
+#  Should I do something for stverbatim?
+
+# Need to check if \input{} works
+# Can't seem to get vertical ' in code.
+#    \stlog uses \alltt but \usepackage{upquote} doesn't work (nor just using it's innards)
+InsetLayout "Flex:Stlog"
+	#CopyStyle        Include:Listings
+	#LabelString           Stlog[[inset]]
+	LatexType             Environment
+	LatexName             stlog
+	LyxType             custom
+	Decoration            minimalistic
+	Font
+		Color               foreground
+		Family              typewriter
+	EndFont
+	LabelFont
+		Color               foreground
+		Size                Small
+	EndFont
+	BgColor               listingsbg
+	MultiPar              true
+	PassThru              true
+	ParbreakIsNewline     true
+	KeepEmpty             true
+	FreeSpacing           true
+	ForceLTR              true
+End
+
+Style Title
+	Margin                Static
+	LatexType             Command
+	Category              FrontMatter
+	InTitle               1
+	LatexName             title
+	ParSkip               0.4
+	ItemSep               0
+	TopSep                0
+	BottomSep             1
+	ParSep                1
+	Align                 Center
+	LabelType             No_Label
+	Font
+		Size                Largest
+	EndFont
+	Argument 1
+		LabelString   "Short Title|S"
+	EndArgument
+End
+
+Style Author
+	Margin                Static
+	LatexType             Command
+	Category              FrontMatter
+	InTitle               1
+	LatexName             author
+	LabelSep              xxx
+	ParSkip               0.4
+	TopSep                1.3
+	BottomSep             0.7
+	ParSep                0.7
+	Align                 Center
+	LabelType             No_Label
+	Font
+		Size                Large
+	EndFont
+	Argument 1
+		Mandatory 1
+		LabelString   "Short Author|S"
+	EndArgument
+End
+
+Style AboutAuthors
+	Margin                Static
+	LatexType             Environment
+	LatexName             aboutauthors
+	Category              BackMatter
+	NextNoIndent          1
+	LeftMargin            MMM
+	RightMargin           MMM
+	ParIndent             MM
+	Align                 Left
+	LabelType             Above
+	LabelString           "About Authors"
+	Font
+		Size                Small
+	EndFont
+	LabelFont
+		Series              Bold
+		Size                Large
+	EndFont
+End
+
+Style Abstract
+	Margin                Static
+	LatexType             Environment
+	LatexName             abstract
+	Category              FrontMatter
+	NextNoIndent          1
+	LeftMargin            MMM
+	RightMargin           MMM
+	ParIndent             MM
+	ItemSep               0
+	TopSep                0.7
+	BottomSep             0.7
+	ParSep                0
+	Align                 Block
+	LabelType             Centered
+	LabelString           "Abstract"
+	LabelBottomSep        0.5
+		Font
+		Size                Small
+	EndFont
+	LabelFont
+		Series              Bold
+		Size                Large
+	EndFont
+End

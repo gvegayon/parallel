@@ -1,0 +1,658 @@
+%%
+%% This is file `sj.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% sj.dtx  (with options: `sj')
+%% ===========================================================================
+%% Stata Journal package for use with LaTeX 2e
+%% 
+%% Copyright 2001--2006 StataCorp LP
+%% 4905 Lakeway Drive
+%% College Station, Texas 77845 USA
+%% http://www.stata.com
+%% stata@stata.com
+%% 
+%% Some macros and environments are modified versions of those given in
+%% classes.dtx v1.4a 1999/01/07, copyrighted by The LaTeX3 Project.
+%% 
+%% \CharacterTable
+%%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%%   Digits        \0\1\2\3\4\5\6\7\8\9
+%%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%%   Dollar        \$     Percent       \%     Ampersand     \&
+%%   Acute accent  \'     Left paren    \(     Right paren   \)
+%%   Asterisk      \*     Plus          \+     Comma         \,
+%%   Minus         \-     Point         \.     Solidus       \/
+%%   Colon         \:     Semicolon     \;     Less than     \<
+%%   Equals        \=     Greater than  \>     Question mark \?
+%%   Commercial at \@     Left bracket  \[     Backslash     \\
+%%   Right bracket \]     Circumflex    \^     Underscore    \_
+%%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%%   Right brace   \}     Tilde         \~}
+%%
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{sj}
+  [2003/12/10 v1.22
+ Stata Journal package]
+\def\sj@Warning#1{\PackageWarning{sj}{#1}}
+\def\sj@WarningNoLine#1{\PackageWarningNoLine{sj}{#1}}
+\def\sj@Info#1{\typeout{#1}\PackageInfo{sj}{#1}}
+\newif\ifsj@opt@notstatapress
+\DeclareOption{notstatapress}{\sj@opt@notstatapresstrue}
+\DeclareOption{book}{\relax}
+\newif\ifsj@opt@notbook
+\DeclareOption{notbook}{\sj@opt@notbooktrue}
+\DeclareOption{article}{\sj@opt@notbooktrue\sj@opt@notstatapresstrue}
+\DeclareOption{book}{\relax}
+\newif\ifsj@opt@reprints
+\DeclareOption{reprints}{\sj@opt@reprintstrue}
+\DeclareOption{noreprints}{\sj@opt@reprintsfalse}
+\DeclareOption{default}{\relax}
+\DeclareOption*{\sj@Warning{{\CurrentOption} is not a valid option}}
+\ExecuteOptions{default}
+\ProcessOptions\relax
+\RequirePackage{ifthen}[1999/09/10]
+\RequirePackage{chapterbib}[1999/04/29]
+\ifsj@opt@notstatapress
+  \newcommand{\spthisheadings}[6]{%
+    \renewcommand{\ps@myheadings}{%
+      \renewcommand{\@oddhead}{{#1\hfil#2\hfil#3}}
+      \renewcommand{\@evenhead}{{#3\hfil#2\hfil#2}}
+      \renewcommand{\@oddfoot}{{#4\hfil#5\hfil#6}}%
+      \renewcommand{\@evenfoot}{{#6\hfil#5\hfil#4}}%
+    }
+  }
+\fi
+\ifsj@opt@notbook
+  \newcounter{chapter}
+\fi
+\renewcommand{\thepart}{\arabic{part}}
+\renewcommand{\thechapter}{\arabic{chapter}}
+\renewcommand{\thesection}{\arabic{section}}
+\renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
+\renewcommand{\theequation}{\arabic{equation}}
+\renewcommand{\thefigure}{\arabic{figure}}
+\renewcommand{\thetable}{\arabic{table}}
+\ifsj@opt@notstatapress
+  \def\sj@pagestyle{\pagestyle{plain}}
+\else
+  \def\sj@pagestyle{\pagestyle{headings}}
+\fi
+\sj@pagestyle%
+\def\chaptermark#1{\relax}
+\def\sectionmark#1{\relax}
+\def\subsectionmark#1{\relax}
+\def\subsubsectionmark#1{\relax}
+\def\ps@headings{%
+  \ifsj@opt@notbook
+    \newcommand{\chaptermark}[1]{\markboth{\textbf{##1}}{}}
+  \fi
+  \renewcommand{\chaptermark}[1]%
+    {\markboth{\textbf{\protect\short@title}}{}}
+  \renewcommand{\sectionmark}[1]%
+    {\markright{\protect\sj@short@author}}
+  \renewcommand{\subsectionmark}[1]%
+    {\markright{\protect\sj@short@author}}
+  \renewcommand{\subsubsectionmark}[1]%
+    {\markright{\protect\sj@short@author}}
+}
+\newif\ifsj@anyinserts
+\def\inserttag{notag}
+\def\sj@tagfilename{\jobname.tag}
+\newwrite\sj@tagfile
+\immediate\openout\sj@tagfile\sj@tagfilename
+\def\sj@inserttypw@previous{\relax}
+\newcommand{\inserttype}[2][notag]{%
+  \clearpage
+  \ifthenelse{\equal{#1}{notag}}{%
+    \def\inserttag{notag\thechapter}%
+  }{%
+    \ifthenelse{\equal{#1}{emptytag}}{%
+      \let\inserttag\relax%
+    }{%
+      \def\inserttag{#1}%
+    }%
+  }%
+  \let\sj@inserttype@previous\sj@inserttype
+    \def\sj@inserttype{article}%
+    \let\@maketitle\sj@maketitle@art
+    \sjbibsection
+  \ifthenelse{\equal{#2}{column}}{%
+    \def\sj@inserttype{column}%
+    \let\@maketitle\sj@maketitle@col
+    \sjbibsection
+  }{}
+  \ifthenelse{\equal{#2}{note}}{%
+    \def\sj@inserttype{note}%
+    \let\@maketitle\sj@maketitle@not
+    \sjbibsection[star]
+  }{}
+  \ifthenelse{\equal{#2}{comment}}{%
+    \def\sj@inserttype{comment}%
+    \let\@maketitle\sj@maketitle@com
+    \sjbibsection[star]
+  }{}%
+  \ifthenelse{\equal{#2}{tip}}{%
+    \def\sj@inserttype{tip}%
+    \let\@maketitle\sj@maketitle@tip
+    \sjbibsection[star]
+  }{}%
+  \ifthenelse{\equal{#2}{update}}{%
+    \def\sj@inserttype{update}%
+    \let\@maketitle\sj@maketitle@upd
+    \sjbibsection[star]
+    \author{\relax}{\relax}
+  }{}%
+}
+\newcommand\sjbibsection[1][]{%
+  \ifthenelse{\equal{#1}{}}{%
+    \def\bibsection{\section{\bibname}}%
+  }{%
+    \def\bibsection{\section*{\bibname}}%
+  }
+}
+\newcommand\citeb[1]{\citeauthor*{#1} [\citeyear{#1}]}
+\newcommand\citebetal[1]{\citeauthor{#1} [\citeyear{#1}]}
+\newcommand{\sj@maketitle@art}{%
+  \let\and\cand
+  {\parindent 0pt \centering \normalfont\sffamily
+    \LARGE\bfseries\sj@placetitle\par\nobreak
+    \vskip 16pt
+  }
+  {\parindent 0pt \centering \normalfont%
+    \begin{tabular}[t]{c}
+    \@author
+    \end{tabular}
+    \par\nobreak%
+  }%
+}
+\newcommand{\columnfig}[1]{\def\@columnfig{#1}}
+\let\emptycolumnfig\relax
+\let\@columnfig\emptycolumnfig
+\newbox\columnpicbox
+\newcount\columnpichght
+\newcommand{\sj@maketitle@col}{%
+  \let\and\cand
+  \ifx\@columnfig\emptycolumnfig
+    \sj@maketitle@art
+  \else
+    \setbox\columnpicbox=\hbox{\epsfig{file=\@columnfig}}
+    \columnpichght=\ht\columnpicbox
+    {\parindent 0pt \centering \normalfont\sffamily
+      \LARGE\bfseries \sj@placetitle\par\nobreak
+      \vskip 16pt
+    }
+    {\parindent 0pt
+      \normalfont
+      \begin{minipage}[b]%
+        [\the\columnpichght sp][c]{\textwidth/2-1em}
+      \raggedleft\@author
+      \end{minipage}
+      \begin{minipage}[b]%
+        [\the\columnpichght sp][c]{\textwidth/2-1em}
+      \unhbox\columnpicbox
+      \end{minipage}
+      \par\nobreak
+    }
+    % reset column figure macro to be empty
+    \let\@columnfig\emptycolumnfig
+  \fi
+  \vskip -6pt
+}
+\newcommand{\sj@maketitle@not}{%
+  \let\and\rand
+  \noindent
+  {\raggedleft\normalfont\sffamily
+    \Large\bfseries \sj@placetitle\par\nobreak
+    \vskip 10pt
+  }
+  {\parindent 0pt \raggedleft\normalfont
+    \begin{tabular}[t]{@{}r@{}}
+    \@author
+    \end{tabular}
+    \par\nobreak
+    \vskip -6pt
+  }
+}
+\let\sj@maketitle@com=\sj@maketitle@not
+\newcommand{\sj@maketitle@tip}{%
+  \let\and\land
+  \noindent
+  {\raggedright\normalfont\sffamily
+    \Large\bfseries \sj@placetitle\par\nobreak
+  }
+  {\parindent 0pt \raggedright\normalfont
+    \begin{tabular}[t]{@{}l@{}}
+    \@author
+    \end{tabular}
+    \par\nobreak
+  }
+  \par\noindent%
+}
+\newcommand{\sj@maketitle@upd}{%
+  \noindent
+  {\raggedright\normalfont\sffamily
+    \Large\bfseries \sj@placetitle\par\nobreak
+    \vskip 20pt
+  }
+}
+\newcommand{\sj@maketitle@def}{%
+  {\parindent 0pt \centering \normalfont\sffamily
+    \LARGE\bfseries \sj@placetitle\par\nobreak
+    \vskip 16pt
+  }
+  {\parindent 0pt \centering \normalfont
+    \begin{tabular}[t]{c}
+    \@author
+    \end{tabular}
+    \par\nobreak
+    \vskip -6pt
+  }
+}
+\let\@maketitle\sj@maketitle@def
+\let\sj@short@author@previous\relax
+\def\sj@short@author{\relax}
+\renewcommand{\author}[2]{%
+  \let\sj@short@author@previous\sj@short@author
+  \def\sjauthor{#1}%
+  \def\sj@short@author{#1}%
+  \def\@author{#2}%
+}
+\def\land{%
+  \end{tabular}%
+  \hskip 1em \@plus.17fil%
+  \begin{tabular}[t]{@{}l@{}}%
+}
+\def\cand{%
+  \end{tabular}%
+  \hskip 1em \@plus.17fil%
+  \begin{tabular}[t]{@{}c@{}}%
+}
+\def\rand{%
+  \end{tabular}%
+  \hskip 1em \@plus.17fil%
+  \begin{tabular}[t]{@{}r@{}}%
+}
+\renewcommand{\title}[2][empty]{%
+  \gdef\sjtitle{#2}%
+  \gdef\@title{#2}%
+  \ifthenelse{\equal{#1}{empty}}{
+    \gdef\short@title{#2}
+  }{
+    \gdef\short@title{#1}
+  }%
+}
+\def\sj@placetitle{%
+  \ifx\hypertarget\sj@undefined%
+    \@title%
+  \else%
+    \ifx\inserttag\relax%
+      \@title%
+    \else%
+      \hypertarget{\inserttag}{\@title}%
+    \fi%
+  \fi%
+}
+\renewcommand{\part}[2][]{%
+  \ifthenelse{\equal{#1}{noclear}}{\relax}{\clearpage}%
+  \refstepcounter{part}
+  \ifnum \thepart>1
+    \addtocontents{toc}{\protect\addvspace{1.5\baselineskip}}%
+  \fi
+  \addcontentsline{toc}{part}{\bfseries #2}
+  \addtocontents{toc}{\protect\addvspace{\baselineskip}}%
+}
+\def\sjaddcontentsline{%
+  \addcontentsline{toc}{chapter}{%
+    \@title\dotfill\newline%
+    \hbox{\hskip20pt}\dotfill\sj@short@author%
+  }%
+}
+\renewcommand{\@pnumwidth}{\@tocrmarg}
+\newlength{\sj@len@max@title}
+\setlength{\sj@len@max@title}{\textwidth}
+\addtolength{\sj@len@max@title}{-\@tocrmarg}
+\newlength{\sj@len@a}
+\newlength{\sj@len@b}
+\renewcommand{\maketitle}{%
+  \sj@pp@set
+  \sj@post@reprints{\sj@short@author@previous}
+  \clearpage\sj@pp@setfirst
+  \spthisheadings%
+    {\small The Stata Journal (\sj@year)\newline%
+      \textbf{\sj@volume}, Number \sj@number \sj@pp@get}
+    {}
+    {}
+    {\small\copyright{} \sj@year{} StataCorp LP}
+    {}
+    {\inserttag}
+  \sj@pagestyle%
+  \refstepcounter{chapter}%
+  \setcounter{section}{0}
+  \setcounter{equation}{0}
+  \setcounter{figure}{0}
+  \setcounter{table}{0}
+  \vskip\baselineskip\par%
+  \@maketitle%
+  \chaptermark{\short@title}%
+  \sectionmark{\sj@short@author}%
+  \immediate\write\sj@tagfile{insert \thechapter --\inserttag: \@title}
+  \sj@Info{New \sj@inserttype: (chapter \thechapter: dest \inserttag)}%
+  \setlength{\sj@len@max@title}{\textwidth}
+  \addtolength{\sj@len@max@title}{-\@tocrmarg}
+  \ifthenelse{\equal{\sj@inserttype}{update}}{%
+    \part[noclear]{\short@title}%
+  }{%
+    \settowidth{\sj@len@a}{\normalfont\@title}%
+    \settowidth{\sj@len@b}{\normalfont\sj@short@author}%
+    \addtolength{\sj@len@a}{\sj@len@b}%
+    \addtolength{\sj@len@max@title}{-1em}
+    \ifdim\sj@len@a<\sj@len@max@title%
+      \addcontentsline{toc}{chapter}%
+        {\@title\dotfill\sj@short@author}%
+    \else
+      \addtolength{\sj@len@max@title}{1.5em}
+      \addtolength{\sj@len@a}{-\sj@len@b-2em}% !! remove 2em
+      \ifdim\sj@len@a<\sj@len@max@title%
+        \addcontentsline{toc}{chapter}{%
+          \@title\dotfill\newline%
+          \hbox{\hskip0pt}\dotfill%
+          \sj@short@author%
+        }%
+      \else
+        \addtolength{\sj@len@a}{-\sj@len@max@title}
+        \addtolength{\sj@len@a}{\sj@len@b + \parindent}
+        \ifdim\sj@len@a<\sj@len@max@title%
+          \addcontentsline{toc}{chapter}%
+          {\@title\dotfill%
+          \hbox{\sj@short@author}}%
+        \else
+          \addtolength{\sj@len@a}%
+          {-\sj@len@max@title}
+          \ifdim\sj@len@a<\sj@len@max@title%
+            \addcontentsline{toc}{chapter}%
+            {%
+            \@title\dotfill\newline%
+            \hbox{\hskip0pt}\dotfill%
+            \sj@short@author%
+            }%
+          \else
+            \sjaddcontentsline%
+          \fi
+        \fi
+      \fi
+    \fi
+  }
+  \sj@anyinsertstrue%
+}
+\ifsj@opt@reprints
+  \def\sj@reprints@filename{\jobname.reprints}
+  \newwrite\sj@reprints@file
+  \openout\sj@reprints@file\sj@reprints@filename
+\fi
+\def\sj@pp@basefile{\jobname.pp}
+\newwrite\sj@pp@file
+\newcommand{\sj@pp@get}{%
+  \IfFileExists{\sj@pp@basefile\thechapter}{%
+    \input{\sj@pp@basefile\thechapter}%
+  }{}%
+}
+\newcounter{sj@pp@thispage}
+\newcommand{\sj@post@reprints}[1]{%
+  \ifsj@opt@reprints
+    \ifsj@anyinserts
+      \ifthenelse{%
+        \equal{\sj@inserttype@previous}{article}%
+      }{%
+        \immediate\write\sj@reprints@file{}
+        \immediate\write\sj@reprints@file{#1}
+        \immediate\write\sj@reprints@file%
+      {pp: \sj@pp@first--\thesj@pp@thispage, copies 25}
+      }{}
+      \ifthenelse{%
+        \equal{\sj@inserttype@previous}{column}%
+      }{%
+        \immediate\write\sj@reprints@file{}
+        \immediate\write\sj@reprints@file{#1}
+        \immediate\write\sj@reprints@file%
+      {pp: \sj@pp@first--\thesj@pp@thispage, copies 25}
+      }{}
+    \fi
+  \fi
+}
+\newcommand{\sj@pp@set}{%
+  \ifsj@anyinserts
+    \setcounter{sj@pp@thispage}{\thepage}
+    \ifnum \thesj@pp@thispage>1
+      \addtocounter{sj@pp@thispage}{-1}%
+    \fi
+    \immediate\openout\sj@pp@file\sj@pp@basefile\thechapter
+    \ifnum \thesj@pp@thispage>\sj@pp@first
+      \immediate\write\sj@pp@file%
+        {, pp.\ \sj@pp@first\string\endash\thesj@pp@thispage}
+    \else
+      \immediate\write\sj@pp@file%
+        {, p.\ \thesj@pp@thispage}
+    \fi
+    \immediate\closeout\sj@pp@file
+  \fi
+}
+\newcommand{\sj@pp@setfirst}{%
+  \edef\sj@pp@first{\thepage}
+}
+\def\sj@pp@first{0}
+\AtEndDocument{
+  \sj@pp@set
+  \inserttype{update}
+  \sj@post@reprints{\sj@short@author@previous}%
+  \ifsj@opt@reprints
+    \closeout\sj@reprints@file
+  \fi
+}
+\renewcommand{\section}{\@startsection%
+  {section}%
+  {1}%
+  {0pt}%
+  {-\baselineskip}%
+  {0.25\baselineskip}%
+  {\normalfont\Large\sffamily\bfseries}%
+}
+\let\sj@section=\section
+\renewcommand{\subsection}{\@startsection%
+  {subsection}%
+  {2}%
+  {0pt}%
+  {-\baselineskip}%
+  {0.25\baselineskip}%
+  {\normalfont\large\sffamily\bfseries}%
+}
+\let\sj@subsection=\subsection
+\renewcommand{\subsubsection}{\@startsection%
+  {subsubsection}%
+  {3}%
+  {0pt}%
+  {-\baselineskip}%
+  {0.25\baselineskip}%
+  {\normalfont\normalsize\sffamily\bfseries}%
+}
+\let\sj@subsubsection=\subsubsection
+\renewcommand{\paragraph}{\@startsection%
+  {paragraph}%
+  {4}%
+  {0pt}%
+  {-\baselineskip}%
+  {-0.25\baselineskip}%
+  {\normalfont\normalsize\sffamily\bfseries}%
+}
+\let\sj@paragraph=\paragraph
+\def\contentsname{Contents}
+\renewcommand{\tableofcontents}[1][]{%
+  \clearpage
+  \spthisheadings%
+    {\normalfont\Large Volume \sj@volume}
+    {\normalfont\Large Number \sj@number}
+    {\normalfont\Large\sj@year}
+    {}
+    {}
+    {}
+    {}
+  \begingroup
+    \parskip 0pt
+    {\parindent 0pt \centering \normalfont
+      \Huge\scshape The Stata Journal
+      \vskip \baselineskip
+    }
+    {\parskip 2pt \@starttoc{toc}}%
+  \endgroup
+  \clearpage
+  \thispagestyle{empty}
+  #1
+  \pagenumbering{arabic}
+}
+\newcommand{\titlepagecontents}[1][]{%
+  \begingroup
+    \vspace*{1in}
+    \parskip 0pt
+    {\vfill \normalfont
+      \hspace{2in}\Huge\scshape The Stata Journal\newline
+      \\
+      \hspace*{2.45in}{\normalfont\Large Volume \sj@volume}\quad
+      {\normalfont\Large Number \sj@number}\quad
+      {\normalfont\Large\sj@year}
+    }
+  \endgroup
+    {\vfill}
+    {\noindent\epsfig{file=bug.eps}\medskip\newline
+    \noindent%
+       A Stata Press publication\newline%
+       StataCorp LP\newline%
+       College Station, Texas}
+    {}
+  \thispagestyle{empty}
+}
+\newcommand*{\l@preface}[2]{%
+  \addpenalty{-\@highpenalty}%
+  \setlength\@tempdima{2.5em}%
+  \begingroup%
+    \parindent \z@ \rightskip \@pnumwidth%
+    \parfillskip -\@pnumwidth%
+    \leavevmode \bfseries%
+    \advance\leftskip\@tempdima%
+    \hskip -\leftskip%
+    #1\nobreak\hfil \nobreak\hb@xt@\@pnumwidth{\hss #2}\par%
+    \penalty\@highpenalty%
+  \endgroup%
+}
+\setcounter{tocdepth}{0}
+\renewcommand*\l@part[2]{%
+  \ifnum \c@tocdepth >-2\relax
+    \addpenalty{-\@highpenalty}%
+    \addvspace{1em \@plus\p@}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+      {\leavevmode
+        {\large \bfseries #1}%
+        \hfil \hb@xt@\@pnumwidth{\hss #2}%
+      }%
+      \par\nobreak
+      \global\@nobreaktrue
+      \everypar{\global\@nobreakfalse\everypar{}}%
+    \endgroup
+  \fi
+}
+\ifsj@opt@notbook
+  \newcommand{\l@chapter}{\relax}
+\fi
+\renewcommand*\l@chapter[2]{%
+  \ifnum \c@tocdepth >\m@ne
+    \addpenalty{-\@highpenalty}%
+    \setlength\@tempdima{1.5em}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+      \leavevmode
+      \advance\leftskip\@tempdima
+      \hskip -\leftskip
+      #1\nobreak%
+      \hfil \nobreak\hb@xt@\@pnumwidth{\hss #2}\par
+      \penalty\@highpenalty
+    \endgroup
+  \fi}
+\newcommand{\keywords}[1]{%
+  \par%
+  \noindent%
+  {\small {\sffamily\bfseries Keywords:} #1}%
+}
+\newenvironment{summary}{%
+  \small%
+  \noindent%
+  {\sffamily\bfseries Summary.}%
+}{\par}
+\ifsj@opt@notbook\relax\else
+  \newenvironment{abstract}{\relax}{\relax}
+\fi
+\def\abstractname{Abstract}%
+\renewenvironment{abstract}{%
+  \small%
+  \quotation%
+  \parskip 0.5\baselineskip%
+  {\noindent\sffamily\bfseries\abstractname.}
+}{%
+  \endquotation%
+  \par%
+}
+\newenvironment{aboutauthor}{%
+  \vskip 0.5\baselineskip\small%
+  {\noindent \normalfont\sffamily\bfseries About the author}\par%
+  \begingroup\parindent 0pt\parskip 0.5\baselineskip%
+}
+{\endgroup}
+\newenvironment{aboutauthors}{%
+  \vskip 0.5\baselineskip\small%
+  {\noindent\normalfont\sffamily\bfseries About the authors}\par%
+  \begingroup\parindent 0pt\parskip 0.5\baselineskip%
+}
+{\endgroup}
+\AtBeginDocument{
+  \let\sj@caption\caption
+  \def\caption{%
+    \ifthenelse{\equal{\@captype}{figure}}{\unskip}{\relax}%
+    \sj@caption
+  }
+}
+\def\sj{Stata Journal}
+\def\tsj{The {\sj}}
+\newcommand{\sjsetissue}[4]{%
+  \def\sj@volume{#1}
+  \def\sj@number{#2}
+  \def\sj@month{#3}
+  \def\sj@year{#4}
+}
+\sjsetissue{1}{1}{October}{2001}
+\AtBeginDocument{%
+  \IfFileExists{editor.sty}{%
+    \sj@Info{automatically inputting editor.sty}%
+    \usepackage{editor}%
+  }{}%
+  \IfFileExists{sj.cfg}{%
+    \sj@Info{automatically inputting sj.cfg}%
+    \input{sj.cfg}%
+  }{}%
+}
+\ifsj@opt@notstatapress
+  \relax
+\fi
+\let\stappendix=\Appendix
+\newcommand\Appendix{%
+  \renewcommand{\chapter}{%
+  \secdef\appendix\sAppendix}%
+\setcounter{section}{0}%
+\renewcommand{\thesection}{\Alph{section}}%
+}
+\endinput
+%%
+%% End of file `sj.sty'.

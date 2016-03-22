@@ -1,0 +1,589 @@
+%%
+%% This is file `stata.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% stata.dtx  (with options: `stata')
+%% ===========================================================================
+%% Stata packages for use with LaTeX 2e
+%% 
+%% Copyright 2001--2006 StataCorp LP
+%% 4905 Lakeway Drive
+%% College Station, Texas 77845 USA
+%% http://www.stata.com
+%% stata@stata.com
+%% 
+%% \CharacterTable
+%%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%%   Digits        \0\1\2\3\4\5\6\7\8\9
+%%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%%   Dollar        \$     Percent       \%     Ampersand     \&
+%%   Acute accent  \'     Left paren    \(     Right paren   \)
+%%   Asterisk      \*     Plus          \+     Comma         \,
+%%   Minus         \-     Point         \.     Solidus       \/
+%%   Colon         \:     Semicolon     \;     Less than     \<
+%%   Equals        \=     Greater than  \>     Question mark \?
+%%   Commercial at \@     Left bracket  \[     Backslash     \\
+%%   Right bracket \]     Circumflex    \^     Underscore    \_
+%%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%%   Right brace   \}     Tilde         \~}
+%%
+\ProvidesPackage{stata}
+              [2013/10/23 v1.34
+ LaTeX package for Stata code]
+\def\st@Warning#1{\PackageWarning{stata}{#1}}
+\def\st@WarningNoLine#1{\PackageWarningNoLine{stata}{#1}}
+\def\st@Info#1{\PackageInfo{stata}{#1}}
+\newif\ifst@opt@ttbox
+\DeclareOption{ttbox}{\st@opt@ttboxtrue}
+\DeclareOption{nottbox}{\st@opt@ttboxfalse}
+\ExecuteOptions{nottbox}
+\ProcessOptions\relax
+\RequirePackage{alltt}[1997/06/16]
+\RequirePackage{calc}[1998/07/07]
+\RequirePackage{ifthen}
+\ifst@opt@ttbox
+  % only the 'ttbox' environtment uses the 'pstricks' package
+  \RequirePackage{pstricks}
+\fi
+\newcommand{\stcmd}[1]{\texttt{#1}}
+\newcommand\ty{\ttfamily}
+\newbox\st@box
+\newdimen\st@box@wd
+\newdimen\st@box@ht
+\newdimen\st@box@dp
+\def\ittt#1{\setbox\st@box=\hbox{\ttfamily #1}\st@box@wd=\wd\st@box%
+  \rlap{\ttfamily\itshape #1}%
+  \hskip\st@box@wd%
+}
+\def\sltt#1{\setbox\st@box=\hbox{\ttfamily #1}\st@box@wd=\wd\st@box%
+  \rlap{\ttfamily\slshape #1}%
+  \hskip\st@box@wd%
+}
+\ifx\forcebftt\@undefined
+  \def\bftt{\ttfamily\bfseries}% the \bfseries is ineffective here
+\else
+  \st@Warning{Using cmbtt8, bold typewriter font}
+  \font\bftt=cmbtt8
+\fi
+\def\nn#1{\mbox{\normalfont\fontsize{9.6}{10}\selectfont #1}}
+\def\smrm{\normalfont\fontsize{8}{10}\selectfont}
+\def\dref#1{[{\smrm D}]~{\bfseries #1}}
+\def\drefi#1{[{\smrm D}]~{\bf\itshape #1}}
+\def\gref#1{[{\smrm G}]~{\bf #1}}
+\def\grefa#1{[{\smrm G-1}]~{\bf #1}}
+\def\grefai#1{[{\smrm G-1}]~{\bf\itshape #1}}
+\def\grefb#1{[{\smrm G-2}]~{\bf #1}}
+\def\grefbi#1{[{\smrm G-2}]~{\bf\itshape #1}}
+\def\grefc#1{[{\smrm G-3}]~{\bf #1}}
+\def\grefci#1{[{\smrm G-3}]~{\bf\itshape #1}}
+\def\grefd#1{[{\smrm G-4}]~{\bf #1}}
+\def\grefdi#1{[{\smrm G-4}]~{\bf\itshape #1}}
+\def\grefi#1{[{\smrm G}]~{\bf\itshape #1}}
+\def\iref#1{[\hskip.10em{\smrm I}\hskip.10em]~{\bf #1}}
+\def\miref#1{[{\smrm MI}]~{\bf #1}}
+\def\mirefi#1{[{\smrm MI}]~{\bf\itshape #1}}
+\def\mrefa#1{\mbox{[{\smrm M-1}]~{\bf #1}}}
+\def\mrefb#1{\mbox{[{\smrm M-2}]~{\bf #1}}}
+\def\mrefc#1{\mbox{[{\smrm M-3}]~{\bf #1}}}
+\def\mrefd#1{\mbox{[{\smrm M-4}]~{\bf #1}}}
+\def\mrefe#1{\mbox{[{\smrm M-5}]~{\bf #1}}}
+\def\mreff#1{\mbox{[{\smrm M-0}]~{\bf #1}}}
+\def\mrefg#1{\mbox{[{\smrm M-6}]~{\bf #1}}}
+\def\mref{\mbox{[{\smrm M}]~{\bf Mata Reference Manual}}}
+\def\mvref#1{[{\smrm MV}]~{\bf #1}}
+\def\mvrefi#1{[{\smrm MV}]~{\bf\itshape #1}}
+\def\pref#1{[{\smrm P}]~{\bf #1}}
+\def\rref#1{[{\smrm R}]~{\bf #1}}
+\def\rrefi#1{[{\smrm R}]~{\bf\itshape #1}}
+\def\stref#1{[{\smrm ST}]~{\bf #1}}
+\def\strefi#1{[{\smrm ST}]~{\bf\itshape #1}}
+\def\svyref#1{[{\smrm SVY}]~{\bf #1}}
+\def\svyrefi#1{[{\smrm SVY}]~{\bf\itshape #1}}
+\def\tsref#1{[{\smrm TS}]~{\bf #1}}
+\def\tsrefi#1{[{\smrm TS}]~{\bf\itshape #1}}
+\def\uref#1{[{\smrm U}]~{\bfseries #1}}
+\def\xtref#1{[{\smrm XT}]~{\bf #1}}
+\def\xtrefi#1{[{\smrm XT}]~{\bf\itshape #1}}
+\let\fref\uref    % for backward compatiblity with staman.sty
+\def\LB{$\bigl[$}
+\def\RB{$\bigr]$}
+\def\num{{\it \#\/}}
+\def\varlist{{\it varlist\/}}
+\def\newvarlist{{\it newvarlist\/}}
+\def\varname{{\it varname\/}}
+\def\newvarname{{\it newvarname\/}}
+\def\ststring{{\it string\/}}
+\def\byvarlist{{\tt by \varlist:}}
+\def\ifexp{{\tt if\/}}
+\def\inrange{{\tt in\/}}
+\def\eqexp{{\tt ={\it exp\/}}}
+\def\optby{\optional{\byvarlist}}
+\def\opteqexp{\optional{\eqexp}}
+\def\optif{\optional{\it if\/}}
+\def\optin{\optional{\it in\/}}
+\def\depvar{\it depvar\/}
+\def\optindepvars{$\bigl[\,${\it indepvars\/}$\,\bigr]$} % new in vegas
+\def\optional#1{{\tt \LB\,{#1}\,\RB}}
+\def\optnewvarlist{\optional{\newvarlist}}
+\def\optnewvarname{\optional{\newvarname}}
+\def\optvarlist{\optional{\varlist}}
+\def\optvarname{\optional{\varname}}
+\def\opttype{$\bigl[\,${\it type\/}$\,\bigr]$}
+\def\optweight{\optional{\it weight\/}}
+\def\optoptions{\optional{{\tt ,} {\it options\/}}}
+\newcommand\dunderbar[1]{%
+  \hbox{\lower.45ex\hbox{\underline{\raise.45ex\hbox{#1}}}}%
+}
+\font\mmbf=ptmb at 9.6pt
+\def\mm#1{{\bf #1}}
+%%\newcount\nd
+%%\def\descender#1#2#3{\nd=0\rlap{#1}\hbox{\lower.45ex\hbox{\underbar%
+%%{\loop\ifnum\nd<#3\ \advance\nd by1\repeat}}#2}}
+\def\descenter#1#2#3{\dunderbar{#1}#2}
+\let\DESCENTER=\descender
+\newlength\stsyndent
+\setlength{\stsyndent}{\parindent}
+\def\stsynpara{\hangindent=\stsyndent\hangafter=1\noindent}
+\def\stsynsep#1{\rlap{#1}\hskip\stsyndent}
+\newenvironment{stsyntax}{%
+  \vskip0.25\baselineskip%
+  \normalfont\ttfamily%
+  \fontsize{10}{16}\selectfont%
+  \stsynpara%
+  \raggedright%
+  \hskip0pt%
+}{%
+  \normalfont\selectfont%
+  \vskip0.25\baselineskip%
+  \par%
+}
+\def\stverbfs{8}        % font size
+\def\stverbbs{9}        % baseline skip
+\newenvironment{stverbatim}{%
+  \fontsize{\stverbfs}{\stverbbs}\selectfont%
+  \list{}{%
+    \parsep        0pt%
+    \listparindent 0pt%
+    \itemindent    0pt%
+    \rightmargin   \leftmargin%
+    \parindent     0pt%
+    \topsep        0pt%
+  }%
+  \item\relax%
+}{%
+  \endlist%
+}
+\begingroup
+  \catcode`\'=\active
+  \gdef\stActiveRightQuotes{%
+    \catcode`\'=\active%
+    \def'{{\textbf{\'{}}}}%
+  }
+\endgroup
+\begingroup
+  \catcode`\`=\active
+  \gdef\stActiveLeftQuotes{%
+    \catcode\string`\`=\active%
+    \def`{{\textbf{\`{}}}}%
+  }
+\endgroup
+\def\stLogSetup{%
+  \noindent%
+  \STLOGsetup%
+  \stActiveRightQuotes%
+  \stActiveLeftQuotes%
+}
+\newenvironment{stlog}[1][default]{%
+  \def\smallskip{\vskip-6pt}%
+  \def\nullskip{\vskip -\baselineskip}%
+  \ifthenelse{\equal{#1}{beamer}}{%
+    \fontsize{7}{8}\selectfont%
+    \list{}{%
+      \parsep        0pt%
+      \parskip       0pt%
+      \listparindent 0pt%
+      \itemindent    0pt%
+      \rightmargin   0pt%
+      \parindent     0pt%
+      \topsep        0pt%
+      \leftmargin    0pt%
+      \labelwidth    0pt%
+      \labelsep      0pt%
+    }%
+  }{
+    \ifthenelse{\equal{#1}{default}}{%
+      \fontsize{8}{9}\selectfont%
+    }{}%
+    \list{}{%
+      \parsep        0pt%
+      \parskip       0pt%
+      \listparindent 0pt%
+      \itemindent    0pt%
+      \rightmargin   0pt%
+      \parindent     0pt%
+      \topsep        0pt%
+    }%
+  }%
+  \item\relax%
+  \catcode`\>=12%
+  \let\\=\stbackslash%
+  \catcode`\^^A=14%
+  \vskip\baselineskip%
+  \begin{alltt}\stLogSetup%
+}{%
+  \end{alltt}%
+  \endlist%
+}
+\def\outputomitted{\ \ {\hbox{{\rm ({\sl{output omitted}$\,$})}}}}
+\let\oom=\outputomitted
+\def\onnextpage{%
+  \vfil%
+  \centerline{{\normalsize\rm({\sl Continued on next page\/})}}%
+  \clearpage%
+}
+\let\cnp=\clearpage
+\newcommand{\clearemptydoublepage}{\newpage{\pagestyle{empty}\cleardoublepage}}
+\def\sttextrulefill#1{%
+  \hbox{\raise2pt\hbox to\hsize{\hbox to12pt{\hfil}\hrulefill%
+  \lower2pt\hbox{\rm{\ #1\ }}%
+  \hbox{\vrule height0.4pt width.5in depth0pt}%
+  \hbox to12pt{\hfil}%
+}}}
+\def\stlinetop#1{\medskip{\footnotesize\sttextrulefill{begin {\tt #1}}}\vspace{-.1in}}
+\def\stlineend#1{{\footnotesize\sttextrulefill{end {\tt #1}}}\smallskip}
+\def\stlinefragment#1{\sttextrulefill{fragment #1}}
+\newlength{\streswidth}
+\setlength{\streswidth}{0.5\textwidth-0.75in-\parindent}
+\newlength{\st@parindent}
+\setlength{\st@parindent}{\parindent}
+\newenvironment{stresults}{%
+  \par\noindent%
+  \fontsize{8}{9}\selectfont%
+  \hskip \parindent%
+  \begin{tabular}%
+    {@{}p{0.8in}@{}p{\streswidth}@{}p{0.8in}@{}p{\streswidth}@{}}
+}{%
+  \end{tabular}%
+}
+\def\stresultsgroup#1{%
+  \noalign{\smallskip}%
+  {\hskip-\st@parindent\normalfont #1}%
+}
+\newlength\stexamplehskip
+\setlength{\stexamplehskip}{-.40in+\parindent}
+\newenvironment{stexample}[1][Example]{%
+  \bigskip%
+  \par\noindent%
+  \hskip\stexamplehskip%
+  {\hbox{\epsfig{file=tr}}{\textsf{\textbf{~#1}}}}%
+  \par\smallskip%
+}{
+  \penalty10000\vskip-5pt\penalty10000%
+  \par\penalty10000\vbox{\hfill\lower1.25ex\hbox{{\epsfig{file=tl}}}}
+}
+\font\ssymfnt=pzdr at 9.5pt             % Adobe Zapf-Dingbats
+\newlength\sttechhskip
+\setlength{\sttechhskip}{-.40in+\parindent}
+\def\statashabox{%
+  \begingroup
+  \sboxsep  = 2pt
+  \sdim     = 1pt
+  \sboxrule = .2pt
+  \raise4pt\hbox{\shabox{\relax}}%
+  \endgroup
+}
+\newenvironment{sttech}[1][Technical note]{%
+  \bigskip%
+  \par\noindent%
+  \hskip\sttechhskip%
+  {\hbox{\statashabox}{\textsf{\textbf{~#1}}}}%
+  \par\smallskip%
+}{
+  \penalty10000\vskip-5pt\penalty10000%
+  \par\penalty10000\vbox{\hfill\lower1.25ex\hbox{\statashabox}}
+}
+\ifst@opt@ttbox
+  \def\ttboxColor{black}
+  \newbox\st@ttbox@box
+  % separation between frame and box contents
+  \newdimen\st@ttbox@framesep
+    \st@ttbox@framesep=6pt
+  \newdimen\ttboxIndent
+    \ttboxIndent=0pt
+  % width of the tt box
+  \newdimen\ttboxWd
+    \ttboxWd=\textwidth
+  \newdimen\st@ttbox@boxwd
+  \newenvironment{ttbox}{%
+    \setbox\st@ttbox@box=\hbox\bgroup%
+      \vbox\bgroup%
+        \vfil%
+        \spaceskip=0pt%
+        \xspaceskip=0pt%
+        \parindent=0pt%
+        \parskip=0pt%
+        \obeylines%
+        \obeyspaces%
+        \ty%
+  }{%
+      \egroup%
+      \hfil%
+    \egroup%
+    \psset{cornersize=absolute}%  related to framearc [linearc]
+    \psset{fillstyle=none}%
+    \psset{framearc=0.2}%    radians for rounded corners
+    \psset{framesep=\st@ttbox@framesep}%
+    \psset{linearc=0.2}%    radians for rounded corners [sic]
+    \psset{linecolor=\ttboxColor}%  color for outline frame
+    \psset{linewidth=.4pt}%
+    \st@ttbox@boxwd=\ttboxWd%
+    \advance\st@ttbox@boxwd by-2\st@ttbox@framesep%
+    \setbox\st@ttbox@box=\hbox{%
+      \psframebox{%
+        \hbox to\st@ttbox@boxwd{%
+          \rlap{\unhbox\st@ttbox@box}%
+          \hfil%
+        }%
+      }%
+    }%
+    \medskip%
+    \par\noindent%
+    \hskip\ttboxIndent%
+    \st@ttbox@boxwd=\wd\st@ttbox@box%
+    \overfullrule=0pt%  allows box to hang into the right margin
+    \hbox to\wd\st@ttbox@box{\unhbox\st@ttbox@box}%
+    \medskip%
+  }
+\else
+  \def\ttboxColor{black}
+  \newbox\st@ttbox@box
+  % separation between frame and box contents
+  \newdimen\st@ttbox@framesep
+    \st@ttbox@framesep=6pt
+  \newdimen\ttboxIndent
+    \ttboxIndent=0pt
+  % width of the tt box
+  \newdimen\ttboxWd
+    \ttboxWd=\textwidth
+  \newdimen\st@ttbox@boxwd
+  \newenvironment{ttbox}{%
+    \setbox\st@ttbox@box=\hbox\bgroup%
+      \vbox\bgroup%
+        \vfil%
+        \spaceskip=0pt%
+        \xspaceskip=0pt%
+        \parindent=0pt%
+        \parskip=0pt%
+        \obeylines%
+        \obeyspaces%
+        \ty%
+  }{%
+      \egroup%
+      \hfil%
+    \egroup%
+    \st@ttbox@boxwd=\ttboxWd%
+    \advance\st@ttbox@boxwd by-2\st@ttbox@framesep%
+    \setbox\st@ttbox@box=\hbox{%
+      \fbox{%
+        \hbox to\st@ttbox@boxwd{%
+          \rlap{\unhbox\st@ttbox@box}%
+          \hfil%
+        }%
+      }%
+    }%
+    \medskip%
+    \par\noindent%
+    \hskip\ttboxIndent%
+    \st@ttbox@boxwd=\wd\st@ttbox@box%
+    \overfullrule=0pt%  allows box to hang into the right margin
+    \hbox to\wd\st@ttbox@box{\unhbox\st@ttbox@box}%
+    \medskip%
+  }
+\fi
+\let\sthat\widehat
+\let\stbar\overline
+\newcommand\stvec[1]{\mathbf #1}
+\let\stmat\stvec
+\newbox\st@box
+\newlength{\st@emptywidth}
+\newlength{\st@linesize}
+\newlength{\st@maxdepth}
+\newlength{\st@maxheight}
+\newlength{\st@mbdepth}
+\newlength{\st@mtdepth}
+\newlength{\st@xheight}
+\newlength{\st@xwidth}
+\newcount\st@N
+\def\STLOGsetup{%
+  \setbox\st@box\hbox{\texttt{x}}%
+  % width of the letter 'x'
+  \st@xwidth=\wd\st@box%
+  %
+  % height of the letter 'x'
+  \st@xheight=\ht\st@box%
+  %
+  % get the maximum height among the characters
+  \setbox\st@box\hbox{\texttt{[]|}}%
+  \st@maxheight=\ht\st@box%
+  %
+  \setlength{\st@linesize}{0.1\st@xwidth}%
+  % middle bottom depth
+  \setlength{\st@mbdepth}{0.5\st@maxheight+0.5\st@linesize}%
+  %
+  % middle top depth
+  \setlength{\st@mtdepth}{\st@mbdepth+\st@linesize}%
+  %
+  % maximum depth among the letters
+  \setlength{\st@maxdepth}{\baselineskip-\st@maxheight}%
+  %
+  % skip to halfway point, not including the vertical line
+  \setlength{\st@emptywidth}{0.5\st@xwidth-0.5\st@linesize}%
+}
+\def\BLANK{{%
+  \hskip0.0pt%
+  \kern\st@xwidth%
+}}
+\def\CDOT{{%
+  \hskip0.0pt%
+  \kern\st@emptywidth%
+  \vrule width\st@linesize height\st@mtdepth depth-\st@mbdepth%
+  \kern\st@emptywidth%
+}}
+\def\DASH{{%
+  {\vrule width\st@xwidth height\st@mtdepth depth-\st@mbdepth}%
+}}
+\def\HLI#1{{%
+  {\st@N=#1\loop\ifnum\st@N>0{\DASH}\advance\st@N by-1\repeat}%
+}}
+\def\LEFTDASH{{%
+  \hskip0.0pt%
+  \vrule width\st@emptywidth height\st@mtdepth depth-\st@mbdepth%
+  \kern\st@emptywidth%
+  \hskip0.0pt%
+  \kern\st@linesize%
+}}
+\def\RIGHTDASH{{%
+  \hskip0.0pt%
+  \kern\st@emptywidth%
+  \hskip0.0pt%
+  \kern\st@linesize%
+  \vrule width\st@emptywidth height\st@mtdepth depth-\st@mbdepth%
+}}
+\def\VBAR{{%
+  \hskip0.0pt%
+  \kern\st@emptywidth%
+  \vrule width\st@linesize height\st@maxheight depth\st@maxdepth%
+  \kern\st@emptywidth%
+}}
+\def\UPVBAR{{%
+  \hskip0.0pt%
+  \kern\st@emptywidth%
+  \vrule width\st@linesize height\st@maxheight depth-\st@mtdepth%
+  \kern\st@emptywidth%
+}}
+\def\DOWNVBAR{{%
+  \hskip0.0pt%
+  \kern\st@emptywidth%
+  \vrule width\st@linesize height\st@mbdepth depth\st@maxdepth%
+  \kern\st@emptywidth%
+}}
+\def\PLUS{{%
+  \hskip0.0pt%
+  \rlap{\DASH}%
+  \VBAR%
+}}
+\def\TOPT{{%
+  \hskip0.0pt%
+  \rlap{\DASH}%
+  \DOWNVBAR%
+}}
+\def\BOTT{{%
+  \hskip0.0pt%
+  \rlap{\DASH}%
+  \UPVBAR%
+}}
+\def\LFTT{{%
+  \hskip0.0pt%
+  \rlap{\VBAR}%
+  \RIGHTDASH%
+}}
+\def\RGTT{{%
+  \hskip0.0pt%
+  \rlap{\VBAR}%
+  \LEFTDASH%
+}}
+\def\TLC{{%
+  \hskip0.0pt%
+  \rlap{\RIGHTDASH}%
+  \rlap{\DOWNVBAR}%
+  \CDOT%
+}}
+\def\TRC{{%
+  \hskip0.0pt%
+  \rlap{\DOWNVBAR}%
+  \rlap{\LEFTDASH}%
+  \CDOT%
+}}
+\def\BLC{{%
+  \hskip0.0pt%
+  \rlap{\UPVBAR}%
+  \rlap{\RIGHTDASH}%
+  \CDOT%
+}}
+\def\BRC{{%
+  \hskip0.0pt%
+  \rlap{\LEFTDASH}%
+  \rlap{\UPVBAR}%
+  \CDOT%
+}}
+\def\hangpara{\hangindent=\parindent\hangafter=1\noindent}
+\def\morehang{\hangindent=\parindent\hangafter=1}
+\def\morehangpara{\hangindent=2\parindent\hangafter=1}
+\def\moremorehang{\hangindent=2\parindent\hangafter=1\hskip\parindent}
+\def\hair{\hbox{\hskip1pt}}
+\def\finehair{\hbox{\hskip0.5pt}}
+\def\emdash{\finehair---\finehair}
+\def\endash{\finehair--\finehair}
+\def\stbackslash{\texttt{\char'134}}
+\def\stforslash{\texttt{/}}
+\def\stcaret{{\char"5E}}                                % for the ^ sign
+\def\caret{\texttt{\stcaret}}
+\def\sttilde{\hbox{\lower.35em\hbox{\char'176}}}        % for the ~ sign
+\def\tytilde{\texttt{\sttilde}}
+\def\lbr{\texttt{\char'173}}                            % for the { sign
+\def\rbr{\texttt{\char'175}}                            % for the } sign
+\def\backtabkey{$\vert$\kern-2pt$\leftarrow$}           % for the backtab
+\def\tabkey{\hbox{$\rightarrow$\kern-2pt$\vert$}}       % for the tabkey
+\newcommand{\STATA}{\mbox{\normalfont Stata}}
+\let\stata=\STATA
+\let\Stata=\STATA
+\def\pvalue{\mbox{$p$-value}}
+\def\pvalues{\mbox{$p$-values}}
+\def\ttest{\mbox{$t$ test}}
+\def\ztest{\mbox{$z$ test}}
+\def\ztests{\mbox{$z$ tests}}
+\def\ttests{\mbox{$t$ tests}}
+\def\tstat{\mbox{$t$ statistic}}
+\def\zstat{\mbox{$Z$ statistic}}
+\def\tstats{\mbox{$t$ statistics}}
+\def\tdist{\mbox{$t$ distribution}}
+\def\zstats{\mbox{$Z$ statistics}}
+\def\z{\mbox{$Z$}}
+\def\ftest{\mbox{$F$ test}}
+\def\fstat{\mbox{$F$ statistic}}
+\def\fstats{\mbox{$F$ statistics}}
+\def\fdist{\mbox{$F$ distribution}}
+\def\tvalue{\mbox{$t$ value}}
+\def\tvalues{\mbox{$t$ values}}
+\def\fvalue{\mbox{$F$ value}}
+\def\fdeflat{\mbox{$F$ deflator}}
+\def\fdeflats{\mbox{$F$ deflators}}
+\def\tdeflat{\mbox{$t$ deflator}}
+\def\rsq{\mbox{$R$-squared}}
+\def\rsqs{\mbox{$R$-squareds}}
+\endinput
+%%
+%% End of file `stata.sty'.
