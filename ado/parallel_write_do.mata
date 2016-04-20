@@ -236,7 +236,10 @@ real scalar parallel_write_do(
 		fput(output_fh, "  noisily {")
 		
 		// If it is not a command, i.e. a dofile
-		if (!nodata) fput(output_fh, `"    use ""'+folder+"__pll"+parallelid+`"_dataset" if _"'+parallelid+"cut == "+strofreal(i))
+		if (!nodata){
+			fput(output_fh, `"    use ""'+folder+"__pll"+parallelid+`"_dataset" if _"'+parallelid+"cut == "+strofreal(i))
+			fput(output_fh, "    drop _"+parallelid+"cut")
+		}
 		
 		/* Checking for break key */
 		fput(output_fh, sprintf("\n/* Checking for break */"))

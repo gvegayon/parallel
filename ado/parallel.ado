@@ -304,8 +304,8 @@ program def parallel_do, rclass
 			// Restores original S_FN (file name) value
 			global S_FN = "`sfn'"
 			
-			/* Removing the cut variable */
-			qui drop _`parallelid'cut
+			/* Removing the cut variable if somehow still there*/
+			cap drop _`parallelid'cut
 		}
 		
 		/* Removes the sandbox file (unprotect the files) */
