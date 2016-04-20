@@ -2071,7 +2071,7 @@ end
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:Beginning of file -parallel_write_do.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
-*! version 0.14.7.22  22jul2014
+*! version 1.16.4.20 20abr2016
 * Generates the corresponding dofiles
 
 mata:

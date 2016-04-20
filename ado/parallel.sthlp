@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.15.8.19 19ago2015}{...}
+{* *! version 1.16.4.20 20abr2016}{...}
 {cmd:help parallel}{right:also see:  {net "describe miparallel, from(http://fmwww.bc.edu/RePEc/bocode/m)":miparallel}}
 {hline}
 
