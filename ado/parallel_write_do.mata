@@ -38,6 +38,7 @@ real scalar parallel_write_do(
 	string scalar memset, maxvarset, matsizeset
 	real scalar i
 	string colvector seeds
+	string scalar new_lib
 
 	// Checking optargs
 	if (matasave == J(1,1,.)) matasave = 0
@@ -113,7 +114,12 @@ real scalar parallel_write_do(
 		fput(output_fh, `"sysdir set PERSONAL ""' + st_global("c(sysdir_personal)") +`"""')
 		fput(output_fh, "global S_ADO = `"+`"""'+st_global("S_ADO")+`"""'+"'")
 		fput(output_fh, "mata: mata mlib index")
-		fput(output_fh, `"mata: mata set matalibs ""'+st_global("c(matalibs)")+`"""')
+		new_lib = (length(st_global("c(matalibs)"))>0 ? ";" : "")+"l__pll"+parallelid+"_mlib"
+		//   c(matalibs) will outputted at the time parallel is called (not when child process is called)
+		// so the final order will be the original+new_lib. The 'mlib index' command above ensures we can
+		// find the new lib. And this next line is needed because if 'keep' is used with previous -parallel-
+		// calls then we don't want to include all the other temporary libraries.
+		fput(output_fh, `"mata: mata set matalibs ""'+st_global("c(matalibs)")+new_lib+`"""')
 			
 		fput(output_fh, "set seed "+seeds[i])
 		
