@@ -17,7 +17,7 @@
 {p2col: 2.  {help parallel##description:Description}}Command description.{p_end}
 {p2col: 3.  {help parallel##details:Details}}How does parallel works.{p_end}
 {p2col: 4.  {help parallel##append_how:Parallel Append}}Using -parallel append- syntax.{p_end}
-{p2col: 5.  {help parallel##caveates:Caveates}}Things to consider before using parallel.{p_end}
+{p2col: 5.  {help parallel##caveats:Caveats}}Things to consider before using parallel.{p_end}
 {p2col: 6.  {help parallel##tech:Technical note}}Some details under the hood.{p_end}
 {p2col: 7.  {help parallel##examples:Examples}}Some examples using parallel{p_end}
 {p2col: 8.  {help parallel##saved_results:Saved results}}A list of parallel's save results{p_end}
@@ -34,7 +34,7 @@
 {p2col: 5.  {help parallel##bs:parallel sim}}Parallel simulate.{p_end}
 {p2col: 6.  {help parallel##append:parallel append}}Multiple file processing and appending.{p_end}
 {p2col: 7.  {help parallel##clean:parallel clean}}Removing auxiliary files.{p_end}
-{p2col: 8.  {help parallel##seelog:parallel seelog}}Checking out clusters' logfiles.{p_end}
+{p2col: 8.  {help parallel##seelog:parallel seelog}}Checking out clusters' log files.{p_end}
 {p2col: 9.  {help parallel##version:parallel version}}Query parallel current version.{p_end}
 {p2col: 10. {help parallel##break:parallel break}}Query if the mother process has requested to break.{p_end}
 
@@ -330,7 +330,7 @@ running as many processes as clusters), this way, should the user set more clust
 than cores the computer has, it is possible that the computer freezes.
 {it:(b)} Unless the user includes -{cmd:parallel break}- within the task (do-file or program),
 by this time -{cmd:parallel}- can not stop running the clusters by itself, what
-implies that, in the case of any of the clusters starts a endless loop, stoping the
+implies that, in the case of any of the clusters starts a endless loop, stopping the
 clusters should be done manually by the user by terminating them from the OS's tasks manager.
 {p_end}
 
@@ -354,7 +354,7 @@ multithreading, such as that from
 setting -{cmd:parallel}- following the number of processors threads, as it was expected,
 hardly results into a perfect speedup scaling. In spite of it, after several tests
 on HTT capable architectures, the results of implementing -{cmd:parallel}- according
-to the machines physical cores versus it logical's shows small though significant differences.
+to the machines physical cores versus its logical cores shows small though significant differences.
 {p_end}
 
 {pstd}
