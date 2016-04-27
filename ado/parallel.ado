@@ -151,8 +151,6 @@ program def parallel_spliter
 	}
 	
 	quietly {
-		gen _`parallelid'cut = .
-		
 		if (length("`xtstructure'")) {
 		
 			/* Checks wheather if the data is in the correct sorting */
@@ -167,6 +165,8 @@ program def parallel_spliter
 				else local strvars `strvars' `var'
 			}
 		}
+		
+		gen _`parallelid'cut = .
 		
 		/* Checking types of data */
 		if (length("`numvars'")) local numvars st_data(.,"`numvars'")
@@ -302,7 +302,7 @@ program def parallel_do, rclass
 				local work_around_no_cwd = 1
 				noi di "Note: In order to pass mata objects to the clusters, they are saved to a temporary mlib file in the current directly."
 				noi di "      Your ado-path doesn't contain the current directory."
-				noi di "      We have added the current directory to the end of the ado-path for the clusters."
+				noi di "      We have added the current directory to the end of the ado-path for the clusters.."
 			}
 			cap mata: mata matsave __pll`parallelid'_mata.mmat *, replace			
 			if (`=_rc') local matasave = 0
