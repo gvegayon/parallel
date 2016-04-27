@@ -1,4 +1,4 @@
-*! version 1.16.4.20 20abr2016
+*! version 1.16.4.26 26abr2016
 *! PARALLEL: Stata module for parallel computing
 *! by George G. Vega [cre,aut], Brian Quistorff [ctb]
 *! 
@@ -73,10 +73,10 @@ end
 program def parallel_version, rclass
 	version 11.0
 	di as result "parallel" as text " Stata module for parallel computing"
-	di as result "vers" as text " 1.16.4.20 20abr2016"
+	di as result "vers" as text " 1.16.4.26 20abr2016"
 	di as result "auth" as text " George G. Vega [cre,aut], Brian Quistorff [ctb]"
 	
-	return local pll_vers = "1.16.4.20"
+	return local pll_vers = "1.16.4.26"
 end
 
 /* Take a look to logfiles */
@@ -221,6 +221,11 @@ program def parallel_do, rclass
 	
 	if length("$PLL_CLUSTERS") == 0 {
 		di "{error:You haven't set the number of clusters}" _n "{error:Please set it with: {cmd:parallel setclusters} {it:#}}"
+		exit 198
+	}
+	
+	if `c(noisily)'==0 & "`programs'"!="" {
+		di "{error:If you want to pass programs in memory (using the option programs)}" _n "{error:then the program must be run noisily.}"
 		exit 198
 	}
 	
