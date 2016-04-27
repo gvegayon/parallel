@@ -247,6 +247,11 @@ program def parallel_do, rclass
 	
 	timer on 98
 	
+	// If they use ,programs() then we need "." in the path
+	if "`programs'"!=""{
+		
+	}
+	
 	// Delets last parallel instance ran
 	if (`keeplast' & length("`r(pll_id)'")) cap parallel_clean, e(`r(pll_id)')
 	
@@ -285,12 +290,20 @@ program def parallel_do, rclass
 	if (!`nodata') parallel_spliter `by' , parallelid(`parallelid') sorting(`sorting') force(`force') keepusing(`keepusing')
 	
 	/* Starts building the files */
+	local work_around_no_cwd = 0
 	quietly {
 	
 		/* Saves mata objects */
 		if (`mata') {
 			mata: mata mlib create l__pll`parallelid'_mlib, replace
 			cap mata: mata mlib add l__pll`parallelid'_mlib *()
+			cap which l__pll`parallelid'_mlib.mlib
+			if _rc!=0{
+				local work_around_no_cwd = 1
+				noi di "Note: In order to pass mata objects to the clusters, they are saved to a temporary mlib file in the current directly."
+				noi di "      Your ado-path doesn't contain the current directory."
+				noi di "      We have added the current directory to the end of the ado-path for the clusters."
+			}
 			cap mata: mata matsave __pll`parallelid'_mata.mmat *, replace			
 			if (`=_rc') local matasave = 0
 			else local matasave = 1
@@ -299,7 +312,7 @@ program def parallel_do, rclass
 	}
 	
 	/* Writing the dofile */
-	mata: st_local("errornum", strofreal(parallel_write_do(strtrim(`"`dofile' `argopt'"'), "`parallelid'", $PLL_CLUSTERS, `prefix', `matasave', !`noglobals', "`seeds'", "`randtype'", `nodata', "`pll_dir'", "`programs'", `processors')))
+	mata: st_local("errornum", strofreal(parallel_write_do(strtrim(`"`dofile' `argopt'"'), "`parallelid'", $PLL_CLUSTERS, `prefix', `matasave', !`noglobals', "`seeds'", "`randtype'", `nodata', "`pll_dir'", "`programs'", `processors',`work_around_no_cwd')))
 	
 	/* Checking if every thing is ok */
 	if (`errornum') {

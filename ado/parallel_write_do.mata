@@ -30,7 +30,8 @@ real scalar parallel_write_do(
 	real   scalar nodata,
 	string scalar folder,
 	string scalar programs,
-	real scalar processors
+	real scalar processors,
+	real scalar work_around_no_cwd
 	)
 {
 	real vector input_fh, output_fh
@@ -84,6 +85,8 @@ real scalar parallel_write_do(
 	/* Checks for the MP version */
 	if (!c("MP") & processors != 0 & processors != J(1,1,.)) display("{result:Warning:}{text: processors option ignored...}")
 	else if (processors == J(1,1,.) | processors == 0) processors = 1
+	
+	if (work_around_no_cwd == J(1,1,.))  work_around_no_cwd=0
 
 	real scalar err
 	err = 0
@@ -112,7 +115,12 @@ real scalar parallel_write_do(
 		//Copy over the adopath & matalibs order
 		//PERSONAL is the most likely to be overwritten and referenced in S_ADO. (could do others)
 		fput(output_fh, `"sysdir set PERSONAL ""' + st_global("c(sysdir_personal)") +`"""')
-		fput(output_fh, "global S_ADO = `"+`"""'+st_global("S_ADO")+`"""'+"'")
+		if(work_around_no_cwd==0){
+			fput(output_fh, "global S_ADO = `"+`"""'+st_global("S_ADO")+`"""'+"'")
+		}
+		else{
+			fput(output_fh, "global S_ADO = `"+`"""'+st_global("S_ADO")+`";.""'+"'")
+		}
 		fput(output_fh, "mata: mata mlib index")
 		new_lib = (length(st_global("c(matalibs)"))>0 ? ";" : "")+"l__pll"+parallelid+"_mlib"
 		//   c(matalibs) will outputted at the time parallel is called (not when child process is called)
@@ -120,7 +128,7 @@ real scalar parallel_write_do(
 		// find the new lib. And this next line is needed because if 'keep' is used with previous -parallel-
 		// calls then we don't want to include all the other temporary libraries.
 		fput(output_fh, `"mata: mata set matalibs ""'+st_global("c(matalibs)")+new_lib+`"""')
-			
+		
 		fput(output_fh, "set seed "+seeds[i])
 		
 		if (st_global("PLL_INCLUDE_FILE")!=""){
