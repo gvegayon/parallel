@@ -47,6 +47,7 @@ tests:
 	@echo Running tests 
 	@echo If you want to test the pkg in ado/ \(rather than the installed version\), do
 	@echo   export S_ADO=\"../ado/\;UPDATES\;BASE\;SITE\;.\;PERSONAL\;PLUS\;OLDPLACE\"
+	@echo When looking at the combined log, search for "with error" and "^r\(".
 	echo PATH > temp.txt
 	cd ../tests && \
 		if [ "$$OS" = "Windows_NT" ]; then rm -f pll_gateway.sh; touch pll_gateway.sh; ( tail -f pll_gateway.sh & echo $$! >&3 ) 3>pid | bash & fi; \
