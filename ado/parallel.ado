@@ -29,7 +29,7 @@ THE SOFTWARE.
 */
 
 // Syntax parser
-cap program drop parallel
+*cap program drop parallel
 program def parallel
     version 11.0
 
@@ -139,7 +139,7 @@ end
 
 ////////////////////////////////////////////////////////////////////////////////
 // Splits the dataset into clusters
-cap program drop parallel_spliter
+*cap program drop parallel_spliter
 program def parallel_spliter
 	version 11.0
 	syntax [namelist(name=xtstructure)] [,parallelid(string) sorting(integer 0) force(integer 0) keepusing(varlist)]
