@@ -969,7 +969,8 @@ real scalar parallel_export_programs(
     // REGEX Patterns
     string scalar space
     space = "[\s ]*"+sprintf("\t")+"*"
-    pathead = "^"+"[^0-9][a-zA-Z_]+([a-zA-Z0-9_]*)(,"+space+"[a-zA-Z]*)?[:]"+space+"$"
+    //local subroutines are named fileado.program_name. Only capture second part
+    pathead = "^"+"([a-zA-Z_][a-zA-Z0-9_]*\.)?([a-zA-Z_][a-zA-Z0-9_]*(,"+space+"[a-zA-Z]*)?)[:]"+space+"$"
     patnext = "^[>] "
     
     while ((line = fget(in_fh))!=J(0,0,"")) {
@@ -977,7 +978,7 @@ real scalar parallel_export_programs(
         // Enters if it is a start of a program
         if(regexm(line, pathead)) {
             // Writes the header
-            fput(ou_fh, sprintf("program def %s", subinstr(line, ":", "")))
+            fput(ou_fh, sprintf("program def %s", regexs(2)))
             line = fget(in_fh)
         
             // While it is whithin the program

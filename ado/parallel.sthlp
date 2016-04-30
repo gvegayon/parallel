@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.16.4.26 26abr2016}{...}
+{* *! version 1.16.4.30 30abr2016}{...}
 {cmd:help parallel}{right:also see:  {net "describe miparallel, from(http://fmwww.bc.edu/RePEc/bocode/m)":miparallel}}
 {hline}
 
@@ -171,7 +171,10 @@ is properly sorted. By using {opt force} the command skips this check.{p_end}
 during the current session.{p_end}
 
 {syntab:Passing Stata/Mata objects}
-{synopt:{opt prog:rams}}A list of programs to be passed to each cluster. {p_end}
+{synopt:{opt prog:rams}}A list of programs to be passed to each cluster. If {cmd:parallel} is 
+being run from inside an ado (say {it:my_cmd.ado}) and you need to access local subroutines (other programs
+defined in the ado beside the primary {it:my_cmd}), then you must pass their names in this option as
+{it:my_cmd.local_subroutine_name} for them to be accessible.{p_end}
 {synopt:{opt m:ata}}If the algorithm needs to use mata objects, this option allows
 to pass to each cluster every mata object loaded in the current session (including functions). 
 Note that when mata objects are loaded into the child processes they will have different 
