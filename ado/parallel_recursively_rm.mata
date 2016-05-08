@@ -55,8 +55,10 @@ real scalar function parallel_recursively_rm(string scalar parallelid ,| string 
 	}
 
 	/* Entering each folder */
-	for(i=1;i<=length(dirs);i++)
-		parallel_recursively_rm(parallelid, dirs[i], 1)
+	for(i=1;i<=length(dirs);i++){
+		if(parallel_recursively_rm(parallelid, dirs[i], 1))
+			retcode=1
+	}
 
 	/* Removing empty folders */
 	for(i=1;i<=length(dirs);i++){
