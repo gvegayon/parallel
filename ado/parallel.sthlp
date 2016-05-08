@@ -82,7 +82,8 @@
 
 {p 8 17 2}
 {cmdab:parallel bs}
-[, {opt exp:ression}({it:{help exp_list}}) {opt prog:rams}({it:{help namelist}})
+[, {opt exp:ression}({it:{help exp_list}}) {opt k:eep}
+ {opt keepl:ast} {opt prog:rams}({it:{help namelist}})
  {opt m:ata} {opt nog:lobal} {opt s:eeds}({it:{help numlist}})
  {opt r:andtype}({it:current|datetime|random.org}) 
  {opt t:imeout}({it:integer}) 

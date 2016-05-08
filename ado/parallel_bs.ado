@@ -32,7 +32,7 @@ program def parallel_bootstrap, rclass
 		Timeout(integer 60)
 		PROCessors(integer 0)
 		argopt(string) 
-		SAVing(string) Reps(integer 100) *];
+		SAVing(string) Reps(integer 100) Keep KEEPLast *];
 	#delimit cr
 
 	/* Checking whereas parallel has been config */	
@@ -95,17 +95,17 @@ program def parallel_bootstrap, rclass
 
 	/* Running parallel */
 	cap noi parallel do `simul', nodata programs(`programs') `mata' `noglobals' `seeds' ///
-		`randtype' timeout(`timeout') processors(`processors') setparallelid(`parallelid')
+		`randtype' timeout(`timeout') processors(`processors') setparallelid(`parallelid') `keep' `keeplast'
 	local pllseeds = r(pll_seeds)
 
 	if (_rc) {
-		qui parallel clean, e($LAST_PLL_ID) force
+		if ("`keep'"=="" & "`keeplast'"=="") qui parallel clean, e($LAST_PLL_ID) force
 		mata: parallel_sandbox(2, "`parallelid'")
 		exit _rc
 	}
 
 	if (r(pll_errs)) {
-		qui parallel clean, e($LAST_PLL_ID) force
+		if ("`keep'"=="" & "`keeplast'"=="") qui parallel clean, e($LAST_PLL_ID) force
 		mata: parallel_sandbox(2,"`parallelid'")
 		exit 1
 	}
@@ -139,7 +139,7 @@ program def parallel_bootstrap, rclass
 	bstat using `saving', title(parallel bootstrapping)
 	
 	/* Cleaning up */
-	parallel clean, e($LAST_PLL_ID)
+	if ("`keep'"=="" & "`keeplast'"=="") parallel clean, e($LAST_PLL_ID)
 	mata: parallel_sandbox(2, "`parallelid'")
 	
 	parallel_bs_ereturn
