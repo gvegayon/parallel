@@ -23,9 +23,9 @@ void parallel_sandbox(
 	)
 {
 	/* Definign variables */
-	real scalar fh,i;
+	real scalar fh,i
 	string scalar tmpdir
-	string colvector sbids, sbfnames;
+	string colvector sbids, sbfnames
 	
 	tmpdir = c("tmpdir")+(c("os") != "Windows" ? "/" : "")
 
@@ -37,11 +37,11 @@ void parallel_sandbox(
 			_error(912,sprintf("-%s- aldready in use. Please change the seed.", pll_id))
 		
 		/* Creating the new file */
-		fh = fopen(tmpdir+"__pll"+pll_id+"_sandbox", "w");
-		fput(fh,"pll_id:"+pll_id);
+		fh = fopen(tmpdir+"__pll"+pll_id+"_sandbox", "w")
+		fput(fh,"pll_id:"+pll_id)
 		fput(fh,"date:"+c("current_date")+" "+c("current_time"))
 		fput(fh,"usr:"+c("username"))
-		fclose(fh);
+		fclose(fh)
 		
 		return
 	}
@@ -51,9 +51,9 @@ void parallel_sandbox(
 	if (action==1)
 	{
 		/* Listing the files that shuldn't be removed */
-		sbids = dir(tmpdir,"files","__pll*sandbox",1);
+		sbids = dir(tmpdir,"files","__pll*sandbox",1)
 		
-		sbfnames = J(0,1,"");
+		sbfnames = J(0,1,"")
 		
 		if (length(sbids))
 		{
@@ -61,8 +61,8 @@ void parallel_sandbox(
 			{
 				if (regexm(sbids[i],"[_][_]pll(.+)[_]sandbox$"))
 				{
-					sbidsi = regexs(1); // regexr(sbids[i], "__pll", ""), "_.*", "");
-					sbfnames = sbfnames\dir(pwd(),"files","__pll"+sbidsi+"*",1)\tmpdir+sbids[i];
+					sbidsi = regexs(1) // regexr(sbids[i], "__pll", ""), "_.*", "")
+					sbfnames = sbfnames\dir(pwd(),"files","__pll"+sbidsi+"*",1)\tmpdir+sbids[i]
 				}
 			}
 		}
@@ -83,10 +83,10 @@ void parallel_sandbox(
 	/* Updates the status of a parallel instance
 	if (action==3)
 	{
-		fh = fopen("__pll"+pll_id+"_sandbox","rw");
-		fseek(fh,2);
-		fput(fh,"date:"+c("current_date")+" "+c("current_time"));
-		fclose(fh);
+		fh = fopen("__pll"+pll_id+"_sandbox","rw")
+		fseek(fh,2)
+		fput(fh,"date:"+c("current_date")+" "+c("current_time"))
+		fclose(fh)
 		
 		return
 	} */
@@ -94,9 +94,9 @@ void parallel_sandbox(
 	if (action==4)
 	{
 		/* Listing the folders that shouldn't be removed */
-		sbids = dir(tmpdir,"files","__pll*sandbox");
+		sbids = dir(tmpdir,"files","__pll*sandbox")
 		
-		sbfnames = J(0,1,"");
+		sbfnames = J(0,1,"")
 
 		if (length(sbids))
 		{
@@ -104,7 +104,7 @@ void parallel_sandbox(
 			{
 				if (regexm(sbids[i],"[_][_]pll(.+)[_]sandbox$"))
 				{
-					sbidsi = regexs(1); // regexr(sbids[i], "__pll", ""), "_.*", "");
+					sbidsi = regexs(1) // regexr(sbids[i], "__pll", ""), "_.*", "")
 					sbfnames = sbfnames\dir(pwd(),"dirs","__pll"+sbidsi+"*",1)
 				}
 			}
@@ -136,7 +136,7 @@ void parallel_sandbox(
 	
 	if (action == 6)
 	{
-		sbids = dir(tmpdir,"files","__pll*sandbox");
+		sbids = dir(tmpdir,"files","__pll*sandbox")
 		for(i=1;i<=length(sbids);i++)
 			sbids[i] = regexr(regexr(sbids[i],"^__pll",""),"sandbox$","")
 			

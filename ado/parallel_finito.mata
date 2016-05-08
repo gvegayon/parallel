@@ -35,7 +35,7 @@ real scalar parallel_finito(
 	
 	/* Temporaly sets break key off */
 	/* In windows (by now) parallel cannot use the breakkey */
-	bk=querybreakintr();
+	bk=querybreakintr()
 	if (c("os")!="Windows") 
 	{
 		bk = setbreakintr(0)

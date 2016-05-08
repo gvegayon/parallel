@@ -35,7 +35,7 @@ real scalar parallel_export_programs(
 	if ( (err = strtoreal(st_local("err"))) ) {
 		stata("qui log close plllog"+st_local("parallelid"))
 		stata("set trace "+oldsettrace)	
-		return(err);
+		return(err)
 	}
 
 	stata("qui log close plllog"+st_local("parallelid"))

@@ -12,14 +12,14 @@ mata:
 */
 void parallel_clean(|string scalar parallelid, real scalar cleanall, real scalar force, real scalar logs) {
 	
-	real scalar i, retcode ;
-	string colvector parallelids, sbfiles;
+	real scalar i, retcode
+	string colvector parallelids, sbfiles
 	
 	// Checking arguments
-	if (parallelid == J(1,1,"")) parallelid = st_global("LAST_PLL_ID");
-	if (cleanall == J(1,1,.)) cleanall = 0;
-	if (force==J(1,1,.)) force = 0;
-	if (logs==J(1,1,.)) logs = 0;
+	if (parallelid == J(1,1,"")) parallelid = st_global("LAST_PLL_ID")
+	if (cleanall == J(1,1,.)) cleanall = 0
+	if (force==J(1,1,.)) force = 0
+	if (logs==J(1,1,.)) logs = 0
 	
 	/* Getting the list of parallel ids that should be removed */
 	if (cleanall)
