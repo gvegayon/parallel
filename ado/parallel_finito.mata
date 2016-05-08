@@ -67,6 +67,7 @@ real scalar parallel_finito(
 	if (suberrors == nclusters) return(suberrors)
 	
 	string scalar logfilename, tmpdirname
+	real scalar ret
 
 	while(length(pendingcl)>0)
 	{
@@ -106,11 +107,10 @@ real scalar parallel_finito(
 				/* Copying log file */
 				logfilename = sprintf("%s__pll%s_do%04.0f.log", (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/"), parallelid, i)
 				stata(sprintf(`"cap copy __pll%s_do%04.0f.log "%s%s", replace"', parallelid, i, c("tmpdir"),logfilename))
-				retcode = _unlink(pwd()+logfilename)
 				/* Sometimes Stata hasn't released the file yet. Either way, don't error out  */
-				if (retcode !=0){
+				if (_unlink(pwd()+logfilename)){
 					stata("sleep 2000")
-					_unlink(pwd()+logfilename)
+					if(_unlink(pwd()+logfilename)) errprintf("Not able to remove temp dir\n")
 				}
 
 				in_fh = fopen(fname, "r", 1)
@@ -126,11 +126,10 @@ real scalar parallel_finito(
 
 				/* Checking tmpdir */
 				tmpdirname = sprintf("%s"+ (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/") + "__pll%s_tmpdir%04.0f", c("tmpdir"),parallelid,i)
-				parallel_recursively_rm(parallelid,tmpdirname,1)
-				retcode = _rmdir(tmpdirname)
-				if (retcode !=0){
+				retcode = parallel_recursively_rm(parallelid,tmpdirname,1)
+				if (_rmdir(tmpdirname)){
 					stata("sleep 2000")
-					_rmdir(tmpdirname)
+					if(_rmdir(tmpdirname)) errprintf("Not able to remove temp dir\n")
 				}
 				
 				/* Taking the finished cluster out of the list */

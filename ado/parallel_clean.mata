@@ -12,7 +12,7 @@ mata:
 */
 void parallel_clean(|string scalar parallelid, real scalar cleanall, real scalar force, real scalar logs) {
 	
-	real scalar i ;
+	real scalar i, retcode ;
 	string colvector parallelids, sbfiles;
 	
 	// Checking arguments
@@ -40,17 +40,20 @@ void parallel_clean(|string scalar parallelid, real scalar cleanall, real scalar
 		parallelids = select(parallelids, parallelids:!=sbfiles[i])
 
 	/* Cleaning up */
+	retcode= 0
 	if (length(parallelids))
 	{
 		for(i=1;i<=length(parallelids);i++)
 		{
-			parallel_recursively_rm(parallelids[i],pwd(),., logs)
-			parallel_recursively_rm(parallelids[i],c("tmpdir"),., logs)
+			if (parallel_recursively_rm(parallelids[i],pwd(),., logs))
+				retcode=1
+			if (parallel_recursively_rm(parallelids[i],c("tmpdir"),., logs))
+				retcode=1
 		}
 	}
 	else display(sprintf("{text:parallel clean:} {result: nothing to clean...}"))
 	
-	return
+	if(retcode) errprintf("Couldn't remove all files.\n")
 }
 end
 

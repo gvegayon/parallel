@@ -6,7 +6,7 @@ mata
  *@param parallelid Id of the parallel process to clean
  *@param path Path where to search for auxiliary files
  */
-void function parallel_recursively_rm(string scalar parallelid ,| string scalar path, real scalar atomic, real scalar rmlogs)
+real scalar function parallel_recursively_rm(string scalar parallelid ,| string scalar path, real scalar atomic, real scalar rmlogs)
 {
 	if (path==J(1,1,"")) path = pwd()
 	else if (!regexm(path,"[/\]$")) path = path+"/"
@@ -28,13 +28,15 @@ void function parallel_recursively_rm(string scalar parallelid ,| string scalar 
 	files = dir(path,"files",pattern,1)\dir(path,"files","l"+pattern,1)
 	
 	real scalar i, retcode
+	retcode=0
 	if (atomic)
 	{
 		for(i=1;i<=length(files);i++){
-			retcode = _unlink(files[i])
-			if (retcode !=0){
+			if (_unlink(files[i])){
 				stata("sleep 2000")
-				_unlink(files[i])
+				if(_unlink(files[i])){
+					retcode=1
+				}
 			}
 		}
 	}
@@ -43,10 +45,11 @@ void function parallel_recursively_rm(string scalar parallelid ,| string scalar 
 		/* We don't want to remove logfiles in tmpdir */
 		for(i=1;i<=length(files);i++)
 			if ( !regexm(files[i],"do[0-9]+\.log$") | rmlogs){
-				retcode = _unlink(files[i])
-				if (retcode !=0){
+				if (_unlink(files[i])){
 					stata("sleep 2000")
-					_unlink(files[i])
+					if(_unlink(files[i])){
+						retcode=1
+					}
 				}
 			}
 	}
@@ -57,15 +60,16 @@ void function parallel_recursively_rm(string scalar parallelid ,| string scalar 
 
 	/* Removing empty folders */
 	for(i=1;i<=length(dirs);i++){
-		retcode = _rmdir(dirs[i])
-		if (retcode !=0){
+		if (_rmdir(dirs[i])){
 			stata("sleep 2000")
-			_rmdir(dirs[i])
+			if(_rmdir(dirs[i])){
+				retcode=1
+			}
 		}
 	}
 
 
-	return
+	return(retcode)
 }
 
 end
