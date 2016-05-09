@@ -9,7 +9,7 @@ program def parallel_append
 	syntax [anything(name=files)] , Do(string asis) [
 		in(string asis) 
 		if(string asis)
-		Expression(string) *];
+		Expression(string) Keep KEEPLast *];
 	#delimit cr
 			
 	if ("`in'" != "") local in in `in'
@@ -145,16 +145,16 @@ program def parallel_append
 
 		mata: parallel_sandbox(5)
 		local parallelid`i' = "`parallelid'"
-		cap noi parallel do `f', `options' nodata setparallelid(`parallelid')
+		cap noi parallel do `f', `options' nodata setparallelid(`parallelid') `keep' `keeplast'
 
 		/* Checking if an error has occurred */
 		if (_rc) {
 			
 			mata: parallel_sandbox(2, "$LAST_PLL_ID")
-			qui parallel clean, e($LAST_PLL_ID)
+			if ("`keep'"=="" & "`keeplast'"=="") qui parallel clean, e($LAST_PLL_ID)
 			forval j=0/`i' {
 				mata: parallel_sandbox(2, "`parallelid`j''")
-				qui parallel clean, e(`parallelid`j'')
+				if ("`keep'"=="" & "`keeplast'"=="") qui parallel clean, e(`parallelid`j'')
 			}
 			qui parallel setclusters `oldclusters', s(`olddir') f
 			di as error "An error -`=_rc'- has occured while running parallel"

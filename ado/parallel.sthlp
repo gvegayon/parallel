@@ -114,7 +114,8 @@
  [{it:{help filename:file(s)}}] ,
  {opt d:o}({it:cmd|dofile}) [{opt in}({it:{help in}}) {opt if}({it:{help if}})
  {opt e:xpression}({it:expand expression (see details)})
- {opt proc:essors}({it:#}) {opt prog:rams}({it:{help namelist}})
+ {opt proc:essors}({it:#}) {opt k:eep}
+ {opt keepl:ast} {opt prog:rams}({it:{help namelist}})
  {opt r:andtype}({it:current|datetime|random.org}) 
  {opt t:imeout}({it:#})]
 
