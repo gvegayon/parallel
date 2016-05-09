@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "statahook", "statahook\statahook.vcxproj", "{DCD45B24-393A-4FFA-BD5B-E883738A0BAF}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "procwait", "procwait\procwait.vcxproj", "{68169A03-0512-4BF0-B2BD-EB495B6C27AC}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "procexec", "procexec\procexec.vcxproj", "{6E9B6064-FC66-4209-9D23-122DC0E5F672}"
@@ -23,14 +21,6 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DCD45B24-393A-4FFA-BD5B-E883738A0BAF}.Debug|Mixed Platforms.ActiveCfg = Release|x64
-		{DCD45B24-393A-4FFA-BD5B-E883738A0BAF}.Debug|Win32.ActiveCfg = Release|x64
-		{DCD45B24-393A-4FFA-BD5B-E883738A0BAF}.Debug|x64.ActiveCfg = Release|x64
-		{DCD45B24-393A-4FFA-BD5B-E883738A0BAF}.Debug|x64.Deploy.0 = Debug|x64
-		{DCD45B24-393A-4FFA-BD5B-E883738A0BAF}.Release|Mixed Platforms.ActiveCfg = Release|x64
-		{DCD45B24-393A-4FFA-BD5B-E883738A0BAF}.Release|Win32.ActiveCfg = Release|x64
-		{DCD45B24-393A-4FFA-BD5B-E883738A0BAF}.Release|x64.ActiveCfg = Release|x64
-		{DCD45B24-393A-4FFA-BD5B-E883738A0BAF}.Release|x64.Deploy.0 = Debug|x64
 		{68169A03-0512-4BF0-B2BD-EB495B6C27AC}.Debug|Mixed Platforms.ActiveCfg = Release|x64
 		{68169A03-0512-4BF0-B2BD-EB495B6C27AC}.Debug|Win32.ActiveCfg = Release|x64
 		{68169A03-0512-4BF0-B2BD-EB495B6C27AC}.Debug|x64.ActiveCfg = Release|x64
