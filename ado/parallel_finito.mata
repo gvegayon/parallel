@@ -12,7 +12,8 @@ mata:
 real scalar parallel_finito(
 	string scalar parallelid,
 	| real scalar nclusters,
-	real scalar timeout
+	real scalar timeout,
+	real colvector pids
 	)
 	{
 	
@@ -24,8 +25,8 @@ real scalar parallel_finito(
 	
 	// Variable definitios
 	real scalar in_fh, out_fh, time
-	real scalar suberrors, i, errornum, retcode
-	string scalar fname
+	real scalar suberrors, i, j, errornum, retcode
+	string scalar fname, fname_break, fname_j
 	string scalar msg
 	real scalar bk, pressed
 	real rowvector pendingcl
@@ -86,21 +87,39 @@ real scalar parallel_finito(
 				display(sprintf("{it:The user pressed -break-. Trying to stop the clusters...}"))
 			
 				/* Openning and checking for the new file */
-				fname = sprintf("__pll%s_break", parallelid)
-				if (fileexists(fname)) _unlink(fname)
-				out_fh = fopen(fname, "w", 1)
+				fname_break = sprintf("__pll%s_break", parallelid)
+				if (fileexists(fname_break)) _unlink(fname_break)
+				out_fh = fopen(fname_break, "w", 1)
 				
 				/* Writing and exit */
 				fput(out_fh, "1")
 				fclose(out_fh)
 				
+				if (pids!=J(0,1,.)) {
+					for (j=1;j<=rows(pids);j++)
+					{
+						stata("prockill " + strofreal(pids[j,1]))
+						//fake as if the child stata caught the break and exited
+						fname_j=sprintf("__pll%s_finito%04.0f", parallelid, j)
+						if(!fileexists(fname_j)){
+							parallel_write_diagnosis(1,fname_j,"while running the command/dofile")
+						}
+					}
+				}
 				pressed = 1
-				fname = sprintf("__pll%s_finito%04.0f", parallelid, i)
 				
 			}
 		
 			if (fileexists(fname)) // If the file exists
 			{
+				if(rows(pids)>0){
+					stata("cap procwait " + strofreal(pids[i,1]))
+					stata("local rc = _rc")
+					if(strtoreal(st_local("rc"))){ //not done yet
+						//errprintf("Found file, but child Stata not done yet.")
+						continue;
+					}
+				}
 				/* Opening the file and looking for somethign different of 0
 				(which is clear) */
 
@@ -109,8 +128,10 @@ real scalar parallel_finito(
 				stata(sprintf(`"cap copy __pll%s_do%04.0f.log "%s%s", replace"', parallelid, i, c("tmpdir"),logfilename))
 				/* Sometimes Stata hasn't released the file yet. Either way, don't error out  */
 				if (_unlink(pwd()+logfilename)){
-					stata("sleep 2000")
-					if(_unlink(pwd()+logfilename)) errprintf("Not able to remove temp dir\n")
+					//stata("sleep 2000")
+					//if(_unlink(pwd()+logfilename)){
+						errprintf("Not able to remove temp dir\n")
+					//}
 				}
 
 				in_fh = fopen(fname, "r", 1)
@@ -128,8 +149,10 @@ real scalar parallel_finito(
 				tmpdirname = sprintf("%s"+ (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/") + "__pll%s_tmpdir%04.0f", c("tmpdir"),parallelid,i)
 				retcode = parallel_recursively_rm(parallelid,tmpdirname,1)
 				if (_rmdir(tmpdirname)){
-					stata("sleep 2000")
-					if(_rmdir(tmpdirname)) errprintf("Not able to remove temp dir\n")
+					//stata("sleep 2000")
+					//if(_rmdir(tmpdirname)){
+						errprintf("Not able to remove temp dir\n")
+					//}
 				}
 				
 				/* Taking the finished cluster out of the list */

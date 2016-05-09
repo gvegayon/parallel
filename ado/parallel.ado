@@ -427,7 +427,7 @@ program parallel_setclusters
         exit `error'
 	}
 	
-	if "`c(mode)'"=="batch" & "`c(os)'"=="Windows" {
+	if "`c(mode)'"=="batch" & "`c(os)'"=="Windows" & "$USE_PROCEXEC"=="0" {
 		if `"`gateway'"'==""{
 			local gateway "pll_gateway.sh"
 		}

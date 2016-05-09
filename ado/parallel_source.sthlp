@@ -134,14 +134,14 @@ mata:
 *!{dup 78:{c -}}{asis}
 void parallel_clean(|string scalar parallelid, real scalar cleanall, real scalar force, real scalar logs) {
     
-    real scalar i ;
-    string colvector parallelids, sbfiles;
+    real scalar i, retcode
+    string colvector parallelids, sbfiles
     
     // Checking arguments
-    if (parallelid == J(1,1,"")) parallelid = st_global("LAST_PLL_ID");
-    if (cleanall == J(1,1,.)) cleanall = 0;
-    if (force==J(1,1,.)) force = 0;
-    if (logs==J(1,1,.)) logs = 0;
+    if (parallelid == J(1,1,"")) parallelid = st_global("LAST_PLL_ID")
+    if (cleanall == J(1,1,.)) cleanall = 0
+    if (force==J(1,1,.)) force = 0
+    if (logs==J(1,1,.)) logs = 0
     
     /* Getting the list of parallel ids that should be removed */
     if (cleanall)
@@ -162,17 +162,20 @@ void parallel_clean(|string scalar parallelid, real scalar cleanall, real scalar
         parallelids = select(parallelids, parallelids:!=sbfiles[i])
 
     /* Cleaning up */
+    retcode= 0
     if (length(parallelids))
     {
         for(i=1;i<=length(parallelids);i++)
         {
-            parallel_recursively_rm(parallelids[i],pwd(),., logs)
-            parallel_recursively_rm(parallelids[i],c("tmpdir"),., logs)
+            if (parallel_recursively_rm(parallelids[i],pwd(),., logs))
+                retcode=1
+            if (parallel_recursively_rm(parallelids[i],c("tmpdir"),., logs))
+                retcode=1
         }
     }
     else display(sprintf("{text:parallel clean:} {result: nothing to clean...}"))
     
-    return
+    if(retcode) errprintf("Couldn't remove all files.\n")
 }
 end
 
@@ -906,7 +909,7 @@ end
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:Beginning of file -parallel_export_programs.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
-*! vers 0.14.4 16apr2014
+*! vers 1.16.4.30 30apr2016
 *! author: George G. Vega
 
 mata:
@@ -948,7 +951,7 @@ real scalar parallel_export_programs(
     if ( (err = strtoreal(st_local("err"))) ) {
         stata("qui log close plllog"+st_local("parallelid"))
         stata("set trace "+oldsettrace)    
-        return(err);
+        return(err)
     }
 
     stata("qui log close plllog"+st_local("parallelid"))
@@ -1038,7 +1041,8 @@ mata:
 real scalar parallel_finito(
     string scalar parallelid,
     | real scalar nclusters,
-    real scalar timeout
+    real scalar timeout,
+    real colvector pids
     )
     {
     
@@ -1050,8 +1054,8 @@ real scalar parallel_finito(
     
     // Variable definitios
     real scalar in_fh, out_fh, time
-    real scalar suberrors, i, errornum, retcode
-    string scalar fname
+    real scalar suberrors, i, j, errornum, retcode
+    string scalar fname, fname_break, fname_j
     string scalar msg
     real scalar bk, pressed
     real rowvector pendingcl
@@ -1061,7 +1065,7 @@ real scalar parallel_finito(
     
     /* Temporaly sets break key off */
     /* In windows (by now) parallel cannot use the breakkey */
-    bk=querybreakintr();
+    bk=querybreakintr()
     if (c("os")!="Windows") 
     {
         bk = setbreakintr(0)
@@ -1093,6 +1097,7 @@ real scalar parallel_finito(
     if (suberrors == nclusters) return(suberrors)
     
     string scalar logfilename, tmpdirname
+    real scalar ret
 
     while(length(pendingcl)>0)
     {
@@ -1111,32 +1116,51 @@ real scalar parallel_finito(
                 display(sprintf("{it:The user pressed -break-. Trying to stop the clusters...}"))
             
                 /* Openning and checking for the new file */
-                fname = sprintf("__pll%s_break", parallelid)
-                if (fileexists(fname)) _unlink(fname)
-                out_fh = fopen(fname, "w", 1)
+                fname_break = sprintf("__pll%s_break", parallelid)
+                if (fileexists(fname_break)) _unlink(fname_break)
+                out_fh = fopen(fname_break, "w", 1)
                 
                 /* Writing and exit */
                 fput(out_fh, "1")
                 fclose(out_fh)
                 
+                if (pids!=J(0,1,.)) {
+                    for (j=1;j<=rows(pids);j++)
+                    {
+                        stata("prockill " + strofreal(pids[j,1]))
+                        //fake as if the child stata caught the break and exited
+                        fname_j=sprintf("__pll%s_finito%04.0f", parallelid, j)
+                        if(!fileexists(fname_j)){
+                            parallel_write_diagnosis(1,fname_j,"while running the command/dofile")
+                        }
+                    }
+                }
                 pressed = 1
-                fname = sprintf("__pll%s_finito%04.0f", parallelid, i)
                 
             }
         
             if (fileexists(fname)) // If the file exists
             {
+                if(rows(pids)>0){
+                    stata("cap procwait " + strofreal(pids[i,1]))
+                    stata("local rc = _rc")
+                    if(strtoreal(st_local("rc"))){ //not done yet
+                        //errprintf("Found file, but child Stata not done yet.")
+                        continue;
+                    }
+                }
                 /* Opening the file and looking for somethign different of 0
                 (which is clear) */
 
                 /* Copying log file */
                 logfilename = sprintf("%s__pll%s_do%04.0f.log", (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/"), parallelid, i)
                 stata(sprintf(`"cap copy __pll%s_do%04.0f.log "%s%s", replace"', parallelid, i, c("tmpdir"),logfilename))
-                retcode = _unlink(pwd()+logfilename)
                 /* Sometimes Stata hasn't released the file yet. Either way, don't error out  */
-                if (retcode !=0){
-                    stata("sleep 2000")
-                    _unlink(pwd()+logfilename)
+                if (_unlink(pwd()+logfilename)){
+                    //stata("sleep 2000")
+                    //if(_unlink(pwd()+logfilename)){
+                        errprintf("Not able to remove temp dir\n")
+                    //}
                 }
 
                 in_fh = fopen(fname, "r", 1)
@@ -1152,11 +1176,12 @@ real scalar parallel_finito(
 
                 /* Checking tmpdir */
                 tmpdirname = sprintf("%s"+ (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/") + "__pll%s_tmpdir%04.0f", c("tmpdir"),parallelid,i)
-                parallel_recursively_rm(parallelid,tmpdirname,1)
-                retcode = _rmdir(tmpdirname)
-                if (retcode !=0){
-                    stata("sleep 2000")
-                    _rmdir(tmpdirname)
+                retcode = parallel_recursively_rm(parallelid,tmpdirname,1)
+                if (_rmdir(tmpdirname)){
+                    //stata("sleep 2000")
+                    //if(_rmdir(tmpdirname)){
+                        errprintf("Not able to remove temp dir\n")
+                    //}
                 }
                 
                 /* Taking the finished cluster out of the list */
@@ -1537,7 +1562,7 @@ mata
 *! {marker parallel_recursively_rm}{bf:function -{it:parallel_recursively_rm}- in file -{it:parallel_recursively_rm.mata}-}
 *! {back:{it:(previous page)}}
 *!{dup 78:{c -}}{asis}
-void function parallel_recursively_rm(string scalar parallelid ,| string scalar path, real scalar atomic, real scalar rmlogs)
+real scalar function parallel_recursively_rm(string scalar parallelid ,| string scalar path, real scalar atomic, real scalar rmlogs)
 {
     if (path==J(1,1,"")) path = pwd()
     else if (!regexm(path,"[/\]$")) path = path+"/"
@@ -1559,13 +1584,15 @@ void function parallel_recursively_rm(string scalar parallelid ,| string scalar 
     files = dir(path,"files",pattern,1)\dir(path,"files","l"+pattern,1)
     
     real scalar i, retcode
+    retcode=0
     if (atomic)
     {
         for(i=1;i<=length(files);i++){
-            retcode = _unlink(files[i])
-            if (retcode !=0){
-                stata("sleep 2000")
-                _unlink(files[i])
+            if (_unlink(files[i])){
+                //stata("sleep 2000")
+                //if(_unlink(files[i])){
+                    retcode=1
+                //}
             }
         }
     }
@@ -1574,29 +1601,33 @@ void function parallel_recursively_rm(string scalar parallelid ,| string scalar 
         /* We don't want to remove logfiles in tmpdir */
         for(i=1;i<=length(files);i++)
             if ( !regexm(files[i],"do[0-9]+\.log$") | rmlogs){
-                retcode = _unlink(files[i])
-                if (retcode !=0){
-                    stata("sleep 2000")
-                    _unlink(files[i])
+                if (_unlink(files[i])){
+                    //stata("sleep 2000")
+                    //if(_unlink(files[i])){
+                        retcode=1
+                    //}
                 }
             }
     }
 
     /* Entering each folder */
-    for(i=1;i<=length(dirs);i++)
-        parallel_recursively_rm(parallelid, dirs[i], 1)
+    for(i=1;i<=length(dirs);i++){
+        if(parallel_recursively_rm(parallelid, dirs[i], 1))
+            retcode=1
+    }
 
     /* Removing empty folders */
     for(i=1;i<=length(dirs);i++){
-        retcode = _rmdir(dirs[i])
-        if (retcode !=0){
-            stata("sleep 2000")
-            _rmdir(dirs[i])
+        if (_rmdir(dirs[i])){
+            //stata("sleep 2000")
+            //if(_rmdir(dirs[i])){
+                retcode=1
+            //}
         }
     }
 
 
-    return
+    return(retcode)
 }
 
 end
@@ -1635,8 +1666,10 @@ real scalar parallel_run(
     string scalar gateway_fname
     ) {
 
-    real scalar fh, i
-    string scalar tmpdir_i
+    real scalar fh, i, use_procexec
+    string scalar tmpdir_i, line, line1, line2
+    real colvector pids
+    pids = J(0,1,.)
     
     // Setting default parameters
     if (nclusters == J(1,1,.)) nclusters = strtoreal(st_global("PLL_CLUSTERS"))
@@ -1679,41 +1712,64 @@ real scalar parallel_run(
         stata("winexec sh __pll"+parallelid+"_shell.sh")
     }
     else { // WINDOWS
-        if (c("mode")=="batch"){ //Execute commands via Cygwin process
-            if (gateway_fname == J(1,1,"")) gateway_fname = st_global("PLL_GATEWAY_FNAME")
-            fh = fopen(gateway_fname,"a", 1)
-            for(i=1;i<=nclusters;i++) {
-                tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f")
-                mkdir(tmpdir_i,1) // fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
-                fput(fh, `"export STATATMP=""'+tmpdir_i+`"""')
-                fput(fh, paralleldir+`" -e -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
+        use_procexec = 2 //set the default
+        if (st_global("USE_PROCEXEC")=="0") use_procexec = 0
+        if (st_global("USE_PROCEXEC")=="1") use_procexec = 1
+        if (st_global("USE_PROCEXEC")=="2") use_procexec = 2
+        if(!use_procexec){
+            if (c("mode")=="batch"){ //Execute commands via Cygwin process
+                if (gateway_fname == J(1,1,"")) gateway_fname = st_global("PLL_GATEWAY_FNAME")
+                fh = fopen(gateway_fname,"a", 1)
+                for(i=1;i<=nclusters;i++) {
+                    tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f")
+                    mkdir(tmpdir_i,1) // fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
+                    fput(fh, `"export STATATMP=""'+tmpdir_i+`"""')
+                    fput(fh, paralleldir+`" -e -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
+                }
+                fclose(fh)
             }
-            fclose(fh)
+            else{
+                unlink("__pll"+parallelid+"_shell.bat")
+                fh = fopen("__pll"+parallelid+"_shell.bat","w", 1)
+                
+                fput(fh, "pushd "+pwd())
+
+                // Writing file
+                for(i=1;i<=nclusters;i++) {
+                    tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")
+                    mkdir(tmpdir_i,1)
+                    line1 = "start /MIN /HIGH set STATATMP="+tmpdir_i
+                    line2 = paralleldir+`" /e /q do ""'+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do""'
+                    fput(fh, line1+" ^& "+line2+"^&exit")
+                }
+                stata("procenv set STATATMP="+tmpdir)
+                
+                fput(fh, "popd")
+                fput(fh, "exit")
+                
+                fclose(fh)
+                stata("winexec __pll"+parallelid+"_shell.bat cmd.bat, replace")
+                stata("winexec __pll"+parallelid+"_shell.bat")
+            }
         }
         else{
-            unlink("__pll"+parallelid+"_shell.bat")
-            fh = fopen("__pll"+parallelid+"_shell.bat","w", 1)
-            
-            fput(fh, "pushd "+pwd())
+            st_numscalar("PROCEXEC_HIDDEN",use_procexec)
+            st_numscalar("PROCEXEC_ABOVE_NORMAL_PRIORITY",1)
 
-            // Writing file
             for(i=1;i<=nclusters;i++) {
-                mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1)
-                fwrite(fh, "start /MIN /HIGH set STATATMP="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")+" ^& ")
-                fput(fh, paralleldir+`" /e /q do ""'+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do"^&exit"')
+                tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")
+                mkdir(tmpdir_i,1)
+                line2 = paralleldir+`" /e /q do ""'+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do""'
+                stata("procenv set STATATMP="+tmpdir_i)
+                stata("procexec "+line2)
+                pids = pids\st_numscalar("r(pid)")
             }
-            
-            fput(fh, "popd")
-            fput(fh, "exit")
-            
-            fclose(fh)
-            
-            stata("winexec __pll"+parallelid+"_shell.bat")
+            stata("procenv set STATATMP="+tmpdir)
         }
     }
     
     /* Waits until each process ends */
-    return(parallel_finito(parallelid,nclusters,timeout))
+    return(parallel_finito(parallelid,nclusters,timeout,pids))
 }
 end
 
@@ -1756,9 +1812,9 @@ void parallel_sandbox(
     )
 {
     /* Definign variables */
-    real scalar fh,i;
+    real scalar fh,i
     string scalar tmpdir
-    string colvector sbids, sbfnames;
+    string colvector sbids, sbfnames
     
     tmpdir = c("tmpdir")+(c("os") != "Windows" ? "/" : "")
 
@@ -1770,11 +1826,11 @@ void parallel_sandbox(
             _error(912,sprintf("-%s- aldready in use. Please change the seed.", pll_id))
         
         /* Creating the new file */
-        fh = fopen(tmpdir+"__pll"+pll_id+"_sandbox", "w");
-        fput(fh,"pll_id:"+pll_id);
+        fh = fopen(tmpdir+"__pll"+pll_id+"_sandbox", "w")
+        fput(fh,"pll_id:"+pll_id)
         fput(fh,"date:"+c("current_date")+" "+c("current_time"))
         fput(fh,"usr:"+c("username"))
-        fclose(fh);
+        fclose(fh)
         
         return
     }
@@ -1784,9 +1840,9 @@ void parallel_sandbox(
     if (action==1)
     {
         /* Listing the files that shuldn't be removed */
-        sbids = dir(tmpdir,"files","__pll*sandbox",1);
+        sbids = dir(tmpdir,"files","__pll*sandbox",1)
         
-        sbfnames = J(0,1,"");
+        sbfnames = J(0,1,"")
         
         if (length(sbids))
         {
@@ -1794,8 +1850,8 @@ void parallel_sandbox(
             {
                 if (regexm(sbids[i],"[_][_]pll(.+)[_]sandbox$"))
                 {
-                    sbidsi = regexs(1); // regexr(sbids[i], "__pll", ""), "_.*", "");
-                    sbfnames = sbfnames\dir(pwd(),"files","__pll"+sbidsi+"*",1)\tmpdir+sbids[i];
+                    sbidsi = regexs(1) // regexr(sbids[i], "__pll", ""), "_.*", "")
+                    sbfnames = sbfnames\dir(pwd(),"files","__pll"+sbidsi+"*",1)\tmpdir+sbids[i]
                 }
             }
         }
@@ -1816,10 +1872,10 @@ void parallel_sandbox(
     /* Updates the status of a parallel instance
     if (action==3)
     {
-        fh = fopen("__pll"+pll_id+"_sandbox","rw");
-        fseek(fh,2);
-        fput(fh,"date:"+c("current_date")+" "+c("current_time"));
-        fclose(fh);
+        fh = fopen("__pll"+pll_id+"_sandbox","rw")
+        fseek(fh,2)
+        fput(fh,"date:"+c("current_date")+" "+c("current_time"))
+        fclose(fh)
         
         return
     } */
@@ -1827,9 +1883,9 @@ void parallel_sandbox(
     if (action==4)
     {
         /* Listing the folders that shouldn't be removed */
-        sbids = dir(tmpdir,"files","__pll*sandbox");
+        sbids = dir(tmpdir,"files","__pll*sandbox")
         
-        sbfnames = J(0,1,"");
+        sbfnames = J(0,1,"")
 
         if (length(sbids))
         {
@@ -1837,7 +1893,7 @@ void parallel_sandbox(
             {
                 if (regexm(sbids[i],"[_][_]pll(.+)[_]sandbox$"))
                 {
-                    sbidsi = regexs(1); // regexr(sbids[i], "__pll", ""), "_.*", "");
+                    sbidsi = regexs(1) // regexr(sbids[i], "__pll", ""), "_.*", "")
                     sbfnames = sbfnames\dir(pwd(),"dirs","__pll"+sbidsi+"*",1)
                 }
             }
@@ -1869,7 +1925,7 @@ void parallel_sandbox(
     
     if (action == 6)
     {
-        sbids = dir(tmpdir,"files","__pll*sandbox");
+        sbids = dir(tmpdir,"files","__pll*sandbox")
         for(i=1;i<=length(sbids);i++)
             sbids[i] = regexr(regexr(sbids[i],"^__pll",""),"sandbox$","")
             
@@ -1984,7 +2040,7 @@ real scalar parallel_setstatapath(string scalar statadir, | real scalar force) {
             statadir = c("sysdir_stata") + fname
             
             //might need to convert to cygwin path-name
-            if (c("mode")=="batch"){
+            if (c("mode")=="batch" & "$USE_PROCEXEC"=="0"){
                 if (!force) if (!fileexists(statadir)) return(601)
                 statadir = "/cygdrive/"+substr(c("sysdir_stata"),1,1)+"/"+substr(c("sysdir_stata"),4,.) + fname
                 force=1

@@ -33,10 +33,10 @@ real scalar function parallel_recursively_rm(string scalar parallelid ,| string 
 	{
 		for(i=1;i<=length(files);i++){
 			if (_unlink(files[i])){
-				stata("sleep 2000")
-				if(_unlink(files[i])){
+				//stata("sleep 2000")
+				//if(_unlink(files[i])){
 					retcode=1
-				}
+				//}
 			}
 		}
 	}
@@ -46,10 +46,10 @@ real scalar function parallel_recursively_rm(string scalar parallelid ,| string 
 		for(i=1;i<=length(files);i++)
 			if ( !regexm(files[i],"do[0-9]+\.log$") | rmlogs){
 				if (_unlink(files[i])){
-					stata("sleep 2000")
-					if(_unlink(files[i])){
+					//stata("sleep 2000")
+					//if(_unlink(files[i])){
 						retcode=1
-					}
+					//}
 				}
 			}
 	}
@@ -63,10 +63,10 @@ real scalar function parallel_recursively_rm(string scalar parallelid ,| string 
 	/* Removing empty folders */
 	for(i=1;i<=length(dirs);i++){
 		if (_rmdir(dirs[i])){
-			stata("sleep 2000")
-			if(_rmdir(dirs[i])){
+			//stata("sleep 2000")
+			//if(_rmdir(dirs[i])){
 				retcode=1
-			}
+			//}
 		}
 	}
 
