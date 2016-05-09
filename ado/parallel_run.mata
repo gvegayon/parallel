@@ -45,22 +45,21 @@ real scalar parallel_run(
 		// Writing file
 		if (c("os") != "Unix") {
 			for(i=1;i<=nclusters;i++) {
-				mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
+				mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1) 
 				fput(fh, "export STATATMP="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f"))
-				fput(fh, paralleldir+`" -e -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
+				fput(fh, paralleldir+`" -e -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" & echo $! >> __pll"'+parallelid+`"_pids&"')
 			}
 		}
 		else {
 			for(i=1;i<=nclusters;i++) {
-				mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1) // fput(fh, "mkdir "+c("tmpdir")+"/__pll"+parallelid+strofreal(i,"%04.0f"))
+				mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1) 
 				fput(fh, "export STATATMP="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f"))
-				fput(fh, paralleldir+`" -b -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
+				fput(fh, paralleldir+`" -b -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" & echo $! >> __pll"'+parallelid+`"_pids&"')
 			}
 		}
 
 		fclose(fh)
 		
-		// stata("shell sh __pll"+parallelid+"shell.sh&")
 		stata("winexec sh __pll"+parallelid+"_shell.sh")
 	}
 	else { // WINDOWS
