@@ -34,7 +34,7 @@
 {p2col: 5.  {help parallel##bs:parallel sim}}Parallel simulate.{p_end}
 {p2col: 6.  {help parallel##append:parallel append}}Multiple file processing and appending.{p_end}
 {p2col: 7.  {help parallel##clean:parallel clean}}Removing auxiliary files.{p_end}
-{p2col: 8.  {help parallel##seelog:parallel seelog}}Checking out clusters' log files.{p_end}
+{p2col: 8.  {help parallel##printlog:parallel printlog}}Checking out clusters' log files.{p_end}
 {p2col: 9.  {help parallel##version:parallel version}}Query parallel current version.{p_end}
 {p2col: 10. {help parallel##break:parallel break}}Query if the mother process has requested to break.{p_end}
 
@@ -125,11 +125,11 @@
 {p 8 17 2}
 {cmdab:parallel clean} [, {opt e:vent}({it:pll_id}) {opt a:ll} {opt f:orce}]
 
-{col 5}{hline}{marker seelog}{...}
+{col 5}{hline}{marker printlog}{...}
 {pstd}Checking out clusters' logfiles
 
 {p 8 17 2}
-{cmdab:parallel seelog} [{it:#}] [, {opt e:vent}({it:pll_id})]
+{cmdab:parallel printlog} [{it:#}] [, {opt e:vent}({it:pll_id})]
 
 {p 8 17 2}
 {cmdab:parallel printlog} [{it:#}] [, {opt e:vent}({it:pll_id})]
