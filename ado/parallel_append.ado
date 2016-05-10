@@ -151,10 +151,10 @@ program def parallel_append
 		if (_rc) {
 			
 			mata: parallel_sandbox(2, "$LAST_PLL_ID")
-			if ("`keep'"=="" & "`keeplast'"=="") qui parallel clean, e($LAST_PLL_ID)
+			if ("`keep'"=="" & "`keeplast'"=="") qui parallel clean, e(${LAST_PLL_ID}) nologs
 			forval j=0/`i' {
 				mata: parallel_sandbox(2, "`parallelid`j''")
-				if ("`keep'"=="" & "`keeplast'"=="") qui parallel clean, e(`parallelid`j'')
+				if ("`keep'"=="" & "`keeplast'"=="") qui parallel clean, e(`parallelid`j'') nologs
 			}
 			qui parallel setclusters `oldclusters', s(`olddir') f
 			di as error "An error -`=_rc'- has occured while running parallel"
@@ -165,7 +165,7 @@ program def parallel_append
 			/*
 			forval j=0/`i' {
 				mata: parallel_sandbox(2, "`parallelid`j''")
-				qui parallel clean, e(`parallelid`j'')
+				qui parallel clean, e(`parallelid`j'') nologs
 			}
 			qui parallel setclusters `oldclusters', s(`olddir') f
 			exit 1
@@ -203,7 +203,7 @@ program def parallel_append
 	/* Removing the tmp dir and free id */
 	forval i = 0/`ng' {
 		mata: parallel_sandbox(2, "`parallelid`i''")
-		qui parallel clean, e(`parallelid`i'')
+		qui parallel clean, e(`parallelid`i'') nologs
 	}
 
 	if (`"`err'"'!="") di "{result:Warning:}{text:The following files could't be found}" _newline as text `"`=regexr(`"`err'"',"^[0]","")'"'

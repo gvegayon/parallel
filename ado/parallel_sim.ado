@@ -109,13 +109,13 @@ program def parallel_simulate, rclass
 	local seeds = r(pll_seeds)
 
 	if (_rc) {
-		if ("`keep'" == "" & "`keeplast'"=="") qui parallel clean, e($LAST_PLL_ID) force
+		if ("`keep'" == "" & "`keeplast'"=="") qui parallel clean, e(${LAST_PLL_ID}) force nologs
 		mata: parallel_sandbox(2, "`parallelid'")
 		exit _rc
 	}
 
 	if (r(pll_errs)) {
-		if ("`keep'" == "" & "`keeplast'"=="") qui parallel clean, e($LAST_PLL_ID) force
+		if ("`keep'" == "" & "`keeplast'"=="") qui parallel clean, e(${LAST_PLL_ID}) force nologs
 		mata: parallel_sandbox(2,"`parallelid'")
 		exit 1
 	}
@@ -140,7 +140,7 @@ program def parallel_simulate, rclass
 	return local command = "`model'"
 			
 	/* Cleaning up */
-	if ("`keep'" == "" & "`keeplast'"=="") parallel clean, e($LAST_PLL_ID)
+	if ("`keep'" == "" & "`keeplast'"=="") parallel clean, e(${LAST_PLL_ID}) nologs
 	mata: parallel_sandbox(2, "`parallelid'")
 	
 	parallel_sim_ereturn
