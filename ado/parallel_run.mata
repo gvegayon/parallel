@@ -21,7 +21,9 @@ real scalar parallel_run(
 	) {
 
 	real scalar fh, i
-	string scalar tmpdir_i
+	string scalar tmpdir, tmpdir_i, line, dofile_i, pidfile, stata_opt
+	real colvector pids
+	pids = J(0,1,.)
 	
 	// Setting default parameters
 	if (nclusters == J(1,1,.)) nclusters = strtoreal(st_global("PLL_CLUSTERS"))
@@ -35,32 +37,33 @@ real scalar parallel_run(
 	display("{text:Running at :} {result:"+c("pwd")+"}")
 	display("{text:Randtype   :} {result:"+st_local("randtype")+"}")
 
-	string scalar tmpdir
 	tmpdir = c("tmpdir") + (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/")
 	
 	if (c("os") != "Windows") { // MACOS/UNIX
 		unlink("__pll"+parallelid+"_shell.sh")
 		fh = fopen("__pll"+parallelid+"_shell.sh","w", 1)
-
+		pidfile = "__pll"+parallelid+"_pids"
+		unlink(pidfile)
+		stata_opt = (c("os") == "Unix" ?" -b -q ":" -e -q ")
 		// Writing file
-		if (c("os") != "Unix") {
-			for(i=1;i<=nclusters;i++) {
-				mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1) 
-				fput(fh, "export STATATMP="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f"))
-				fput(fh, paralleldir+`" -e -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" & echo $! >> __pll"'+parallelid+`"_pids&"')
-			}
-		}
-		else {
-			for(i=1;i<=nclusters;i++) {
-				mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1) 
-				fput(fh, "export STATATMP="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f"))
-				fput(fh, paralleldir+`" -b -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" & echo $! >> __pll"'+parallelid+`"_pids&"')
-			}
+		for(i=1;i<=nclusters;i++) {
+			tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f")
+			mkdir(tmpdir_i,1) 
+			fput(fh, "export STATATMP="+tmpdir_i)
+			dofile_i = pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do"
+			fput(fh, paralleldir+stata_opt+`"do ""'+dofile_i+`"" & echo $! >> "'+pidfile)
 		}
 
 		fclose(fh)
 		
-		stata("winexec sh __pll"+parallelid+"_shell.sh")
+		stata("shell sh __pll"+parallelid+"_shell.sh") //wait for the pids to be full written
+		
+		fh = fopen(pidfile, "r")
+		while ((line=fget(fh))!=J(0,0,"")) {
+			pids = pids \ strtoreal(line)
+		}
+		fclose(fh)
+		unlink(pidfile)
 	}
 	else { // WINDOWS
 		if (c("mode")=="batch"){ //Execute commands via Cygwin process
@@ -70,7 +73,8 @@ real scalar parallel_run(
 				tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f")
 				mkdir(tmpdir_i,1) // fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
 				fput(fh, `"export STATATMP=""'+tmpdir_i+`"""')
-				fput(fh, paralleldir+`" -e -q do ""'+pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do" &"')
+				dofile_i = pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do"
+				fput(fh, paralleldir+`" -e -q do ""'+dofile_i+`"" &"')
 			}
 			fclose(fh)
 		}
@@ -82,9 +86,11 @@ real scalar parallel_run(
 
 			// Writing file
 			for(i=1;i<=nclusters;i++) {
-				mkdir(tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f"),1)
-				fwrite(fh, "start /MIN /HIGH set STATATMP="+tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")+" ^& ")
-				fput(fh, paralleldir+`" /e /q do ""'+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do"^&exit"')
+				tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f")
+				mkdir(tmpdir_i,1)
+				fwrite(fh, "start /MIN /HIGH set STATATMP="+tmpdir_i+" ^& ")
+				dofile_i = "__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do"
+				fput(fh, paralleldir+`" /e /q do ""'+dofile_i+`""^&exit"')
 			}
 			
 			fput(fh, "popd")
