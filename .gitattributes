@@ -27,6 +27,7 @@
 *.mata text
 *.sthlp text
 *.mlib binary
+*.plugin binary
 
 # Other
 *.sh text
