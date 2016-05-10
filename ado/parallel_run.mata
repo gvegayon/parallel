@@ -96,7 +96,6 @@ real scalar parallel_run(
 					line2 = paralleldir+`" /e /q do ""'+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do""'
 					fput(fh, line1+" ^& "+line2+"^&exit")
 				}
-				stata("procenv set STATATMP="+tmpdir)
 				
 				fput(fh, "popd")
 				fput(fh, "exit")

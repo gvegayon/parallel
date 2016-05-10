@@ -2,7 +2,13 @@
 program prockill
 	version 11.0
 	syntax anything(everything)
-	plugin call prockill_plug, `"`anything'"'
+	
+	if (c(os) == "Windows") {
+		plugin call prockill_plug, `"`anything'"'
+	}
+	else{ //sends signal SIGTERM by default
+		shell kill `anything'
+	}
 end
 
-program prockill_plug, plugin using("prockill.plugin")
+cap program prockill_plug, plugin using("prockill.plugin")
