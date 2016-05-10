@@ -20,8 +20,8 @@ real scalar parallel_run(
 	string scalar gateway_fname
 	) {
 
-	real scalar fh, i
-	string scalar tmpdir, tmpdir_i, line, dofile_i, pidfile, stata_opt
+	real scalar fh, i, use_procexec
+	string scalar tmpdir, tmpdir_i, line, line1, line2, dofile_i, pidfile, stata_opt
 	real colvector pids
 	pids = J(0,1,.)
 	
@@ -66,44 +66,64 @@ real scalar parallel_run(
 		unlink(pidfile)
 	}
 	else { // WINDOWS
-		if (c("mode")=="batch"){ //Execute commands via Cygwin process
-			if (gateway_fname == J(1,1,"")) gateway_fname = st_global("PLL_GATEWAY_FNAME")
-			fh = fopen(gateway_fname,"a", 1)
-			for(i=1;i<=nclusters;i++) {
-				tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f")
-				mkdir(tmpdir_i,1) // fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
-				fput(fh, `"export STATATMP=""'+tmpdir_i+`"""')
-				dofile_i = pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do"
-				fput(fh, paralleldir+`" -e -q do ""'+dofile_i+`"" &"')
+		use_procexec = 2 //set the default
+		if (st_global("USE_PROCEXEC")=="0") use_procexec = 0
+		if (st_global("USE_PROCEXEC")=="1") use_procexec = 1
+		if (st_global("USE_PROCEXEC")=="2") use_procexec = 2
+		if (!use_procexec){
+			if (c("mode")=="batch"){ //Execute commands via Cygwin process
+				if (gateway_fname == J(1,1,"")) gateway_fname = st_global("PLL_GATEWAY_FNAME")
+				fh = fopen(gateway_fname,"a", 1)
+				for(i=1;i<=nclusters;i++) {
+					tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f")
+					mkdir(tmpdir_i,1) // fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
+					fput(fh, `"export STATATMP=""'+tmpdir_i+`"""')
+					dofile_i = pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do"
+					fput(fh, paralleldir+`" -e -q do ""'+dofile_i+`"" &"')
+				}
+				fclose(fh)
 			}
-			fclose(fh)
+			else{
+				unlink("__pll"+parallelid+"_shell.bat")
+				fh = fopen("__pll"+parallelid+"_shell.bat","w", 1)
+				
+				fput(fh, "pushd "+pwd())
+
+				// Writing file
+				for(i=1;i<=nclusters;i++) {
+					tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f")
+					mkdir(tmpdir_i,1)
+					fwrite(fh, "start /MIN /HIGH set STATATMP="+tmpdir_i+" ^& ")
+					dofile_i = "__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do"
+					fput(fh, paralleldir+`" /e /q do ""'+dofile_i+`""^&exit"')
+				}
+				
+				fput(fh, "popd")
+				fput(fh, "exit")
+				
+				fclose(fh)
+				
+				stata("winexec __pll"+parallelid+"_shell.bat")
+			}
 		}
 		else{
-			unlink("__pll"+parallelid+"_shell.bat")
-			fh = fopen("__pll"+parallelid+"_shell.bat","w", 1)
-			
-			fput(fh, "pushd "+pwd())
+			st_numscalar("PROCEXEC_HIDDEN",use_procexec)
+			st_numscalar("PROCEXEC_ABOVE_NORMAL_PRIORITY",1)
 
-			// Writing file
 			for(i=1;i<=nclusters;i++) {
-				tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f")
+				tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")
 				mkdir(tmpdir_i,1)
-				fwrite(fh, "start /MIN /HIGH set STATATMP="+tmpdir_i+" ^& ")
-				dofile_i = "__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do"
-				fput(fh, paralleldir+`" /e /q do ""'+dofile_i+`""^&exit"')
+				line2 = paralleldir+`" /e /q do ""'+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do""'
+				stata("procenv set STATATMP="+tmpdir_i)
+				stata("procexec "+line2)
+				pids = pids\st_numscalar("r(pid)")
 			}
-			
-			fput(fh, "popd")
-			fput(fh, "exit")
-			
-			fclose(fh)
-			
-			stata("winexec __pll"+parallelid+"_shell.bat")
+			stata("procenv set STATATMP="+tmpdir)
 		}
 	}
 	
 	/* Waits until each process ends */
-	return(parallel_finito(parallelid,nclusters,timeout))
+	return(parallel_finito(parallelid,nclusters,timeout,pids))
 }
 end
 

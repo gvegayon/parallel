@@ -2,6 +2,8 @@ SHELL := /bin/bash
 PATH:=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/stata12/:$(PATH)
 TESTS=test_bs.do test_append.do test_sim.do test_prefix.do test.do \
 	test_append_loop.do
+TESTS_LOGS=test_bs.log test_append.log test_sim.log test_prefix.log test.log \
+	test_append_loop.log
 
 #Provide an override for stata location
 ifeq "$(STATABATCH)" ""
@@ -46,15 +48,14 @@ check_version:
 tests: 
 	@echo Running tests 
 	@echo When looking at the combined log, search for "with error" and "^r\(".
-	echo PATH > temp.txt
-	
-	export S_ADO="../ado/;UPDATES;BASE;SITE;.;PERSONAL;PLUS;OLDPLACE" && \
-		cd ../tests && \
-		if [ "$$OS" = "Windows_NT" ]; then rm -f pll_gateway.sh; touch pll_gateway.sh; ( tail -f pll_gateway.sh & echo $$! >&3 ) 3>pid | bash & fi; \
+	echo $$PATH > temp.txt
+	cd ../tests && if [ ! -f platformname.txt ]; then $(STATABATCH) do export_platformname.do platformname.txt; fi;
+	cd ../tests && \
+		PLAT=$$(<platformname.txt) && \
+		export S_ADO="../ado/;../ado/$$PLAT;UPDATES;BASE;SITE;.;PERSONAL;PLUS;OLDPLACE" && \
 		for i in $(TESTS) ; do \
 			$(STATABATCH) do $${i}; \
 			echo test $${i} done; \
 		done ; \
-		if [ "$$OS" = "Windows_NT" ]; then kill $$(<pid); rm -f pll_gateway.sh pid; fi; \
-		cat *.log > all_tests_results.txt; \
+		cat $(TESTS_LOGS) > all_tests_results.txt; \
 		less all_tests_results.txt;

@@ -4,6 +4,7 @@ __pll*
 *.do
 
 tests/all_tests_results.txt
+tests/platformname.txt
 ado/temp.txt
 
 *.log

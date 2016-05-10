@@ -46,4 +46,15 @@ f ado/parallel_sim.ado
 f ado/parallel.sthlp
 f ado/parallel_source.sthlp
 f ado/lparallel.mlib
-
+f ado/procenv.ado
+f ado/procexec.ado
+f ado/prockill.ado
+f ado/procwait.ado
+g WIN ado/WIN/procenv.plugin procenv.plugin
+g WIN64A ado/WIN64A/procenv.plugin procenv.plugin  
+g WIN ado/WIN/procexec.plugin procexec.plugin
+g WIN64A ado/WIN64A/procexec.plugin procexec.plugin  
+g WIN ado/WIN/prockill.plugin prockill.plugin
+g WIN64A ado/WIN64A/prockill.plugin prockill.plugin  
+g WIN ado/WIN/procwait.plugin procwait.plugin
+g WIN64A ado/WIN64A/procwait.plugin procwait.plugin  
