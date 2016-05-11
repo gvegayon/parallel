@@ -1667,7 +1667,7 @@ real scalar parallel_run(
     ) {
 
     real scalar fh, i, use_procexec
-    string scalar tmpdir, tmpdir_i, line, line1, line2, dofile_i, pidfile, stata_opt
+    string scalar tmpdir, tmpdir_i, line, line2, dofile_i, pidfile, stata_opt
     real colvector pids
     pids = J(0,1,.)
     

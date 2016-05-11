@@ -9,4 +9,4 @@ program procexec, rclass
 	return scalar pid = `pid'
 end
 
-program procexec_plug, plugin using("procexec.plugin")
+cap program procexec_plug, plugin using("procexec.plugin")

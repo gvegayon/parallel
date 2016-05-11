@@ -19,4 +19,4 @@ program procenv, rclass
 	return local value `"`env_value'"'
 end
 
-program procenv_plug, plugin using("procenv.plugin")
+cap program procenv_plug, plugin using("procenv.plugin")
