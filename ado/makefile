@@ -7,14 +7,11 @@ TESTS_LOGS=test_bs.log test_append.log test_sim.log test_prefix.log test.log \
 
 #Provide an override for stata location
 ifeq "$(STATABATCH)" ""
-  STATABATCH:=stata-mp -b
+  STATABATCH:=stata -b
 endif
 
-.PHONY: sp home compile inc_dist_date clean tests
+.PHONY: home compile inc_dist_date clean tests
 
-sp :
-	$(STATABATCH) do compile_and_install.do;cp -u -r ~/parallel ~/../investigacion/george/comandos_paquetes_librerias/stata
-	make clean
 home:
 	$(STATABATCH) do compile_and_install.do
 	make clean
