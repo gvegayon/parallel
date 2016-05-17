@@ -44,7 +44,7 @@ foreach c of global clusters {
 			ren x xserial
 
 			/* Parallel fashion */
-			cap parallel, `by' nog: `test`i''
+			qui parallel, `by' nog: `test`i''
 			local t2 = r(pll_t_fini) + r(pll_t_calc) + r(pll_t_setu)
 
 			if (_rc) continue	

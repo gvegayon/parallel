@@ -1022,7 +1022,7 @@ end
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:Beginning of file -parallel_finito.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
-*! version 0.14.7.22  22jul2014
+*! version 1.16.9000 17may2016
 *! author: George G. Vega Yon
 
 mata:
@@ -1085,7 +1085,9 @@ real scalar parallel_finito(
         if (!fileexists(fname))
         {
             display(sprintf("{it:cluster %04.0f} {text:has finished with a connection error -601- (timeout) ({stata search r(601):see more})...}", i))
+            
             suberrors++
+            st_local("pll_last_error", "601")
             continue
         }
         else pendingcl = pendingcl, i
@@ -1170,6 +1172,7 @@ real scalar parallel_finito(
                     if (msg == J(0,0,"")) display(sprintf(`"{it:cluster %04.0f} {text:Exited with error -%g- ({stata parallel viewlog %g, e(%s):view log})...}"', i, errornum, i, parallelid))
                     else display(sprintf(`"{it:cluster %04.0f} {text:Exited with error -%g- %s ({stata parallel viewlog %g, e(%s):view log})...}"', i, errornum, msg, i, parallelid))
                     suberrors++
+                    st_local("pll_last_error", strofreal(errornum))
                 }
                 else display(sprintf("{it:cluster %04.0f} {text:has exited without error...}", i))
                 fclose(in_fh)
