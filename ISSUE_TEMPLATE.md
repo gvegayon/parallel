@@ -11,6 +11,6 @@ Please provide with code to reproduce the issue
 Some relevant information
 
 * Stata version:
-* Parallel version:
+* Parallel version (please first try installing the latest version to resolve bugs):
 
 ## Output from `creturn list`:
