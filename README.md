@@ -407,6 +407,8 @@ In this example we create a short program (`parfor`) which is intended to work a
 
     . 
 
+For more examples, see the [Gallery](https://github.com/gvegayon/parallel/wiki/Gallery).
+		
 Authors
 =======
 
