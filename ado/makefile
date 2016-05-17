@@ -44,7 +44,7 @@ check_version:
 #  The "redirect to a subshell" doesn't seem to work any more on Cygwin
 tests: 
 	@echo Running tests 
-	@echo When looking at the combined log, search for "with error" and "^r\(".
+	@echo When looking at the combined log, search for "^r\(".
 	echo $$PATH > temp.txt
 	cd ../tests && if [ ! -f platformname.txt ]; then $(STATABATCH) do export_platformname.do platformname.txt; fi;
 	cd ../tests && \
