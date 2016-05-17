@@ -1,3 +1,6 @@
+2016-05-10 Brian Quistorff
+	* Add Windows plugin for more convenient process launching.
+
 2016-05-09  George G. Vega Yon <g.vegayon@gmail.com>
 	* ado/parallel_run.mata: Now on OS != Windows will generate a file
 	  named __pll[parallelid]_pids which holds processes PIDs.
