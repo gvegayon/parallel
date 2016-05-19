@@ -792,7 +792,8 @@ In the case of bug reporting, you can submit issues here:
 {pmore}{browse "https://github.com/gvegayon/parallel/issues"}
 
 {pstd}
-Please try to include steps to reproduce the issue and the output of the Stata
+Please try the latest version to see if your problem has been solved.
+Include the steps to reproduce the issue and the output of the Stata
 command -creturn list-.
 {p_end}
 
