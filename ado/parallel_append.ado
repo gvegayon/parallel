@@ -18,11 +18,11 @@ program def parallel_append
 	/* Checking arguments */
 	if (`"`files'"' == "" & `"`expression'"' == "") {
 		di as error "One of -files- or -expr()- must be specified."
-		error 1
+		error 198
 	}
 	else if (`"`anything'"' != "" & `"`expression'"' != "") {
 		di as error "-files- and -expr()- cannot be specified at the same time"
-		error 1
+		error 198
 	}
 
 	/* Expanding the expression */
@@ -69,7 +69,7 @@ program def parallel_append
 	/* If no files had been found */
 	if (!`n') {
 		di as error "No files found"
-		error 1
+		error 601
 	}
 
 	/* Showing the files that will be used */
@@ -158,7 +158,7 @@ program def parallel_append
 			}
 			qui parallel setclusters `oldclusters', s(`olddir') f
 			di as error "An error -`=_rc'- has occured while running parallel"
-			exit 1
+			exit `=_rc'
 			
 		}
 		else if (r(pll_errs)) {
@@ -168,7 +168,7 @@ program def parallel_append
 				qui parallel clean, e(`parallelid`j'') nologs
 			}
 			qui parallel setclusters `oldclusters', s(`olddir') f
-			exit 1
+			exit 9
 			*/
 			di "{result:Warning:}{text: Some datasets in group -`g'- couldn't be processed}"
 		}
