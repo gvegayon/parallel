@@ -13,6 +13,10 @@ SSC at Boston College: <http://ideas.repec.org/c/boc/bocode/s457527.html>
 
 Installation
 ============
+If you have a previous installation of -parallel- installed from a different source (SSC, specific folder, specific URL) you should uninstall that first. Once installed it is suggested to restart Stata. 
+
+SSC
+---
 
 For accessing SSC version of parallel
 
@@ -20,6 +24,9 @@ For accessing SSC version of parallel
 . ssc install parallel, replace
 . mata mata mlib index
 ```
+
+Development Version (Latest/Master)
+--------------------------
 
 For accessing the latest development version of parallel (from here) using Stata version \>=13
 
@@ -34,7 +41,17 @@ For Stata version \<13, download as zip, unzip, and then replace the above -net 
 . net install parallel, from(full_local_path_to_files) replace
 ```
 
-Once installed it is suggested to restart Stata. If you had a previous installation of -parallel- installed from a different source you should uninstall that first.
+Development Version (Other Releases)
+------------------------------------
+
+Access other development releases via the [Releases Page](https://github.com/gvegayon/parallel/releases). You can use the release tag to install over the internet. For example,
+
+``` stata
+. net install parallel, from(https://raw.github.com/gvegayon/parallel/v1.15.8.19/) replace
+. mata mata mlib index
+```
+
+Or you can download the release and install locally (for Stata \<13).
 
 Minimal examples
 ================
