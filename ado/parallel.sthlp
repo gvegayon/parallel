@@ -786,6 +786,11 @@ is from its github repo (on-development source code):
 
 
 {pstd}
+You can track new releases on GitHub or by following the RSS feed https://github.com/gvegayon/parallel/releases.atom
+{p_end}
+
+
+{pstd}
 In the case of bug reporting, you can submit issues here:
 {p_end}
 
