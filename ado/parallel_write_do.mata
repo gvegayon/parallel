@@ -18,6 +18,20 @@
  * @returns As many do-files as clusers used.
  */
 mata:
+
+real scalar parallel_temp_sequence(string scalar id_part){
+	real rowvector ascii_codes, nice_ind
+	real scalar num, i, exp
+	ascii_codes = ascii(id_part)
+	nice_ind = ascii_codes :- ((ascii_codes :> 57):*7:+48) /*zero-based and reindexed (letters smashed down to numbers)*/
+	num = 1
+	for(i=length(nice_ind); i>=1; i--){
+		exp = length(nice_ind)-i
+		num = num+nice_ind[i]*(36^exp)
+	}
+	return(num)
+}
+
 real scalar parallel_write_do(
 	string scalar inputname,
 	string scalar parallelid,
@@ -35,9 +49,9 @@ real scalar parallel_write_do(
 	)
 {
 	real vector input_fh, output_fh
-	string scalar line, fname
+	string scalar line, fname, nexttempname
 	string scalar memset, maxvarset, matsizeset
-	real scalar i
+	real scalar i, n_prev_tempnames
 	string colvector seeds
 	string scalar new_lib
 
@@ -98,6 +112,10 @@ real scalar parallel_write_do(
 		errprintf("An error has occurred while exporting -programs-")
 		return(err)
 	}
+	
+	//figure out the tempname state
+	nexttempname=st_tempname()
+	n_prev_tempnames = parallel_temp_sequence(substr(nexttempname,3))-1
 	
 	for(i=1;i<=nclusters;i++) 
 	{
@@ -167,6 +185,9 @@ real scalar parallel_write_do(
 				fput(output_fh, "set matsize "+matsizeset)
 			}
 		}
+		
+		if (n_prev_tempnames>0) fput(output_fh, `"mata: for(i=1;i<="'+strofreal(n_prev_tempnames)+`";i++) PLL_QUIET = st_tempname()"')
+		
 		/* Checking data setting is just fine */
 		fput(output_fh, "}")
 		fput(output_fh, "local result = _rc")
