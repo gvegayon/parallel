@@ -1143,14 +1143,15 @@ real scalar parallel_finito(
         
             if (fileexists(fname)) // If the file exists
             {
+                /* Child process might have made file but not exited yet
+                  (so still might have it open, which would cause error when we try to delete it) */
                 if(rows(pids)>0){
                     stata("cap procwait " + strofreal(pids[i,1]))
-                    stata("local rc = _rc")
-                    if(strtoreal(st_local("rc"))){ //not done yet
-                        //errprintf("Found file, but child Stata not done yet.")
-                        continue;
+                    if(c("rc")){ //not done yet
+                        continue; //try again later
                     }
                 }
+                
                 /* Opening the file and looking for somethign different of 0
                 (which is clear) */
 
@@ -1159,10 +1160,7 @@ real scalar parallel_finito(
                 stata(sprintf(`"cap copy __pll%s_do%04.0f.log "%s%s", replace"', parallelid, i, c("tmpdir"),logfilename))
                 /* Sometimes Stata hasn't released the file yet. Either way, don't error out  */
                 if (_unlink(pwd()+logfilename)){
-                    //stata("sleep 2000")
-                    //if(_unlink(pwd()+logfilename)){
-                        errprintf("Not able to remove temp dir\n")
-                    //}
+                    errprintf("Not able to remove temp dir\n")
                 }
 
                 in_fh = fopen(fname, "r", 1)
@@ -1181,10 +1179,7 @@ real scalar parallel_finito(
                 tmpdirname = sprintf("%s"+ (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/") + "__pll%s_tmpdir%04.0f", c("tmpdir"),parallelid,i)
                 retcode = parallel_recursively_rm(parallelid,tmpdirname,1)
                 if (_rmdir(tmpdirname)){
-                    //stata("sleep 2000")
-                    //if(_rmdir(tmpdirname)){
-                        errprintf("Not able to remove temp dir\n")
-                    //}
+                    errprintf("Not able to remove temp dir\n")
                 }
                 
                 /* Taking the finished cluster out of the list */

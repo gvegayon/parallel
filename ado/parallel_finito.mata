@@ -118,7 +118,7 @@ real scalar parallel_finito(
 				  (so still might have it open, which would cause error when we try to delete it) */
 				if(rows(pids)>0){
 					stata("cap procwait " + strofreal(pids[i,1]))
-					if(strtoreal(c("rc"))){ //not done yet
+					if(c("rc")){ //not done yet
 						continue; //try again later
 					}
 				}
