@@ -416,11 +416,8 @@ program parallel_setclusters
 	version 11.0
 	syntax anything(name=nclusters)  [, Force Statapath(string asis) Gateway(string) Includefile(string)]
 	
-	local nclusters = real(`"`nclusters'"')
-	if (`nclusters' == .) {
-		di as error `"Not allow: "#" Should be a number"'
-		exit 109
-	}
+	local nclusters = int(real(`"`nclusters'"'))
+	_assert `nclusters'!=., msg(`"Not allowed: "#" Should be a number"') rc(109)
 	local force = length("`force'")>0
 	mata: parallel_setclusters(`nclusters', `force')
 	mata: st_local("error", strofreal(parallel_setstatapath(`"`statapath'"', `force')))
