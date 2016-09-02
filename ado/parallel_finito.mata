@@ -158,7 +158,19 @@ real scalar parallel_finito(
 				
 				continue
 			} /* Else just wait for it 1/10 of a second! */
-			else stata("sleep 100")
+			else{ //no finish file yet
+				//check if the child process was killed (or stopped w/o making finish file)
+				if(rows(pids)>0){
+					stata("cap procwait " + strofreal(pids[i,1]))
+					if(!c("rc")){ //not running
+						//simulate a error-ed shutdown. 700 is an unlabelled Operating System error
+						parallel_write_diagnosis("700",sprintf("__pll%s_finito%04.0f", parallelid, i),"while running the command/dofile")
+						// It'll be picked up next time around.
+						continue 
+					}
+				}
+				stata("sleep 100")
+			}
 		}
 	}
 	
