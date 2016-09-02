@@ -1133,7 +1133,7 @@ real scalar parallel_finito(
                         //fake as if the child stata caught the break and exited
                         fname_j=sprintf("__pll%s_finito%04.0f", parallelid, j)
                         if(!fileexists(fname_j)){
-                            parallel_write_diagnosis(1,fname_j,"while running the command/dofile")
+                            parallel_write_diagnosis("1",fname_j,"while running the command/dofile")
                         }
                     }
                 }
