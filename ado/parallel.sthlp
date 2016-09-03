@@ -174,7 +174,9 @@ is properly sorted. By using {opt force} the command skips this check.{p_end}
 during the current session.{p_end}
 
 {syntab:Passing Stata/Mata objects}
-{synopt:{opt prog:rams}}A list of programs to be passed to each cluster. If {cmd:parallel} is 
+{synopt:{opt prog:rams}}A list of programs to be passed to each cluster. 
+To do this, {cmd:parallel} needs to echo the contents of those programs to the output window. 
+If {cmd:parallel} is 
 being run from inside an ado (say {it:my_cmd.ado}) and you need to access local subroutines (other programs
 defined in the ado beside the primary {it:my_cmd}), then you must pass their names in this option as
 {it:my_cmd.local_subroutine_name} for them to be accessible.{p_end}
@@ -464,6 +466,11 @@ other object different from data.
 Although -{cmd:parallel}- passes-through {help program list:programs}, {help macro:macros}
 and {help mata:mata objects}, in the current version it is not capable of doing the same with
 {help matrix:matrices} or {help scalar:scalars}.
+{p_end}
+ 
+{pstd}
+If the number of tasks to be done is less than the number of clusters, {cmd:parallel} will temporarily reduce
+the number of clusters. This is reported in the global {cmd:$LAST_PLL_N}.
 {p_end}
 
 

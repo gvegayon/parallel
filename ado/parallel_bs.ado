@@ -42,12 +42,17 @@ program def parallel_bootstrap, rclass
 	}
 		
 	/* Setting sizes */
-	local csize = floor(`reps'/$PLL_CLUSTERS)
-	if (`csize' == 0) error 1
-	else {
-		local lsize = `csize' + (`reps' - `csize'*$PLL_CLUSTERS)
-	}
+	//BS needs normally reps at least 2 (per cluster)
+	if `reps'<2*$PLL_CLUSTERS {
+		_assert `reps'>1, msg("reps() must be an integer greater than 1") rc(198)
 
+		local orig_PLL_CLUSTERS = ${PLL_CLUSTERS}
+		global PLL_CLUSTERS = floor(`reps'/2)
+		di "Small workload. Temporarily setting number of clusters to ${PLL_CLUSTERS}"
+	}
+	local csize = floor(`reps'/$PLL_CLUSTERS)
+	local lsize = `csize' + (`reps' - `csize'*$PLL_CLUSTERS)
+	
 	/* Reserving a pll_id. This will be stored in the -parallelid- local
 	macro */	
 	mata: parallel_sandbox(5)
@@ -76,6 +81,7 @@ program def parallel_bootstrap, rclass
 	cap confirm file `saving'
 	if (!_rc & "`replace'" == "") {
 		di "{error:File -`saving'- already exists, use the -replace- option}"
+		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
 		exit 602
 	}
 
@@ -101,13 +107,15 @@ program def parallel_bootstrap, rclass
 	if (_rc) {
 		if ("`keep'"=="" & "`keeplast'"=="") qui parallel clean, e(${LAST_PLL_ID}) force nologs
 		mata: parallel_sandbox(2, "`parallelid'")
+		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
 		exit _rc
 	}
 
 	if (r(pll_errs)) {
 		if ("`keep'"=="" & "`keeplast'"=="") qui parallel clean, e(${LAST_PLL_ID}) force nologs
 		mata: parallel_sandbox(2,"`parallelid'")
-		exit 1
+		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
+		exit 9
 	}
 
 	preserve
@@ -145,6 +153,7 @@ program def parallel_bootstrap, rclass
 	parallel_bs_ereturn
 	
 	/* Getting macros back */
+	if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
 	foreach m of local macros {
 		return local `m'  `"``m''"'
 	}

@@ -140,7 +140,7 @@ end
 *cap program drop parallel_spliter
 program def parallel_spliter
 	version 11.0
-	syntax [namelist(name=xtstructure)] [,parallelid(string) sorting(integer 0) force(integer 0) keepusing(varlist)]
+	syntax [namelist(name=xtstructure)] [,parallelid(string) sorting(integer 0) force(integer 0) keepusing(varlist) orig_cl_local(string)]
 	//args xtstructure parallelid Sorting Force
 	
 	if length("$PLL_CLUSTERS") == 0 {
@@ -162,6 +162,20 @@ program def parallel_spliter
 				if (`=_rc') local numvars `numvars' `var'
 				else local strvars `strvars' `var'
 			}
+			/* Do we have too many clusters? */
+			egen _`parallelid'grp = group(`xtstructure'), missing
+			summ _`parallelid'grp, meanonly
+			local max_n_cl = `r(max)'
+		}
+		else {
+			local max_n_cl = _N
+		}
+		
+		/* Do we have too many clusters? */
+		if (`max_n_cl'<$PLL_CLUSTERS){
+			c_local `orig_cl_local' ${PLL_CLUSTERS}
+			global PLL_CLUSTERS = `max_n_cl'
+			di "Small workload/num groups. Temporarily setting number of clusters to ${PLL_CLUSTERS}"
 		}
 		
 		gen _`parallelid'cut = .
@@ -170,11 +184,18 @@ program def parallel_spliter
 		if (length("`numvars'")) local numvars st_data(.,"`numvars'")
 		else local numvars J(0,0,.)
 		
-		if (length("`strvars'")) local strvars st_data(.,"`strvars'")
+		if (length("`strvars'")) local strvars st_sdata(.,"`strvars'")
 		else local strvars J(0,0,"")
 		
 		/* Processing in MATA */
+		capture {
 		mata: st_store(., "_`parallelid'cut", parallel_divide_index(`numvars', `strvars'))
+		}
+		local main_rc = _rc
+		if `main_rc' {
+			cap drop _`parallelid'cut
+			error `main_rc'
+		}
 				
 		if (length("`keepusing'")) {
 			keep _`parallelid'cut `keepusing'
@@ -182,7 +203,6 @@ program def parallel_spliter
 		}
 		
 		save __pll`parallelid'_dataset, replace
-		
 		drop _all
 	}
 	
@@ -280,12 +300,12 @@ program def parallel_do, rclass
 	if ("`setparallelid'"=="") mata: parallel_sandbox(5)
 	else local parallelid = "`setparallelid'"
 
-	global LAST_PLL_ID = "`parallelid'"
-	global LAST_PLL_N = $PLL_CLUSTERS
-	global LAST_PLL_DIR = "`pll_dir'"		
-
 	/* Generates database clusters */
-	if (!`nodata') parallel_spliter `by' , parallelid(`parallelid') sorting(`sorting') force(`force') keepusing(`keepusing')
+	if (!`nodata') parallel_spliter `by' , parallelid(`parallelid') sorting(`sorting') force(`force') keepusing(`keepusing') orig_cl_local(orig_PLL_CLUSTERS)
+
+	global LAST_PLL_ID = "`parallelid'"
+	global LAST_PLL_DIR = "`pll_dir'"	
+	global LAST_PLL_N = $PLL_CLUSTERS	
 	
 	/* Starts building the files */
 	local work_around_no_cwd = 0
@@ -327,6 +347,7 @@ program def parallel_do, rclass
 		/* Removes the sandbox file (unprotect the files) */
 		mata: parallel_sandbox(2, "`parallelid'")
 		
+		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
 		error `errornum'
 	}
 	
@@ -388,9 +409,11 @@ program def parallel_do, rclass
 
 	
 	qui cd "`initialdir'"
+	if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
 	if `nerrors' {
 		di as err "`nerrors' child processes encountered errors. Throwing last error."
-		error `pll_last_error'
+		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
+		exit `pll_last_error'
 	}
 end
 
@@ -418,6 +441,8 @@ program parallel_setclusters
 	
 	local nclusters = int(real(`"`nclusters'"'))
 	_assert `nclusters'!=., msg(`"Not allowed: "#" Should be a number"') rc(109)
+	_assert `nclusters'>0,  msg(`"Not allowed: "#" Should be positive"') rc(109)
+	
 	local force = length("`force'")>0
 	mata: parallel_setclusters(`nclusters', `force')
 	mata: st_local("error", strofreal(parallel_setstatapath(`"`statapath'"', `force')))

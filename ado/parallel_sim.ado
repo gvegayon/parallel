@@ -42,18 +42,18 @@ program def parallel_simulate, rclass
 	}
 	
 	/* Checking reps */
-	if (`reps' < 1) {
-			di as err "reps() is required, and must be a positive integer"
-			exit 198
+	if `reps'<$PLL_CLUSTERS {
+		_assert `reps'>=1, msg("reps() is required, and must be a positive intege") rc(198)
+
+		local orig_PLL_CLUSTERS = ${PLL_CLUSTERS}
+		global PLL_CLUSTERS = `reps'
+		di "Small workload. Temporarily setting number of clusters to ${PLL_CLUSTERS}"
 	}
 
 		
 	/* Setting sizes */
 	local csize = floor(`reps'/$PLL_CLUSTERS)
-	if (`csize' == 0) error 1
-	else {
-		local lsize = `csize' + (`reps' - `csize'*$PLL_CLUSTERS)
-	}
+	local lsize = `csize' + (`reps' - `csize'*$PLL_CLUSTERS)
 
 	/* Reserving a pll_id. This will be stored in the -parallelid- local
 	macro */
@@ -85,6 +85,7 @@ program def parallel_simulate, rclass
 	cap confirm file `saving'
 	if (!_rc & "`replace'" == "") {
 		di "{error:File -`saving'- already exists, use the -replace- option}"
+		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
 		exit 602
 	}
 	
@@ -111,13 +112,15 @@ program def parallel_simulate, rclass
 	if (_rc) {
 		if ("`keep'" == "" & "`keeplast'"=="") qui parallel clean, e(${LAST_PLL_ID}) force nologs
 		mata: parallel_sandbox(2, "`parallelid'")
+		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
 		exit _rc
 	}
 
 	if (r(pll_errs)) {
 		if ("`keep'" == "" & "`keeplast'"=="") qui parallel clean, e(${LAST_PLL_ID}) force nologs
 		mata: parallel_sandbox(2,"`parallelid'")
-		exit 1
+		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
+		exit 9
 	}
 	
 	/* Appending datasets */
@@ -144,6 +147,7 @@ program def parallel_simulate, rclass
 	mata: parallel_sandbox(2, "`parallelid'")
 	
 	parallel_sim_ereturn
+	if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
 	/*
 	/* Getting macros back */
 	foreach m of local macros {

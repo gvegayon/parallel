@@ -251,10 +251,8 @@ real colvector parallel_divide_index(
     /* Defining variables */
     if (numvars == J(0,0,.) & strvars == J(0,0,""))
         N = c("N")
-    else if (numvars != J(0,0,.) & strvars == J(0,0,""))
-        N = rows(numvars)
-    else if (numvars == J(0,0,.) & strvars != J(0,0,""))
-        N = rows(strvars)
+    else 
+        N = max((rows(numvars), rows(strvars)))
 
     size   = J(1,1,floor(N/nclusters))
     result = J(N,1,0)
