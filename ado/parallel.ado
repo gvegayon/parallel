@@ -166,6 +166,7 @@ program def parallel_spliter
 			egen _`parallelid'grp = group(`xtstructure'), missing
 			summ _`parallelid'grp, meanonly
 			local max_n_cl = `r(max)'
+			drop _`parallelid'grp
 		}
 		else {
 			local max_n_cl = _N
