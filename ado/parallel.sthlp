@@ -48,8 +48,9 @@
 {p 8 17 2}
 {cmdab:parallel setclusters} # [, {opt f:orce} 
 {opt s:tatapath}({it:{help filename:stata_path}})
-{opt g:ateway}({it:{help filename:gateway_path}})
-{opt i:ncludefile}({it:{help filename:filename}})]
+{opt i:ncludefile}({it:{help filename:filename}})
+{opt proc:exec}({it:int})
+{opt g:ateway}({it:{help filename:gateway_path}})]
 
 {col 5}{hline}{col 2}{marker do}{...}
 {pstd}Parallelizing a do-file
@@ -156,11 +157,17 @@
 {synopt:{opt s:tatapath}}File path. {cmd:parallel} tries to automatically identify
 Stata's exe path. By using this option you will override this and force 
 {cmd:parallel} to use a specific path to stata.exe.{p_end}
-{synopt:{opt g:ateway}}File path. For Windows, a file that a Cygwin process
-is listening to in order to execute the parallel instances. See example below.{p_end}
 {synopt:{opt i:ncludefile}}File path. This file will be included before parallel commands
 are executed. The target purpose for this is to allow one to copy over preferences that
 {cmd:parallel} does not copy automatically.{p_end}
+{synopt:{opt proc:exec}} On Windows, controls how child processes are spawned. 
+The default value 2 will launch them in a hidden desktop (they can still be seen in the task manager)
+so that the child applications don't briefly steal the window focus (which is annoying). 
+With value 1 the child processes will be launched in the user's desktop, will be launch auto-minimized, but will still briefly steal the focus. 
+Value 0 (deprecated) is the older method of launching processes via the command-line (in batch-mode this requires a Cygwin gateway) 
+and will steal focus and perhaps briefly show the windows of the child processes.{p_end}
+{synopt:{opt g:ateway}}File path. Deprecated. For Windows batch-mode and using command-line process launching, a file that a Cygwin process
+is listening to in order to execute the parallel instances. See example below.{p_end}
 
 {syntab:Byable parallelization}
 {synopt:{opt by}}Varlist. Tells the command through which observations the current dataset 
@@ -702,10 +709,12 @@ the second cluster it will compute -z- equal to the average price and for the
 rest of the clusters it will generate -z- equal to zero.
 {p_end}
 
-{title:Example 7: Using -parallel- on Windows in batch-mode}
+{title:Example 7: Using -parallel- on Windows in batch-mode using command-line launching (Deprecated)}
 
 {pstd}
-Normally, the parallel instances of Stata are executed using -{cmd:winexec}-. This
+The below is deprecated as Windows launching is now normally done using Windows system calls
+rather than from the command line. If you specified the {it:procexec(0)} option then you will revert
+to using command-line style launching. In this case, normally the parallel instances of Stata are executed using -{cmd:winexec}-. This
 command is ignored, however, on Windows when in batch-mode. A work-around for
 this environment is to have Stata write out the commands to be executed to a file
 (called the gateway) and have a separate process read new inputs to this file and 

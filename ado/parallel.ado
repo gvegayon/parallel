@@ -438,11 +438,14 @@ end
 *cap program drop parallel_setclusters
 program parallel_setclusters
 	version 11.0
-	syntax anything(name=nclusters)  [, Force Statapath(string asis) Gateway(string) Includefile(string)]
+	syntax anything(name=nclusters)  [, Force Statapath(string asis) Gateway(string) Includefile(string) procexec(int 2)]
 	
 	local nclusters = int(real(`"`nclusters'"'))
 	_assert `nclusters'!=., msg(`"Not allowed: "#" Should be a number"') rc(109)
 	_assert `nclusters'>0,  msg(`"Not allowed: "#" Should be positive"') rc(109)
+	_assert inlist(`procexec',0,1,2), msg("procexec() must be 0, 1, or 2") rc(198)
+	
+	global USE_PROCEXEC = `procexec'
 	
 	local force = length("`force'")>0
 	mata: parallel_setclusters(`nclusters', `force')
