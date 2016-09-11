@@ -146,7 +146,7 @@ program def parallel_spliter
 		exit 198
 	}
 	
-	quietly {
+	//quietly {
 		if (length("`xtstructure'")) {
 		
 			/* Checks wheather if the data is in the correct sorting */
@@ -187,28 +187,25 @@ program def parallel_spliter
 		else local strvars J(0,0,"")
 		
 		/* Processing in MATA */
-		capture {
 		mata: st_store(., "_`parallelid'cut", parallel_divide_index(`numvars', `strvars'))
-		}
-		local main_rc = _rc
-		if `main_rc' {
-			cap drop _`parallelid'cut
-			error `main_rc'
-		}
 				
 		if (length("`keepusing'")) {
 			keep _`parallelid'cut `keepusing'
 			gen __pllnobs`parallelid' = _n
 		}
 		
-		save __pll`parallelid'_dataset, replace
+		qui save __pll`parallelid'_dataset, replace
 		drop _all
-	}
+	//}
 	
 end
 
 ////////////////////////////////////////////////////////////////////////////////
 // MAIN PROGRAM
+// There are three things we need to possibly restore on exit
+// - Data/S_FN (this is taken care of by -preserve-)
+// - PWD (non-indented capture block)
+// - Temporaliy changed number of clusters (non-indented capture block)
 program def parallel_do, rclass
 
 	version 11.0
@@ -271,8 +268,11 @@ program def parallel_do, rclass
 	// Delets last parallel instance ran
 	if (`keeplast' & length("`r(pll_id)'")) cap parallel_clean, e(`r(pll_id)') nologs
 	
-	// Gets some global values
-	local sfn = "$S_FN"
+	if length("`by'") != 0 {
+		local sortlist: sortedby
+		local sorting = regexm("`sortlist'","^`by'")
+	}
+	else local sorting = 0
 	
 	// Gets the directory where to work at
 	if (!`prefix') {
@@ -284,22 +284,22 @@ program def parallel_do, rclass
 	}
 	else local pll_dir = c(pwd)+"/"
 		
-	
 	local initialdir = c(pwd)
 	qui cd "`pll_dir'"
-	
-	if length("`by'") != 0 {
-		local sortlist: sortedby
-		local sorting = regexm("`sortlist'","^`by'")
-	}
-	else local sorting = 0
+	capture noisily { //Start capture block for PWD
 	
 	/* Creates a unique ID for the process and secures it */
 	if ("`setparallelid'"=="") mata: parallel_sandbox(5)
 	else local parallelid = "`setparallelid'"
 
 	/* Generates database clusters */
-	if (!`nodata') parallel_spliter `by' , parallelid(`parallelid') sorting(`sorting') force(`force') keepusing(`keepusing') orig_cl_local(orig_PLL_CLUSTERS)
+	capture noisily { //Start capture block for PLL_CLUSTERS
+	if (!`nodata'){
+		local sfn = "$S_FN" // be able to "fake" restore this
+		preserve
+		
+		parallel_spliter `by' , parallelid(`parallelid') sorting(`sorting') force(`force') keepusing(`keepusing') orig_cl_local(orig_PLL_CLUSTERS)
+	}
 
 	global LAST_PLL_ID = "`parallelid'"
 	global LAST_PLL_DIR = "`pll_dir'"	
@@ -329,23 +329,10 @@ program def parallel_do, rclass
 	
 	/* Writing the dofile */
 	mata: st_local("errornum", strofreal(parallel_write_do(strtrim(`"`dofile' `argopt'"'), "`parallelid'", $PLL_CLUSTERS, `prefix', `matasave', !`noglobals', "`seeds'", "`randtype'", `nodata', "`pll_dir'", "`programs'", `processors',`work_around_no_cwd')))
-	
-	/* Checking if every thing is ok */
 	if (`errornum') {
-		if (!`nodata') {
-			qui use __pll`parallelid'_dataset, clear
-			
-			// Restores original S_FN (file name) value
-			global S_FN = "`sfn'"
-			
-			/* Removing the cut variable if somehow still there*/
-			cap drop _`parallelid'cut
-		}
-		
 		/* Removes the sandbox file (unprotect the files) */
 		mata: parallel_sandbox(2, "`parallelid'")
 		
-		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
 		error `errornum'
 	}
 	
@@ -359,13 +346,6 @@ program def parallel_do, rclass
 	mata: st_local("nerrors", strofreal(parallel_run("`parallelid'",$PLL_CLUSTERS,`"$PLL_STATA_PATH"',`=`timeout'*1000')))
 	timer off 99
 	
-	/* If parallel finished with an error it restores the dataset */
-	if (`nerrors' & !`nodata') {
-		qui use __pll`parallelid'_dataset, clear
-		global S_FN = "`sfn'"
-		cap drop _`parallelid'cut	
-	}
-	
 	cap timer list
 	if (r(t99) == .) local pll_t_calc = 0
 	else local pll_t_calc = r(t99)
@@ -375,18 +355,32 @@ program def parallel_do, rclass
 	// Paste the databases
 	if (!`nodata' & !`nerrors') {
 		parallel_fusion `parallelid', clusters($PLL_CLUSTERS) keepusing(`keepusing')
-		
-		// Restores original S_FN (file name) value
-		global S_FN = "`sfn'"
-	
 		cap drop _`parallelid'cut
+		
+		global S_FN = "`sfn'" // Restores original S_FN (file name) value
+		restore, not
 	}
-
+	
+	return scalar pll_n = $PLL_CLUSTERS
+	} //End capture block for $PLL_CLUSTERS
+	if _rc {
+		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
+		exit _rc
+	}
+	if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
+	
 	/* Removes the sandbox file (unprotect the files) */
 	if ("`setparallelid'" == "") {
 		mata: parallel_sandbox(2, "`parallelid'")
 		if (!`keep' & !`keeplast') parallel_clean, e("`parallelid'") nologs
 	}
+	
+	} //End capture block for PWD
+	if _rc {
+		qui cd "`initialdir'"
+		exit _rc
+	}
+	qui cd "`initialdir'"
 	
 	timer off 97
 	cap timer list
@@ -395,7 +389,6 @@ program def parallel_do, rclass
 	
 	qui timer list
 	return local  pll_seeds="`pllseeds'"
-	local pllseeds ""
 	return scalar pll_errs = `nerrors'
 	return local  pll_dir "`pll_dir'"
 	return scalar pll_t_reps = `pll_t_reps'
@@ -403,14 +396,9 @@ program def parallel_do, rclass
 	return scalar pll_t_calc = `pll_t_calc'
 	return scalar pll_t_fini = `pll_t_fini'
 	return local pll_id = "`parallelid'"
-	return scalar pll_n = $PLL_CLUSTERS
-
 	
-	qui cd "`initialdir'"
-	if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
 	if `nerrors' {
 		di as err "`nerrors' child processes encountered errors. Throwing last error."
-		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
 		exit `pll_last_error'
 	}
 end
