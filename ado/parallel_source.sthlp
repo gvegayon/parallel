@@ -1720,10 +1720,7 @@ real scalar parallel_run(
         unlink(pidfile)
     }
     else { // WINDOWS
-        use_procexec = 2 //set the default
-        if (st_global("USE_PROCEXEC")=="0") use_procexec = 0
-        if (st_global("USE_PROCEXEC")=="1") use_procexec = 1
-        if (st_global("USE_PROCEXEC")=="2") use_procexec = 2
+        use_procexec = strtoreal(st_global("USE_PROCEXEC"))
         if (!use_procexec){
             if (c("mode")=="batch"){ //Execute commands via Cygwin process
                 if (gateway_fname == J(1,1,"")) gateway_fname = st_global("PLL_GATEWAY_FNAME")
@@ -2048,7 +2045,7 @@ real scalar parallel_setstatapath(string scalar statadir, | real scalar force) {
             statadir = c("sysdir_stata") + fname
             
             //might need to convert to cygwin path-name
-            if (c("mode")=="batch" & "$USE_PROCEXEC"=="0"){
+            if (c("mode")=="batch" & st_global("USE_PROCEXEC")=="0"){
                 if (!force) if (!fileexists(statadir)) return(601)
                 statadir = "/cygdrive/"+substr(c("sysdir_stata"),1,1)+"/"+substr(c("sysdir_stata"),4,.) + fname
                 force=1
