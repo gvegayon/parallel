@@ -391,7 +391,7 @@ in parallel fashion.
 
 {pstd}
 At this time -{cmd:parallel}- has been successfully tested in Windows, Unix
-and MacOS for Stata versions 10 to 12.
+and MacOS for Stata versions 11 to 14.
 {p_end}
 
 {pstd}
