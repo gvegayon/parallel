@@ -199,10 +199,11 @@ end
 
 ////////////////////////////////////////////////////////////////////////////////
 // MAIN PROGRAM
-// There are three things we need to possibly restore on exit
+// There are things we need to possibly restore on exit
 // - Data/S_FN (this is taken care of by -preserve-)
 // - PWD (non-indented capture block)
 // - Temporaliy changed number of clusters (non-indented capture block)
+// - Turn off the timer (do within catch for capture blocks)
 program def parallel_do, rclass
 	version 11.0
 
@@ -357,6 +358,9 @@ program def parallel_do, rclass
 	} //End capture block for $PLL_CLUSTERS
 	if _rc {
 		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
+		cap timer off 97
+		cap timer off 98
+		cap timer off 99
 		exit _rc
 	}
 	if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
@@ -370,6 +374,9 @@ program def parallel_do, rclass
 	} //End capture block for PWD
 	if _rc {
 		qui cd "`initialdir'"
+		cap timer off 97
+		cap timer off 98
+		cap timer off 99
 		exit _rc
 	}
 	qui cd "`initialdir'"
