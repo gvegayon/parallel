@@ -250,6 +250,7 @@ program def parallel_do, rclass
 	if (!(c(N)*c(k))) local nodata 1
 	
 	if (!`keeptiming') {
+		timer clear 97
 		timer clear 98
 		timer clear 99
 	}
@@ -327,10 +328,10 @@ program def parallel_do, rclass
 		error `errornum'
 	}
 	
-	timer off 88
+	timer off 98
 	cap timer list
-	if (r(t88) == .) local pll_t_setu = 0
-	else local pll_t_setu = r(t88)
+	if (r(t98) == .) local pll_t_setu = 0
+	else local pll_t_setu = r(t98)
 	
 	/* Running the dofiles */
 	timer on 99
