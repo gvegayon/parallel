@@ -30,7 +30,6 @@ run parallel_finito.mata
 run parallel_setstatapath.mata
 run parallel_normalizepath.mata
 run parallel_clean.mata
-run parallel_divide_index.mata
 run parallel_write_diagnosis.mata
 run parallel_break.mata
 run parallel_sandbox.mata
