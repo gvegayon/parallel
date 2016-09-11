@@ -148,11 +148,7 @@ program def parallel_spliter
 	
 	//quietly {
 		if (length("`xtstructure'")) {
-		
-			/* Checks wheather if the data is in the correct sorting */
-			if !`sorting' & !`force' {
-				error 5
-			}
+			_assert `sorting' | `force', msg("Data not sorted") rc(5)
 
 			/* Checking the data types */
 			foreach var of varlist `xtstructure' {
@@ -160,7 +156,8 @@ program def parallel_spliter
 				if (`=_rc') local numvars `numvars' `var'
 				else local strvars `strvars' `var'
 			}
-			/* Do we have too many clusters? */
+			
+			/* calculate max possible clusters */
 			egen _`parallelid'grp = group(`xtstructure'), missing
 			summ _`parallelid'grp, meanonly
 			local max_n_cl = `r(max)'
@@ -178,7 +175,7 @@ program def parallel_spliter
 		}
 		
 		gen _`parallelid'cut = .
-		
+
 		/* Checking types of data */
 		if (length("`numvars'")) local numvars st_data(.,"`numvars'")
 		else local numvars J(0,0,.)
@@ -188,7 +185,7 @@ program def parallel_spliter
 		
 		/* Processing in MATA */
 		mata: st_store(., "_`parallelid'cut", parallel_divide_index(`numvars', `strvars'))
-				
+			
 		if (length("`keepusing'")) {
 			keep _`parallelid'cut `keepusing'
 			gen __pllnobs`parallelid' = _n
@@ -207,7 +204,6 @@ end
 // - PWD (non-indented capture block)
 // - Temporaliy changed number of clusters (non-indented capture block)
 program def parallel_do, rclass
-
 	version 11.0
 
 	#delimit ;
@@ -260,12 +256,7 @@ program def parallel_do, rclass
 	
 	timer on 98
 	
-	// If they use ,programs() then we need "." in the path
-	if "`programs'"!=""{
-		
-	}
-	
-	// Delets last parallel instance ran
+	// Deletes last parallel instance ran
 	if (`keeplast' & length("`r(pll_id)'")) cap parallel_clean, e(`r(pll_id)') nologs
 	
 	if length("`by'") != 0 {
@@ -331,7 +322,7 @@ program def parallel_do, rclass
 	mata: st_local("errornum", strofreal(parallel_write_do(strtrim(`"`dofile' `argopt'"'), "`parallelid'", $PLL_CLUSTERS, `prefix', `matasave', !`noglobals', "`seeds'", "`randtype'", `nodata', "`pll_dir'", "`programs'", `processors',`work_around_no_cwd')))
 	if (`errornum') {
 		/* Removes the sandbox file (unprotect the files) */
-		mata: parallel_sandbox(2, "`parallelid'")
+		mata: parallel_sandbox(2, "`parallelid'") 
 		
 		error `errornum'
 	}
