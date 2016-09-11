@@ -171,7 +171,14 @@ is listening to in order to execute the parallel instances. See example below.{p
 
 {syntab:Byable parallelization}
 {synopt:{opt by}}Varlist. Tells the command through which observations the current dataset 
-can be divided, avoiding stories (panel) splitting over two or more clusters.{p_end}
+can be divided, avoiding stories (panel) splitting over two or more clusters.
+The semantics for {opt by} are not the same as for Stata.
+When Stata implements {cmd:by}, the command that is run will only see a section of the data where the by-variables are the same.
+{cmd:parallel}'s semantics are that no observations with the same {opt by}-values will be in different clusters. 
+It pools together combinations when there are fewer clusters than by-var combinations. 
+If you need Stata-style semantics, the solution is to add {cmd:by} in the subcommand. 
+For example, {cmd: parallel, by(byvar): by byvar: egen x_max = max(x)}.
+{p_end}
 {synopt:{opt f:orce}}When using {opt by}, {cmd:parallel} checks whether if the dataset
 is properly sorted. By using {opt force} the command skips this check.{p_end}
 
