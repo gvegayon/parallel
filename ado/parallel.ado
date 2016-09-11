@@ -357,11 +357,12 @@ program def parallel_do, rclass
 	return scalar pll_n = $PLL_CLUSTERS
 	} //End capture block for $PLL_CLUSTERS
 	if _rc {
+		local orig_rc = _rc
 		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
 		cap timer off 97
 		cap timer off 98
 		cap timer off 99
-		exit _rc
+		exit `orig_rc'
 	}
 	if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
 	
@@ -373,11 +374,12 @@ program def parallel_do, rclass
 	
 	} //End capture block for PWD
 	if _rc {
+		local orig_rc = _rc
 		qui cd "`initialdir'"
 		cap timer off 97
 		cap timer off 98
 		cap timer off 99
-		exit _rc
+		exit `orig_rc'
 	}
 	qui cd "`initialdir'"
 	
