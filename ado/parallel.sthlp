@@ -757,7 +757,6 @@ If this does not work you will need to specify the {it:statapath} explicitly.{p_
 {synopt:{cmd:r(pll_t_fini)}}Time took to appending and cleaning{p_end}
 {synopt:{cmd:r(pll_t_calc)}}Time took to complete the parallel job{p_end}
 {synopt:{cmd:r(pll_t_setu)}}Time took to setup (before the parallelization) and to finish the job (after the parallelization){p_end}
-{synopt:{cmd:r(pll_t_reps)}}In the case of {opt keeptime}, the number of time measures performed.{p_end}
 {synopt:{cmd:r(pll_errs)}}Number of clusters which stopped with an error.{p_end}
 
 {p2col 5 20 24 2: Macros}{p_end}
