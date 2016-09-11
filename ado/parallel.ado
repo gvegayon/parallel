@@ -178,7 +178,8 @@ program def parallel_spliter
 			keep _`parallelid'grp
 			contract _`parallelid'grp
 			sort _freq
-			//figuring out the best mapping from groupID to cut isn't easy but this is reasonable
+			//Figuring out the mapping from groupID to cut that equalizes sizes is the "Partition Problem"
+			//which is hard to solve exactly (it's NP-complete). A rough solution suffices here though.
 			gen _`parallelid'cut = mod(_n, ${PLL_CLUSTERS}) + 1
 			tempfile grp_to_cut_map
 			qui save `grp_to_cut_map'
@@ -189,7 +190,7 @@ program def parallel_spliter
 			sort `xtstructure'
 		}
 		else {
-			gen _`parallelid'cut = ceil(_n*${PLL_CLUSTERS}/_N) //_N/$PLL_CLUSTERS
+			gen _`parallelid'cut = ceil(_n*${PLL_CLUSTERS}/_N) //each of size _N/$PLL_CLUSTERS
 		}
 			
 		if (length("`keepusing'")) {
