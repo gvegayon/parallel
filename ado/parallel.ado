@@ -502,6 +502,7 @@ program def parallel_fusion
 	capture {
 		cap use "__pll`parallelid'_dta0001.dta", clear
 		if (_rc) di "{error:No dataset for instance 0001.}"
+		local sortlist: sortedby
 		
 		forval i = 2/`clusters' {
 			cap append using `"__pll`parallelid'_dta`=string(`i',"%04.0f")'.dta"'
@@ -516,6 +517,8 @@ program def parallel_fusion
 	}
 
 	
+	//restore the sort
+	if "`sortlist'"!="" sort `sortlist'	
 	
 end
 
