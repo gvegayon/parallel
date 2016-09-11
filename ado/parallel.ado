@@ -447,33 +447,22 @@ program parallel_setclusters
 	
 	global USE_PROCEXEC = `procexec'
 	
-	local force = length("`force'")>0
+	local force = (length("`force'")>0)
 	mata: parallel_setclusters(`nclusters', `force')
 	mata: st_local("error", strofreal(parallel_setstatapath(`"`statapath'"', `force')))
-	if (`error'){
-        di as error `"Can not set Stata directory, try using -statapath()- option"'
-        exit `error'
-	}
+	_assert (!`error'), msg("Can not set Stata directory, try using -statapath()- option") rc(`error')
 	
 	if "`c(mode)'"=="batch" & "`c(os)'"=="Windows" & "$USE_PROCEXEC"=="0" {
-		if `"`gateway'"'==""{
-			local gateway "pll_gateway.sh"
-		}
+		if `"`gateway'"'=="" local gateway "pll_gateway.sh"
+
 		cap confirm file `"`gateway'"'
-		if _rc {
-			di "path: `c(pwd)'"
-			di as error `"On Windows in batch-mode, parallel requires a gateway file and no such file found."'
-			exit _rc
-		}
+		_assert `=!_rc', msg(`"On Windows batch-mode with command-line process execution, requires a gateway file is required but not found (path: `c(pwd)')"') rc(`=_rc')
 		global PLL_GATEWAY_FNAME `"`gateway'"'
 	}
 	
 	if `"`includefile'"'!=""{
 		cap confirm file `"`includefile'"'
-		if _rc {
-			di as error `"Can not find the include file (`includefile')."'
-			exit _rc
-		}
+		_assert `=!_rc', msg("Can not find the include file (`includefile').") msg(`=_rc')
 		global PLL_INCLUDE_FILE `"`includefile'"'
 	}
 end
@@ -483,7 +472,6 @@ end
 // Exports
 
 // Exports a copy of programs
-*cap program drop program_export
 program def program_export
 	version 11.0
 	syntax using/ [,Programlist(string) Inname(string)]
@@ -494,28 +482,30 @@ end
 
 ////////////////////////////////////////////////////////////////////////////////
 // Appends the clusterized dataset
-*cap program drop parallel_fusion
 program def parallel_fusion
 	version 11.0
 	syntax anything(name=parallelid) , clusters(integer) [keepusing(string)]
 	
-	capture {
-		cap use "__pll`parallelid'_dta0001.dta", clear
-		if (_rc) di "{error:No dataset for instance 0001.}"
-		local sortlist: sortedby
-		
-		forval i = 2/`clusters' {
-			cap append using `"__pll`parallelid'_dta`=string(`i',"%04.0f")'.dta"'
-			if (_rc) di "{error:No dataset for instance `=string(`i',"%04.0f")'.}"
-		}
-		
-		/* If it just used a set of variables */
-		if (length("`keepusing'")) {
-			merge 1:1 __pllnobs`parallelid' using __pll`parallelid'_dataset, keep(3) nogen
-			drop __pllnobs`parallelid'
+	cap use "__pll`parallelid'_dta0001.dta", clear
+	if (_rc){
+		di "{error:No dataset for instance 0001.}"
+		exit _rc
+	}
+	local sortlist: sortedby
+	
+	forval i = 2/`clusters' {
+		cap append using `"__pll`parallelid'_dta`=string(`i',"%04.0f")'.dta"'
+		if (_rc){	
+			di "{error:No dataset for instance `=string(`i',"%04.0f")'.}"
+			exit _rc
 		}
 	}
-
+	
+	/* If it just used a set of variables */
+	if (length("`keepusing'")) {
+		qui merge 1:1 __pllnobs`parallelid' using __pll`parallelid'_dataset, keep(3) nogen
+		drop __pllnobs`parallelid'
+	}
 	
 	//restore the sort
 	if "`sortlist'"!="" sort `sortlist'	
@@ -524,7 +514,6 @@ end
 
 ////////////////////////////////////////////////////////////////////////////////
 // Checks whether the user pressed break inside a loop
-*cap program drop parallel_break
 program def parallel_break
 	version 11.0
 	mata: parallel_break()
