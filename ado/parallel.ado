@@ -29,7 +29,6 @@ THE SOFTWARE.
 */
 
 // Syntax parser
-*cap program drop parallel
 program def parallel
     version 11.0
 
@@ -137,7 +136,6 @@ end
 
 ////////////////////////////////////////////////////////////////////////////////
 // Splits the dataset into clusters
-*cap program drop parallel_spliter
 program def parallel_spliter
 	version 11.0
 	syntax [namelist(name=xtstructure)] [,parallelid(string) sorting(integer 0) force(integer 0) keepusing(varlist) orig_cl_local(string)]
@@ -211,7 +209,6 @@ end
 
 ////////////////////////////////////////////////////////////////////////////////
 // MAIN PROGRAM
-*cap program drop parallel_do
 program def parallel_do, rclass
 
 	version 11.0
@@ -435,7 +432,6 @@ end
 
 ////////////////////////////////////////////////////////////////////////////////
 // Sets the number of clusters as a global macro
-*cap program drop parallel_setclusters
 program parallel_setclusters
 	version 11.0
 	syntax anything(name=nclusters)  [, Force Statapath(string asis) Gateway(string) Includefile(string) procexec(int 2)]
