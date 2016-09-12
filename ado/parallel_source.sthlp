@@ -146,7 +146,7 @@ void parallel_clean(|string scalar parallelid, real scalar cleanall, real scalar
     /* Getting the list of parallel ids that should be removed */
     if (cleanall)
     {
-        parallelids = dir(pwd(),"files","__pll*") \ dir(pwd(),"files","l__pll*") \ dir(pwd(),"dirs","__pll*")
+        parallelids = dir(pwd(),"files","__pll*") \ dir(pwd(),"files","l__pll*") \ dir(pwd(),"dirs","__pll*") \ dir(c("tmpdir"),"files","__pll*")
 
         for(i=1;i<=length(parallelids);i++)
             parallelids = regexr(regexr(parallelids,"^l?__pll",""),"_.+$","")

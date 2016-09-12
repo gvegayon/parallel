@@ -294,6 +294,8 @@ security reasons, in-use auxiliary files will not be deleted unless the user
 specifies it through the option {opt force}, which will override not deleting
 in-use auxiliary files (see the {help parallel##tech:Technical note} section for
 more information about this).
+Log files from the runs are stored in {it:c(tmpdir)} so that they can be inspected by the user.
+The user will likely want to delete these periodically with {cmd:parallel clean, all}.
 {p_end}
 
 {pstd}
