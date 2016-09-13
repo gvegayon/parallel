@@ -397,6 +397,10 @@ and MacOS for Stata versions 11 to 14.
 {p_end}
 
 {pstd}
+-{cmd:parallel}- does not change the RNG state (even if subcommands invoke randomization functions).
+{p_end}
+
+{pstd}
 After several tests, it has been proven that--thanks to how -{cmd:parallel}- has been
 written--it is possible to use the algorithm in such a way that other techniques
 of parallel computing can be implemented; such as Monte Carlo Simulations, 
@@ -791,6 +795,9 @@ If this does not work you will need to specify the {it:statapath} explicitly.{p_
 {synopt:{cmd:$LAST_PLL_ID}}A copy of {cmd:r(pll_id)}.{p_end}
 {synopt:{cmd:$PLL_LASTRNG}}Number of times that -{cmd:parallel_randomid()}- has
 been executed.{p_end}
+{synopt:{cmd:$PLL_LASTRNG}}Number of times that -{cmd:parallel_randomid()}- has
+been executed.{p_end}
+{synopt:{cmd:$PLL_STATA_PATH, $PLL_CLUSTERS, $USE_PROCEXEC}}Internal usage.{p_end}
 
 
 {marker development}{...}
