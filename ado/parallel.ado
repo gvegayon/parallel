@@ -286,14 +286,13 @@ program def parallel_do, rclass
 		
 	local initialdir = c(pwd)
 	qui cd "`pll_dir'"
-	capture noisily { //Start capture block for PWD
+	capture noisily { //Start capture block for PWD & $PLL_CLUSTERS
 	
 	/* Creates a unique ID for the process and secures it */
 	if ("`setparallelid'"=="") mata: parallel_sandbox(5)
 	else local parallelid = "`setparallelid'"
 
 	/* Generates database clusters */
-	capture noisily { //Start capture block for PLL_CLUSTERS
 	if (!`nodata'){
 		local sfn = "$S_FN" // be able to "fake" restore this
 		preserve
@@ -362,16 +361,6 @@ program def parallel_do, rclass
 	}
 	
 	return scalar pll_n = $PLL_CLUSTERS
-	} //End capture block for $PLL_CLUSTERS
-	if _rc {
-		local orig_rc = _rc
-		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
-		cap timer off 97
-		cap timer off 98
-		cap timer off 99
-		exit `orig_rc'
-	}
-	if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
 	
 	/* Removes the sandbox file (unprotect the files) */
 	if ("`setparallelid'" == "") {
@@ -379,16 +368,18 @@ program def parallel_do, rclass
 		if (!`keep' & !`keeplast') parallel_clean, e("`parallelid'") nologs
 	}
 	
-	} //End capture block for PWD
+	} //End capture block
 	if _rc {
 		local orig_rc = _rc
 		qui cd "`initialdir'"
+		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
 		cap timer off 97
 		cap timer off 98
 		cap timer off 99
 		exit `orig_rc'
 	}
 	qui cd "`initialdir'"
+	if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
 	
 	timer off 97
 	cap timer list
