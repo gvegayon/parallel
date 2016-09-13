@@ -10,7 +10,7 @@ ifeq "$(STATABATCH)" ""
   STATABATCH:=stata -b
 endif
 
-.PHONY: home compile inc_dist_date clean tests
+.PHONY: home compile inc_dist_date clean tests checks check_smcl check_missing_tempname check_macro_exp_mata check_version
 
 home:
 	$(STATABATCH) do compile_and_install.do
@@ -25,11 +25,28 @@ clean:
 	rm -f __pll*
 	-rm -f -r /tmp/__pll*
 	
+checks: check_smcl check_missing_tempname check_macro_exp_mata check_version
+	
 #Smcl has problems displaying lines over 244 characters
 check_smcl:
 	@echo "Will display lines if error"
 	-grep '.\{245\}' *.sthlp
 	@echo ""
+	
+#Ideally check for other named things like graph names.
+check_missing_tempname :
+	@echo Checking for ados with missing tempname and instead use scalars
+	X=$$(grep "file open [^\`]" *.ado); echo -n "$$X"; [ $$(echo $$X | wc -w) -eq 0 ] 
+	X=$$(grep "^\s\+\(qui \)\?scalar [^\`]" *.ado | grep -v "scalar define \`"); echo -n "$$X"; [ $$(echo $$X | wc -w) -eq 0 ] 
+	X=$$(grep "^\s\+mat\(rix\)\? [^\`\$$]" *.ado | grep -v "\(row\|col\)\(n\(ames\?\)\?\|eq\)" | grep -v " li\(st\)\?" | grep -v " drop" | grep -v " input [\`\$$]"); echo -n "$$X"; [ $$(echo $$X | wc -w) -eq 0 ] 
+	
+check_macro_exp_mata :
+	@echo Checking for mata files that accidentally use macro exp
+	@echo which happens at compile time and not runtime.
+	@echo Will display lines if errors.
+	@echo Some false-positives in parallel_eststore.mata
+	-X=$$(grep "\`[^\"]\+\'" *.mata); echo -n "$$X"; [ $$(echo $$X | wc -w) -eq 0 ] 
+	-X=$$(grep '\$$[\{a-zA-Z_]' *.mata); echo -n "$$X"; [ $$(echo $$X | wc -w) -eq 0 ] 
 	
 check_version:
 	@echo "Visually ensure numbers are the same"

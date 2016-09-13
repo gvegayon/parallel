@@ -117,29 +117,30 @@ program def parallel_append
 		
 		/* Writing the file */	
 		local f `tmpid'.do
-		qui file open fh using `f', w replace
+		tempname fh
+		qui file open `fh' using `f', w replace
 		
 		tokenize `group`i''
 		local j = 0
 		local k = 0
-		file write fh "cd `c(pwd)'" _newline
+		file write `fh' "cd `c(pwd)'" _newline
 		while (`"``++j''"' != "") {
-			file write fh `"if (\`pll_instance' == `++k') {"' _newline
-			file write fh `"    use ``j'' `if' `in'"' _newline 
-			file write fh `"    local filename = `"``j''"'"' _newline
-			file write fh `"    local tmpn = string(`++nsave',"%04.0f")"'_newline _newline "}" _newline
+			file write `fh' `"if (\`pll_instance' == `++k') {"' _newline
+			file write `fh' `"    use ``j'' `if' `in'"' _newline 
+			file write `fh' `"    local filename = `"``j''"'"' _newline
+			file write `fh' `"    local tmpn = string(`++nsave',"%04.0f")"'_newline _newline "}" _newline
 		}
 		
 		cap findfile `do'
 		if (_rc) {
-			file write fh `"`do'"' _newline
+			file write `fh' `"`do'"' _newline
 		}
 		
-		file write fh `"gen dta_source = "\`filename'""' _newline
-		file write fh "compress" _newline
-		file write fh "save `tmpid'/`tmpid'\`tmpn', replace" _newline
+		file write `fh' `"gen dta_source = "\`filename'""' _newline
+		file write `fh' "compress" _newline
+		file write `fh' "save `tmpid'/`tmpid'\`tmpn', replace" _newline
 		
-		file close fh
+		file close `fh'
 
 		qui parallel setclusters `--j', s(`olddir') f
 

@@ -91,13 +91,14 @@ program def parallel_bootstrap, rclass
 	if (_rc) local programs `programs' `cmd'
 
 	/* Creating a tmp program */	
-	cap file open fh using `"`simul'"', w replace
-	file write fh `"use `tmpdta', clear"' _n
-	file write fh "if (\`pll_instance'==\$PLL_CLUSTERS) local reps = `lsize'" _n
-	file write fh "else local reps = `csize'" _n
-	file write fh `"local pll_instance : di %04.0f \`pll_instance'"' _n
-	file write fh `"bs `expression', sav(__pll\`pll_id'_bs_eststore\`pll_instance', replace `double' `every') `options' rep(\`reps'): `model' `argopt'"' _n
-	file close fh 
+	tempname fh
+	cap file open `fh' using `"`simul'"', w replace
+	file write `fh' `"use `tmpdta', clear"' _n
+	file write `fh' "if (\`pll_instance'==\$PLL_CLUSTERS) local reps = `lsize'" _n
+	file write `fh' "else local reps = `csize'" _n
+	file write `fh' `"local pll_instance : di %04.0f \`pll_instance'"' _n
+	file write `fh' `"bs `expression', sav(__pll\`pll_id'_bs_eststore\`pll_instance', replace `double' `every') `options' rep(\`reps'): `model' `argopt'"' _n
+	file close `fh' 
 
 	/* Running parallel */
 	cap noi parallel do `simul', nodata programs(`programs') `mata' `noglobals' `seeds' ///
