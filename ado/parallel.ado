@@ -1,4 +1,4 @@
-*! version 1.16.9000 17may2016
+*! version 1.17.0 15sep2016
 *! PARALLEL: Stata module for parallel computing
 *! by George G. Vega [cre,aut], Brian Quistorff [ctb]
 *! 
@@ -70,10 +70,10 @@ end
 program def parallel_version, rclass
 	version 11.0
 	di as result "parallel" as text " Stata module for parallel computing"
-	di as result "vers" as text " 1.16.9000 17may2016"
+	di as result "vers" as text " 1.17.0 15sep2016"
 	di as result "auth" as text " George G. Vega [cre,aut], Brian Quistorff [ctb]"
 	
-	return local pll_vers = "1.16.9000"
+	return local pll_vers = "1.17.0"
 end
 
 /* Take a look to logfiles */
