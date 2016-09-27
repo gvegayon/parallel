@@ -127,13 +127,16 @@
 {cmdab:parallel clean} [, {opt e:vent}({it:pll_id}) {opt a:ll} {opt f:orce}]
 
 {col 5}{hline}{marker printlog}{...}
-{pstd}Checking out clusters' logfiles
+{pstd}Checking out clusters' logfiles by printing the output.
 
 {p 8 17 2}
 {cmdab:parallel printlog} [{it:#}] [, {opt e:vent}({it:pll_id})]
 
-{p 8 17 2}
-{cmdab:parallel printlog} [{it:#}] [, {opt e:vent}({it:pll_id})]
+{p 4 17 2}
+Checking out clusters' logfiles by showing the output in a view window.
+
+{p 8 8 2}
+{cmdab:parallel viewlog} [{it:#}] [, {opt e:vent}({it:pll_id})]
 
 {col 5}{hline}{marker version}{...}
 {pstd}Query {cmd:parallel} current version
