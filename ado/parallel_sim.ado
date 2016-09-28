@@ -116,13 +116,6 @@ program def parallel_simulate, rclass
 		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
 		exit _rc
 	}
-
-	if (r(pll_errs)) {
-		if ("`keep'" == "" & "`keeplast'"=="") qui parallel clean, e(${LAST_PLL_ID}) force nologs
-		mata: parallel_sandbox(2,"`parallelid'")
-		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
-		exit 9
-	}
 	
 	/* Appending datasets */
 	forval i=1/$PLL_CLUSTERS {

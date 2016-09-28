@@ -159,19 +159,8 @@ program def parallel_append
 			}
 			qui parallel setclusters `oldclusters', s(`olddir') f
 			di as error "An error -`=_rc'- has occured while running parallel"
+			cap rm `f'
 			exit `=_rc'
-			
-		}
-		else if (r(pll_errs)) {
-			/*
-			forval j=0/`i' {
-				mata: parallel_sandbox(2, "`parallelid`j''")
-				qui parallel clean, e(`parallelid`j'') nologs
-			}
-			qui parallel setclusters `oldclusters', s(`olddir') f
-			exit 9
-			*/
-			di "{result:Warning:}{text: Some datasets in group -`g'- couldn't be processed}"
 		}
 
 		rm `f'
