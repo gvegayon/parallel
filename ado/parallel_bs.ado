@@ -32,7 +32,7 @@ program def parallel_bootstrap, rclass
 		Timeout(integer 60)
 		PROCessors(integer 0)
 		argopt(string) 
-		SAVing(string) Reps(integer 100) Keep KEEPLast *];
+		SAVing(string) Reps(integer 50) Keep KEEPLast *];
 	#delimit cr
 
 	/* Checking whereas parallel has been config */	
