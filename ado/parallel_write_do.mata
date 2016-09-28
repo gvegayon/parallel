@@ -156,7 +156,7 @@ real scalar parallel_write_do(
 
 		/* Parallel macros to be used by the current user */
 		fput(output_fh, `"noi di "{hline 80}""')
-		fput(output_fh, `"noi di "Parallel computing with stata (by GVY)""')
+		fput(output_fh, `"noi di "Parallel computing with Stata""')
 		fput(output_fh, `"noi di "{hline 80}""')
 		fput(output_fh, sprintf(`"noi di \`"cmd/dofile   : "%s""'"', inputname))
 		fput(output_fh, sprintf(`"noi di "pll_id       : %s""',parallelid))
