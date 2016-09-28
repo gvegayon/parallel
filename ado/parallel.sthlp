@@ -352,13 +352,9 @@ with the used seeds in the {cmd:r(pll_seeds)} macro.
 
 {marker warnings}{...}
 {pstd}
-{err:WARNINGS} {it:(a)} For each cluster -{cmd:parallel}- starts a new Stata instance (thus
+{err:WARNINGS} For each cluster -{cmd:parallel}- starts a new Stata instance (thus
 running as many processes as clusters), this way, should the user set more clusters
 than cores the computer has, it is possible that the computer freezes.
-{it:(b)} Unless the user includes -{cmd:parallel break}- within the task (do-file or program),
-by this time -{cmd:parallel}- can not stop running the clusters by itself, what
-implies that, in the case of any of the clusters starts a endless loop, stopping the
-clusters should be done manually by the user by terminating them from the OS's tasks manager.
 {p_end}
 
 {marker details}{...}
@@ -753,6 +749,11 @@ file modify the Cygwin script above and pass a new value for {it:gateway_path}.{
 it needs a Cygwin-like Stata path. If the user does not specify the Stata path then
 -{cmd:parallel}- will take the generated windows path and convert it to "/cygdrive/<drive letter>/...".
 If this does not work you will need to specify the {it:statapath} explicitly.{p_end}
+
+{pstd}In this mode, unless the user includes -{cmd:parallel break}- within the task (do-file or program),
+by this time -{cmd:parallel}- can not stop running the clusters by itself, what
+implies that, in the case of any of the clusters starts a endless loop, stopping the
+clusters should be done manually by the user by terminating them from the OS's tasks manager.{p_end}
 
 {marker saved_results}{...}
 {title:8. Saved results}
