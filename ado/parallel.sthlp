@@ -889,7 +889,7 @@ George Vega Yon [cre,aut], California Institute of Technology. {browse "mailto:g
 {p_end}
 
 {pstd}
-Brian Quistorff [ctb], University of Maryland. {browse "mailto:bquistorff@gmail.com"} {browse "http://econweb.umd.edu/~quistorff/index.html"}
+Brian Quistorff [ctb], Microsoft Research. {browse "mailto:Brian.Quistorff@microsoft.com"} {browse "http://quistorff.com"}
 {p_end}
 
 
