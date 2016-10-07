@@ -36,7 +36,6 @@
 {p2col: 7.  {help parallel##clean:parallel clean}}Removing auxiliary files.{p_end}
 {p2col: 8.  {help parallel##printlog:parallel printlog}}Checking out clusters' log files.{p_end}
 {p2col: 9.  {help parallel##version:parallel version}}Query parallel current version.{p_end}
-{p2col: 10. {help parallel##break:parallel break}}Query if the mother process has requested to break.{p_end}
 
 
 {marker syntax}{...}
@@ -49,8 +48,7 @@
 {cmdab:parallel setclusters} # [, {opt f:orce} 
 {opt s:tatapath}({it:{help filename:stata_path}})
 {opt i:ncludefile}({it:{help filename:filename}})
-{opt proc:exec}({it:int})
-{opt g:ateway}({it:{help filename:gateway_path}})]
+{opt proc:exec}({it:int})]
 
 {col 5}{hline}{col 2}{marker do}{...}
 {pstd}Parallelizing a do-file
@@ -144,12 +142,6 @@ Checking out clusters' logfiles by showing the output in a view window.
 {p 8 17 2}
 {cmdab:parallel version}
 
-{col 5}{hline}{marker break}{...}
-{pstd}Query if the mother process has requested to break
-
-{p 8 17 2}
-{cmdab:parallel break}
-
 
 {synoptset 15 tabbed}{...}
 {synopthdr}
@@ -167,10 +159,7 @@ are executed. The target purpose for this is to allow one to copy over preferenc
 The default value 2 will launch them in a hidden desktop (they can still be seen in the task manager)
 so that the child applications don't briefly steal the window focus (which is annoying). 
 With value 1 the child processes will be launched in the user's desktop, will be launch auto-minimized, but will still briefly steal the focus. 
-Value 0 (deprecated) is the older method of launching processes via the command-line (in batch-mode this requires a Cygwin gateway) 
 and will steal focus and perhaps briefly show the windows of the child processes.{p_end}
-{synopt:{opt g:ateway}}File path. Deprecated. For Windows batch-mode and using command-line process launching, a file that a Cygwin process
-is listening to in order to execute the parallel instances. See example below.{p_end}
 
 {syntab:Byable parallelization}
 {synopt:{opt by}}Varlist. Tells the command through which observations the current dataset 
@@ -313,14 +302,6 @@ Also, if the files to be processed have a pattern base name, the user can provid
 -{cmd:parallel append}- with an expression representing the list of files to be
 processed; for information on how to use this feature, see the section
 {help parallel##append_how:Parallel Append}.
-{p_end}
-
-{pstd}
-If the user needs to allow the mother instance to {cmd:break}, users can insert
-the command -{cmd:parallel break}- (stata) and the functions 
--{cmd:parallel_break()}- or -{cmd:_parallel_break()}- (mata) in some parts of his
-code. These commands/functions check whether the user has pressed the 
-{cmd:-break-} key in the mother process.
 {p_end}
 
 {pstd}
@@ -562,6 +543,40 @@ see -{stata viewsource parallel_bs.ado:parallel.bs}- and
 -{stata viewsource parallel_sim.ado:parallel_sim.ado}-.
 {p_end}
 
+{title:Windows-shell: Spawning child processes with shell command on Windows (Deprecated)}
+
+{pstd}
+Originally child processes on Windows were spawned as they were on other platforms using Stata's shell methods (e.g. {cmd:winexec}). 
+This had a number of problems (spawned processes stole the UI focus, failure to recover from killed child processes, difficulty in batch-mode), so now Windows uses a plugin that launches the child processes directly using Win32 system calls. 
+The original functionality is retained, but deprecated. To enable it you must specified the {it:procexec(0)} option. {p_end}
+
+{pstd}Since shell commmands are ignored by Stata in batch-mode on Windows, a work around is needed. The method is to have Stata write out the commands to be executed to a file
+(called the gateway) and have a separate process read new inputs to this file and 
+execute the commands. This latter part requires the user to install Cygwin and run 
+a few commands prior to starting Stata. In a Cygwin terminal, navigate to the appropriate
+directory and do the following:
+{p_end}
+
+{tab}{cmd:$ rm pll_gateway.sh}
+{tab}{cmd:$ touch pll_gateway.sh}
+{tab}{cmd:$ tail -f pll_gateway.sh | bash}
+
+{pstd}Then you can execute your Stata script in batch-mode on Windows. The Cygwin tail
+process can stay running through multiple uses.{p_end}
+
+{pstd}The default gateway file assumed is pll_gateway.sh. If you would like a different
+file modify the Cygwin script above and pass a new value for {opt g:ateway}({it:{help filename:gateway_path}}) to {cmd:parallel setclusters}.{p_end}
+
+{pstd}Since Cygwin is going to execute the commands to start the parallel Stata instances
+it needs a Cygwin-like Stata path. If the user does not specify the Stata path then
+-{cmd:parallel}- will take the generated windows path and convert it to "/cygdrive/<drive letter>/...".
+If this does not work you will need to specify the {it:statapath} explicitly.{p_end}
+
+{pstd}In this mode, there is no automatic way for the parent process to stop the child processes in case the user has requested a break in execution. 
+The original (but now deprecated) {cmd:parallel break} can still be used (and mata equivalents {cmd:parallel_break()} and {cmd:_parallel_break()}). 
+This is a call that is you write into the code that executes in the children that queries if the mother process has requested to break. 
+If this is not used appropriately, and a child cluster is executing for a long period (e.g. an endless loop) the user must kill the child processes manually.{p_end}
+
 
 {marker examples}{...}
 {title:Example 1: using prefix syntax}
@@ -610,8 +625,6 @@ syntax
 {tab}{hline 35} begin of do-file {hline 12}
 {tab}{tab}{cmd:local maxiter = _N}
 {tab}{tab}{cmd:forval i = 1/`maxiter'} {cmd:{c -(}}
-{tab}{tab}{tab}{cmd:/* Break key check (this line is optional) */}
-{tab}{tab}{tab}{cmd:parallel break}
 {tab}{tab}{tab}{it:...some routine...}
 {tab}{tab}{cmd:{c )-}}
 {tab}{hline 35} end of the do-file {hline 10}
@@ -622,8 +635,6 @@ syntax
 {tab}{tab}{cmd:mata:}
 {tab}{tab}{cmd:N=c("N")}
 {tab}{tab}{cmd:for(i = 1;i<=N;i++) {c -(}}
-{tab}{tab}{tab}{cmd:/* Break key check (this line is optional) */}
-{tab}{tab}{tab}{cmd:parallel_break()}
 {tab}{tab}{tab}{it:...some routine...}
 {tab}{tab}{cmd:{c )-}}
 {tab}{hline 35} end of the do-file {hline 10}
@@ -722,40 +733,6 @@ first cluster, -{cmd:parallel}- will generate -z- equal to exp(2), for those in
 the second cluster it will compute -z- equal to the average price and for the
 rest of the clusters it will generate -z- equal to zero.
 {p_end}
-
-{title:Example 7: Using -parallel- on Windows in batch-mode using command-line launching (Deprecated)}
-
-{pstd}
-The below is deprecated as Windows launching is now normally done using Windows system calls
-rather than from the command line. If you specified the {it:procexec(0)} option then you will revert
-to using command-line style launching. In this case, normally the parallel instances of Stata are executed using -{cmd:winexec}-. This
-command is ignored, however, on Windows when in batch-mode. A work-around for
-this environment is to have Stata write out the commands to be executed to a file
-(called the gateway) and have a separate process read new inputs to this file and 
-execute the commands. This latter part requires the user to install Cygwin and run 
-a few commands prior to starting Stata. In a Cygwin terminal, navigate to the appropriate
-directory and do the following:
-{p_end}
-
-{tab}{cmd:$ rm pll_gateway.sh}
-{tab}{cmd:$ touch pll_gateway.sh}
-{tab}{cmd:$ tail -f pll_gateway.sh | bash}
-
-{pstd}Then you can execute your Stata script in batch-mode on Windows. The Cygwin tail
-process can stay running through multiple uses.{p_end}
-
-{pstd}The default gateway file assumed is pll_gateway.sh. If you would like a different
-file modify the Cygwin script above and pass a new value for {it:gateway_path}.{p_end}
-
-{pstd}Since Cygwin is going to execute the commands to start the parallel Stata instances
-it needs a Cygwin-like Stata path. If the user does not specify the Stata path then
--{cmd:parallel}- will take the generated windows path and convert it to "/cygdrive/<drive letter>/...".
-If this does not work you will need to specify the {it:statapath} explicitly.{p_end}
-
-{pstd}In this mode, unless the user includes -{cmd:parallel break}- within the task (do-file or program),
-by this time -{cmd:parallel}- can not stop running the clusters by itself, what
-implies that, in the case of any of the clusters starts a endless loop, stopping the
-clusters should be done manually by the user by terminating them from the OS's tasks manager.{p_end}
 
 {marker saved_results}{...}
 {title:8. Saved results}
