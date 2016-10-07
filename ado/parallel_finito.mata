@@ -162,7 +162,7 @@ real scalar parallel_finito(
 				//check if the child process was killed (or stopped w/o making finish file)
 				if(rows(pids)>0){
 					stata("cap procwait " + strofreal(pids[i,1]))
-					if(!c("rc")){ //not running
+					if(!c("rc") & !fileexists(fname)){ //not running. Recheck file because of scheduling
 						//simulate a error-ed shutdown. 700 is an unlabelled Operating System error
 						parallel_write_diagnosis("700",sprintf("__pll%s_finito%04.0f", parallelid, i),"while running the command/dofile")
 						// It'll be picked up next time around.
