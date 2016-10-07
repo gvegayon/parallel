@@ -31,7 +31,7 @@ real scalar parallel_run(
 	
 	// Message
 	display(sprintf("{hline %g}",c("linesize") > 80?80:c("linesize")))
-	display("{result:Parallel Computing with Stata} (by GVY)")
+	display("{result:Parallel Computing with Stata}")
 	display("{text:Clusters   :} {result:"+strofreal(nclusters)+"}")
 	display("{text:pll_id     :} {result:"+parallelid+"}")
 	display("{text:Running at :} {result:"+c("pwd")+"}")
