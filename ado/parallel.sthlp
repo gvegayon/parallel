@@ -326,7 +326,7 @@ code. These commands/functions check whether the user has pressed the
 {pstd}
 Given {it:N} clusters, within each cluster -{cmd:parallel}- creates the macros 
 {it:pll_id} (equal for all the clusters) and {it:pll_instance} (ranging
-1 up to {it:N}, equalling 1 inside the first cluster and {it:N} inside the last cluster), 
+1 up to {it:N}, equaling 1 inside the first cluster and {it:N} inside the last cluster), 
 both as globals and locals macros. This allows the user setting different
 tasks/actions depending on the cluster. Also the global macro {it:PLL_CLUSTERS}
 (equal to {it:N}) is available within each cluster. For an example using this
@@ -437,7 +437,7 @@ which may look something like this: {p_end}
 execute the following program:{p_end}
 
 {tab}{cmd: program def myprogram}
-{tab}{cmd:{tab} gen female = gender == "female"}
+{tab}{cmd:{tab} gen female = (gender == "female")}
 {tab}{cmd:{tab} collapse (mean) income, by(female) fast}
 {tab}{cmd: end}
 
@@ -450,8 +450,8 @@ this with the following command.{p_end}
 
 {pstd}Where element by element, we are telling parallel:{p_end}
 {tab}(1) {cmd:do(myprogram)}: execute the command -{cmd:myprogram}-,
-{tab}(1) {cmd:prog(myprogram)}: -{cmd:myprogram}- is a user written program, and
-{tab}(1) {cmd:e("%g_%02.0f/income.dta, 2008/2012, 1/12")}: this should process files 2008_01/income.dta up to 2012_12/income.dta.
+{tab}(2) {cmd:prog(myprogram)}: -{cmd:myprogram}- is a user written program, and
+{tab}(3) {cmd:e("%g_%02.0f/income.dta, 2008/2012, 1/12")}: this should process files 2008_01/income.dta up to 2012_12/income.dta.
 
 {pstd}Besides of the simplicity of its syntax, the advantage of using -{cmd:parallel append}-
 lies in doing so in a parallel fashion, this is, instead of processing one file
@@ -799,8 +799,6 @@ clusters should be done manually by the user by terminating them from the OS's t
 {synopt:{cmd:$LAST_PLL_DIR}}A copy of {cmd:r(pll_dir)}.{p_end}
 {synopt:{cmd:$LAST_PLL_N}}A copy of {cmd:r(pll_n)}.{p_end}
 {synopt:{cmd:$LAST_PLL_ID}}A copy of {cmd:r(pll_id)}.{p_end}
-{synopt:{cmd:$PLL_LASTRNG}}Number of times that -{cmd:parallel_randomid()}- has
-been executed.{p_end}
 {synopt:{cmd:$PLL_LASTRNG}}Number of times that -{cmd:parallel_randomid()}- has
 been executed.{p_end}
 {synopt:{cmd:$PLL_STATA_PATH, $PLL_CLUSTERS, $USE_PROCEXEC}}Internal usage.{p_end}
