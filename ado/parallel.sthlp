@@ -188,7 +188,9 @@ is properly sorted. By using {opt force} the command skips this check.{p_end}
 {synopt:{opt sim_options}} Further options to be passed to the {help simulate} command, including the required reps() parameter.
 
 {syntab:Multiple file processing and appending}
-{synopt:{opt d:o}}Stata cmd or dofile.{p_end}
+{synopt:{opt d:o}}Stata cmd or dofile. 
+Note that {cmd: parallel do} does not support passing options to the do-file. 
+If you need arguments then use the prefix style. {p_end}
 {synopt:{opt files}}Explicit list of files to process.{p_end}
 {synopt:{opt e:xpression}}String. Expression representing file names in the form of
 "{it:{help fmt:%fmts}}, {it:{help numlist: numlist1 [, numlist2 [, ...]]}}"
