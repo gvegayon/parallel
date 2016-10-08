@@ -164,6 +164,14 @@ each cluster should use. Default value is 0 (do nothing).{p_end}
 {synopt:{opt t:imeout}}Integer. If a cluster hasn't started, how much time in seconds
 does {cmd:parallel} has to wait until assume that there was a connection error and thus
 the child process (cluster) won't start. Default value is 60.{p_end}
+{synopt:{opt outputopts}} A list of option names that are aggregating output options.
+{cmd:parallel} automtically aggregates main data from child processes. 
+Often, though, a program will aggregate more than one type of data.
+{opt outputopts} allows generic file-based aggregation (appending). 
+A sequential call such as {cmd:my_prog, output1(outputfile.dta)} can be converted to
+{cmd:parallel, outputopts(output1): my_prog, output1(outputfile.dta)}.
+{cmd:parallel} will execute each child process with its own file passed to {opt output1}
+and at the end, append them all and save it to {it:outputfile.dta}.{p_end}
 
 
 {syntab:Byable parallelization}
