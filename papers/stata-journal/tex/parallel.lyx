@@ -149,8 +149,20 @@ Vega Yon, Quistorff
 
 George G.
  Vega Yon
+\begin_inset Newline newline
+\end_inset
+
+University of Southern California
+\begin_inset Newline newline
+\end_inset
+
+Pasadena, CA
+\begin_inset Newline newline
+\end_inset
+
+gvegayon@caltech.edu 
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Plain Layout
 
@@ -161,38 +173,291 @@ and
 
 \end_inset
 
- Brian Quistorf
+ Brian Quistorff
+\begin_inset Newline newline
+\end_inset
+
+Microsoft Research
+\begin_inset Newline newline
+\end_inset
+
+Redmond, WA
+\begin_inset Newline newline
+\end_inset
+
+Brian.Quistorff@microsoft.com
 \end_layout
 
 \begin_layout Abstract
-Here goes the abstract
+The 
+\family typewriter
+parallel
+\family default
+ package allows parallel processing of tasks that can logically be separated
+ into parallel tasks that have no dependencies between them.
+ This allows all flavors of Stata to take advantage of multiprocessor machines.
+ Even Stata/MP users can benefit as many user-written programs are not automatic
+ally parallelized but could be so under our framework.
+ 
+\end_layout
+
+\begin_layout Abstract
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+keywords{
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+inserttag
+\end_layout
+
+\end_inset
+
+, parallel computing, simulations, high performance computing
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+To do: 
+\end_layout
+
+\begin_layout Itemize
+What example to put for monte carlo.
+\end_layout
+
+\begin_layout Itemize
+Do conclusion
+\end_layout
+
+\begin_layout Itemize
+Benchmark? This might be a lot of work
+\end_layout
+
+\begin_layout Itemize
+Should we tell people to always install from GitHub?
+\end_layout
+
+\begin_layout Itemize
+Talk about sandboxing/example at end of technical note (I don't understand
+ it well)
+\end_layout
+
+\begin_layout Plain Layout
+(at end)
+\end_layout
+
+\begin_layout Itemize
+Make sure 
+\family typewriter
+parallel
+\family default
+ is formatted well.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Notes: 
+\end_layout
+
+\begin_layout Itemize
+Hyperlink doesn't seem to work in this document.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
 Parallel computing
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:desc"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-What it is (cras course), why is it useful, comment on user friendly implementat
-ion and scope (Stata/MP, R snow and friends, Matlab's parallel toolbox).
+Most computers these days have multiple 
+\begin_inset Quotes eld
+\end_inset
+
+processors
+\begin_inset Quotes erd
+\end_inset
+
+ such as with multiple cores per CPU or multiple threads per core (e.g.
+ Intel's Hyper-Threading Technology).
+ Stata currently uses only one processor except for Stata/MP with certain
+ built-in commands
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+For a list of commands explicitly parallelized see the Stata/MP Performance
+ Report (
+\begin_inset CommandInset citation
+LatexCommand cite
+key "stata2010"
+
+\end_inset
+
+).
 \end_layout
 
-\begin_layout Section
-A stata module for parallel computing
+\end_inset
+
+.
+ Many other tasks, however, are logically easy to parallelize.
+ These tasks, called 
+\begin_inset Quotes eld
+\end_inset
+
+embarassingly parallel
+\begin_inset Quotes erd
+\end_inset
+
+, are ones where there are no dependencies (or need for communication) between
+ the parallel tasks.
+ We provide here the package 
+\family typewriter
+parallel
+\family default
+, to parallelize these tasks.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+More 
+\begin_inset Quotes eld
+\end_inset
+
+fine-grained
+\begin_inset Quotes erd
+\end_inset
+
+ parallelism, where tasks need to communicate frequently, could be handled
+ but there is no direct support.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-General description and compare against Stata/MP, more detailed description
- with how it works (explain diagram), when is it a good idea (make a reference
- to the examples).
+The primary process used is to invoke 
+\family typewriter
+parallel
+\family default
+ with a command (or do-file) across 
+\begin_inset Formula $N$
+\end_inset
+
+ parallel 
+\begin_inset Quotes eld
+\end_inset
+
+clusters
+\begin_inset Quotes erd
+\end_inset
+
+ is as follows,
 \end_layout
 
-\begin_layout Subsection
-Syntax and options
+\begin_layout Enumerate
+
+\family typewriter
+parallel
+\family default
+ splits the dataset into 
+\begin_inset Formula $N$
+\end_inset
+
+ pieces.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+parallel
+\family default
+ starts 
+\begin_inset Formula $N$
+\end_inset
+
+ copies of Stata.
+ Those are referred to as child processes while the original is the parent.
+ In each, one of the pieces of the split dataset is loaded, the command
+ is executed, and the resultant data is saved.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+parallel
+\family default
+ waits for the child processes to finish and then aggregates the resultant
+ datasets.
+ 
 \end_layout
 
 \begin_layout Standard
-What the title says Figure 
+This is diagrammed in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:howworks"
+
+\end_inset
+
+.
+ Notice that this is a setting with 
+\begin_inset Quotes eld
+\end_inset
+
+distributed
+\begin_inset Quotes erd
+\end_inset
+
+ rather than shared memory between the child processes.
 \end_layout
 
 \begin_layout Standard
@@ -222,7 +487,7 @@ status open
 
 
 \backslash
-scalebox{1}{
+scalebox{.9}{
 \backslash
 input{tables_and_figures/diagram.tex}}
 \end_layout
@@ -233,7 +498,11 @@ input{tables_and_figures/diagram.tex}}
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-How parallel works
+How 
+\family typewriter
+parallel
+\family default
+ works
 \begin_inset CommandInset label
 LatexCommand label
 name "fig:howworks"
@@ -248,9 +517,64 @@ name "fig:howworks"
 
 \end_layout
 
-\begin_layout Plain Layout
+\end_inset
+
 
 \end_layout
+
+\begin_layout Standard
+Stata/MP is a version where internal routines are able to take advantage
+ of multiple processors on a machine.
+ 
+\family typewriter
+parallel
+\family default
+ allows this for generic commands which both expands the set of possible
+ parallelizations and allows this for single-threaded flavors of the program.
+\end_layout
+
+\begin_layout Standard
+This module is similar to R's 
+\family typewriter
+parallel
+\family default
+ package (superseding the 
+\family typewriter
+snow
+\family default
+ package) and Matlab's parallel toolbox.
+\end_layout
+
+\begin_layout Standard
+The document follows, after this introduction, section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Syntax"
+
+\end_inset
+
+ discusses the details of execution, section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:examples"
+
+\end_inset
+
+ provides some usage examples, and section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:discussion"
+
+\end_inset
+
+ discusses and concludes.
+\end_layout
+
+\begin_layout Section
+A Stata module for parallel computing
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Syntax"
 
 \end_inset
 
@@ -258,32 +582,1546 @@ name "fig:howworks"
 \end_layout
 
 \begin_layout Standard
-The document follows, after this introduction section 
+In this section we discuss the syntax of the 
+\family typewriter
+parallel
+\family default
+ subcommands, technical details of execution, and results returned from
+ the commands.
+\end_layout
+
+\begin_layout Subsection
+Syntax and options
+\end_layout
+
+\begin_layout Standard
+A typical program will use separate 
+\family typewriter
+parallel
+\family default
+ subcommands for initialization, parallel task execution, and finally for
+ cleanup.
+ There are diagnostic tool commands also available.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Initialization
+\end_layout
+
+\begin_layout Standard
+To initialize the parallel setup use the 
+\family typewriter
+setclusters
+\family default
+ subcommand 
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+parallel setclusters 
+\emph on
+#
+\emph default
+ [, force statapath(
+\emph on
+path
+\emph default
+) includefile(
+\emph on
+filename
+\emph default
+)]
+\end_layout
+
+\begin_layout Standard
+The main usage of this command is to set the number of child processes to
+ launch when parallelizing later tasks.
+ Options:
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+force
+\family default
+ - To prevent slowdowns on systems with few available computing resources,
+ there is a soft limit on eight clusters.
+ Use this option to override the limit.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+statapath(
+\emph on
+stata_path
+\emph default
+)
+\family default
+- By default, 
+\family typewriter
+parallel
+\family default
+ tries to automatically identify Stata's executable path.
+ By using this option you will override this and force 
+\family typewriter
+parallel
+\family default
+ to use a specific path to the executable.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+includefile(
+\emph on
+filename
+\emph default
+)
+\family default
+ - This file will be included before 
+\family typewriter
+parallel
+\family default
+ commands are executed.
+ The target purpose for this is to allow one to copy over preferences that
+ 
+\family typewriter
+parallel
+\family default
+ does not copy automatically (see section 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "sec:desc"
+reference "subsec:Technical-Details"
 
 \end_inset
 
-, section provides some usage examples 
+).
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Parallel task execution
+\end_layout
+
+\begin_layout Standard
+The follow are subcommands that execute tasks in parallel.
+ 
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+parallel [, by(
+\emph on
+varlist
+\emph default
+) force nodata setparallelid(
+\emph on
+pll_id
+\emph default
+)
+\emph on
+ execution_options
+\emph default
+]: 
+\emph on
+command
+\family default
+\emph default
+ 
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+parallel do 
+\emph on
+dofile
+\emph default
+ [, by(
+\emph on
+varlist
+\emph default
+) force nodata setparallelid(
+\emph on
+pll_id
+\emph default
+) 
+\emph on
+execution_options
+\emph default
+] 
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+parallel bs [, expression(
+\emph on
+exp_list
+\emph default
+)
+\emph on
+ execution_options
+\emph default
+ 
+\emph on
+bs_options
+\emph default
+ ] [: 
+\emph on
+command
+\emph default
+] 
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+parallel sim [, expression(
+\emph on
+exp_list
+\emph default
+)
+\emph on
+ execution_options
+\emph default
+ 
+\emph on
+sim_options
+\emph default
+ ] [: 
+\emph on
+command
+\emph default
+]
+\family default
+ 
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+parallel append [
+\emph on
+file(s)
+\emph default
+] , do(
+\emph on
+command|dofile
+\emph default
+) [in(
+\emph on
+in
+\emph default
+) if(
+\emph on
+if
+\emph default
+) expression(
+\emph on
+expand expression
+\emph default
+)
+\emph on
+ execution_options
+\emph default
+]
+\family default
+ 
+\end_layout
+
+\begin_layout Standard
+The : (prefix) notation for 
+\family typewriter
+parallel
+\family default
+ and the 
+\family typewriter
+do
+\family default
+ subcommand are the main subcommands while the others are helper utilities.
+ Their usage is shown in sections 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "sec:examples"
 
 \end_inset
 
-, and section 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "sec:discussion"
+.
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\emph on
+execution_options
+\family default
+\emph default
+: 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+keep
+\family default
+ - Keeps auxiliary files generated by 
+\family typewriter
+parallel
+\family default
+.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+keeplast
+\family default
+ - Keeps auxiliary files and remove those last saved during the current
+ session.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+noglobal
+\family default
+ - Avoid passing current session's global macros to the clusters.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+programs(
+\emph on
+namelist
+\emph default
+)
+\family default
+ - A list of programs to be passed to each cluster.
+ To do this, 
+\family typewriter
+parallel
+\family default
+ needs to echo the contents of those programs to the output window.
+ If 
+\family typewriter
+parallel
+\family default
+ is being run from inside an ado (say 
+\family typewriter
+my_cmd.ado
+\family default
+) and you need to access local subroutines (other programs defined in the
+ ado beside the primary 
+\family typewriter
+my_cmd
+\family default
+), then you must pass their names in this option as 
+\family typewriter
+my_cmd.local_subroutine_name
+\family default
+ for them to be accessible.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+mata
+\family default
+ - If the algorithm needs to use mata objects, this option allows to pass
+ to each cluster every mata object loaded in the current session (including
+ functions).
+ Note that when mata objects are loaded into the child processes they will
+ have different locations and therefore pointers may no longer be accurate.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+randtype(current|datetime|random.org)
+\family default
+ - Tells 
+\family typewriter
+parallel
+\family default
+ whether to use the current seed (default), the current datetime or random.org
+ API to generate the seeds for each clusters.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+seeds(
+\emph on
+numlist
+\emph default
+)
+\family default
+ - With this option the user can pass an specific seed to be used within
+ each cluster.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+processors(
+\emph on
+integer
+\emph default
+)
+\family default
+ - If running on StataMP, sets the number of processors each cluster should
+ use.
+ Default value is 0 (do nothing).
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+timeout(
+\emph on
+integer
+\emph default
+)
+\family default
+ - If a cluster hasn't started, how much time in seconds does 
+\family typewriter
+parallel
+\family default
+ has to wait until assume that there was a connection error and thus the
+ child process (cluster) won't start.
+ Default value is 60.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+outputopts(
+\emph on
+namelist
+\emph default
+)
+\family default
+ - allows generic file-based aggregation (appending).
+ A sequential call such as
+\begin_inset Newline newline
+\end_inset
+
+
+\family typewriter
+
+\begin_inset space \qquad{}
+\end_inset
+
+my_prog, output1(outputfile.dta)
+\family default
+ 
+\begin_inset Newline newline
+\end_inset
+
+can be converted to 
+\family typewriter
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+parallel, outputopts(output1): my_prog, output1(outputfile.dta)
+\family default
+
+\begin_inset Newline newline
+\end_inset
+
+
+\family typewriter
+parallel
+\family default
+ will execute each child process with its own file passed to 
+\family typewriter
+output1
+\family default
+ and at the end, append them all and save it to 
+\family typewriter
+outputfile.dta
+\family default
+.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+\emph on
+dofile
+\family default
+\emph default
+/
+\family typewriter
+command
+\family default
+ - Task to run in parallel.
+ Note that while the prefix notation can handle parameters passed to the
+ command, 
+\family typewriter
+parallel do
+\family default
+ can not handle parameters passed to the do file.
+\end_layout
+
+\begin_layout Standard
+Main 
+\family typewriter
+parallel
+\family default
+ subcommand options:
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+by(
+\emph on
+varlist
+\emph default
+)
+\family default
+ - Tells the command through which observations the current dataset can
+ be divided, avoiding stories (panel) splitting over two or more clusters.
+ 
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+The semantics for 
+\family typewriter
+by
+\family default
+ are not the same as for Stata.
+ When Stata implements 
+\family typewriter
+by
+\family default
+, the command that is run will only see a section of the data where the
+ 
+\family typewriter
+by
+\family default
+-variables are the same.
+ 
+\family typewriter
+parallel
+\family default
+'s semantics are that no observations with the same 
+\family typewriter
+by
+\family default
+-values will be in different clusters.
+ It pools together combinations when there are fewer clusters than 
+\family typewriter
+by
+\family default
+-var combinations.
+ If you need Stata-style semantics, the solution is to add 
+\family typewriter
+by
+\family default
+ in the subcommand.
+ For example, 
+\family typewriter
+parallel, by(byvar): by byvar: egen x_max = max(x)
+\family default
+.
+ 
+\end_layout
 
 \end_inset
 
- concludes.
+
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+force
+\family default
+ - When using 
+\family typewriter
+by()
+\family default
+, 
+\family typewriter
+parallel
+\family default
+ checks whether if the dataset is properly sorted.
+ By using 
+\family typewriter
+force
+\family default
+ the command skips this check.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+nodata
+\family default
+ - Tells 
+\family typewriter
+parallel
+\family default
+ not to use loaded data and thus not to try splitting or appending anything.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+setparallelid(
+\emph on
+pll_id
+\emph default
+)
+\family default
+ - Forces 
+\family typewriter
+parallel
+\family default
+ to use an specific id.
+\end_layout
+
+\begin_layout Standard
+Bootstrap options
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+expression(
+\emph on
+exp_list
+\emph default
+)
+\family default
+ - An expression list to be passed to the native 
+\family typewriter
+bootstrap
+\family default
+ command.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+\emph on
+bs_options
+\family default
+\emph default
+ - Further options to be passed to the native 
+\family typewriter
+bootstrap
+\family default
+ command, including the optional 
+\family typewriter
+reps()
+\family default
+ parameter.
+\end_layout
+
+\begin_layout Standard
+Simulation options:
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+expression(
+\emph on
+exp_list
+\emph default
+)
+\family default
+ - An exp_list to be passed to the native 
+\family typewriter
+simulate
+\family default
+ command.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+\emph on
+sim_options
+\family default
+\emph default
+ - Further options to be passed to the native 
+\family typewriter
+simulate
+\family default
+ command, including the required 
+\family typewriter
+reps()
+\family default
+ parameter.
+\end_layout
+
+\begin_layout Standard
+Append options:
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+\emph on
+file(s)
+\family default
+\emph default
+ - Explicit list of files to process.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+expression(
+\emph on
+expand expression
+\emph default
+)
+\family default
+ - Expression representing file names in the form of "
+\family typewriter
+%fmts, numlist1 [, numlist2 [, ...]]
+\family default
+" 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+in(
+\emph on
+in
+\emph default
+)/if(
+\emph on
+if
+\emph default
+)
+\family default
+ - Opens the file using 
+\family typewriter
+if
+\family default
+ and 
+\family typewriter
+in
+\family default
+ accordingly.
+\end_layout
+
+\begin_layout Subsubsection
+Cleanup
+\end_layout
+
+\begin_layout Standard
+Log files from 
+\family typewriter
+parallel
+\family default
+ execution are saved so that they can be inspected by the user.
+ Use the 
+\family typewriter
+clean
+\family default
+ subcommand to remove these and any other ancillary files that have been
+ saved:
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+parallel clean [, event(
+\emph on
+pll_id
+\emph default
+) all force]
+\end_layout
+
+\begin_layout Standard
+Options:
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+event(
+\emph on
+pll_id
+\emph default
+)
+\family default
+ - Specifies which executed (and stored) event's files should be removed.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+all
+\family default
+ - Tells 
+\family typewriter
+parallel
+\family default
+ to remove every remnant auxiliary files generated by it in the current
+ directory.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+force
+\family default
+ - Forces the command to remove (apparently) in-use auxiliary files.
+ Otherwise these will not get deleted.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Diagnostic tools
+\end_layout
+
+\begin_layout Standard
+Additionally there are some diagnostic tools,
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+parallel version
+\end_layout
+
+\begin_layout Standard
+This command returns the version both to the screen and programmatically.
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+parallel printlog [
+\emph on
+#
+\emph default
+] [, event(
+\emph on
+pll_id
+\emph default
+)]
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+parallel viewlog [
+\emph on
+#
+\emph default
+] [, event(
+\emph on
+pll_id
+\emph default
+)]
+\end_layout
+
+\begin_layout Standard
+These commands allow you to view logs of the child processes.
+ The initial part of the log file will be from commands generated by 
+\family typewriter
+parallel
+\family default
+ for setting up the child process (loading data, global macros, settings,
+ etc.).
+ The final part of the log file is where the users task is.
+ Options:
+\end_layout
+
+\begin_layout Itemize
+# - specifies which cluster number of an event to display (default is 1).
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+event(
+\emph on
+pll_id
+\emph default
+)
+\family default
+- Specifies which event's log files should be displayed
+\end_layout
+
+\begin_layout Subsection
+Saved Results
+\end_layout
+
+\begin_layout Standard
+The primary result of
+\family typewriter
+ parallel
+\family default
+ is to return a transformed dataset.
+ In addition 
+\family typewriter
+parallel
+\family default
+ returns the following values:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="12" columns="2">
+<features islongtable="true" longtabularalignment="left">
+<column alignment="left" valignment="top" width="0pt">
+<column alignment="left" valignment="top" width="3in">
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Scalars
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\begin_inset space \quad{}
+\end_inset
+
+r(pll_n)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Number of parallel clusters last used.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\begin_inset space \quad{}
+\end_inset
+
+r(pll_t_fini)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Time took to appending and cleaning.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\begin_inset space \quad{}
+\end_inset
+
+r(pll_t_calc)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Time took to complete the parallel job.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\begin_inset space \quad{}
+\end_inset
+
+r(pll_t_setu)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Time took to setup (before the parallelization) and to finish the job (after
+ the parallelization) .
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\begin_inset space \quad{}
+\end_inset
+
+r(pll_errs)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Number of clusters which stopped with an error.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Global Macros
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\begin_inset space \quad{}
+\end_inset
+
+LAST_PLL_DIR
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+A copy of 
+\family typewriter
+r(pll_dir)
+\family default
+.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\begin_inset space \quad{}
+\end_inset
+
+LAST_PLL_N
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+A copy of 
+\family typewriter
+r(pll_n)
+\family default
+.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\begin_inset space \quad{}
+\end_inset
+
+LAST_PLL_ID
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+A copy of 
+\family typewriter
+r(pll_id)
+\family default
+.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\begin_inset space \quad{}
+\end_inset
+
+PLL_LASTRNG
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Number of times that 
+\family typewriter
+parallel_randomid()
+\family default
+ has been executed.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\begin_inset space \quad{}
+\end_inset
+
+PLL_LASTRNG
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Internal usage.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+parallel version
+\family default
+ saves
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="2" columns="2">
+<features islongtable="true" longtabularalignment="left">
+<column alignment="left" valignment="top" width="0pt">
+<column alignment="left" valignment="top" width="3in">
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Macros
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\begin_inset space \quad{}
+\end_inset
+
+r(pll_vers)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Current version of the module.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+parallel bs
+\family default
+ and 
+\family typewriter
+parallel sim
+\family default
+ save
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="2" columns="2">
+<features islongtable="true" longtabularalignment="left">
+<column alignment="left" valignment="top" width="0pt">
+<column alignment="left" valignment="top" width="3in">
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Scalars
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+\begin_inset space \quad{}
+\end_inset
+
+e(pll)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Technical Details
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Technical-Details"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+parallel
+\family default
+ does not change the RNG state (even if subcommands invoke randomization
+ functions).
+ 
+\end_layout
+
+\begin_layout Standard
+Log files from the runs are stored in 
+\family typewriter
+c(tmpdir)
+\family default
+ so that they can be inspected by the user.
+ The user will likely want to delete these periodically with 
+\family typewriter
+parallel clean, all
+\family default
+.
+\end_layout
+
+\begin_layout Standard
+Given 
+\begin_inset Formula $N$
+\end_inset
+
+ clusters, within each cluster 
+\family typewriter
+parallel
+\family default
+ creates the macros 
+\family typewriter
+pll_id
+\family default
+ (equal for all the clusters) and 
+\family typewriter
+pll_instance
+\family default
+ (ranging 
+\begin_inset Formula $1$
+\end_inset
+
+ up to 
+\begin_inset Formula $N$
+\end_inset
+
+, equaling 
+\begin_inset Formula $1$
+\end_inset
+
+ inside the first cluster and 
+\begin_inset Formula $N$
+\end_inset
+
+ inside the last cluster), both as global and local macros.
+ This allows the user setting different tasks/actions depending on the cluster.
+ Also the global macro 
+\family typewriter
+PLL_CLUSTERS
+\family default
+ (equal to 
+\begin_inset Formula $N$
+\end_inset
+
+) is available within each cluster.
+ Note the locals will obviously be not available inside of programs that
+ you call from 
+\family typewriter
+parallel
+\family default
+ (in prefix or do-file setup).
+\end_layout
+
+\begin_layout Standard
+When launching child Stata processes, several settings are automatically
+ copied over.
+ These include the 
+\family typewriter
+PLUS
+\family default
+ and 
+\family typewriter
+PERSONAL
+\family default
+ sysdirs, the global 
+\family typewriter
+S_ADO
+\family default
+, the mlib search index, the 
+\family typewriter
+tempname
+\family default
+/
+\family typewriter
+tempvar
+\family default
+ state.
+ If you would like child processes to start with additional setting changes
+ then you should use the 
+\family typewriter
+includefile()
+\family default
+ option.
+\end_layout
+
+\begin_layout Standard
+Child processes are managed.
+ If the task is stopped from the parent process then all child processes
+ will be killed directly.
+ The parent process can recover from both errors in the child Stata program
+ and if child Stata processes are killed by the operating system.
+ Child processes are launched using the shell on MacOS and Unix/Linux machines.
+ On Windows machines a compiled plugin launches the child processes using
+ the Win32 API.
+ Windows uses a different system as batch-mode windows will not execute
+ shell commands and there is no console-only version of Stata so every launched
+ process will annoyingly flash on the screen and steel your current application'
+s focus.
+ 
+\end_layout
+
+\begin_layout Standard
+When the stata_cmd or do-file saves results, as 
+\family typewriter
+parallel
+\family default
+ runs Stata in batch mode, none of the results will be kept.
+ This is also true for matrices, scalars, mata objects, returns, or whatever
+ other object different from data.
+ Programs can often be modified to aggregate data in the primary dataset
+ or using secondary files (see the {it:outputopts} options).
+\end_layout
+
+\begin_layout Standard
+Although 
+\family typewriter
+parallel
+\family default
+ passes-through programs, macros and mata objects, in the current version
+ it is not capable of doing the same with matrices or scalars.
+ 
+\end_layout
+
+\begin_layout Standard
+If the number of tasks to be done is less than the number of clusters, 
+\family typewriter
+parallel
+\family default
+ will temporarily reduce the number of clusters.
+ This is reported in the global macro 
+\family typewriter
+LAST_PLL_N
+\family default
+.
+ 
 \end_layout
 
 \begin_layout Section
-Examples and bechmarks
+Examples
 \begin_inset CommandInset label
 LatexCommand label
 name "sec:examples"
@@ -294,8 +2132,810 @@ name "sec:examples"
 \end_layout
 
 \begin_layout Standard
-Explain when is it good to use parallel and when not.
- And perhaps when to use it with Stata/MP?
+In this section we discuss basic usage of the commands as some common use
+ cases.
+\end_layout
+
+\begin_layout Subsection
+Subcommand examples
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{stexample}[Example Prefix]
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A minimal example of using 
+\family typewriter
+parallel
+\family default
+ is
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+.
+ sysuse auto, clear 
+\end_layout
+
+\begin_layout Plain Layout
+
+(1978 Automobile Data)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+.
+ parallel setclusters 2
+\end_layout
+
+\begin_layout Plain Layout
+
+N Clusters: 2 
+\end_layout
+
+\begin_layout Plain Layout
+
+Stata dir:  C:
+\backslash
+Program Files (x86)
+\backslash
+Stata14/StataMP-64.exe 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+.
+ parallel: gen price2 = price*price
+\end_layout
+
+\begin_layout Plain Layout
+
+--------------------------------------------------------------- 
+\end_layout
+
+\begin_layout Plain Layout
+
+Parallel Computing with Stata 
+\end_layout
+
+\begin_layout Plain Layout
+
+Clusters   : 2 
+\end_layout
+
+\begin_layout Plain Layout
+
+pll_id     : <unique ID> 
+\end_layout
+
+\begin_layout Plain Layout
+
+Running at : <pwd> 
+\end_layout
+
+\begin_layout Plain Layout
+
+Randtype   : datetime 
+\end_layout
+
+\begin_layout Plain Layout
+
+Waiting for the clusters to finish...
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+cluster 0001 has exited without error...
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+cluster 0002 has exited without error...
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+--------------------------------------------------------------- 
+\end_layout
+
+\begin_layout Plain Layout
+
+Enter -parallel printlog #- to checkout logfiles.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+--------------------------------------------------------------- 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This example illustrates that many simple tasks can be parallelized.
+ This particular task was not executed faster because it was run in parallel
+ since parallel execution has its own overhead and the task was quite easy.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{stexample}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The next example shows the usage of the 
+\family typewriter
+do
+\family default
+ subcommand.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{stexample}[Example Do-file]
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Suppose that we had the existing do-file
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+//---------------- make_polynomial.do --------//
+\end_layout
+
+\begin_layout Plain Layout
+
+gen price2 = price*price
+\end_layout
+
+\begin_layout Plain Layout
+
+gen price3 = price2*price
+\end_layout
+
+\begin_layout Plain Layout
+
+gen price4 = price3*price
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can execute it either sequentially or
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+.
+ parallel do make_polynomial.do
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{stexample}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{stexample}[Example Bootstrap]
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A simple sequential bootstrap would
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+.
+ sysuse auto, clear
+\end_layout
+
+\begin_layout Plain Layout
+
+.
+ bs: reg price c.weig##c.weigh foreign rep
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+To parallelize
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+.
+ sysuse auto, clear
+\end_layout
+
+\begin_layout Plain Layout
+
+.
+ parallel setclusters 2
+\end_layout
+
+\begin_layout Plain Layout
+
+.
+ parallel bs: reg price c.weig##c.weigh foreign rep
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{stexample}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{stexample}[Example Simulation]
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Suppose we have the following simulation program.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+program define lnsim, rclass
+\end_layout
+
+\begin_layout Plain Layout
+
+  version 14
+\end_layout
+
+\begin_layout Plain Layout
+
+  syntax [, obs(integer 1) mu(real 0) sigma(real 1) ]
+\end_layout
+
+\begin_layout Plain Layout
+
+  drop _all
+\end_layout
+
+\begin_layout Plain Layout
+
+  set obs `obs'
+\end_layout
+
+\begin_layout Plain Layout
+
+  tempvar z
+\end_layout
+
+\begin_layout Plain Layout
+
+  gen `z' = exp(rnormal(`mu',`sigma'))
+\end_layout
+
+\begin_layout Plain Layout
+
+  summarize `z'
+\end_layout
+
+\begin_layout Plain Layout
+
+  return scalar mean = r(mean)
+\end_layout
+
+\begin_layout Plain Layout
+
+  return scalar Var  = r(Var)         
+\end_layout
+
+\begin_layout Plain Layout
+
+end 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If we were to run it sequentially we'd use
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+.
+ simulate mean=r(mean) var=r(Var), reps(10000): lnsim, obs(100)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+to run it parallel we could instead use a very familiar syntax
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+.
+ parallel sim, expr(mean=r(mean) var=r(Var)) reps(10000): ///
+\end_layout
+
+\begin_layout Plain Layout
+
+    lnsim, obs(100)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{stexample}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{stexample}[Example Append]
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Imagine we have several dta files named 
+\family typewriter
+income.dta
+\family default
+ stored in a set of folders ranging 
+\begin_inset Quotes eld
+\end_inset
+
+2008_01
+\begin_inset Quotes erd
+\end_inset
+
+ up to 
+\begin_inset Quotes eld
+\end_inset
+
+2012_12
+\begin_inset Quotes erd
+\end_inset
+
+, this is, a total of 60 files ordered which may look something like this:
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+2008_01/income.dta 
+\end_layout
+
+\begin_layout Plain Layout
+
+2008_02/income.dta 
+\end_layout
+
+\begin_layout Plain Layout
+
+2008_03/income.dta
+\end_layout
+
+\begin_layout Plain Layout
+
+...more files...
+\end_layout
+
+\begin_layout Plain Layout
+
+2010_01/income.dta 
+\end_layout
+
+\begin_layout Plain Layout
+
+2010_02/income.dta 
+\end_layout
+
+\begin_layout Plain Layout
+
+2010_03/income.dta
+\end_layout
+
+\begin_layout Plain Layout
+
+...more files...
+\end_layout
+
+\begin_layout Plain Layout
+
+2012_10/income.dta 
+\end_layout
+
+\begin_layout Plain Layout
+
+2012_11/income.dta 
+\end_layout
+
+\begin_layout Plain Layout
+
+2012_12/income.dta 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now, imagine that for each and every one of those files we would like to
+ execute the following program: 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+program def myprogram
+\end_layout
+
+\begin_layout Plain Layout
+
+  gen female = gender == "female"
+\end_layout
+
+\begin_layout Plain Layout
+
+  collapse (mean) income, by(female) fast
+\end_layout
+
+\begin_layout Plain Layout
+
+end 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Instead of writing a 
+\family typewriter
+forval
+\family default
+/
+\family typewriter
+foreach
+\family default
+ loop (which would be the natural solution for this situation), 
+\family typewriter
+parallel append
+\family default
+ allows us to smoothly solve this with the following command.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+.
+ parallel append, do(myprogram) prog(myprogram) ///
+\end_layout
+
+\begin_layout Plain Layout
+
+	e("%g_%02.0f/income.dta, 2008/2012, 1/12")
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where element by element, we are telling 
+\family typewriter
+parallel
+\family default
+: 
+\end_layout
+
+\begin_layout Standard
+(1) 
+\family typewriter
+do(myprogram)
+\family default
+: execute the command 
+\family typewriter
+mypro
+\family default
+gram, 
+\end_layout
+
+\begin_layout Standard
+(2) 
+\family typewriter
+prog(myprogram)
+\family default
+: 
+\family typewriter
+myprogram
+\family default
+ is a user written program that needs to passed to child clusters, and 
+\end_layout
+
+\begin_layout Standard
+(3) 
+\family typewriter
+e("%g_%02.0f/income.dta, 2008/2012, 1/12")
+\family default
+: this should process files 
+\begin_inset Quotes eld
+\end_inset
+
+2008_01/income.dta
+\begin_inset Quotes erd
+\end_inset
+
+ up to 
+\begin_inset Quotes eld
+\end_inset
+
+2012_12/income.dta
+\begin_inset Quotes erd
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Besides of the simplicity of its syntax, the advantage of using 
+\family typewriter
+parallel append
+\family default
+ lies in doing so in a parallel fashion, this is, instead of processing
+ one file at a time, 
+\family typewriter
+parallel
+\family default
+ manages to process these files in groups of as many files as clusters are
+ set.
+ Step-by-step, what this command does is:
+\end_layout
+
+\begin_layout Standard
+1.
+ Distribute groups of files across clusters
+\end_layout
+
+\begin_layout Standard
+Once each cluster starts, for each dta file
+\end_layout
+
+\begin_layout Standard
+2.
+ Opens the file using [if] [in] accordingly to in and if options.
+ 
+\end_layout
+
+\begin_layout Standard
+3.
+ Executes the command/dofile specified by the user.
+ 
+\end_layout
+
+\begin_layout Standard
+3.
+ Stores the results in a temporary dta file.
+\end_layout
+
+\begin_layout Standard
+Finally, once all the files have been processed
+\end_layout
+
+\begin_layout Standard
+4.
+ Appends all the resulting files into a single one.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{stexample}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -304,11 +2944,477 @@ Monte Carlo Experiment
 
 \begin_layout Standard
 Maybe something more fancy such as a non-parametric test statistic based
- on simulations? Use the parallel sim prefix
+ on simulations? Use the 
+\family typewriter
+parallel sim
+\family default
+ prefix.
 \end_layout
 
 \begin_layout Subsection
-Bootstrap
+Parallelizing a loop
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Parallelizing-a-loop"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If a user has a loop where the processing in each loop are independent of
+ each other and the output can be aggregated easily then it is easily transforme
+d using parallel.
+\end_layout
+
+\begin_layout Standard
+Suppose we want to parallelize a general loop
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+forval i=1/`num_total'{         
+\end_layout
+
+\begin_layout Plain Layout
+
+  //work for i   
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can transform this so that a setup that can be done either parallel or
+ sequential.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+local n_proc = XXX
+\end_layout
+
+\begin_layout Plain Layout
+
+save currdata.dta, replace
+\end_layout
+
+\begin_layout Plain Layout
+
+drop _all
+\end_layout
+
+\begin_layout Plain Layout
+
+set obs `num_total'
+\end_layout
+
+\begin_layout Plain Layout
+
+gen long i = _n
+\end_layout
+
+\begin_layout Plain Layout
+
+if `n_proc'>1 {
+\end_layout
+
+\begin_layout Plain Layout
+
+  parallel setclusters `n_proc'
+\end_layout
+
+\begin_layout Plain Layout
+
+  parallel: parfor_task
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+else {
+\end_layout
+
+\begin_layout Plain Layout
+
+  parfor_task
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+//------------parfor_task.ado------------//
+\end_layout
+
+\begin_layout Plain Layout
+
+program parfor_task
+\end_layout
+
+\begin_layout Plain Layout
+
+  local num_task = _N    
+\end_layout
+
+\begin_layout Plain Layout
+
+  mkmat i, matrix(tasks_i)
+\end_layout
+
+\begin_layout Plain Layout
+
+  use currdata.dta, clear
+\end_layout
+
+\begin_layout Plain Layout
+
+  forval j=1/`=_N'{
+\end_layout
+
+\begin_layout Plain Layout
+
+    local i = tasks_i[`j',1]  
+\end_layout
+
+\begin_layout Plain Layout
+
+    //work for i   
+\end_layout
+
+\begin_layout Plain Layout
+
+  }
+\end_layout
+
+\begin_layout Plain Layout
+
+  //put output into main data
+\end_layout
+
+\begin_layout Plain Layout
+
+end
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Consistency
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Sequential-consistency"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For many tasks we will want to ensure that there is exact consistency between
+ multiple runs of a program.
+ Deterministic programs virtually ensure this.
+ With random functions, a sequential program is usually made consistent
+ by specifying a fixed random seed at the beginning of the program.
+ If one is always using the same number of clusters then the same can be
+ achieved by pre-specifying the seeds with the 
+\family typewriter
+seeds
+\family default
+ options.
+\end_layout
+
+\begin_layout Standard
+A similar notion of sequential consistency guarantees that results do not
+ differ between sequential and parallel operations.
+ Again, for deterministic programs this is straight-forward to check.
+ If the program has a random component then more care must be taken.
+ To do this, provide the seed for each repetition.
+ Once we do that, we can build upon the previous example about loop (section
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Parallelizing-a-loop"
+
+\end_inset
+
+) so that the tasks are split to the child processes and show how to collect
+ the output.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{stexample}[Example Sequential consistency]
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here we do it with a custom bootstrap implementation
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+set seed 1337 
+\end_layout
+
+\begin_layout Plain Layout
+
+sysuse auto, clear 
+\end_layout
+
+\begin_layout Plain Layout
+
+parallel setclusters 2
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+cap program drop do_work 
+\end_layout
+
+\begin_layout Plain Layout
+
+program do_work     
+\end_layout
+
+\begin_layout Plain Layout
+
+  args main_data     
+\end_layout
+
+\begin_layout Plain Layout
+
+  local num_rep = _N     
+\end_layout
+
+\begin_layout Plain Layout
+
+  tempname tasks pfile     
+\end_layout
+
+\begin_layout Plain Layout
+
+  mkmat n seed, matrix(`tasks')     
+\end_layout
+
+\begin_layout Plain Layout
+
+  qui use "`main_data'", clear     
+\end_layout
+
+\begin_layout Plain Layout
+
+  tempfile estimates     
+\end_layout
+
+\begin_layout Plain Layout
+
+  postfile `pfile' long(n seed) float(b_mpg) using "`estimates'"     
+\end_layout
+
+\begin_layout Plain Layout
+
+  forval i=1/`num_rep'{         
+\end_layout
+
+\begin_layout Plain Layout
+
+    local seedi = `tasks'[`i',2]         
+\end_layout
+
+\begin_layout Plain Layout
+
+    set seed `seedi'         
+\end_layout
+
+\begin_layout Plain Layout
+
+    preserve         
+\end_layout
+
+\begin_layout Plain Layout
+
+    bsample         
+\end_layout
+
+\begin_layout Plain Layout
+
+    qui reg price mpg         
+\end_layout
+
+\begin_layout Plain Layout
+
+    post `pfile' (`=`tasks'[`i',1]') (`seedi') (_b[mpg])         
+\end_layout
+
+\begin_layout Plain Layout
+
+    restore     
+\end_layout
+
+\begin_layout Plain Layout
+
+  }     
+\end_layout
+
+\begin_layout Plain Layout
+
+  postclose `pfile'     
+\end_layout
+
+\begin_layout Plain Layout
+
+  use "`estimates'", clear 
+\end_layout
+
+\begin_layout Plain Layout
+
+end
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+tempfile maindata 
+\end_layout
+
+\begin_layout Plain Layout
+
+save "`maindata'" 
+\end_layout
+
+\begin_layout Plain Layout
+
+drop _all 
+\end_layout
+
+\begin_layout Plain Layout
+
+gen long seed = .
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+qui set obs 99 //number of reps
+\end_layout
+
+\begin_layout Plain Layout
+
+replace seed = int((-1*`c(minlong)'-1)*runiform())
+\end_layout
+
+\begin_layout Plain Layout
+
+gen long n=_n 
+\end_layout
+
+\begin_layout Plain Layout
+
+local final_seed = c(seed) 
+\end_layout
+
+\begin_layout Plain Layout
+
+parallel, program(do_work): do_work "`maindata'" 
+\end_layout
+
+\begin_layout Plain Layout
+
+mata: rseed(st_local("final_seed"))
+\end_layout
+
+\begin_layout Plain Layout
+
+sort n
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The output be the same no matter the number of clusters or if the 
+\family typewriter
+do_work
+\family default
+ is run without 
+\family typewriter
+parallel
+\family default
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{stexample}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -316,7 +3422,58 @@ Parallelizing own command
 \end_layout
 
 \begin_layout Standard
-Create a short simple to understand command
+A third-party Stata package developer with easily parallelizable tasks can
+ easily write their packages to take advantage of parallel if it is installed.
+ We recommend that packages not require parallel as users may be on machines
+ with limited resources.
+ The most common example would be wanting to parallelize an existing loop,
+ so one can follow the examples of the parallel for loop or the sequential
+ consistency example.
+ You can put that secondary program in your original ado file (but then
+ you have use myado.ado.subtask) or you can make a separate file (in which
+ case you might want to prefix the name with an underscore as it is not
+ likely used directly by users).
+\end_layout
+
+\begin_layout Subsection
+Benchmarks
+\end_layout
+
+\begin_layout Standard
+Processing a file in parallel using the 
+\family typewriter
+parallel
+\family default
+ package will like result in more memory (ie RAM) usage than processing
+ the file sequentially.
+ So to some extent one is trading memory capacity for processing capacity.
+ Therefore, there is likely to be little benefit if a sequential setup would
+ already utilize close to all of your system memory.
+\end_layout
+
+\begin_layout Subsection
+Debugging
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+parallel
+\family default
+ command will issue an error if either it or one of its child processes
+ encounters an error.
+ The first step towards debugging this is to look at the log files (using,
+ e.g., 
+\family typewriter
+parallel viewlog
+\family default
+).
+ If this does not show enough information you may want to use to turn 
+\family typewriter
+trace
+\family default
+ on in your execute task or output your own diagnostic information.
+ 
 \end_layout
 
 \begin_layout Section
@@ -328,6 +3485,107 @@ name "sec:discussion"
 \end_inset
 
 
+\end_layout
+
+\begin_layout Subsection
+Development and feedback
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:development"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In the case you would like to report a bug or feature request, check first
+ if there is an existing issue at 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://github.com/gvegayon/parallel/issues
+\end_layout
+
+\end_inset
+
+.
+ Please also try the latest version to see if your problem has been solved
+ already.
+ You can install the latest version using
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+.
+ ado uninstall parallel //if already installed from elsewhere
+\end_layout
+
+\begin_layout Plain Layout
+
+.
+ net install parallel, ///
+\end_layout
+
+\begin_layout Plain Layout
+
+    from(https://raw.github.com/gvegayon/parallel/master/)
+\end_layout
+
+\begin_layout Plain Layout
+
+.
+ mata mata mlib index 
+\end_layout
+
+\end_inset
+
+If these do not resolve your concern, please submit an issue at the above
+ address so that anyone available may help to solve the issue.
+ Include in the issue the steps to reproduce the issue and the output of
+ the 
+\family typewriter
+creturn list
+\family default
+.
+ 
+\end_layout
+
+\begin_layout Subsection
+Conclusion
+\end_layout
+
+\begin_layout Standard
+We hope that this package will be able to help users in their own work as
+ well as package authors who want to take advantage of multicore machines
+ for generic tasks.
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "bib"
+options "sj"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout AboutAuthors
+George G.
+ Vega Yon is a Research Programmer at the University of Southern California.
+\end_layout
+
+\begin_layout AboutAuthors
+Brian Quistorff is an Economic Researcher at Microsoft Research, Redmond.
 \end_layout
 
 \end_body
