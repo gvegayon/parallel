@@ -2021,7 +2021,8 @@ real scalar parallel_write_do(
     string scalar folder,
     string scalar programs,
     real scalar processors,
-    real scalar work_around_no_cwd
+    real scalar work_around_no_cwd,
+    string scalar output_opts
     )
 {
     real vector input_fh, output_fh
@@ -2029,7 +2030,8 @@ real scalar parallel_write_do(
     string scalar memset, maxvarset, matsizeset
     real scalar i, n_prev_tempnames
     string colvector seeds
-    string scalar new_lib
+    string scalar new_lib, output_args, output_opts_final
+    string rowvector output_opts_toks
 
     // Checking optargs
     if (matasave == J(1,1,.)) matasave = 0
@@ -2257,7 +2259,14 @@ real scalar parallel_write_do(
             while ((line=fget(input_fh))!=J(0,0,"")) fput(output_fh, "    "+line)    
             fclose(input_fh)
         } // if it is a command
-        else fput(output_fh, "    "+inputname)
+        else{
+            //convert potential output_opts
+            output_opts_toks = tokens(output_opts)
+            output_opts_toks = output_opts_toks :+ "(" :+ folder :+ "__pll" :+ parallelid :+ "_out_" :+ output_opts_toks :+ strofreal(i,"%04.0f") :+ ")"
+            output_opts_final = invtokens(output_opts_toks, " ")
+            
+            fput(output_fh, "    "+inputname+" "+output_opts_final)
+        }
         
         fput(output_fh, "  }")
         fput(output_fh, "}")

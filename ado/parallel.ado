@@ -204,6 +204,53 @@ program def parallel_spliter
 	
 end
 
+//in a subprogram because some of the outputopts may have the same name as -parallel- options
+program pll_remove_replace
+	syntax, pll_argopt(string) pll_outputopts(string)
+	
+	//parse the original options
+	foreach pll_outputopt of local pll_outputopts{
+		local pll_outputopts_syn "`pll_outputopts_syn' `pll_outputopt'(string)"
+	}
+	local 0 : copy local pll_argopt
+	syntax [anything(equalok everything)][, `pll_outputopts_syn' *]
+	
+	//remove the ones were are subbing out
+	c_local argopt `"`anything', `options'"'
+	
+	//some may be null so only sub out real ones
+	foreach pll_outputopt of local pll_outputopts{
+		if "`pll_outputopt'"!="" local outputopts "`outputopts' `pll_outputopt'"
+	}
+	c_local outputopts `outputopts'
+	/* old method (doesn't account for syntax eliding blank ones
+	//make version of argopt that doesn't have the options that will be swapped out
+	local argopt_orig : copy local argopt
+	foreach outputopt of local outputopts{
+		local argopt = regexr(`"`argopt'"',"`outputopt'\([^\)]*\)","")
+	}*/
+end
+
+//allow some or all files to not have been created
+program pll_collect
+	syntax, folder(string) parallelid(string) outputopts(string) argopt_orig(string)
+	preserve
+	
+	foreach outputopt of local outputopts{
+		if regexm(`"`argopt_orig'"',"`outputopt'\(([^\)]+)\)"){
+			local outfile = regexs(1)
+			//get rid of quotes
+			local outfile `outfile'
+			drop _all
+			forval i=1/$PLL_CLUSTERS{
+				cap append using `"`folder'__pll`parallelid'_out_`outputopt'`=strofreal(`i',"%04.0f")'"'
+			}
+
+			if _N>0 qui save `"`outfile'"', replace
+		}
+	}
+end
+
 ////////////////////////////////////////////////////////////////////////////////
 // MAIN PROGRAM
 // There are things we need to possibly restore on exit
@@ -233,6 +280,7 @@ program def parallel_do, rclass
 		argopt(string)
 		KEEPUsing(string)
 		SETparallelid(string)
+		OUTputopts(string)
 		];
 	#delimit cr
 	
@@ -266,7 +314,8 @@ program def parallel_do, rclass
 	timer on 98
 	
 	// Deletes last parallel instance ran
-	if (`keeplast' & length("`r(pll_id)'")) cap parallel_clean, e(`r(pll_id)') nologs
+	local last_id = cond("`r(pll_id)'"!="","`r(pll_id)'", "$LAST_PLL_ID")
+	if (`keeplast' & length("`last_id'")) cap parallel_clean, e(`last_id') nologs
 	
 	if length("`by'") != 0 {
 		local sortlist: sortedby
@@ -326,8 +375,14 @@ program def parallel_do, rclass
 		else local matasave = 0
 	}
 	
+	//see if we handle extra output streams
+	if "`outputopts'"!=""{
+		local argopt_orig : copy local argopt
+		pll_remove_replace, pll_argopt(`"`argopt'"') pll_outputopts(`outputopts')
+	}
+	
 	/* Writing the dofile */
-	mata: st_local("errornum", strofreal(parallel_write_do(strtrim(`"`dofile' `argopt'"'), "`parallelid'", $PLL_CLUSTERS, `prefix', `matasave', !`noglobals', "`seeds'", "`randtype'", `nodata', "`pll_dir'", "`programs'", `processors',`work_around_no_cwd')))
+	mata: st_local("errornum", strofreal(parallel_write_do(strtrim(`"`dofile' `argopt'"'), "`parallelid'", $PLL_CLUSTERS, `prefix', `matasave', !`noglobals', "`seeds'", "`randtype'", `nodata', "`pll_dir'", "`programs'", `processors',`work_around_no_cwd',"`outputopts'")))
 	if (`errornum') {
 		/* Removes the sandbox file (unprotect the files) */
 		mata: parallel_sandbox(2, "`parallelid'") 
@@ -351,6 +406,11 @@ program def parallel_do, rclass
 	local pll_t_reps = r(nt99)
 	
 	timer on 97
+	
+	if ("`outputopts'"!=""  & !`nerrors'){
+		pll_collect, folder("`pll_dir'") parallelid("`parallelid'") outputopts(`outputopts') argopt_orig(`"`argopt_orig'"')
+	}
+	
 	// Paste the databases
 	if (!`nodata' & !`nerrors') {
 		parallel_fusion `parallelid', clusters($PLL_CLUSTERS) keepusing(`keepusing')
