@@ -266,7 +266,8 @@ program def parallel_do, rclass
 	timer on 98
 	
 	// Deletes last parallel instance ran
-	if (`keeplast' & length("`r(pll_id)'")) cap parallel_clean, e(`r(pll_id)') nologs
+	local last_id = cond("`r(pll_id)'"!="","`r(pll_id)'", "$LAST_PLL_ID")
+	if (`keeplast' & length("`last_id'")) cap parallel_clean, e(`last_id') nologs
 	
 	if length("`by'") != 0 {
 		local sortlist: sortedby
