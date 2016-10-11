@@ -206,7 +206,7 @@ real scalar parallel_write_do(
 		{
 			fput(output_fh, sprintf("\n/* Loading Programs */"))
 			fput(output_fh, "capture {")
-			fput(output_fh, "run "+folder+"__pll"+parallelid+"_prog.do")
+			fput(output_fh, `"run ""'+folder+"__pll"+parallelid+`"_prog.do""')
 			/* Checking programs loading is just fine */
 			fput(output_fh, "}")
 			fput(output_fh, "local result = _rc")
