@@ -5,7 +5,7 @@ cap log close _all
 log using parallelnumlist.log, replace
 clear all
 set more off
-set trace off
+*set trace off
 
 tempname f0 f1 f2
 

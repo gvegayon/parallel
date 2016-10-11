@@ -1,6 +1,6 @@
 *! Testing prefix syntax
 *! version 1.14.6.24 24jun2014
-set trace off
+*set trace off
 clear all
 set more off
 

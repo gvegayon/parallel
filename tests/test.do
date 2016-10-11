@@ -1,5 +1,5 @@
 set matadebug off
-set trace off
+*set trace off
 
 
 *clear all

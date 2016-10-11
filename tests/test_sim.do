@@ -1,6 +1,6 @@
 clear all
 set more off
-set trace off
+*set trace off
 
 set obs 100
 set seed 54321

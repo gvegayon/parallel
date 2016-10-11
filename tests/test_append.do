@@ -2,7 +2,7 @@
 *!
 
 set more off
-set trace off
+*set trace off
 clear all
 
 vers 11.0
