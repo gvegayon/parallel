@@ -182,10 +182,10 @@ program def parallel_spliter
 			//which is hard to solve exactly (it's NP-complete). A rough solution suffices here though.
 			gen _`parallelid'cut = mod(_n, ${PLL_CLUSTERS}) + 1
 			tempfile grp_to_cut_map
-			qui save `grp_to_cut_map'
+			qui save `"`grp_to_cut_map'"'
 			restore
 			
-			qui merge m:1 _`parallelid'grp using `grp_to_cut_map', keepusing(_`parallelid'cut) nogenerate
+			qui merge m:1 _`parallelid'grp using `"`grp_to_cut_map'"', keepusing(_`parallelid'cut) nogenerate
 			drop _`parallelid'grp
 			sort `xtstructure'
 		}

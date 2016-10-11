@@ -31,14 +31,14 @@ parallel, by(rep78) f keepl nog: gen n3 = _N
 
 /* Testing collapse */
 tempfile original cllps1
-save `original'
+save `"`original'"'
 
 collapse (mean) price foreign, by(rep78)
-save `cllps1'
+save `"`cllps1'"'
 
-use `original'
+use `"`original'"'
 parallel, by(rep78) nog f:collapse (mean) price foreign, by(rep78)
-cf _all using `cllps1'
+cf _all using `"`cllps1'"'
 
 parallel, nog keepl: mata: for(i=1;i<=1e6;i++) parallel_break()
 
