@@ -150,7 +150,7 @@ program def parallel_append
 
 		/* Checking if an error has occurred */
 		if (_rc) {
-			
+			local orig_rc = _rc
 			mata: parallel_sandbox(2, "$LAST_PLL_ID")
 			if ("`keep'"=="" & "`keeplast'"=="") qui parallel clean, e(${LAST_PLL_ID}) nologs
 			forval j=0/`i' {
@@ -160,7 +160,7 @@ program def parallel_append
 			qui parallel setclusters `oldclusters', s(`olddir') f
 			di as error "An error -`=_rc'- has occured while running parallel"
 			cap rm `f'
-			exit `=_rc'
+			exit `orig_rc'
 		}
 
 		rm `f'
