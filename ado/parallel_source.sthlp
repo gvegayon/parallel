@@ -772,7 +772,7 @@ real scalar parallel_export_programs(
     // Writing log
     oldsettrace =c("trace")
     if (oldsettrace == "on") stata("set trace off")
-    stata("qui log using "+inname+", text replace name(plllog"+st_local("parallelid")+")")
+    stata(`"qui log using ""'+inname+`"", text replace name(plllog"'+st_local("parallelid")+")")
     display(sprintf("{hline 80}{break}{result:Exporting the following program(s): %s}",programlist))
     stata("capture noisily program list "+programlist)
     stata("local err = _rc")
@@ -2182,7 +2182,7 @@ real scalar parallel_write_do(
         {
             fput(output_fh, sprintf("\n/* Loading Programs */"))
             fput(output_fh, "capture {")
-            fput(output_fh, "run "+folder+"__pll"+parallelid+"_prog.do")
+            fput(output_fh, `"run ""'+folder+"__pll"+parallelid+`"_prog.do""')
             /* Checking programs loading is just fine */
             fput(output_fh, "}")
             fput(output_fh, "local result = _rc")

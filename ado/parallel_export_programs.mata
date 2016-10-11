@@ -26,7 +26,7 @@ real scalar parallel_export_programs(
 	// Writing log
 	oldsettrace =c("trace")
 	if (oldsettrace == "on") stata("set trace off")
-	stata("qui log using "+inname+", text replace name(plllog"+st_local("parallelid")+")")
+	stata(`"qui log using ""'+inname+`"", text replace name(plllog"'+st_local("parallelid")+")")
 	display(sprintf("{hline 80}{break}{result:Exporting the following program(s): %s}",programlist))
 	stata("capture noisily program list "+programlist)
 	stata("local err = _rc")

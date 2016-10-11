@@ -123,7 +123,7 @@ program def parallel_append
 		tokenize `group`i''
 		local j = 0
 		local k = 0
-		file write `fh' "cd `c(pwd)'" _newline
+		file write `fh' `"cd "`c(pwd)'""' _newline
 		while (`"``++j''"' != "") {
 			file write `fh' `"if (\`pll_instance' == `++k') {"' _newline
 			file write `fh' `"    use ``j'' `if' `in'"' _newline 
