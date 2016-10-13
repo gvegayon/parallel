@@ -56,9 +56,6 @@ check_version:
 	grep "*! version" parallel.ado
 	@echo ""
 
-#in the Win part below, it's hard to easily get the PID of 'tail' in 'tail -f file| bash'.
-# see http://stackoverflow.com/questions/1652680/. 
-#  The "redirect to a subshell" doesn't seem to work any more on Cygwin
 tests: 
 	@echo Running tests 
 	@echo When looking at the combined log, search for "^r\(".
@@ -67,6 +64,7 @@ tests:
 	cd "../test files" && \
 		PLAT=$$(<platformname.txt) && \
 		export S_ADO="../ado/;../ado/$$PLAT;UPDATES;BASE;SITE;.;PERSONAL;PLUS;OLDPLACE" && \
+		export STATATMP=. && \
 		for i in $(TESTS) ; do \
 			$(STATABATCH) do $${i}; \
 			echo test $${i} done; \
