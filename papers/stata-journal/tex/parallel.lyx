@@ -1,4 +1,4 @@
-#LyX 2.3 created this file. For more info see http://www.lyx.org/
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
 \lyxformat 508
 \begin_document
 \begin_header
@@ -272,11 +272,12 @@ beta +
 varepsilon] or something like that?
 \end_layout
 
-\end_deeper
 \begin_layout Itemize
-(B) Do conclusion
+(B) If nothing jumps out at you to put in, we might be fine w/o anything
+ new given we have lots of examples including the -parallel sim- one.
 \end_layout
 
+\end_deeper
 \begin_layout Itemize
 (B) Benchmark? This might be a lot of work
 \end_layout
@@ -285,21 +286,6 @@ varepsilon] or something like that?
 \begin_layout Itemize
 (G) I may have some scripts to generate benchmarks (I already did this once!)
  I'll look for them, otherwise I'll write them from scratch.
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-(B) Should we tell people to always install from GitHub?
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-(G) I don't think so, it is not the easiest way.
- On the otherhand, perhaps this is where using a mail-list may be useful,
- we could suggest users to register there, to download the SSC version and
- tell them that any bugs and news will be notified throught it, including
- suggestions to update from github.
- 
 \end_layout
 
 \end_deeper
@@ -335,19 +321,14 @@ a7/ado/parallel_sandbox.mata#L33).
 \end_layout
 
 \begin_layout Itemize
-(B) Make sure 
+(B) Make sure commands (e.g.
+ 
 \family typewriter
 parallel
 \family default
- is formatted well.
+) are formatted as Typewriter (monospace).
 \end_layout
 
-\begin_deeper
-\begin_layout Itemize
-(G) I don't get this comment.
-\end_layout
-
-\end_deeper
 \end_inset
 
 
@@ -2186,6 +2167,56 @@ LAST_PLL_N
  
 \end_layout
 
+\begin_layout Subsection
+Installation
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Installation"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Stable versions of 
+\family typewriter
+parallel
+\family default
+ can be installed from the SSC archives.
+ The latest development versions can be installed install the latest version
+ using
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+.
+ net install parallel, ///
+\end_layout
+
+\begin_layout Plain Layout
+
+    from(https://raw.github.com/gvegayon/parallel/master/)
+\end_layout
+
+\begin_layout Plain Layout
+
+.
+ mata mata mlib index 
+\end_layout
+
+\end_inset
+
+If you are switching the source of the installation materials (e.g.
+ is you move from SSC to GitHub versions), then be sure to uninstall the
+ program explicitly before installing the new version.
+\end_layout
+
 \begin_layout Section
 Examples
 \begin_inset CommandInset label
@@ -3565,8 +3596,8 @@ name "sec:development"
 \end_layout
 
 \begin_layout Standard
-In the case you would like to report a bug or feature request, check first
- if there is an existing issue at 
+In case you would like to report a bug or feature request, check first if
+ there is an existing issue at 
 \begin_inset Flex URL
 status open
 
@@ -3578,43 +3609,17 @@ https://github.com/gvegayon/parallel/issues
 \end_inset
 
 .
- Please also try the latest version to see if your problem has been solved
- already.
- You can install the latest version using
-\end_layout
-
-\begin_layout Standard
-\begin_inset listings
-inline false
-status open
-
-\begin_layout Plain Layout
-
-.
- ado uninstall parallel //if already installed from elsewhere
-\end_layout
-
-\begin_layout Plain Layout
-
-.
- net install parallel, ///
-\end_layout
-
-\begin_layout Plain Layout
-
-    from(https://raw.github.com/gvegayon/parallel/master/)
-\end_layout
-
-\begin_layout Plain Layout
-
-.
- mata mata mlib index 
-\end_layout
+ Please also try the latest development version to see if your problem has
+ been solved already (see Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Installation"
 
 \end_inset
 
-If these do not resolve your concern, please submit an issue at the above
- address so that anyone available may help to solve the issue.
+).
+ If these do not resolve your concern, please submit an issue at the GitHub
+ issue address so that anyone available may help to solve the issue.
  Include in the issue the steps to reproduce the issue and the output of
  the 
 \family typewriter
@@ -3629,9 +3634,20 @@ Conclusion
 \end_layout
 
 \begin_layout Standard
-We hope that this package will be able to help users in their own work as
- well as package authors who want to take advantage of multicore machines
- for generic tasks.
+The 
+\family typewriter
+parallel
+\family default
+ package allows users to take advantage of multicore machines for many generic
+ tasks with a minimum of additional complexity.
+ For tasks where the processor is the limiting factor and that are easily
+ parallelizable, 
+\family typewriter
+parallel
+\family default
+ may significantly speed up execution.
+ We hope that this package is used not just for ad-hoc processes but can
+ be integrated into other packages as a recommended package.
 \end_layout
 
 \begin_layout Standard
