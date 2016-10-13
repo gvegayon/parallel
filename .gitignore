@@ -3,8 +3,8 @@ __pll*
 *~
 *.do
 
-tests/all_tests_results.txt
-tests/platformname.txt
+test files/all_tests_results.txt
+test files/platformname.txt
 ado/temp.txt
 
 *.log

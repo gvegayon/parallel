@@ -63,8 +63,8 @@ tests:
 	@echo Running tests 
 	@echo When looking at the combined log, search for "^r\(".
 	echo $$PATH > temp.txt
-	cd ../tests && if [ ! -f platformname.txt ]; then $(STATABATCH) do export_platformname.do platformname.txt; fi;
-	cd ../tests && \
+	cd "../test files" && if [ ! -f platformname.txt ]; then $(STATABATCH) do export_platformname.do platformname.txt; fi;
+	cd "../test files" && \
 		PLAT=$$(<platformname.txt) && \
 		export S_ADO="../ado/;../ado/$$PLAT;UPDATES;BASE;SITE;.;PERSONAL;PLUS;OLDPLACE" && \
 		for i in $(TESTS) ; do \
