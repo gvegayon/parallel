@@ -26,7 +26,8 @@ program def parallel_bootstrap, rclass
 		EXPression(string asis) 
 		PROGrams(string)
 		Mata 
-		NOGlobals 
+		NOGlobals
+		KEEPTiming 
 		Seeds(passthru)
 		Randtype(passthru)
 		Timeout(integer 60)
@@ -40,6 +41,14 @@ program def parallel_bootstrap, rclass
 		di "{error:You haven't set the number of clusters}" _n "{error:Please set it with: {cmd:parallel setclusters} {it:#}}"
 		exit 198
 	}
+	
+	if ("`keeptiming'" == "") {
+		timer clear 97
+		timer clear 98
+		timer clear 99
+	}
+	
+	timer on 98
 		
 	/* Setting sizes */
 	//BS needs normally reps at least 2 (per cluster)
@@ -100,10 +109,23 @@ program def parallel_bootstrap, rclass
 	file write `fh' `"bs `expression', sav(__pll\`pll_id'_bs_eststore\`pll_instance', replace `double' `every') `options' rep(\`reps'): `model' `argopt'"' _n
 	file close `fh' 
 
+	timer off 98
+	cap timer list
+	if (r(t98) == .) local pll_t_setu = 0
+	else local pll_t_setu = r(t98)
+
 	/* Running parallel */
 	cap noi parallel do `simul', nodata programs(`programs') `mata' `noglobals' `seeds' ///
 		`randtype' timeout(`timeout') processors(`processors') setparallelid(`parallelid') `keep' `keeplast'
 	local pllseeds = r(pll_seeds)
+	local nerrors  = r(pll_errs)
+	local pll_dir r(pll_dir)
+	
+	local pll_t_setu = r(pll_t_setu) + `pll_t_setu'
+	local pll_t_calc = r(pll_t_calc)
+	local pll_t_fini = r(pll_t_fini)
+	
+	timer on 97
 
 	if (_rc) {
 		if ("`keep'"=="" & "`keeplast'"=="") qui parallel clean, e(${LAST_PLL_ID}) force nologs
@@ -154,6 +176,21 @@ program def parallel_bootstrap, rclass
 	foreach s of local scalars {
 		return scalar `s' = ``s''
 	}
+	
+	timer off 97
+	cap timer list
+	if (r(t97) == .) local pll_t_fini = 0 + `pll_t_fini'
+	else local pll_t_fini = r(t97) + `pll_t_fini'
+	
+	return local  pll_seeds="`pllseeds'"
+	return scalar pll_errs = `nerrors'
+	return local  pll_dir "`pll_dir'"
+	// return scalar pll_t_reps = `pll_t_reps'
+	return scalar pll_t_setu = `pll_t_setu'
+	return scalar pll_t_calc = `pll_t_calc'
+	return scalar pll_t_fini = `pll_t_fini'
+	return local pll_id = "`parallelid'"
+	
 	return local pll_seeds = "`pllseeds'"
 	
 end
