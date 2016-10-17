@@ -26,6 +26,7 @@ program def parallel_simulate, rclass
 		PROGrams(string)
 		Mata 
 		NOGlobals
+		KEEPTiming
 		Keep KEEPLast 
 		Seeds(passthru)
 		Randtype(passthru)
@@ -40,6 +41,14 @@ program def parallel_simulate, rclass
 		di "{error:You haven't set the number of clusters}" _n "{error:Please set it with: {cmd:parallel setclusters} {it:#}}"
 		exit 198
 	}
+	
+	if ("`keeptiming'" == "") {
+		timer clear 97
+		timer clear 98
+		timer clear 99
+	}
+	
+	timer on 98
 	
 	/* Checking reps */
 	if `reps'<$PLL_CLUSTERS {
@@ -104,11 +113,32 @@ program def parallel_simulate, rclass
 	file write `fh' `"simulate `expression', sav(__pll\`pll_id'_sim_eststore\`pll_instance', replace `double' `every') `options' rep(\`reps'): `model' `argopt'"' _n
 	file close `fh' 
 
+	timer off 98
+	cap timer list
+	if (r(t98) == .) local pll_t_setu = 0
+	else local pll_t_setu = r(t98)
+
 	/* Running parallel */
 	cap noi parallel do `simul', nodata programs(`programs') `mata' `noglobals' ///
 		`randtype' timeout(`timeout') processors(`processors') setparallelid(`parallelid') ///
 		 `seeds' `keep' `keeplast'
-	local seeds = r(pll_seeds)
+	local pllseeds = r(pll_seeds)
+	
+	local nerrors  = r(pll_errs)
+	local pll_dir  = r(pll_dir)
+	
+	local pll_t_setu = r(pll_t_setu) + `pll_t_setu'
+	local pll_t_calc = r(pll_t_calc)
+	local pll_t_fini = r(pll_t_fini)
+	
+	timer on 97
+
+	if (_rc) {
+		if ("`keep'"=="" & "`keeplast'"=="") qui parallel clean, e(${LAST_PLL_ID}) force nologs
+		mata: parallel_sandbox(2, "`parallelid'")
+		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
+		exit _rc
+	}
 
 	if (_rc) {
 		if ("`keep'" == "" & "`keeplast'"=="") qui parallel clean, e(${LAST_PLL_ID}) force nologs
@@ -139,6 +169,21 @@ program def parallel_simulate, rclass
 	/* Cleaning up */
 	if ("`keep'" == "" & "`keeplast'"=="") parallel clean, e(${LAST_PLL_ID}) nologs
 	mata: parallel_sandbox(2, "`parallelid'")
+	
+	timer off 97
+	cap timer list
+	if (r(t97) == .) local pll_t_fini = 0 + `pll_t_fini'
+	else local pll_t_fini = r(t97) + `pll_t_fini'
+	
+	return scalar pll_errs = `nerrors'
+	return local  pll_dir "`pll_dir'"
+	// return scalar pll_t_reps = `pll_t_reps'
+	return scalar pll_t_setu = `pll_t_setu'
+	return scalar pll_t_calc = `pll_t_calc'
+	return scalar pll_t_fini = `pll_t_fini'
+	return local pll_id = "`parallelid'"
+	
+	return local pll_seeds = "`pllseeds'"
 	
 	parallel_sim_ereturn
 	if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'

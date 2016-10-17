@@ -119,7 +119,7 @@ program def parallel_bootstrap, rclass
 		`randtype' timeout(`timeout') processors(`processors') setparallelid(`parallelid') `keep' `keeplast'
 	local pllseeds = r(pll_seeds)
 	local nerrors  = r(pll_errs)
-	local pll_dir r(pll_dir)
+	local pll_dir  = r(pll_dir)
 	
 	local pll_t_setu = r(pll_t_setu) + `pll_t_setu'
 	local pll_t_calc = r(pll_t_calc)
@@ -182,7 +182,6 @@ program def parallel_bootstrap, rclass
 	if (r(t97) == .) local pll_t_fini = 0 + `pll_t_fini'
 	else local pll_t_fini = r(t97) + `pll_t_fini'
 	
-	return local  pll_seeds="`pllseeds'"
 	return scalar pll_errs = `nerrors'
 	return local  pll_dir "`pll_dir'"
 	// return scalar pll_t_reps = `pll_t_reps'
