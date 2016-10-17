@@ -1,3 +1,8 @@
+2016-10-16 Brian Quistorff
+  * Allow parallel to aggregate secondary data sources.
+	* Bug Fixes
+	* Documentation updates.
+
 2016-09-15 Brian Quistorff
   * Recover from killed child process
 	* Allow automatically and temporarily lower the number of clusters to accomodate smaller work loads

@@ -665,21 +665,58 @@ setclusters
 \end_layout
 
 \begin_layout Standard
+\begin_inset ERT
+status open
 
-\family typewriter
-parallel setclusters 
-\emph on
-#
-\emph default
- [, force statapath(
-\emph on
-path
-\emph default
-) includefile(
-\emph on
-filename
-\emph default
-)]
+\begin_layout Plain Layout
+
+parallel setclusters
+\end_layout
+
+\begin_layout Plain Layout
+
+    {
+\backslash
+it 
+\backslash
+#}
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+optional{,
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+underbar{f}orce
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+underbar{s}tatapath({
+\backslash
+it path})
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+underbar{i}ncludefile({
+\backslash
+it filename})}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -691,7 +728,19 @@ The main usage of this command is to set the number of child processes to
 \begin_layout Itemize
 
 \family typewriter
-force
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{f}
+\end_layout
+
+\end_inset
+
+orce
 \family default
  - To prevent slowdowns on systems with few available computing resources,
  there is a soft limit on eight clusters.
@@ -701,7 +750,19 @@ force
 \begin_layout Itemize
 
 \family typewriter
-statapath(
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{s}
+\end_layout
+
+\end_inset
+
+tatapath(
 \emph on
 stata_path
 \emph default
@@ -723,7 +784,19 @@ parallel
 \begin_layout Itemize
 
 \family typewriter
-includefile(
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{i}
+\end_layout
+
+\end_inset
+
+ncludefile(
 \emph on
 filename
 \emph default
@@ -760,126 +833,290 @@ The follow are subcommands that execute tasks in parallel.
 \end_layout
 
 \begin_layout Standard
+\begin_inset ERT
+status open
 
-\family typewriter
-parallel [, by(
-\emph on
-varlist
-\emph default
-) force nodata setparallelid(
-\emph on
-pll_id
-\emph default
-)
-\emph on
- execution_options
-\emph default
-]: 
-\emph on
-command
-\family default
-\emph default
- 
+\begin_layout Plain Layout
+
+parallel 
+\backslash
+optional{,
+\end_layout
+
+\begin_layout Plain Layout
+
+    by({
+\backslash
+it varlist})
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+underbar{f}orce
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+underbar{nod}ata
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+underbar{set}parallelid({
+\backslash
+it pll
+\backslash
+_id})
+\end_layout
+
+\begin_layout Plain Layout
+
+    {
+\backslash
+it execution
+\backslash
+_options}} : {
+\backslash
+it command}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
+\begin_inset ERT
+status open
 
-\family typewriter
-parallel do 
-\emph on
-dofile
-\emph default
- [, by(
-\emph on
-varlist
-\emph default
-) force nodata setparallelid(
-\emph on
-pll_id
-\emph default
-) 
-\emph on
-execution_options
-\emph default
-] 
+\begin_layout Plain Layout
+
+parallel do
+\end_layout
+
+\begin_layout Plain Layout
+
+    {
+\backslash
+it dofile}
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+optional{,
+\end_layout
+
+\begin_layout Plain Layout
+
+    by({
+\backslash
+it varlist})
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+underbar{f}orce
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+underbar{nod}ata
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+underbar{set}parallelid({
+\backslash
+it pll
+\backslash
+_id})
+\end_layout
+
+\begin_layout Plain Layout
+
+    {
+\backslash
+it execution
+\backslash
+_options}}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
+\begin_inset ERT
+status open
 
-\family typewriter
-parallel bs [, expression(
-\emph on
-exp_list
-\emph default
-)
-\emph on
- execution_options
-\emph default
- 
-\emph on
-bs_options
-\emph default
- ] [: 
-\emph on
-command
-\emph default
-] 
+\begin_layout Plain Layout
+
+parallel bs
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+optional{,
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+underbar{exp}ression({
+\backslash
+it exp
+\backslash
+_list})
+\end_layout
+
+\begin_layout Plain Layout
+
+    {
+\backslash
+it execution
+\backslash
+_options}
+\end_layout
+
+\begin_layout Plain Layout
+
+    {
+\backslash
+it bs
+\backslash
+_options}} 
+\backslash
+optional{: {
+\backslash
+it command}}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
+\begin_inset ERT
+status open
 
-\family typewriter
-parallel sim [, expression(
-\emph on
-exp_list
-\emph default
-)
-\emph on
- execution_options
-\emph default
- 
-\emph on
-sim_options
-\emph default
- ] [: 
-\emph on
-command
-\emph default
-]
-\family default
- 
+\begin_layout Plain Layout
+
+parallel sim
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+optional{,
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+underbar{exp}ression({
+\backslash
+it exp
+\backslash
+_list})
+\end_layout
+
+\begin_layout Plain Layout
+
+    {
+\backslash
+it execution
+\backslash
+_options}
+\end_layout
+
+\begin_layout Plain Layout
+
+    {
+\backslash
+it sim
+\backslash
+_options}} 
+\backslash
+optional{: {
+\backslash
+it command}}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
+\begin_inset ERT
+status open
 
-\family typewriter
-parallel append [
-\emph on
-file(s)
-\emph default
-] , do(
-\emph on
-command|dofile
-\emph default
-) [in(
-\emph on
-in
-\emph default
-) if(
-\emph on
-if
-\emph default
-) expression(
-\emph on
-expand expression
-\emph default
-)
-\emph on
- execution_options
-\emph default
-]
-\family default
- 
+\begin_layout Plain Layout
+
+parallel append
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+optional{{
+\backslash
+it files(s)}}, 
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+underbar{d}o({
+\backslash
+it command|dofile}) 
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+optional{in({
+\backslash
+it in}) if({
+\backslash
+it if}) 
+\backslash
+underbar{e}xpression({
+\backslash
+it expand expression}) {
+\backslash
+it execution
+\backslash
+_options}}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -915,7 +1152,19 @@ execution_options
 \begin_layout Itemize
 
 \family typewriter
-keep
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{k}
+\end_layout
+
+\end_inset
+
+eep
 \family default
  - Keeps auxiliary files generated by 
 \family typewriter
@@ -927,7 +1176,19 @@ parallel
 \begin_layout Itemize
 
 \family typewriter
-keeplast
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{keepl}
+\end_layout
+
+\end_inset
+
+ast
 \family default
  - Keeps auxiliary files and remove those last saved during the current
  session.
@@ -936,7 +1197,19 @@ keeplast
 \begin_layout Itemize
 
 \family typewriter
-noglobal
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{nog}
+\end_layout
+
+\end_inset
+
+lobal
 \family default
  - Avoid passing current session's global macros to the clusters.
 \end_layout
@@ -944,7 +1217,19 @@ noglobal
 \begin_layout Itemize
 
 \family typewriter
-programs(
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{prog}
+\end_layout
+
+\end_inset
+
+rams(
 \emph on
 namelist
 \emph default
@@ -980,7 +1265,19 @@ my_cmd.local_subroutine_name
 \begin_layout Itemize
 
 \family typewriter
-mata
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{m}
+\end_layout
+
+\end_inset
+
+ata
 \family default
  - If the algorithm needs to use mata objects, this option allows to pass
  to each cluster every mata object loaded in the current session (including
@@ -993,7 +1290,19 @@ mata
 \begin_layout Itemize
 
 \family typewriter
-randtype(current|datetime|random.org)
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{randt}
+\end_layout
+
+\end_inset
+
+ype(current|datetime|random.org)
 \family default
  - Tells 
 \family typewriter
@@ -1006,7 +1315,19 @@ parallel
 \begin_layout Itemize
 
 \family typewriter
-seeds(
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{s}
+\end_layout
+
+\end_inset
+
+eeds(
 \emph on
 numlist
 \emph default
@@ -1020,7 +1341,19 @@ numlist
 \begin_layout Itemize
 
 \family typewriter
-processors(
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{proc}
+\end_layout
+
+\end_inset
+
+essors(
 \emph on
 integer
 \emph default
@@ -1035,7 +1368,19 @@ integer
 \begin_layout Itemize
 
 \family typewriter
-timeout(
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{t}
+\end_layout
+
+\end_inset
+
+imeout(
 \emph on
 integer
 \emph default
@@ -1054,7 +1399,19 @@ parallel
 \begin_layout Itemize
 
 \family typewriter
-outputopts(
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{out}
+\end_layout
+
+\end_inset
+
+putopts(
 \emph on
 namelist
 \emph default
@@ -1202,7 +1559,19 @@ parallel, by(byvar): by byvar: egen x_max = max(x)
 \begin_layout Itemize
 
 \family typewriter
-force
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{f}
+\end_layout
+
+\end_inset
+
+orce
 \family default
  - When using 
 \family typewriter
@@ -1224,7 +1593,19 @@ force
 \begin_layout Itemize
 
 \family typewriter
-nodata
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{nod}
+\end_layout
+
+\end_inset
+
+ata
 \family default
  - Tells 
 \family typewriter
@@ -1237,7 +1618,19 @@ parallel
 \begin_layout Itemize
 
 \family typewriter
-setparallelid(
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{set}
+\end_layout
+
+\end_inset
+
+parallelid(
 \emph on
 pll_id
 \emph default
@@ -1257,7 +1650,19 @@ Bootstrap options
 \begin_layout Itemize
 
 \family typewriter
-expression(
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{exp}
+\end_layout
+
+\end_inset
+
+ression(
 \emph on
 exp_list
 \emph default
@@ -1295,7 +1700,19 @@ Simulation options:
 \begin_layout Itemize
 
 \family typewriter
-expression(
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{exp}
+\end_layout
+
+\end_inset
+
+ression(
 \emph on
 exp_list
 \emph default
@@ -1343,7 +1760,19 @@ file(s)
 \begin_layout Itemize
 
 \family typewriter
-expression(
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{e}
+\end_layout
+
+\end_inset
+
+xpression(
 \emph on
 expand expression
 \emph default
@@ -1399,13 +1828,49 @@ clean
 \end_layout
 
 \begin_layout Standard
+\begin_inset ERT
+status open
 
-\family typewriter
-parallel clean [, event(
-\emph on
-pll_id
-\emph default
-) all force]
+\begin_layout Plain Layout
+
+parallel clean
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+optional{, 
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+underbar{e}vent({
+\backslash
+it pll
+\backslash
+_id})
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+underbar{a}ll
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+underbar{f}orce}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1415,7 +1880,19 @@ Options:
 \begin_layout Itemize
 
 \family typewriter
-event(
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{e}
+\end_layout
+
+\end_inset
+
+vent(
 \emph on
 pll_id
 \emph default
@@ -1428,7 +1905,19 @@ pll_id
 \begin_layout Itemize
 
 \family typewriter
-all
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{a}
+\end_layout
+
+\end_inset
+
+ll
 \family default
  - Tells 
 \family typewriter
@@ -1442,7 +1931,19 @@ parallel
 \begin_layout Itemize
 
 \family typewriter
-force
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{f}
+\end_layout
+
+\end_inset
+
+orce
 \family default
  - Forces the command to remove (apparently) in-use auxiliary files.
  Otherwise these will not get deleted.
@@ -1458,9 +1959,17 @@ Additionally there are some diagnostic tools,
 \end_layout
 
 \begin_layout Standard
+\begin_inset ERT
+status open
 
-\family typewriter
+\begin_layout Plain Layout
+
 parallel version
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1468,31 +1977,79 @@ This command returns the version both to the screen and programmatically.
 \end_layout
 
 \begin_layout Standard
+\begin_inset ERT
+status open
 
-\family typewriter
-parallel printlog [
-\emph on
-#
-\emph default
-] [, event(
-\emph on
-pll_id
-\emph default
-)]
+\begin_layout Plain Layout
+
+parallel printlog
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+optional{{
+\backslash
+it 
+\backslash
+#}} 
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+optional{, 
+\backslash
+underbar{e}vent({
+\backslash
+it pll
+\backslash
+_id})}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
+\begin_inset ERT
+status open
 
-\family typewriter
-parallel viewlog [
-\emph on
-#
-\emph default
-] [, event(
-\emph on
-pll_id
-\emph default
-)]
+\begin_layout Plain Layout
+
+parallel viewlog
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+optional{{
+\backslash
+it 
+\backslash
+#}}  
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+optional{, 
+\backslash
+underbar{e}vent({
+\backslash
+it pll
+\backslash
+_id})}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1515,7 +2072,19 @@ parallel
 \begin_layout Itemize
 
 \family typewriter
-event(
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{e}
+\end_layout
+
+\end_inset
+
+vent(
 \emph on
 pll_id
 \emph default

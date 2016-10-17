@@ -164,7 +164,7 @@ each cluster should use. Default value is 0 (do nothing).{p_end}
 {synopt:{opt t:imeout}}Integer. If a cluster hasn't started, how much time in seconds
 does {cmd:parallel} has to wait until assume that there was a connection error and thus
 the child process (cluster) won't start. Default value is 60.{p_end}
-{synopt:{opt outputopts}} A list of option names that are aggregating output options.
+{synopt:{opt out:putopts}} A list of option names that are aggregating output options.
 {cmd:parallel} automtically aggregates main data from child processes. 
 Often, though, a program will aggregate more than one type of data.
 {opt outputopts} allows generic file-based aggregation (appending). 
