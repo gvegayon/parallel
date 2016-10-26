@@ -50,7 +50,7 @@ real scalar parallel_run(
 			tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f")
 			mkdir(tmpdir_i,1) 
 			fput(fh, "export STATATMP="+tmpdir_i)
-			dofile_i = pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do"
+			dofile_i = "__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do"
 			fput(fh, paralleldir+stata_opt+`"do ""'+dofile_i+`"" & echo $! >> "'+pidfile)
 		}
 
@@ -75,7 +75,7 @@ real scalar parallel_run(
 					tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f")
 					mkdir(tmpdir_i,1) // fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
 					fput(fh, `"export STATATMP=""'+tmpdir_i+`"""')
-					dofile_i = pwd()+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do"
+					dofile_i = "__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do"
 					fput(fh, paralleldir+`" -e -q do ""'+dofile_i+`"" &"')
 				}
 				fclose(fh)

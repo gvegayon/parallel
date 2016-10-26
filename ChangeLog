@@ -1,3 +1,11 @@
+2016-10-26 George G. Vega Yon
+	* Squash issue #47 reported by Rebecca Nemec.
+
+2016-10-17 George G. Vega Yon
+	* : Creating new dev branch.
+	* ado/parallel_bs.ado:bs and sim subcommands now how timers as well.
+	* ado/parallel_sim.ado: idem.
+
 2016-10-16 Brian Quistorff
   * Allow parallel to aggregate secondary data sources.
 	* Bug Fixes
