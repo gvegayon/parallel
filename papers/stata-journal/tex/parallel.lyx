@@ -1,4 +1,4 @@
-#LyX 2.2 created this file. For more info see http://www.lyx.org/
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
 \lyxformat 508
 \begin_document
 \begin_header
@@ -37,6 +37,7 @@
 % Author packages
 \usepackage{tikz}
 \usepackage{tabularx}\usetikzlibrary{arrows, fit,positioning}
+\usepackage{booktabs}
 
 
 % EDITORS: volume number, issue number, month, and year
@@ -277,6 +278,11 @@ varepsilon] or something like that?
  new given we have lots of examples including the -parallel sim- one.
 \end_layout
 
+\begin_layout Itemize
+(G) DONE.
+ See Section Benchmarks
+\end_layout
+
 \end_deeper
 \begin_layout Itemize
 (B) Benchmark? This might be a lot of work
@@ -286,6 +292,10 @@ varepsilon] or something like that?
 \begin_layout Itemize
 (G) I may have some scripts to generate benchmarks (I already did this once!)
  I'll look for them, otherwise I'll write them from scratch.
+\end_layout
+
+\begin_layout Itemize
+(G) See Section Benchmarks
 \end_layout
 
 \end_deeper
@@ -3631,7 +3641,11 @@ name "subsec:Parallelizing-a-loop"
 \begin_layout Standard
 If a user has a loop where the processing in each loop are independent of
  each other and the output can be aggregated easily then it is easily transforme
-d using parallel.
+d using 
+\family typewriter
+parallel
+\family default
+.
 \end_layout
 
 \begin_layout Standard
@@ -4089,9 +4103,16 @@ Parallelizing own command
 
 \begin_layout Standard
 A third-party Stata package developer with easily parallelizable tasks can
- easily write their packages to take advantage of parallel if it is installed.
- We recommend that packages not require parallel as users may be on machines
- with limited resources.
+ easily write their packages to take advantage of 
+\family typewriter
+parallel
+\family default
+ if it is installed.
+ We recommend that packages not require 
+\family typewriter
+parallel
+\family default
+ as users may be on machines with limited resources.
  The most common example would be wanting to parallelize an existing loop,
  so one can follow the examples of the parallel for loop or the sequential
  consistency example.
@@ -4140,6 +4161,485 @@ trace
 \family default
  on in your execute task or output your own diagnostic information.
  
+\end_layout
+
+\begin_layout Section
+Benchmarks
+\end_layout
+
+\begin_layout Standard
+In order to assess the speed-gains obtain when using 
+\family typewriter
+parallel
+\family default
+, we present what we think are the two most relevan uses of the module:
+ bootstrapping and simulations.
+ We compared the performance of running each routine in: serial fashion,
+ using 2 clusters (cores), and using 4 clusters (cores).
+ While the tasks over which we performed the comparisons are rather simple
+ (and not particularly time consuming since all of them took less than a
+ minute to complete), they are useful to ilustrate the benefits of using
+ 
+\family typewriter
+parallel
+\family default
+.
+\end_layout
+
+\begin_layout Standard
+It is important to keep in mind that, as we will see, the lack of perfectly
+ linear speed-gains is due to the simplicity of the problem with respect
+ to the time that takes to compute it in a serial fashion.
+ On the other hand, overall, as the problem size–number of simulations,
+ resamples, etc.–increases, the speed-gains do become perfectly linear.
+\end_layout
+
+\begin_layout Standard
+The code used to perform the benchmarks and generate the figures and tables
+ is available in the project's website.
+\end_layout
+
+\begin_layout Subsection
+Bootstrapping
+\end_layout
+
+\begin_layout Standard
+In this first benchmark, we use the auto.dta data base shipped with Stata.
+ After expanding each observation 10 times–so the size of the problem increases–
+we perform a bootstrap of a linear regression model as follows:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Flex Stlog
+status open
+
+\begin_layout Plain Layout
+
+sysuse auto, clear
+\end_layout
+
+\begin_layout Plain Layout
+
+expand 10
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+// Parallel fashion
+\end_layout
+
+\begin_layout Plain Layout
+
+parallel bs, rep($size) nodots: regress mpg weight gear foreign
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+// Serial fashion
+\end_layout
+
+\begin_layout Plain Layout
+
+bs, rep($size) nodots: regress mpg weight gear foreign
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For each combination of (Serial, 2 Cluster, 4 Cluster) methods and (1000;
+ 2000; 4000) repetitions (problem size), we ran the problem 1000 times and
+ recorded (total) average computing time.
+ The results are presented in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:bootstrap"
+
+\end_inset
+
+ and table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:bootstrap"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename tables_and_figures/parallel_benchmarks_test=boottest.eps
+	width 80line%
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Bootstrap computing times by problem size (number of repetitions).
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:bootstrap"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+input{tables_and_figures/parallel_benchmarks_test=boottest.tex}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Absolute and relative computing times for each run of a Bootstrap.
+ For each given problem size, the first row shows the time in seconds that
+ each method took on average to complete the task; and the second row shows
+ the relative time each method took to complete the task relative to using
+ 
+\family typewriter
+parallel
+\family default
+ with 4 clusters.
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:bootstrap"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Simulations
+\end_layout
+
+\begin_layout Standard
+In the case of Simulations, we perform a simple (and uninteresting) Monte
+ carlo experiment which consists in two main steps: (1) Generate 1,000 observati
+ons, each with 
+\begin_inset Formula $X\sim N(0,1)$
+\end_inset
+
+ and 
+\begin_inset Formula $Y=X\beta+\varepsilon$
+\end_inset
+
+, where 
+\begin_inset Formula $\varepsilon\sim N(0,1)$
+\end_inset
+
+ and 
+\begin_inset Formula $\beta=2$
+\end_inset
+
+, and (2) obtain the parameter estimate of 
+\begin_inset Formula $\beta$
+\end_inset
+
+.
+ The code used follows:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Flex Stlog
+status open
+
+\begin_layout Plain Layout
+
+prog def mysim, rclass
+\end_layout
+
+\begin_layout Plain Layout
+
+  // Data generating process
+\end_layout
+
+\begin_layout Plain Layout
+
+  drop _all
+\end_layout
+
+\begin_layout Plain Layout
+
+  set obs 1000 
+\end_layout
+
+\begin_layout Plain Layout
+
+  gen eps = rnormal()
+\end_layout
+
+\begin_layout Plain Layout
+
+  gen X   = rnormal()
+\end_layout
+
+\begin_layout Plain Layout
+
+  gen Y   = X*2 + eps 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  // Estimation
+\end_layout
+
+\begin_layout Plain Layout
+
+  reg Y X 
+\end_layout
+
+\begin_layout Plain Layout
+
+  mat def ans = e(b)
+\end_layout
+
+\begin_layout Plain Layout
+
+  return scalar beta = ans[1,1]
+\end_layout
+
+\begin_layout Plain Layout
+
+end
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+// Parallel fashion
+\end_layout
+
+\begin_layout Plain Layout
+
+parallel sim, reps($size) expr(beta=r(beta)) nodots: mysim
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+// Serial fashion
+\end_layout
+
+\begin_layout Plain Layout
+
+simulate beta=r(beta), reps($size) nodots: mysim
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+As before, for each combination of (Serial, 2 Cluster, 4 Cluster) methods
+ and (1000; 2000; 4000) number of simulations (problem size), we ran the
+ problem 1000 times and recorded (total) average computing time.
+ The results are presented in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:simulation"
+
+\end_inset
+
+ and table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:simulation"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename tables_and_figures/parallel_benchmarks_test=simtest.eps
+	width 80line%
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Simulation computing times by problem size (number of simulations).
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:simulation"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+input{tables_and_figures/parallel_benchmarks_test=simtest.tex}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Absolute and relative computing times for each run of a Monte carlo experiment.
+ For each given problem size, the first row shows the time in seconds that
+ each method took on average to complete the task; and the second row shows
+ the relative time each method took to complete the task relative to using
+ 
+\family typewriter
+parallel
+\family default
+ with 4 clusters.
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:simulation"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
