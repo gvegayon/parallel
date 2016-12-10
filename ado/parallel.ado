@@ -1,4 +1,4 @@
-*! version 1.17.0 15sep2016
+*! version 1.18.0 12dec2016
 *! PARALLEL: Stata module for parallel computing
 *! by George G. Vega [cre,aut], Brian Quistorff [ctb]
 *! 
@@ -33,7 +33,7 @@ program def parallel
     version 11.0
 
 	// Checks wether if is parallel prefix or not
-	if  (regexm(`"`0'"', "^(do|clean|setclusters|break|version|append|printlog|viewlog)")) {
+	if  (regexm(`"`0'"', "^(do|clean|setclusters|break|version|append|printlog|viewlog|numprocessors)")) {
 	/* If not prefix */
 		parallel_`0'
 	} 
@@ -66,14 +66,41 @@ program def parallel
 	}
 end
 
+/*
+ For Windows we use an environment variable that could be redefined by a parent 
+   (both a plus and minus). Alternative is to sum output from command:
+    WMIC CPU Get DeviceID,NumberOfCores,NumberOfLogicalProcessors
+	
+ For *nix see http://stackoverflow.com/questions/6481005/ for alternatives.
+   Note: 'nproc --all' does not return the right result on some cloud providers where systems are shared.
+*/
+program parallel_numprocessors, rclass
+	if "`c(os)'"=="Windows" {
+		local nproc : env NUMBER_OF_PROCESSORS
+	}
+	else {
+		tempfile nproc_out
+		! getconf _NPROCESSORS_ONLN > "`nproc_out'"
+		tempname nproc_out_fhandle
+		file open `nproc_out_fhandle' using "`nproc_out'", read text
+		file read `nproc_out_fhandle' nproc
+		local r_eof = `r(eof)'
+		file close `nproc_out_fhandle'
+		_assert `r_eof'==0, msg("Wasn't able to read output from system")
+	}
+	
+	di "Number of logical processors: `nproc'"
+	return scalar numprocessors = `nproc'
+end
+
 /* Returns the version of parallel */
 program def parallel_version, rclass
 	version 11.0
 	di as result "parallel" as text " Stata module for parallel computing"
-	di as result "vers" as text " 1.17.0 15sep2016"
+	di as result "vers" as text " 1.18.0 12dec2016"
 	di as result "auth" as text " George G. Vega [cre,aut], Brian Quistorff [ctb]"
 	
-	return local pll_vers = "1.17.0"
+	return local pll_vers = "1.18.0"
 end
 
 /* Take a look to logfiles */

@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.17.0 15sep2016}{...}
+{* *! version 1.18.0 12dec2016}{...}
 {cmd:help parallel}{right:also see:  {net "describe miparallel, from(http://fmwww.bc.edu/RePEc/bocode/m)":miparallel}}
 {hline}
 
@@ -28,6 +28,7 @@
 {p2col:{bf:{ul:Available commands}}}{p_end}
 
 {p2col: 1.  {help parallel##setclusters:parallel setclusters}}Setting the number of clusters.{p_end}
+{p2col: 1.  {help parallel##numprocessors:parallel numprocessors}}Getting the number of processors on the system.{p_end}
 {p2col: 2.  {help parallel##do:parallel do}}Parallelizing a do-file.{p_end}
 {p2col: 3.  {help parallel##prefix:parallel : (prefix)}}Parallelizing a Stata command (parallel prefix).{p_end}
 {p2col: 4.  {help parallel##bs:parallel bs}}Parallel bootstrapping.{p_end}
@@ -49,6 +50,12 @@
 {opt s:tatapath}({it:{help filename:stata_path}})
 {opt i:ncludefile}({it:{help filename:filename}})
 {opt proc:exec}({it:int})]
+
+{col 5}{hline}{marker numprocessors}{...}
+{pstd}Getting the number of processors on the system
+
+{p 8 17 2}
+{cmdab:parallel numprocessors}
 
 {col 5}{hline}{col 2}{marker do}{...}
 {pstd}Parallelizing a do-file
@@ -753,6 +760,13 @@ rest of the clusters it will generate -z- equal to zero.
 {synoptset 20 tabbed}{...}
 {p2col 5 20 24 2:Macros}{p_end}
 {synopt:{cmd:r(pll_vers)}}Current version of the module.{p_end}
+
+{pstd}
+-{cmd:parallel numprocessors}- saves the following in {cmd:r()}:
+
+{synoptset 20 tabbed}{...}
+{p2col 5 20 24 2:Scalars}{p_end}
+{synopt:{cmd:r(numprocessors)}}Number of logical processors on the system.{p_end}
 
 
 {pstd}-{cmd:parallel}- saves the following global macros:{p_end}
