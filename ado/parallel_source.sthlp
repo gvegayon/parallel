@@ -1815,18 +1815,19 @@ mata:
 *!{col 4}{it:Initial cluster setup for parallel.}
 *!{col 4}{bf:parameters:}
 *!{col 6}{bf:ncluster}{col 20}Number of clusters.
-*!{col 6}{bf:force}{col 20}Whether to force setting more than 8 clusters.
+*!{col 6}{bf:force}{col 20}Whether to force setting more than nproc clusters.
+*!{col 6}{bf:nproc}{col 20}Number of processors on the system.
 *!{col 4}{bf:returns:}
 *!{col 6}{it:A global PLL_CLUSTERS.}
 *!{dup 78:{c -}}{asis}
-void parallel_setclusters(real scalar nclusters, |real scalar force) {
+void parallel_setclusters(real scalar nclusters, |real scalar force, real scalar nproc) {
         
     // Setting number of clusters
     if (force == J(1,1,.)) force = 0
-    if (nclusters <= 8 | (nclusters > 8 & force)) {
+    if (nproc==. | nclusters <= nproc | force) {
         st_global("PLL_CLUSTERS", strofreal(nclusters))
     }
-    else _error(912,`"Too many clusters: If you want to set more than 8 clusters you should use the option -force-"')
+    else _error(912,`"Use -force- if you want to set clusters than there are processors."')
     display(sprintf("{text:N Clusters}: {result:%g}",nclusters))
 }
 end

@@ -89,6 +89,9 @@ program parallel_numprocessors, rclass
 		_assert `r_eof'==0, msg("Wasn't able to read output from system")
 	}
 	
+	local nproc = int(real("`nproc'"))
+	_assert "`nproc'"!=".", msg("Wasn't able to interpret output from system")
+	
 	di "Number of logical processors: `nproc'"
 	return scalar numprocessors = `nproc'
 end
@@ -510,15 +513,21 @@ program parallel_setclusters
 	version 11.0
 	syntax anything(name=nclusters)  [, Force Statapath(string asis) Gateway(string) Includefile(string) procexec(int 2)]
 	
-	local nclusters = int(real(`"`nclusters'"'))
-	_assert `nclusters'!=., msg(`"Not allowed: "#" Should be a number"') rc(109)
-	_assert `nclusters'>0,  msg(`"Not allowed: "#" Should be positive"') rc(109)
 	_assert inlist(`procexec',0,1,2), msg("procexec() must be 0, 1, or 2") rc(198)
-	
+	cap parallel_setclusters
+	local nproc = int(real("`r(numprocessors)'"))
+	if "`nclusters'"=="default"{
+		_assert `nproc'!=., msg("Couldn't determine number of available processors for default configuration.")
+		local nclusters = max(floor(`nproc'*3/4),1)
+	}
+	else{
+		local nclusters = int(real(`"`nclusters'"'))
+		_assert (`nclusters'>0 & `nclusters'!=.),  msg(`"Not allowed: "#" Should be a positive number"') rc(109)
+	}
 	global USE_PROCEXEC = `procexec'
 	
 	local force = (length("`force'")>0)
-	mata: parallel_setclusters(`nclusters', `force')
+	mata: parallel_setclusters(`nclusters', `force', `nproc')
 	mata: st_local("error", strofreal(parallel_setstatapath(`"`statapath'"', `force')))
 	_assert (!`error'), msg("Can not set Stata directory, try using -statapath()- option") rc(`error')
 	

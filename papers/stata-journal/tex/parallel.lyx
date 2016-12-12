@@ -1,4 +1,4 @@
-#LyX 2.3 created this file. For more info see http://www.lyx.org/
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
 \lyxformat 508
 \begin_document
 \begin_header
@@ -44,6 +44,9 @@
 \sjsetissue{$vv$}{$ii$}{$mm$}{$yyyy$}
 \end_preamble
 \use_default_options true
+\begin_modules
+graphicboxes
+\end_modules
 \maintain_unincluded_children false
 \language english
 \language_package default
@@ -194,8 +197,7 @@ The
 \family typewriter
 parallel
 \family default
- package allows parallel processing of tasks that can logically be separated
- into parallel tasks that have no dependencies between them.
+ package allows parallel processing of tasks that are not inter-dependent.
  This allows all flavors of Stata to take advantage of multiprocessor machines.
  Even Stata/MP users can benefit as many user-written programs are not automatic
 ally parallelized but could be so under our framework.
@@ -244,67 +246,12 @@ status collapsed
 
 \begin_layout Standard
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
-To do: 
+Sandbox example (left out for now)
 \end_layout
 
-\begin_layout Itemize
-(B) What example to put for monte carlo.
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-(G) I'm not sure, what comes to my mind is using a standard econ model.
- Or perhaps it would suffice using a toy model (any)...
- I'm not sure if it has to be meaningful, but, on the otherhand, a meaningful
- might be more interesting for the editors.
- Perhaps a multiple equation model (two at least), with a latent variable
- and then a probit?? e.g.
- y* = z
-\backslash
-gamma + 
-\backslash
-eta; y = 1[y* > x
-\backslash
-beta + 
-\backslash
-varepsilon] or something like that?
-\end_layout
-
-\begin_layout Itemize
-(B) If nothing jumps out at you to put in, we might be fine w/o anything
- new given we have lots of examples including the -parallel sim- one.
-\end_layout
-
-\begin_layout Itemize
-(G) DONE.
- See Section Benchmarks
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-(B) Benchmark? This might be a lot of work
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-(G) I may have some scripts to generate benchmarks (I already did this once!)
- I'll look for them, otherwise I'll write them from scratch.
-\end_layout
-
-\begin_layout Itemize
-(G) See Section Benchmarks
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-(B) Talk about sandboxing/example at end of technical note (I don't understand
- it well)
-\end_layout
-
-\begin_deeper
 \begin_layout Itemize
 (G) I use the 'sandbox' in order to avoid overwriting processes.
  This is an issue when you have multiple computers or sessions of stata
@@ -325,20 +272,6 @@ a7/ado/parallel_sandbox.mata#L33).
  we can change it if you want =).
 \end_layout
 
-\end_deeper
-\begin_layout Plain Layout
-(at end)
-\end_layout
-
-\begin_layout Itemize
-(B) Make sure commands (e.g.
- 
-\family typewriter
-parallel
-\family default
-) are formatted as Typewriter (monospace).
-\end_layout
-
 \end_inset
 
 
@@ -346,7 +279,7 @@ parallel
 
 \begin_layout Standard
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 Notes: 
@@ -373,7 +306,7 @@ name "sec:desc"
 \end_layout
 
 \begin_layout Standard
-Most computers these days have multiple 
+Most computers currently have multiple 
 \begin_inset Quotes eld
 \end_inset
 
@@ -381,7 +314,42 @@ processors
 \begin_inset Quotes erd
 \end_inset
 
- such as with multiple cores per CPU or multiple threads per core (e.g.
+.
+ Physically there may be multiple 
+\begin_inset Quotes eld
+\end_inset
+
+cores
+\begin_inset Quotes erd
+\end_inset
+
+ in one 
+\begin_inset Quotes eld
+\end_inset
+
+socket
+\begin_inset Quotes erd
+\end_inset
+
+/
+\begin_inset Quotes eld
+\end_inset
+
+package
+\begin_inset Quotes erd
+\end_inset
+
+/
+\begin_inset Quotes eld
+\end_inset
+
+chip carrier
+\begin_inset Quotes erd
+\end_inset
+
+, and multiple packages in one system.
+ There may be more logical processors if the cores use simultaneous multithreadi
+ng (e.g.
  Intel's Hyper-Threading Technology).
  Stata currently uses only one processor except for Stata/MP with certain
  built-in commands
@@ -403,12 +371,12 @@ key "stata2010"
 \end_inset
 
 .
- Many other tasks, however, are logically easy to parallelize.
+ Many other tasks, however, are logically very easy to parallelize.
  These tasks, called 
 \begin_inset Quotes eld
 \end_inset
 
-embarassingly parallel
+embarrassingly parallel
 \begin_inset Quotes erd
 \end_inset
 
@@ -457,7 +425,8 @@ clusters
 \begin_inset Quotes erd
 \end_inset
 
- is as follows,
+.
+ It proceeds as follows,
 \end_layout
 
 \begin_layout Enumerate
@@ -481,7 +450,7 @@ parallel
 \begin_inset Formula $N$
 \end_inset
 
- copies of Stata.
+ new instances of Stata.
  Those are referred to as child processes while the original is the parent.
  In each, one of the pieces of the split dataset is loaded, the command
  is executed, and the resultant data is saved.
@@ -493,7 +462,7 @@ parallel
 parallel
 \family default
  waits for the child processes to finish and then aggregates the resultant
- datasets.
+ datasets and loads this into memory.
  
 \end_layout
 
@@ -519,35 +488,16 @@ distributed
 
 \begin_layout Standard
 \begin_inset Float figure
+placement t
 wide false
 sideways false
 status open
 
 \begin_layout Plain Layout
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-centering
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-scalebox{.9}{
-\backslash
-input{tables_and_figures/diagram.tex}}
-\end_layout
+\align center
+\begin_inset CommandInset include
+LatexCommand input
+filename "tables_and_figures/diagram.tex"
 
 \end_inset
 
@@ -580,7 +530,23 @@ name "fig:howworks"
 \end_layout
 
 \begin_layout Standard
-Stata/MP is a version where internal routines are able to take advantage
+There are two considerations that limit the parallelization in practice.
+ First, it will never be useful to use more clusters than the number of
+ processors on the machine.
+ Second, processing a task in parallel using the 
+\family typewriter
+parallel
+\family default
+ package uses more memory (i.e.
+ RAM).
+ One is therefore trading memory capacity for processing capacity.
+ Therefore, there is likely to be little benefit if a sequential setup would
+ already utilize close to all of the system memory.
+\end_layout
+
+\begin_layout Standard
+Some existing solution are able to take advantage of multiprocessors systems.
+ Stata/MP is a version where internal routines are able to take advantage
  of multiple processors on a machine.
  
 \family typewriter
@@ -588,10 +554,7 @@ parallel
 \family default
  allows this for generic commands which both expands the set of possible
  parallelizations and allows this for single-threaded flavors of the program.
-\end_layout
-
-\begin_layout Standard
-This module is similar to R's 
+ This module is similar to R's 
 \family typewriter
 parallel
 \family default
@@ -603,7 +566,8 @@ snow
 \end_layout
 
 \begin_layout Standard
-The document follows, after this introduction, section 
+The document proceeds as follows.
+ Section 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "sec:Syntax"
@@ -617,7 +581,14 @@ reference "sec:examples"
 
 \end_inset
 
- provides some usage examples, and section 
+ provides some usage examples, section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Benchmarks"
+
+\end_inset
+
+ provides some execution speed details, and section 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "sec:discussion"
@@ -658,7 +629,7 @@ parallel
 \family default
  subcommands for initialization, parallel task execution, and finally for
  cleanup.
- There are diagnostic tool commands also available.
+ Diagnostic tool commands are also available.
  
 \end_layout
 
@@ -689,7 +660,7 @@ parallel setclusters
 \backslash
 it 
 \backslash
-#}
+#|default}
 \end_layout
 
 \begin_layout Plain Layout
@@ -738,6 +709,33 @@ The main usage of this command is to set the number of child processes to
 \begin_layout Itemize
 
 \family typewriter
+#
+\family default
+ - The number of clusters to use.
+ One can also input 
+\family typewriter
+default
+\family default
+ which set it to
+\begin_inset Formula $\max(\lfloor(\mathrm{num\ processors})\cdot0.75\rfloor,1)$
+\end_inset
+
+.
+ The default should be fine for testing on a personal computer (if there
+ are multiple processors it will leave some free for other computer interactions
+).
+ Note that when uing Stata/MP with child tasks that are automatically paralleliz
+ed by Stata care should be taken with this option and the 
+\family typewriter
+processors()
+\family default
+ option for the execution so as not to inadvertently use more processors
+ than are available.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
 \begin_inset ERT
 status open
 
@@ -752,8 +750,8 @@ underbar{f}
 
 orce
 \family default
- - To prevent slowdowns on systems with few available computing resources,
- there is a soft limit on eight clusters.
+ - To prevent slowdowns there is a soft limit that restricts setting the
+ number of clusters to be more than the number of processors on the system.
  Use this option to override the limit.
 \end_layout
 
@@ -778,12 +776,12 @@ stata_path
 \emph default
 )
 \family default
-- By default, 
+ - By default, 
 \family typewriter
 parallel
 \family default
  tries to automatically identify Stata's executable path.
- By using this option you will override this and force 
+ Using this option will override this and force 
 \family typewriter
 parallel
 \family default
@@ -812,11 +810,11 @@ filename
 \emph default
 )
 \family default
- - This file will be included before 
+ - This file will be 
 \family typewriter
-parallel
+include
 \family default
- commands are executed.
+d in the child processes before the parallelized tasks are executed.
  The target purpose for this is to allow one to copy over preferences that
  
 \family typewriter
@@ -833,12 +831,31 @@ reference "subsec:Technical-Details"
  
 \end_layout
 
+\begin_layout Standard
+Use the following subcommand to determine the number of processors on a
+ system.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+parallel numprocessors
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsubsection
 Parallel task execution
 \end_layout
 
 \begin_layout Standard
-The follow are subcommands that execute tasks in parallel.
+The following are subcommands that execute tasks in parallel.
  
 \end_layout
 
@@ -1250,25 +1267,26 @@ namelist
 \family typewriter
 parallel
 \family default
- needs to echo the contents of those programs to the output window.
+ needs to print the contents of those programs to the output window.
  If 
 \family typewriter
 parallel
 \family default
- is being run from inside an ado (say 
+ is being run from inside an ado file (say 
 \family typewriter
 my_cmd.ado
 \family default
-) and you need to access local subroutines (other programs defined in the
- ado beside the primary 
+) and will need to access auxiliary local subroutines (other programs defined
+ in the ado), then their names must be passed in as 
 \family typewriter
-my_cmd
+<main command name.local subrouting name>
 \family default
-), then you must pass their names in this option as 
+ (e.g.
+ 
 \family typewriter
-my_cmd.local_subroutine_name
+my_cmd.aux_prog
 \family default
- for them to be accessible.
+) for them to be accessible.
  
 \end_layout
 
@@ -1289,10 +1307,10 @@ underbar{m}
 
 ata
 \family default
- - If the algorithm needs to use mata objects, this option allows to pass
- to each cluster every mata object loaded in the current session (including
+ - If the algorithm needs to use Mata objects, this option allows to pass
+ to each cluster every Mata object loaded in the current session (including
  functions).
- Note that when mata objects are loaded into the child processes they will
+ Note that when Mata objects are loaded into the child processes they will
  have different locations and therefore pointers may no longer be accurate.
  
 \end_layout
@@ -1318,8 +1336,8 @@ ype(current|datetime|random.org)
 \family typewriter
 parallel
 \family default
- whether to use the current seed (default), the current datetime or random.org
- API to generate the seeds for each clusters.
+ whether to use the current random number generator seed (default), the
+ current datetime or random.org API to generate the seeds for each clusters.
 \end_layout
 
 \begin_layout Itemize
@@ -1343,8 +1361,8 @@ numlist
 \emph default
 )
 \family default
- - With this option the user can pass an specific seed to be used within
- each cluster.
+ - With this option the user can pass a specific random seeds to be used
+ within each cluster.
  
 \end_layout
 
@@ -1369,9 +1387,10 @@ integer
 \emph default
 )
 \family default
- - If running on StataMP, sets the number of processors each cluster should
+ - If running on Stata/MP, sets the number of processors each cluster should
  use.
- Default value is 0 (do nothing).
+ The default value is 0 which means to take no specific change in the child
+ processes.
  
 \end_layout
 
@@ -1402,7 +1421,7 @@ parallel
 \family default
  has to wait until assume that there was a connection error and thus the
  child process (cluster) won't start.
- Default value is 60.
+ The default value is 60.
  
 \end_layout
 
@@ -1427,52 +1446,58 @@ namelist
 \emph default
 )
 \family default
- - allows generic file-based aggregation (appending).
- A sequential call such as
+ - allows generic file-based appending.
+ First, imagine a setup where a program generates multiple outputs and the
+ extra outputs are stored in files as in
 \begin_inset Newline newline
 \end_inset
 
 
 \family typewriter
-
+.
 \begin_inset space \qquad{}
 \end_inset
 
-my_prog, output1(outputfile.dta)
+my_prog, output1(outputfile1.dta) output2(outputfile2.dta)
 \family default
  
 \begin_inset Newline newline
 \end_inset
 
-can be converted to 
-\family typewriter
-
-\begin_inset Newline newline
-\end_inset
-
-
-\begin_inset space \qquad{}
-\end_inset
-
-parallel, outputopts(output1): my_prog, output1(outputfile.dta)
-\family default
-
-\begin_inset Newline newline
-\end_inset
-
-
+Calling 
 \family typewriter
 parallel
 \family default
- will execute each child process with its own file passed to 
+ with 
+\family typewriter
+outputopts(output1 output2)
+\family default
+ causes 
+\family typewriter
+parallel
+\family default
+ to run the parallel tasks with their own pair of temporary files passed
+ in for 
 \family typewriter
 output1
 \family default
- and at the end, append them all and save it to 
+ and 
 \family typewriter
-outputfile.dta
+output2
 \family default
+ and then aggregates those to create a final pair of files.
+ 
+\family typewriter
+
+\begin_inset Newline newline
+\end_inset
+
 .
+\begin_inset space \qquad{}
+\end_inset
+
+parallel, outputopts(output1 output2): my_prog, output1(outputfile1.dta)
+ output2(outputfile2.dta)
 \end_layout
 
 \begin_layout Itemize
@@ -1488,11 +1513,11 @@ command
 \family default
  - Task to run in parallel.
  Note that while the prefix notation can handle parameters passed to the
- command, 
+ user command, 
 \family typewriter
 parallel do
 \family default
- can not handle parameters passed to the do file.
+ can not handle parameters passed to a do file.
 \end_layout
 
 \begin_layout Standard
@@ -1548,14 +1573,19 @@ by
 by
 \family default
 -var combinations.
- If you need Stata-style semantics, the solution is to add 
+ If Stata-style semantics are needed, the solution is to add 
 \family typewriter
 by
 \family default
  in the subcommand.
- For example, 
+ For example,
+\begin_inset Newline newline
+\end_inset
+
+
 \family typewriter
-parallel, by(byvar): by byvar: egen x_max = max(x)
+.
+ parallel, by(byvar): by byvar: egen x_max = max(x)
 \family default
 .
  
@@ -1621,7 +1651,8 @@ ata
 \family typewriter
 parallel
 \family default
- not to use loaded data and thus not to try splitting or appending anything.
+ not to use loaded data and thus not to try splitting at the beginning or
+ appending anything at the end.
  
 \end_layout
 
@@ -1650,7 +1681,7 @@ pll_id
 \family typewriter
 parallel
 \family default
- to use an specific id.
+ to use a specific id.
 \end_layout
 
 \begin_layout Standard
@@ -1728,7 +1759,7 @@ exp_list
 \emph default
 )
 \family default
- - An exp_list to be passed to the native 
+ - An expression list to be passed to the native 
 \family typewriter
 simulate
 \family default
@@ -2063,7 +2094,7 @@ _id})}
 \end_layout
 
 \begin_layout Standard
-These commands allow you to view logs of the child processes.
+These commands allow users to view logs of the child processes.
  The initial part of the log file will be from commands generated by 
 \family typewriter
 parallel
@@ -2100,7 +2131,7 @@ pll_id
 \emph default
 )
 \family default
-- Specifies which event's log files should be displayed
+ - Specifies which event's log files should be displayed
 \end_layout
 
 \begin_layout Subsection
@@ -2190,7 +2221,7 @@ r(pll_t_fini)
 \begin_inset Text
 
 \begin_layout Plain Layout
-Time took to appending and cleaning.
+Time spent appending and cleaning.
 \end_layout
 
 \end_inset
@@ -2215,7 +2246,7 @@ r(pll_t_calc)
 \begin_inset Text
 
 \begin_layout Plain Layout
-Time took to complete the parallel job.
+Time spent completing the parallel job.
 \end_layout
 
 \end_inset
@@ -2240,8 +2271,8 @@ r(pll_t_setu)
 \begin_inset Text
 
 \begin_layout Plain Layout
-Time took to setup (before the parallelization) and to finish the job (after
- the parallelization) .
+Time spent setting up (before the parallelization) and to finishing the
+ job (after the parallelization).
 \end_layout
 
 \end_inset
@@ -2418,7 +2449,7 @@ parallel_randomid()
 \begin_inset space \quad{}
 \end_inset
 
-PLL_LASTRNG
+PLL_STATA_PATH, PLL_CLUSTERS, USE_PROCEXEC
 \end_layout
 
 \end_inset
@@ -2592,13 +2623,14 @@ name "subsec:Technical-Details"
 \family typewriter
 parallel
 \family default
- does not change the RNG state (even if subcommands invoke randomization
- functions).
+ does not change the random number generator state upon completion.
+ Subcommands that invoke randomization functions restore the state before
+ finishing.
  
 \end_layout
 
 \begin_layout Standard
-Log files from the runs are stored in 
+Log files from the children are stored in 
 \family typewriter
 c(tmpdir)
 \family default
@@ -2654,12 +2686,17 @@ PLL_CLUSTERS
 \end_inset
 
 ) is available within each cluster.
- Note the locals will obviously be not available inside of programs that
- you call from 
+ Note that the locals will be not available inside of programs that are
+ called from 
 \family typewriter
 parallel
 \family default
- (in prefix or do-file setup).
+ (in prefix or do-file setup), but will be available inside a script called
+ from 
+\family typewriter
+parallel do
+\family default
+.
 \end_layout
 
 \begin_layout Standard
@@ -2677,7 +2714,7 @@ PERSONAL
 \family typewriter
 S_ADO
 \family default
-, the mlib search index, the 
+, the mlib search index, and the 
 \family typewriter
 tempname
 \family default
@@ -2686,8 +2723,8 @@ tempname
 tempvar
 \family default
  state.
- If you would like child processes to start with additional setting changes
- then you should use the 
+ To start child processes with additional setting changes then one should
+ use the 
 \family typewriter
 includefile()
 \family default
@@ -2703,23 +2740,24 @@ Child processes are managed.
  Child processes are launched using the shell on MacOS and Unix/Linux machines.
  On Windows machines a compiled plugin launches the child processes using
  the Win32 API.
- Windows uses a different system as batch-mode windows will not execute
+ Windows uses a different system as batch-mode Windows will not execute
  shell commands and there is no console-only version of Stata so every launched
- process will annoyingly flash on the screen and steel your current application'
-s focus.
+ process will annoyingly flash on the screen and steal the user interface's
+ focus.
  
 \end_layout
 
 \begin_layout Standard
-When the stata_cmd or do-file saves results, as 
-\family typewriter
-parallel
-\family default
- runs Stata in batch mode, none of the results will be kept.
- This is also true for matrices, scalars, mata objects, returns, or whatever
+Results not explicitly saved in the child processes will not be available
+ afterward.
+ This is also true for matrices, scalars, Mata objects, returns, or whatever
  other object different from data.
  Programs can often be modified to aggregate data in the primary dataset
- or using secondary files (see the {it:outputopts} options).
+ or using secondary files (see the 
+\emph on
+outputopts
+\emph default
+ options).
 \end_layout
 
 \begin_layout Standard
@@ -2727,7 +2765,7 @@ Although
 \family typewriter
 parallel
 \family default
- passes-through programs, macros and mata objects, in the current version
+ passes-through programs, macros and Mata objects, in the current version
  it is not capable of doing the same with matrices or scalars.
  
 \end_layout
@@ -2791,9 +2829,9 @@ status open
 
 \end_inset
 
-If you are switching the source of the installation materials (e.g.
- is you move from SSC to GitHub versions), then be sure to uninstall the
- program explicitly before installing the new version.
+If one is switching the source of the installation materials (e.g.
+ if moving from SSC to GitHub versions), then be sure to uninstall the program
+ explicitly before installing the new version.
 \end_layout
 
 \begin_layout Section
@@ -2961,8 +2999,13 @@ Enter -parallel printlog #- to checkout logfiles.
 
 \begin_layout Standard
 This example illustrates that many simple tasks can be parallelized.
- This particular task was not executed faster because it was run in parallel
- since parallel execution has its own overhead and the task was quite easy.
+ This particular task was not executed faster in parallel since parallel
+ execution has its own overhead and the task was quite easy.
+ The short examples that follow assume that 
+\family typewriter
+parallel
+\family default
+ has been setup.
 \end_layout
 
 \begin_layout Standard
@@ -3118,25 +3161,13 @@ status open
 \end_layout
 
 \begin_layout Standard
-To parallelize
+When parallelized it becomes
 \end_layout
 
 \begin_layout Standard
 \begin_inset listings
 inline false
 status open
-
-\begin_layout Plain Layout
-
-.
- sysuse auto, clear
-\end_layout
-
-\begin_layout Plain Layout
-
-.
- parallel setclusters 2
-\end_layout
 
 \begin_layout Plain Layout
 
@@ -3332,7 +3363,7 @@ Imagine we have several dta files named
 \family typewriter
 income.dta
 \family default
- stored in a set of folders ranging 
+ stored in a set of folders ranging from 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3348,7 +3379,7 @@ income.dta
 \begin_inset Quotes erd
 \end_inset
 
-, this is, a total of 60 files ordered which may look something like this:
+, that is, a total of 60 files ordered which may look something like this:
  
 \end_layout
 
@@ -3434,7 +3465,7 @@ program def myprogram
 
 \begin_layout Plain Layout
 
-  gen female = gender == "female"
+  gen female = (gender == "female")
 \end_layout
 
 \begin_layout Plain Layout
@@ -3498,20 +3529,20 @@ parallel
 : 
 \end_layout
 
-\begin_layout Standard
-(1) 
+\begin_layout Itemize
+
 \family typewriter
 do(myprogram)
 \family default
 : execute the command 
 \family typewriter
-mypro
+myprogram
 \family default
-gram, 
+, 
 \end_layout
 
-\begin_layout Standard
-(2) 
+\begin_layout Itemize
+
 \family typewriter
 prog(myprogram)
 \family default
@@ -3522,8 +3553,8 @@ myprogram
  is a user written program that needs to passed to child clusters, and 
 \end_layout
 
-\begin_layout Standard
-(3) 
+\begin_layout Itemize
+
 \family typewriter
 e("%g_%02.0f/income.dta, 2008/2012, 1/12")
 \family default
@@ -3552,7 +3583,7 @@ Besides of the simplicity of its syntax, the advantage of using
 \family typewriter
 parallel append
 \family default
- lies in doing so in a parallel fashion, this is, instead of processing
+ lies in doing so in a parallel fashion, that is, instead of processing
  one file at a time, 
 \family typewriter
 parallel
@@ -3562,39 +3593,33 @@ parallel
  Step-by-step, what this command does is:
 \end_layout
 
-\begin_layout Standard
-1.
- Distribute groups of files across clusters
+\begin_layout Enumerate
+Distribute groups of files across clusters
 \end_layout
 
-\begin_layout Standard
-Once each cluster starts, for each dta file
+\begin_layout Enumerate
+Once each cluster starts, for each dta file:
 \end_layout
 
-\begin_layout Standard
-2.
- Opens the file using [if] [in] accordingly to in and if options.
+\begin_deeper
+\begin_layout Enumerate
+Opens the file using [if] [in] accordingly to in and if options.
  
 \end_layout
 
-\begin_layout Standard
-3.
- Executes the command/dofile specified by the user.
+\begin_layout Enumerate
+Executes the command/dofile specified by the user.
  
 \end_layout
 
-\begin_layout Standard
-3.
- Stores the results in a temporary dta file.
+\begin_layout Enumerate
+Stores the results in a temporary dta file.
 \end_layout
 
-\begin_layout Standard
-Finally, once all the files have been processed
-\end_layout
-
-\begin_layout Standard
-4.
- Appends all the resulting files into a single one.
+\end_deeper
+\begin_layout Enumerate
+Finally, once all the files have been processed, append all the resulting
+ files into a single one.
  
 \end_layout
 
@@ -3615,19 +3640,6 @@ end{stexample}
 \end_layout
 
 \begin_layout Subsection
-Monte Carlo Experiment 
-\end_layout
-
-\begin_layout Standard
-Maybe something more fancy such as a non-parametric test statistic based
- on simulations? Use the 
-\family typewriter
-parallel sim
-\family default
- prefix.
-\end_layout
-
-\begin_layout Subsection
 Parallelizing a loop
 \begin_inset CommandInset label
 LatexCommand label
@@ -3639,9 +3651,9 @@ name "subsec:Parallelizing-a-loop"
 \end_layout
 
 \begin_layout Standard
-If a user has a loop where the processing in each loop are independent of
- each other and the output can be aggregated easily then it is easily transforme
-d using 
+If a user has a loop where the processing in each iteration are independent
+ of each other and the output can be aggregated easily then it is easily
+ transformed using 
 \family typewriter
 parallel
 \family default
@@ -3689,7 +3701,7 @@ status open
 
 \begin_layout Plain Layout
 
-local n_proc = XXX
+local n_proc = <number set by user>
 \end_layout
 
 \begin_layout Plain Layout
@@ -3842,7 +3854,7 @@ A similar notion of sequential consistency guarantees that results do not
  Again, for deterministic programs this is straight-forward to check.
  If the program has a random component then more care must be taken.
  To do this, provide the seed for each repetition.
- Once we do that, we can build upon the previous example about loop (section
+ Once we do that, we can build upon the previous example about loops (section
  
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -4103,7 +4115,7 @@ Parallelizing own command
 
 \begin_layout Standard
 A third-party Stata package developer with easily parallelizable tasks can
- easily write their packages to take advantage of 
+ write their packages to take advantage of 
 \family typewriter
 parallel
 \family default
@@ -4114,28 +4126,14 @@ parallel
 \family default
  as users may be on machines with limited resources.
  The most common example would be wanting to parallelize an existing loop,
- so one can follow the examples of the parallel for loop or the sequential
+ so one can follow the examples of the parallel for loops or the sequential
  consistency example.
- You can put that secondary program in your original ado file (but then
- you have use myado.ado.subtask) or you can make a separate file (in which
- case you might want to prefix the name with an underscore as it is not
- likely used directly by users).
-\end_layout
-
-\begin_layout Subsection
-Benchmarks
-\end_layout
-
-\begin_layout Standard
-Processing a file in parallel using the 
+ One can put that secondary program in the original ado file (in which case
+ use 
 \family typewriter
-parallel
+myado.ado.subtask
 \family default
- package will like result in more memory (ie RAM) usage than processing
- the file sequentially.
- So to some extent one is trading memory capacity for processing capacity.
- Therefore, there is likely to be little benefit if a sequential setup would
- already utilize close to all of your system memory.
+ form) or one can make a separate file.
 \end_layout
 
 \begin_layout Subsection
@@ -4155,16 +4153,24 @@ parallel
 parallel viewlog
 \family default
 ).
- If this does not show enough information you may want to use to turn 
+ If this does not show enough information, 
 \family typewriter
 trace
 \family default
- on in your execute task or output your own diagnostic information.
+ can be turned on in the executed task or custom diagnostic information
+ and be printed.
  
 \end_layout
 
 \begin_layout Section
 Benchmarks
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Benchmarks"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -4172,13 +4178,24 @@ In order to assess the speed-gains obtain when using
 \family typewriter
 parallel
 \family default
-, we present what we think are the two most relevan uses of the module:
+, we present what we think are the two most relevant uses of the module:
  bootstrapping and simulations.
- We compared the performance of running each routine in: serial fashion,
- using 2 clusters (cores), and using 4 clusters (cores).
+ We compared the performance of running each routine in the following fashions
+ on computer with at least four processors
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Tests were run using StataIC 12.1 on a Unix machine with an Intel i7-4790
+ CPU @ 3.60GHz with 8 processors.
+\end_layout
+
+\end_inset
+
+: serial, parallel using two clusters, and parallel using four clusters.
  While the tasks over which we performed the comparisons are rather simple
  (and not particularly time consuming since all of them took less than a
- minute to complete), they are useful to ilustrate the benefits of using
+ minute to complete), they are useful to illustrate the benefits of using
  
 \family typewriter
 parallel
@@ -4189,9 +4206,9 @@ parallel
 \begin_layout Standard
 It is important to keep in mind that, as we will see, the lack of perfectly
  linear speed-gains is due to the simplicity of the problem with respect
- to the time that takes to compute it in a serial fashion.
- On the other hand, overall, as the problem size–number of simulations,
- resamples, etc.–increases, the speed-gains do become perfectly linear.
+ to the time that it takes to compute it in a serial fashion.
+ On the other hand, overall, as the problem size (number of simulations,
+ resamples, etc.) increases, the speed-gains do become perfectly linear.
 \end_layout
 
 \begin_layout Standard
@@ -4204,7 +4221,11 @@ Bootstrapping
 \end_layout
 
 \begin_layout Standard
-In this first benchmark, we use the auto.dta data base shipped with Stata.
+In this first benchmark, we use the 
+\emph on
+auto
+\emph default
+ dataset shipped with Stata.
  After expanding each observation 10 times–so the size of the problem increases–
 we perform a bootstrap of a linear regression model as follows:
 \end_layout
@@ -4229,7 +4250,26 @@ expand 10
 
 \begin_layout Plain Layout
 
+// Serial fashion
+\end_layout
+
+\begin_layout Plain Layout
+
+bs, rep($size) nodots: regress mpg weight gear foreign
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
 // Parallel fashion
+\end_layout
+
+\begin_layout Plain Layout
+
+parallel setclusters 2
 \end_layout
 
 \begin_layout Plain Layout
@@ -4239,16 +4279,12 @@ parallel bs, rep($size) nodots: regress mpg weight gear foreign
 
 \begin_layout Plain Layout
 
+parallel setclusters 4
 \end_layout
 
 \begin_layout Plain Layout
 
-// Serial fashion
-\end_layout
-
-\begin_layout Plain Layout
-
-bs, rep($size) nodots: regress mpg weight gear foreign
+parallel bs, rep($size) nodots: regress mpg weight gear foreign
 \end_layout
 
 \end_inset
@@ -4257,17 +4293,9 @@ bs, rep($size) nodots: regress mpg weight gear foreign
 \end_layout
 
 \begin_layout Standard
-For each combination of (Serial, 2 Cluster, 4 Cluster) methods and (1000;
- 2000; 4000) repetitions (problem size), we ran the problem 1000 times and
- recorded (total) average computing time.
- The results are presented in Figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:bootstrap"
-
-\end_inset
-
- and table 
+For each number of repetitions (1000; 2000; 4000) we ran the problem 1000
+ times and recorded average computing time.
+ The results are presented in table 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "tab:bootstrap"
@@ -4278,57 +4306,6 @@ reference "tab:bootstrap"
 \end_layout
 
 \begin_layout Standard
-\begin_inset Float figure
-placement h
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-centering
-\end_layout
-
-\end_inset
-
-
-\begin_inset Graphics
-	filename tables_and_figures/parallel_benchmarks_test=boottest.eps
-	width 80line%
-
-\end_inset
-
-
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Bootstrap computing times by problem size (number of repetitions).
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:bootstrap"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 \begin_inset Float table
 placement h
 wide false
@@ -4336,15 +4313,9 @@ sideways false
 status open
 
 \begin_layout Plain Layout
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-input{tables_and_figures/parallel_benchmarks_test=boottest.tex}
-\end_layout
+\begin_inset CommandInset include
+LatexCommand input
+filename "tables_and_figures/parallel_benchmarks_test=boottest.tex"
 
 \end_inset
 
@@ -4355,7 +4326,8 @@ input{tables_and_figures/parallel_benchmarks_test=boottest.tex}
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Absolute and relative computing times for each run of a Bootstrap.
+Absolute and relative computing times for each run of a basic bootstrap
+ problem.
  For each given problem size, the first row shows the time in seconds that
  each method took on average to complete the task; and the second row shows
  the relative time each method took to complete the task relative to using
@@ -4363,7 +4335,7 @@ Absolute and relative computing times for each run of a Bootstrap.
 \family typewriter
 parallel
 \family default
- with 4 clusters.
+ with four clusters.
 \begin_inset CommandInset label
 LatexCommand label
 name "tab:bootstrap"
@@ -4388,21 +4360,21 @@ Simulations
 \end_layout
 
 \begin_layout Standard
-In the case of Simulations, we perform a simple (and uninteresting) Monte
- carlo experiment which consists in two main steps: (1) Generate 1,000 observati
-ons, each with 
-\begin_inset Formula $X\sim N(0,1)$
-\end_inset
-
- and 
+In the case of simulations, we perform a simple (and uninteresting) Monte
+ Carlo experiment which consists in two main steps: (1) Generate 1,000 observati
+ons as 
 \begin_inset Formula $Y=X\beta+\varepsilon$
 \end_inset
 
-, where 
+ where 
+\begin_inset Formula $X\sim N(0,1)$
+\end_inset
+
+, 
 \begin_inset Formula $\varepsilon\sim N(0,1)$
 \end_inset
 
- and 
+, and 
 \begin_inset Formula $\beta=2$
 \end_inset
 
@@ -4488,7 +4460,26 @@ end
 
 \begin_layout Plain Layout
 
+// Serial fashion
+\end_layout
+
+\begin_layout Plain Layout
+
+simulate beta=r(beta), reps($size) nodots: mysim
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
 // Parallel fashion
+\end_layout
+
+\begin_layout Plain Layout
+
+parallel setclusters 2
 \end_layout
 
 \begin_layout Plain Layout
@@ -4498,16 +4489,12 @@ parallel sim, reps($size) expr(beta=r(beta)) nodots: mysim
 
 \begin_layout Plain Layout
 
+parallel setclusters 4
 \end_layout
 
 \begin_layout Plain Layout
 
-// Serial fashion
-\end_layout
-
-\begin_layout Plain Layout
-
-simulate beta=r(beta), reps($size) nodots: mysim
+parallel sim, reps($size) expr(beta=r(beta)) nodots: mysim
 \end_layout
 
 \end_inset
@@ -4516,17 +4503,9 @@ simulate beta=r(beta), reps($size) nodots: mysim
 \end_layout
 
 \begin_layout Standard
-As before, for each combination of (Serial, 2 Cluster, 4 Cluster) methods
- and (1000; 2000; 4000) number of simulations (problem size), we ran the
- problem 1000 times and recorded (total) average computing time.
- The results are presented in Figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:simulation"
-
-\end_inset
-
- and table 
+As before, for each number of simulations (1000; 2000; 4000), we ran the
+ problem 1000 times and recorded average computing time.
+ The results are presented in table 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "tab:simulation"
@@ -4537,57 +4516,6 @@ reference "tab:simulation"
 \end_layout
 
 \begin_layout Standard
-\begin_inset Float figure
-placement h
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-centering
-\end_layout
-
-\end_inset
-
-
-\begin_inset Graphics
-	filename tables_and_figures/parallel_benchmarks_test=simtest.eps
-	width 80line%
-
-\end_inset
-
-
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Simulation computing times by problem size (number of simulations).
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:simulation"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 \begin_inset Float table
 placement h
 wide false
@@ -4595,15 +4523,9 @@ sideways false
 status open
 
 \begin_layout Plain Layout
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-input{tables_and_figures/parallel_benchmarks_test=simtest.tex}
-\end_layout
+\begin_inset CommandInset include
+LatexCommand input
+filename "tables_and_figures/parallel_benchmarks_test=simtest.tex"
 
 \end_inset
 
@@ -4614,7 +4536,8 @@ input{tables_and_figures/parallel_benchmarks_test=simtest.tex}
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Absolute and relative computing times for each run of a Monte carlo experiment.
+Absolute and relative computing times for each run of a simple Monte Carlo
+ exercise.
  For each given problem size, the first row shows the time in seconds that
  each method took on average to complete the task; and the second row shows
  the relative time each method took to complete the task relative to using
@@ -4622,7 +4545,7 @@ Absolute and relative computing times for each run of a Monte carlo experiment.
 \family typewriter
 parallel
 \family default
- with 4 clusters.
+ with four clusters.
 \begin_inset CommandInset label
 LatexCommand label
 name "tab:simulation"
@@ -4665,7 +4588,7 @@ name "sec:development"
 \end_layout
 
 \begin_layout Standard
-In case you would like to report a bug or feature request, check first if
+In case one would like to report a bug or feature request, check first if
  there is an existing issue at 
 \begin_inset Flex URL
 status open
@@ -4678,8 +4601,8 @@ https://github.com/gvegayon/parallel/issues
 \end_inset
 
 .
- Please also try the latest development version to see if your problem has
- been solved already (see Section 
+ Please also try the latest development version to see if the problem has
+ been solved already (see section 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "subsec:Installation"
@@ -4687,7 +4610,7 @@ reference "subsec:Installation"
 \end_inset
 
 ).
- If these do not resolve your concern, please submit an issue at the GitHub
+ If these do not resolve the concern, please submit an issue at the GitHub
  issue address so that anyone available may help to solve the issue.
  Include in the issue the steps to reproduce the issue and the output of
  the 
@@ -4707,8 +4630,8 @@ The
 \family typewriter
 parallel
 \family default
- package allows users to take advantage of multicore machines for many generic
- tasks with a minimum of additional complexity.
+ package allows users to take advantage of multiprocessor machines for many
+ generic tasks with a minimum of additional complexity.
  For tasks where the processor is the limiting factor and that are easily
  parallelizable, 
 \family typewriter
@@ -4736,7 +4659,7 @@ George G.
 \end_layout
 
 \begin_layout AboutAuthors
-Brian Quistorff is an Economic Researcher at Microsoft Research, Redmond.
+Brian Quistorff is an Economic Researcher at Microsoft Research.
 \end_layout
 
 \end_body
