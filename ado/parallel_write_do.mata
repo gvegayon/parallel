@@ -204,7 +204,7 @@ real scalar parallel_write_do(
 		// Loading programs
 		if (progsave)
 		{
-			fput(output_fh, sprintf("\n/* Loading Programs */"))
+			fput(output_fh, sprintf("\n* Loading Programs *"))
 			fput(output_fh, "capture {")
 			fput(output_fh, `"run ""'+folder+"__pll"+parallelid+`"_prog.do""')
 			/* Checking programs loading is just fine */
@@ -219,13 +219,13 @@ real scalar parallel_write_do(
 		}
 		
 		/* Checking for break key 
-		fput(output_fh, sprintf("\n/* Checking for break */"))
+		fput(output_fh, sprintf("\n* Checking for break *"))
 		fput(output_fh, "mata: parallel_break()") */
 		
 		// Mata objects loading
 		if (matasave)
 		{
-			fput(output_fh, sprintf("\n/* Loading Mata Objects */"))
+			fput(output_fh, sprintf("\n* Loading Mata Objects *"))
 			fput(output_fh, "capture {")
 			fput(output_fh, `"mata: mata matuse ""'+folder+"__pll"+parallelid+`"_mata.mmat""')
 			/* Checking programs loading is just fine */
@@ -240,13 +240,13 @@ real scalar parallel_write_do(
 		}
 		
 		/* Checking for break key */
-		fput(output_fh, sprintf("\n/* Checking for break */"))
+		fput(output_fh, sprintf("\n* Checking for break *"))
 		fput(output_fh, "mata: parallel_break()")
 		
 		// Globals loading
 		if (getmacros)
 		{
-			fput(output_fh, sprintf("\n/* Loading Globals */"))
+			fput(output_fh, sprintf("\n* Loading Globals *"))
 			fput(output_fh, "capture {")
 			fput(output_fh, `"cap run ""'+folder+"__pll"+parallelid+`"_glob.do""')
 			/* Checking programs loading is just fine */
@@ -260,7 +260,7 @@ real scalar parallel_write_do(
 		}
 		
 		/* Checking for break key */
-		fput(output_fh, sprintf("\n/* Checking for break */"))
+		fput(output_fh, sprintf("\n* Checking for break *"))
 		fput(output_fh, "mata: parallel_break()")
 				
 		// Step 2		
@@ -274,7 +274,7 @@ real scalar parallel_write_do(
 		}
 		
 		/* Checking for break key */
-		fput(output_fh, sprintf("\n/* Checking for break */"))
+		fput(output_fh, sprintf("\n* Checking for break *"))
 		fput(output_fh, "mata: parallel_break()")
 		
 		if (!prefix) {

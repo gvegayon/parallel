@@ -20,8 +20,8 @@ real scalar parallel_run(
 	string scalar gateway_fname
 	) {
 
-	real scalar fh, i, use_procexec
-	string scalar tmpdir, tmpdir_i, line, line2, dofile_i, pidfile, stata_opt
+	real scalar fh, i, use_procexec, folder_has_space
+	string scalar tmpdir, tmpdir_i, line, line2, dofile_i, dofile_i_base, pidfile, stata_quiet, stata_batch, folder, exec_cmd, dofile_i_basename
 	real colvector pids
 	pids = J(0,1,.)
 	
@@ -38,20 +38,31 @@ real scalar parallel_run(
 	display("{text:Randtype   :} {result:"+st_local("randtype")+"}")
 
 	tmpdir = c("tmpdir") + (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/")
+	//If there is a -cd- command in (sys)profile.do then we need to 
+	// specify the full path for the do file.  so grab the directory
+	folder = st_global("LAST_PLL_DIR")
+	folder_has_space = (length(tokens(folder))>1)
 	
 	if (c("os") != "Windows") { // MACOS/UNIX
 		unlink("__pll"+parallelid+"_shell.sh")
 		fh = fopen("__pll"+parallelid+"_shell.sh","w", 1)
 		pidfile = "__pll"+parallelid+"_pids"
 		unlink(pidfile)
-		stata_opt = (c("os") == "Unix" ?" -b -q ":" -e -q ")
+		stata_quiet = " -q"
+		stata_batch = (c("os") == "Unix" ?" -b":" -e")
 		// Writing file
 		for(i=1;i<=nclusters;i++) {
 			tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f")
 			mkdir(tmpdir_i,1) 
 			fput(fh, "export STATATMP="+tmpdir_i)
-			dofile_i = "__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do"
-			fput(fh, paralleldir+stata_opt+`"do ""'+dofile_i+`"" & echo $! >> "'+pidfile)
+			dofile_i_base = "__pll"+parallelid+"_do"+strofreal(i,"%04.0f")
+			dofile_i = folder+dofile_i_base+".do"
+			//The standard batch-mode way of calling funbles the automated name of the log file
+			// if the folder has a space in it (it makes it the first word before the space,
+			// rather than the base). So do the < > redirect way.
+			//exec_cmd = paralleldir+stata_batch+stata_quiet+" "+`"do \""'+dofile_i + `"\""'
+			exec_cmd = paralleldir+stata_quiet+ `" < ""'+dofile_i + `"" > "' + dofile_i_base + ".log"
+			fput(fh, exec_cmd + " & echo $! >> "+pidfile)
 		}
 
 		fclose(fh)
@@ -75,7 +86,7 @@ real scalar parallel_run(
 					tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f")
 					mkdir(tmpdir_i,1) // fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
 					fput(fh, `"export STATATMP=""'+tmpdir_i+`"""')
-					dofile_i = "__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do"
+					dofile_i = folder+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do"
 					fput(fh, paralleldir+`" -e -q do ""'+dofile_i+`"" &"')
 				}
 				fclose(fh)
@@ -91,7 +102,7 @@ real scalar parallel_run(
 					tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f")
 					mkdir(tmpdir_i,1)
 					fwrite(fh, "start /MIN /HIGH set STATATMP="+tmpdir_i+" ^& ")
-					dofile_i = "__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do"
+					dofile_i = folder+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do"
 					fput(fh, paralleldir+`" /e /q do ""'+dofile_i+`""^&exit"')
 				}
 				
@@ -110,7 +121,8 @@ real scalar parallel_run(
 			for(i=1;i<=nclusters;i++) {
 				tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")
 				mkdir(tmpdir_i,1)
-				line2 = paralleldir+`" /e /q do ""'+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+`".do""'
+				dofile_i = folder+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do"
+				line2 = paralleldir+`" /e /q do ""'+dofile_i+`"""'
 				stata("procenv set STATATMP="+tmpdir_i)
 				stata("procexec "+line2)
 				pids = pids\st_numscalar("r(pid)")
