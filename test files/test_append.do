@@ -54,7 +54,7 @@ local test4 parallel append, do(collapse _all) exp("../test files/test_append/pa
 
 foreach c of global clusters {
 
-	parallel setclusters `c'
+	parallel setclusters `c', force
 	local i 0
 	while (`"`test`++i''"'!= "") {
 		//quietly {

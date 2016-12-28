@@ -51,7 +51,7 @@ end
 
 foreach c of global clusters {
 
-	parallel setclusters `c'
+	parallel setclusters `c', force
 
 	local i = 0
 	while (`"`test`++i''"' != "") {

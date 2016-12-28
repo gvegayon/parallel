@@ -26,7 +26,7 @@ parallel clean, all
 /* Testing cluster assigment */
 parallel numprocessors
 parallel setclusters default //just to check
-parallel setclusters 5
+parallel setclusters 2
 sort rep78
 parallel, by(rep78) f keepl nog: gen n2 = _N
 parallel, by(rep78) f keepl nog: gen n3 = _N

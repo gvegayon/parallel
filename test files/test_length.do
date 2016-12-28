@@ -3,7 +3,7 @@ program drop _all
 macro drop _all
 sysuse auto, clear
 global nCl = 3
-parallel setclusters $nCl
+parallel setclusters $nCl, force
 set seed 1337
 
 //Test -parallel bs-
@@ -81,7 +81,7 @@ di "LAST_PLL_N=$LAST_PLL_N. PLL_CLUSTERS=$PLL_CLUSTERS"
 if 1{ 
 sysuse auto, clear
 replace foreign=. in 1/20
-parallel setclusters 4 //max is 3
+parallel setclusters 4, force //max is 3
 sort foreign
 parallel, by(foreign): reg price mpg
 di "LAST_PLL_N=$LAST_PLL_N. PLL_CLUSTERS=$PLL_CLUSTERS"
