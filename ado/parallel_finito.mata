@@ -36,12 +36,8 @@ real scalar parallel_finito(
 	
 	/* Temporaly sets break key off */
 	/* In windows (by now) parallel cannot use the breakkey */
-	bk=querybreakintr()
-	if (c("os")!="Windows") 
-	{
-		bk = setbreakintr(0)
-		pressed=0
-	}
+	bk = setbreakintr(0)
+	pressed=0
 	
 	/* Checking conextion timeout */
 	pendingcl = J(1,0,.)
