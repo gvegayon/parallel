@@ -858,7 +858,7 @@ links:
 {title:12. Author}
 
 {pstd}
-George Vega Yon [cre,aut], California Institute of Technology. {browse "mailto:g.vegayon@gmail.com"}
+George Vega Yon [cre,aut], University of Southern California. {browse "mailto:g.vegayon@gmail.com"}
 {browse "http://www.its.caltech.edu/~gvegayon"}
 {p_end}
 
