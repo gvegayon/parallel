@@ -319,12 +319,12 @@ program def parallel_do, rclass
 	#delimit cr
 	
 	if length("$PLL_CLUSTERS") == 0 {
-		di "{error:You haven't set the number of clusters}" _n "{error:Please set it with: {cmd:parallel setclusters} {it:#}}"
+		di as err "You haven't set the number of clusters" _n "Please set it with: {cmd:parallel setclusters} {it:#}"
 		exit 198
 	}
 	
 	if `c(noisily)'==0 & "`programs'"!="" {
-		di "{error:If you want to pass programs in memory (using the option programs)}" _n "{error:then the program must be run noisily.}"
+		di as err "If you want to pass programs in memory (using the option programs)" _n "then the program must be run noisily."
 		exit 198
 	}
 	
@@ -571,7 +571,7 @@ program def parallel_fusion
 	
 	cap use "__pll`parallelid'_dta0001.dta", clear
 	if (_rc){
-		di "{error:No dataset for instance 0001.}"
+		di as err "No dataset for instance 0001."
 		exit _rc
 	}
 	local sortlist: sortedby
@@ -579,7 +579,7 @@ program def parallel_fusion
 	forval i = 2/`clusters' {
 		cap append using `"__pll`parallelid'_dta`=string(`i',"%04.0f")'.dta"'
 		if (_rc){	
-			di "{error:No dataset for instance `=string(`i',"%04.0f")'.}"
+			di as err "No dataset for instance `=string(`i',"%04.0f")'."
 			exit _rc
 		}
 	}
