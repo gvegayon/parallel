@@ -1,9 +1,9 @@
 SHELL := /bin/bash
 PATH:=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/stata12/:$(PATH)
 TESTS=test_bs.do test_append.do test_sim.do test_prefix.do test.do \
-	test_append_loop.do test_length.do
+	test_append_loop.do test_length.do test_aux_out.do
 TESTS_LOGS=test_bs.log test_append.log test_sim.log test_prefix.log test.log \
-	test_append_loop.log test_length.do
+	test_append_loop.log test_length.do test_aux_out.log
 
 #Provide an override for stata location
 ifeq "$(STATABATCH)" ""

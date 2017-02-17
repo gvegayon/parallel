@@ -1,4 +1,4 @@
-*! version 1.18.0 12dec2016
+*! version 1.18.1 17feb2017
 *! PARALLEL: Stata module for parallel computing
 *! by George G. Vega [cre,aut], Brian Quistorff [ctb]
 *! 
@@ -100,10 +100,10 @@ end
 program def parallel_version, rclass
 	version 11.0
 	di as result "parallel" as text " Stata module for parallel computing"
-	di as result "vers" as text " 1.18.0 12dec2016"
+	di as result "vers" as text " 1.18.1 17feb2017"
 	di as result "auth" as text " George G. Vega [cre,aut], Brian Quistorff [ctb]"
 	
-	return local pll_vers = "1.18.0"
+	return local pll_vers = "1.18.1"
 end
 
 /* Take a look to logfiles */
@@ -267,7 +267,7 @@ program pll_collect
 	preserve
 	
 	foreach outputopt of local outputopts{
-		if regexm(`"`argopt_orig'"',"`outputopt'\(([^\)]+)\)"){
+		if regexm(`"`argopt_orig'"',"`outputopt'\(([^)]+)\)"){
 			local outfile = regexs(1)
 			//get rid of quotes
 			local outfile `outfile'
