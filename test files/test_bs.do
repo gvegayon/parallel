@@ -2,8 +2,8 @@ clear all
 set more off
 *set trace off
 
-if (c(os) == "Windows") parallel setclusters 2
-else parallel setclusters 8, f
+if (c(os) == "Windows") parallel setclusters 2, force
+else parallel setclusters 8, force
 
 sysuse auto
 
