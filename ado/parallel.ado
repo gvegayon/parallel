@@ -262,6 +262,8 @@ program pll_remove_replace
 end
 
 //allow some or all files to not have been created
+//If at least one file was made, even if it was empty, make a file
+// (same save dynamics as user program)
 program pll_collect
 	syntax, folder(string) parallelid(string) outputopts(string) argopt_orig(string)
 	preserve
@@ -271,12 +273,14 @@ program pll_collect
 			local outfile = regexs(1)
 			//get rid of quotes
 			local outfile `outfile'
+			local emptyok ""
 			drop _all
 			forval i=1/$PLL_CLUSTERS{
 				cap append using `"`folder'__pll`parallelid'_out_`outputopt'`=strofreal(`i',"%04.0f")'"'
+				if (_rc==0) local emptyok "emptyok"
 			}
 
-			if _N>0 qui save `"`outfile'"', replace
+			qui save `"`outfile'"', replace `emptyok'
 		}
 	}
 end
