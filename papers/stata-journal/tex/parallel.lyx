@@ -1503,6 +1503,30 @@ parallel, outputopts(output1 output2): my_prog, output1(outputfile1.dta)
 \begin_layout Itemize
 
 \family typewriter
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+underbar{det}
+\end_layout
+
+\end_inset
+
+erministicoutput
+\family default
+ will eliminates displayed output that would vary depending on the machine
+ (e.g.
+ timers, seeds, and number of parallel clusters) so that log files can be
+ easily compared across runs.
+ Errors are still printed.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
 \emph on
 dofile
 \family default

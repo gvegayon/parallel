@@ -315,6 +315,7 @@ program def parallel_do, rclass
 		KEEPUsing(string)
 		SETparallelid(string)
 		OUTputopts(string)
+		DETerministicoutput
 		];
 	#delimit cr
 	
@@ -329,7 +330,7 @@ program def parallel_do, rclass
 	}
 	
 	// Initial checks
-	foreach opt in macrolist keep keeplast prefix force mata noglobals keeptiming nodata {
+	foreach opt in macrolist keep keeplast prefix force mata noglobals keeptiming nodata deterministicoutput {
 		local `opt' = length("``opt''") > 0
 	}
 
@@ -431,7 +432,7 @@ program def parallel_do, rclass
 	
 	/* Running the dofiles */
 	timer on 99
-	mata: st_local("nerrors", strofreal(parallel_run("`parallelid'",$PLL_CLUSTERS,`"$PLL_STATA_PATH"',`=`timeout'*1000')))
+	mata: st_local("nerrors", strofreal(parallel_run("`parallelid'",$PLL_CLUSTERS,`"$PLL_STATA_PATH"',`=`timeout'*1000', `deterministicoutput')))
 	timer off 99
 	
 	cap timer list
