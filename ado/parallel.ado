@@ -1,4 +1,4 @@
-*! version 1.18.1 17feb2017
+*! version 1.18.2 20mar2017
 *! PARALLEL: Stata module for parallel computing
 *! by George G. Vega [cre,aut], Brian Quistorff [ctb]
 *! 
@@ -40,7 +40,7 @@ program def parallel
 	else if (regexm(`"`0'"', "^(bs|sim)[,]?[\s ]?")) {
 	/* Prefix bootstrap or simulate */
 		local cmd = regexs(1)
-		local 0   = regexr(`"`0'"', "^(bs|sim)", "")
+		mata: st_local("0", regexr(st_local("0"), "^(bs|sim)", ""))
 		gettoken x 0 : 0, parse(":") bind
 		local 0 = regexr(`"`0'"', "^[:]", "")
 		gettoken x options : x, parse(",") bind
@@ -51,7 +51,7 @@ program def parallel
 	else if (regexm(`"`0'"',"^([,]?.*[:])")) {              
 	/* if prefix */
 		gettoken x 0 : 0, parse(":") bind 
-		local 0 = regexr(`"`0'"', "^[:]", "")
+		mata: st_local("0", regexr(st_local("0"), "^[:]", ""))
 		// Gets the options (if these exists) of parallel
 		gettoken x options : x, parse(",") bind
 		
@@ -100,10 +100,10 @@ end
 program def parallel_version, rclass
 	version 11.0
 	di as result "parallel" as text " Stata module for parallel computing"
-	di as result "vers" as text " 1.18.1 17feb2017"
+	di as result "vers" as text " 1.18.2 20mar2017"
 	di as result "auth" as text " George G. Vega [cre,aut], Brian Quistorff [ctb]"
 	
-	return local pll_vers = "1.18.1"
+	return local pll_vers = "1.18.2"
 end
 
 /* Take a look to logfiles */
@@ -269,8 +269,9 @@ program pll_collect
 	preserve
 	
 	foreach outputopt of local outputopts{
-		if regexm(`"`argopt_orig'"',"`outputopt'\(([^)]+)\)"){
-			local outfile = regexs(1)
+		mata: st_local("val", strofreal(regexm(st_local("argopt_orig"),st_local("outputopt")+"\(([^)]+)\)")))
+		if `val'{
+			mata: st_local("outfile", regexs(1))
 			//get rid of quotes
 			local outfile `outfile'
 			local emptyok ""
