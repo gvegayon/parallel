@@ -12,7 +12,7 @@ parallel clean, all
 
 sysuse auto, clear
 
-parallel setclusters 2
+parallel setclusters 2, force
 
 /* Simple tests */
 parallel, by(foreign) f keepl nog : egen maxp = max(price)
@@ -26,7 +26,7 @@ parallel clean, all
 /* Testing cluster assigment */
 parallel numprocessors
 parallel setclusters default //just to check
-parallel setclusters 2
+parallel setclusters 2, force
 sort rep78
 parallel, by(rep78) f keepl nog: gen n2 = _N
 parallel, by(rep78) f keepl nog: gen n3 = _N

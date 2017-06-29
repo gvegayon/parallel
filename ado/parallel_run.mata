@@ -17,6 +17,7 @@ real scalar parallel_run(
 	|real scalar nclusters, 
 	string scalar paralleldir,
 	real scalar timeout,
+	real scalar deterministicoutput,
 	string scalar gateway_fname
 	) {
 
@@ -32,9 +33,9 @@ real scalar parallel_run(
 	// Message
 	display(sprintf("{hline %g}",c("linesize") > 80?80:c("linesize")))
 	display("{result:Parallel Computing with Stata}")
-	display("{text:Clusters   :} {result:"+strofreal(nclusters)+"}")
-	display("{text:pll_id     :} {result:"+parallelid+"}")
-	display("{text:Running at :} {result:"+c("pwd")+"}")
+	if (!deterministicoutput) display("{text:Clusters   :} {result:"+strofreal(nclusters)+"}")
+	if (!deterministicoutput) display("{text:pll_id     :} {result:"+parallelid+"}")
+	if (!deterministicoutput) display("{text:Running at :} {result:"+c("pwd")+"}")
 	display("{text:Randtype   :} {result:"+st_local("randtype")+"}")
 
 	tmpdir = c("tmpdir") + (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/")
@@ -132,7 +133,7 @@ real scalar parallel_run(
 	}
 	
 	/* Waits until each process ends */
-	return(parallel_finito(parallelid,nclusters,timeout,pids))
+	return(parallel_finito(parallelid,nclusters,timeout,pids, deterministicoutput))
 }
 end
 

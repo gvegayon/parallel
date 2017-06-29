@@ -1,4 +1,4 @@
-*! version 1.18.0 12dec2016
+*! version 1.18.2 20mar2017
 *! PARALLEL: Stata module for parallel computing
 *! by George G. Vega [cre,aut], Brian Quistorff [ctb]
 *! 
@@ -40,7 +40,7 @@ program def parallel
 	else if (regexm(`"`0'"', "^(bs|sim)[,]?[\s ]?")) {
 	/* Prefix bootstrap or simulate */
 		local cmd = regexs(1)
-		local 0   = regexr(`"`0'"', "^(bs|sim)", "")
+		mata: st_local("0", regexr(st_local("0"), "^(bs|sim)", ""))
 		gettoken x 0 : 0, parse(":") bind
 		local 0 = regexr(`"`0'"', "^[:]", "")
 		gettoken x options : x, parse(",") bind
@@ -51,7 +51,7 @@ program def parallel
 	else if (regexm(`"`0'"',"^([,]?.*[:])")) {              
 	/* if prefix */
 		gettoken x 0 : 0, parse(":") bind 
-		local 0 = regexr(`"`0'"', "^[:]", "")
+		mata: st_local("0", regexr(st_local("0"), "^[:]", ""))
 		// Gets the options (if these exists) of parallel
 		gettoken x options : x, parse(",") bind
 		
@@ -100,10 +100,10 @@ end
 program def parallel_version, rclass
 	version 11.0
 	di as result "parallel" as text " Stata module for parallel computing"
-	di as result "vers" as text " 1.18.0 12dec2016"
+	di as result "vers" as text " 1.18.2 20mar2017"
 	di as result "auth" as text " George G. Vega [cre,aut], Brian Quistorff [ctb]"
 	
-	return local pll_vers = "1.18.0"
+	return local pll_vers = "1.18.2"
 end
 
 /* Take a look to logfiles */
@@ -262,21 +262,26 @@ program pll_remove_replace
 end
 
 //allow some or all files to not have been created
+//If at least one file was made, even if it was empty, make a file
+// (same save dynamics as user program)
 program pll_collect
 	syntax, folder(string) parallelid(string) outputopts(string) argopt_orig(string)
 	preserve
 	
 	foreach outputopt of local outputopts{
-		if regexm(`"`argopt_orig'"',"`outputopt'\(([^\)]+)\)"){
-			local outfile = regexs(1)
+		mata: st_local("val", strofreal(regexm(st_local("argopt_orig"),st_local("outputopt")+"\(([^)]+)\)")))
+		if `val'{
+			mata: st_local("outfile", regexs(1))
 			//get rid of quotes
 			local outfile `outfile'
+			local emptyok ""
 			drop _all
 			forval i=1/$PLL_CLUSTERS{
 				cap append using `"`folder'__pll`parallelid'_out_`outputopt'`=strofreal(`i',"%04.0f")'"'
+				if (_rc==0) local emptyok "emptyok"
 			}
 
-			if _N>0 qui save `"`outfile'"', replace
+			qui save `"`outfile'"', replace `emptyok'
 		}
 	}
 end
@@ -311,21 +316,22 @@ program def parallel_do, rclass
 		KEEPUsing(string)
 		SETparallelid(string)
 		OUTputopts(string)
+		DETerministicoutput
 		];
 	#delimit cr
 	
 	if length("$PLL_CLUSTERS") == 0 {
-		di "{error:You haven't set the number of clusters}" _n "{error:Please set it with: {cmd:parallel setclusters} {it:#}}"
+		di as err "You haven't set the number of clusters" _n "Please set it with: {cmd:parallel setclusters} {it:#}"
 		exit 198
 	}
 	
 	if `c(noisily)'==0 & "`programs'"!="" {
-		di "{error:If you want to pass programs in memory (using the option programs)}" _n "{error:then the program must be run noisily.}"
+		di as err "If you want to pass programs in memory (using the option programs)" _n "then the program must be run noisily."
 		exit 198
 	}
 	
 	// Initial checks
-	foreach opt in macrolist keep keeplast prefix force mata noglobals keeptiming nodata {
+	foreach opt in macrolist keep keeplast prefix force mata noglobals keeptiming nodata deterministicoutput {
 		local `opt' = length("``opt''") > 0
 	}
 
@@ -427,7 +433,7 @@ program def parallel_do, rclass
 	
 	/* Running the dofiles */
 	timer on 99
-	mata: st_local("nerrors", strofreal(parallel_run("`parallelid'",$PLL_CLUSTERS,`"$PLL_STATA_PATH"',`=`timeout'*1000')))
+	mata: st_local("nerrors", strofreal(parallel_run("`parallelid'",$PLL_CLUSTERS,`"$PLL_STATA_PATH"',`=`timeout'*1000', `deterministicoutput')))
 	timer off 99
 	
 	cap timer list
@@ -567,7 +573,7 @@ program def parallel_fusion
 	
 	cap use "__pll`parallelid'_dta0001.dta", clear
 	if (_rc){
-		di "{error:No dataset for instance 0001.}"
+		di as err "No dataset for instance 0001."
 		exit _rc
 	}
 	local sortlist: sortedby
@@ -575,7 +581,7 @@ program def parallel_fusion
 	forval i = 2/`clusters' {
 		cap append using `"__pll`parallelid'_dta`=string(`i',"%04.0f")'.dta"'
 		if (_rc){	
-			di "{error:No dataset for instance `=string(`i',"%04.0f")'.}"
+			di as err "No dataset for instance `=string(`i',"%04.0f")'."
 			exit _rc
 		}
 	}

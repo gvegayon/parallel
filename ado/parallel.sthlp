@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.18.0 12dec2016}{...}
+{* *! version 1.18.2 20mar2017}{...}
 {cmd:help parallel}{right:also see:  {net "describe miparallel, from(http://fmwww.bc.edu/RePEc/bocode/m)":miparallel}}
 {hline}
 
@@ -179,7 +179,9 @@ A sequential call such as {cmd:my_prog, output1(outputfile.dta)} can be converte
 {cmd:parallel, outputopts(output1): my_prog, output1(outputfile.dta)}.
 {cmd:parallel} will execute each child process with its own file passed to {opt output1}
 and at the end, append them all and save it to {it:outputfile.dta}.{p_end}
-
+{synopt:{opt det:erministicoutput}}will eliminates displayed output that would vary 
+depending on the machine (e.g. timers, seeds, and number of parallel clusters) so 
+that log files can be easily compared across runs. Errors are still printed.{p_end}
 
 {syntab:Byable parallelization}
 {synopt:{opt by}}Varlist. Tells the command through which observations the current dataset 

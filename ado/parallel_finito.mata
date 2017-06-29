@@ -13,7 +13,8 @@ real scalar parallel_finito(
 	string scalar parallelid,
 	| real scalar nclusters,
 	real scalar timeout,
-	real colvector pids
+	real colvector pids,
+	real scalar deterministicoutput
 	)
 	{
 	
@@ -139,7 +140,9 @@ real scalar parallel_finito(
 					suberrors++
 					st_local("pll_last_error", strofreal(errornum))
 				}
-				else display(sprintf("{it:cluster %04.0f} {text:has exited without error...}", i))
+				else{
+					if (!deterministicoutput) display(sprintf("{it:cluster %04.0f} {text:has exited without error...}", i))
+				}
 				fclose(in_fh)
 
 				/* Checking tmpdir */

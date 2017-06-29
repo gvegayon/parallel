@@ -2,8 +2,8 @@ clear all
 set more off
 *set trace off
 
-if (c(os) == "Windows") parallel setclusters 2
-else parallel setclusters 8, f
+if (c(os) == "Windows") parallel setclusters 2, force
+else parallel setclusters 8, force
 
 sysuse auto
 
@@ -12,7 +12,7 @@ local nreps 1000
 
 forval i=1/1 {
 	timer on 2
-	parallel bs, sav(pllbs, replace) keepl reps(`nreps') nodots  : reg price c.weig##c.weigh foreign rep, robust
+	parallel bs, sav(pllbs, replace) reps(`nreps') nodots  : reg price c.weig##c.weigh foreign rep, robust
 	timer off 2
 
 	timer on 1

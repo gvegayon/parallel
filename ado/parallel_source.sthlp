@@ -872,7 +872,8 @@ real scalar parallel_finito(
     string scalar parallelid,
     | real scalar nclusters,
     real scalar timeout,
-    real colvector pids
+    real colvector pids,
+    real scalar deterministicoutput
     )
     {
     
@@ -998,7 +999,9 @@ real scalar parallel_finito(
                     suberrors++
                     st_local("pll_last_error", strofreal(errornum))
                 }
-                else display(sprintf("{it:cluster %04.0f} {text:has exited without error...}", i))
+                else{
+                    if (!deterministicoutput) display(sprintf("{it:cluster %04.0f} {text:has exited without error...}", i))
+                }
                 fclose(in_fh)
 
                 /* Checking tmpdir */
@@ -1499,6 +1502,7 @@ real scalar parallel_run(
     |real scalar nclusters, 
     string scalar paralleldir,
     real scalar timeout,
+    real scalar deterministicoutput,
     string scalar gateway_fname
     ) {
 
@@ -1514,9 +1518,9 @@ real scalar parallel_run(
     // Message
     display(sprintf("{hline %g}",c("linesize") > 80?80:c("linesize")))
     display("{result:Parallel Computing with Stata}")
-    display("{text:Clusters   :} {result:"+strofreal(nclusters)+"}")
-    display("{text:pll_id     :} {result:"+parallelid+"}")
-    display("{text:Running at :} {result:"+c("pwd")+"}")
+    if (!deterministicoutput) display("{text:Clusters   :} {result:"+strofreal(nclusters)+"}")
+    if (!deterministicoutput) display("{text:pll_id     :} {result:"+parallelid+"}")
+    if (!deterministicoutput) display("{text:Running at :} {result:"+c("pwd")+"}")
     display("{text:Randtype   :} {result:"+st_local("randtype")+"}")
 
     tmpdir = c("tmpdir") + (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/")
@@ -1614,7 +1618,7 @@ real scalar parallel_run(
     }
     
     /* Waits until each process ends */
-    return(parallel_finito(parallelid,nclusters,timeout,pids))
+    return(parallel_finito(parallelid,nclusters,timeout,pids, deterministicoutput))
 }
 end
 
@@ -1865,7 +1869,7 @@ mata:
 *!{dup 78:{c -}}{asis}
 real scalar parallel_setstatapath(string scalar statadir, | real scalar force) {
 
-    string scalar bit, flv, fname, sys_dir
+    string scalar bit, flv, flv2, fname, sys_dir
 
     // Is it 64bits?
     if (c("osdtl") != "" | c("bit") == 64) bit = "-64"
@@ -1893,17 +1897,30 @@ real scalar parallel_setstatapath(string scalar statadir, | real scalar force) {
             }
             
         }
-        else if (regexm(c("os"), "^MacOS.*")) { // MACOS
+        else if (regexm(c("machine_type"), "^Mac.*")) { // MACOS. (Note, c(os) for Mac in CLI actuall reports "Unix")
         
             if (c("stata_version") < 11 & (c("osdtl") != "" | c("bit") == 64)) bit = "64"
             else bit = ""
-        
-            if (c("MP")) flv = "Stata"+bit+"MP" 
-            else if (c("SE")) flv = "Stata"+bit+"SE"
-            else if (c("flavor") == "Small") flv = "smStata"
-            else if (c("flavor") == "IC") flv = "Stata"+bit
+            //not sure if the flv2 variants use bit, but we don't support those old ones.
+            if (c("MP")){
+                flv = "Stata"+bit+"MP" 
+                flv2 = "stata"+bit+"-mp" 
+            }
+            else if (c("SE")) {
+                flv = "Stata"+bit+"SE"
+                flv2 = "stata"+bit+"-se"
+            }
+            else if (c("flavor") == "Small"){
+                flv = "smStata"
+                flv2 = "stata-sm" //not sure about this one
+            }
+            else if (c("flavor") == "IC"){
+                flv = "Stata"+bit
+                flv2 = "stata"+bit
+            }
             
-            statadir = c("sysdir_stata")+flv+".app/Contents/MacOS/"+flv
+            //use flv at end for gui. Use flv2 for cmd-line
+            statadir = c("sysdir_stata")+flv+".app/Contents/MacOS/"+flv2
         }
         else { // UNIX
             if (c("MP")) flv = "stata-mp" 
