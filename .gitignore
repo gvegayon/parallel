@@ -18,6 +18,7 @@ ado/temp.txt
 
 *.zip
 *.7z
+*.dta
 
 *.png
 *.jpeg
