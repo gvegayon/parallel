@@ -1,0 +1,51 @@
+. qui reshape wide bp max_bp*, i(patient) j(when)
+{\smallskip}
+. summ 
+{\smallskip}
+    Variable {\VBAR}       Obs        Mean    Std. Dev.       Min        Max
+\HLI{13}{\PLUS}\HLI{56}
+     patient {\VBAR}       120        60.5    34.78505          1        120
+         bp1 {\VBAR}       120      156.45    11.38985        138        185
+     max_bp1 {\VBAR}       120    160.8333    11.59421        138        185
+ max_bp_pll1 {\VBAR}       120    160.8333    11.59421        138        185
+         bp2 {\VBAR}       120    151.3583    14.17762        125        185
+\HLI{13}{\PLUS}\HLI{56}
+     max_bp2 {\VBAR}       120    160.8333    11.59421        138        185
+ max_bp_pll2 {\VBAR}       120    160.8333    11.59421        138        185
+         sex {\VBAR}       120          .5    .5020964          0          1
+      agegrp {\VBAR}       120           2    .8199201          1          3
+{\smallskip}
+. qui reshape long
+{\smallskip}
+. qui parallel, by(patient) f nog: reshape wide bp max_bp*, i(patient) j(when)
+{\smallskip}
+. return list
+{\smallskip}
+scalars:
+              r(pll_n) =  4
+         r(pll_t_fini) =  .001
+         r(pll_t_calc) =  .181
+         r(pll_t_setu) =  0
+         r(pll_t_reps) =  1
+           r(pll_errs) =  0
+{\smallskip}
+macros:
+             r(pll_id) : "not6lzdcp8"
+            r(pll_dir) : "/u1/users/estudios/investigacion/george/comandos_paqu
+> etes_librerias/stata/parallel"
+{\smallskip}
+. summ
+{\smallskip}
+    Variable {\VBAR}       Obs        Mean    Std. Dev.       Min        Max
+\HLI{13}{\PLUS}\HLI{56}
+     patient {\VBAR}       120        60.5    34.78505          1        120
+         bp1 {\VBAR}       120      156.45    11.38985        138        185
+     max_bp1 {\VBAR}       120    160.8333    11.59421        138        185
+ max_bp_pll1 {\VBAR}       120    160.8333    11.59421        138        185
+         bp2 {\VBAR}       120    151.3583    14.17762        125        185
+\HLI{13}{\PLUS}\HLI{56}
+     max_bp2 {\VBAR}       120    160.8333    11.59421        138        185
+ max_bp_pll2 {\VBAR}       120    160.8333    11.59421        138        185
+         sex {\VBAR}       120          .5    .5020964          0          1
+      agegrp {\VBAR}       120           2    .8199201          1          3
+{\smallskip}
