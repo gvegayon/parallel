@@ -16,6 +16,10 @@ ado/temp.txt
 *.vrb
 *.snm
 
+# LaTeX
+*.synctex.gz
+
+
 *.zip
 *.7z
 *.dta
