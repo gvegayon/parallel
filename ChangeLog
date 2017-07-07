@@ -1,3 +1,12 @@
+2017-06-28 Brian Quistorff
+	* Fix Mac CLI issue
+
+2017-02-17 Brian Quistorff
+	* Add deterministic option
+
+2016-12-10 Brian Quistorff
+	* Add numprocessors subcommand
+	
 2016-10-26 George G. Vega Yon
 	* Squash issue #47 reported by Rebecca Nemec.
 

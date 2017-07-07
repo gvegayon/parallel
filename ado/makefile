@@ -71,3 +71,9 @@ tests:
 		done ; \
 		cat $(TESTS_LOGS) > all_tests_results.txt; \
 		less all_tests_results.txt;
+
+releaseinfo: check tests
+	@echo Make sure you run tests (on Stata v12)
+	@echo Make sure you bump the version
+	@echo Make sure you editted the Changelog
+	@echo After pushing to github, go to https://github.com/gvegayon/parallel/releases and make a release
