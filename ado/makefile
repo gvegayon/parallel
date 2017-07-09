@@ -10,15 +10,16 @@ ifeq "$(STATABATCH)" ""
   STATABATCH:=stata -b
 endif
 
-.PHONY: home compile inc_dist_date clean tests checks check_smcl check_missing_tempname check_macro_exp_mata check_version
+.PHONY: compile home inc_dist_date clean tests checks check_smcl check_missing_tempname check_macro_exp_mata check_version releaseinfo
 
+compile: inc_dist_date
+	$(STATABATCH) do compile.do
+	@echo Other helpful targets include: tests, checks, clean, and releaseinfo
 home:
 	$(STATABATCH) do compile_and_install.do
 	make clean
 inc_dist_date:
 	sed -ie "s/\(d Distribution-Date: \).\+/\1$$(date +%Y%m%d)/g" ../parallel.pkg
-compile: inc_dist_date
-	$(STATABATCH) do compile.do
 clean:
 	less compile_and_install.log
 	rm -f compile_and_install.log
