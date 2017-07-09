@@ -74,6 +74,6 @@ tests:
 
 releaseinfo: check tests
 	@echo Make sure you run tests (on Stata v12)
-	@echo Make sure you bump the version
+	@echo Make sure you bump the version and -make inc_dist_date-
 	@echo Make sure you editted the Changelog
 	@echo After pushing to github, go to https://github.com/gvegayon/parallel/releases and make a release

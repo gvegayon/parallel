@@ -24,8 +24,8 @@ type __pll`r(pll_id)'_do0001.do
 parallel clean, all
 
 /* Testing cluster assigment */
-parallel numprocessors
 parallel setclusters default //just to check
+parallel numprocessors
 parallel setclusters 2, force
 sort rep78
 parallel, by(rep78) f keepl nog: gen n2 = _N

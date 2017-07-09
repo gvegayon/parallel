@@ -1,4 +1,4 @@
-*! version 1.18.2 20mar2017
+*! version 1.18.3 09jul2017
 *! PARALLEL: Stata module for parallel computing
 *! by George G. Vega [cre,aut], Brian Quistorff [ctb]
 *! 
@@ -100,10 +100,10 @@ end
 program def parallel_version, rclass
 	version 11.0
 	di as result "parallel" as text " Stata module for parallel computing"
-	di as result "vers" as text " 1.18.2 20mar2017"
+	di as result "vers" as text " 1.18.3 09jul2017"
 	di as result "auth" as text " George G. Vega [cre,aut], Brian Quistorff [ctb]"
 	
-	return local pll_vers = "1.18.2"
+	return local pll_vers = "1.18.3"
 end
 
 /* Take a look to logfiles */
@@ -520,7 +520,7 @@ program parallel_setclusters
 	syntax anything(name=nclusters)  [, Force Statapath(string asis) Gateway(string) Includefile(string) procexec(int 2)]
 	
 	_assert inlist(`procexec',0,1,2), msg("procexec() must be 0, 1, or 2") rc(198)
-	cap parallel_setclusters
+	cap parallel_numprocessors
 	local nproc = int(real("`r(numprocessors)'"))
 	if "`nclusters'"=="default"{
 		_assert `nproc'!=., msg("Couldn't determine number of available processors for default configuration.")

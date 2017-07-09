@@ -1,3 +1,6 @@
+2017-07-09 Brian Quistorff
+	* Fix Bug in setting default numprocessors
+
 2017-06-28 Brian Quistorff
 	* Fix Mac CLI issue
 
