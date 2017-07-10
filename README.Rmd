@@ -80,7 +80,7 @@ knitr::opts_chunk$set(autodep = TRUE, echo=FALSE, comment='')
 When conducted over groups, parallelizing `egen` can be useful. In the following example we show how to use `parallel` with `by: egen`.
 
 ```{stata}
-parallel setclusters 2
+parallel setclusters 2, f
 sysuse auto
 parallel, by(foreign): egen maxp = max(price)
 tab maxp
@@ -101,7 +101,7 @@ In this example we'll evaluate a regression model using bootstrapping which, tog
 
 ```{stata}
 sysuse auto, clear
-parallel setclusters 4
+parallel setclusters 4, f
 timer on 1
 parallel bs, reps(5000): reg price c.weig##c.weigh foreign rep
 timer off 1
@@ -124,7 +124,7 @@ timer list
 From the `simulate` stata command:
 
 ```{stata}
-parallel setclusters 2
+parallel setclusters 2, f
 program define lnsim, rclass
   version 12.1
   syntax [, obs(integer 1) mu(real 0) sigma(real 1) ]
@@ -187,7 +187,7 @@ end
 
 // Running the algorithm in parallel fashion
 timer on 1
-parallel setclusters 4
+parallel setclusters 4, f
 parallel, prog(parfor): parfor y_pll
 timer off 1
 
@@ -211,7 +211,7 @@ di "Parallel is `=round(r(t2)/r(t1),.1)' times faster"
 Authors {#authors}
 ======
 George G. Vega [aut,cre]
-gvegayon (at) caltech dot edu
+g.vegayon %at% gmail
 
 Brian Quistorff [ctb]
 

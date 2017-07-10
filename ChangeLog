@@ -1,16 +1,23 @@
-2017-07-09 Brian Quistorff
+2017-07-09  George G. Vega Yon:
+	* Updated the README files, but used the -f- option so that the
+	  examples would work.
+
+	* Remove a pretty old file that is not been used anymore.
+
+
+2017-07-09  Brian Quistorff
 	* Fix Bug in setting default numprocessors
 
-2017-06-28 Brian Quistorff
+2017-06-28  Brian Quistorff
 	* Fix Mac CLI issue
 
-2017-02-17 Brian Quistorff
+2017-02-17  Brian Quistorff
 	* Add deterministic option
 
-2016-12-10 Brian Quistorff
+2016-12-10  Brian Quistorff
 	* Add numprocessors subcommand
 	
-2016-10-26 George G. Vega Yon
+2016-10-26  George G. Vega Yon
 	* Squash issue #47 reported by Rebecca Nemec.
 
 2016-10-17 George G. Vega Yon
@@ -18,22 +25,22 @@
 	* ado/parallel_bs.ado:bs and sim subcommands now how timers as well.
 	* ado/parallel_sim.ado: idem.
 
-2016-10-16 Brian Quistorff
+2016-10-16  Brian Quistorff
   * Allow parallel to aggregate secondary data sources.
 	* Bug Fixes
 	* Documentation updates.
 
-2016-09-15 Brian Quistorff
+2016-09-15  Brian Quistorff
   * Recover from killed child process
 	* Allow automatically and temporarily lower the number of clusters to accomodate smaller work loads
 	* Better error handling
 	* Bug fixes
 
-2016-05-17 Brian Quistorff
+2016-05-17  Brian Quistorff
 	* Change behavior to throw child errors.
 	* Switch to semantic versions
 
-2016-05-10 Brian Quistorff
+2016-05-10  Brian Quistorff
 	* Add Windows plugin for more convenient process launching.
 
 2016-05-09  George G. Vega Yon <g.vegayon@gmail.com>
