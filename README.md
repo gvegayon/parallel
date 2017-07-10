@@ -13,7 +13,8 @@ SSC at Boston College: <http://ideas.repec.org/c/boc/bocode/s457527.html>
 
 Installation
 ============
-If you have a previous installation of -parallel- installed from a different source (SSC, specific folder, specific URL) you should uninstall that first. Once installed it is suggested to restart Stata. 
+
+If you have a previous installation of -parallel- installed from a different source (SSC, specific folder, specific URL) you should uninstall that first. Once installed it is suggested to restart Stata.
 
 SSC
 ---
@@ -26,16 +27,16 @@ For accessing SSC version of parallel
 ```
 
 Development Version (Latest/Master)
---------------------------
+-----------------------------------
 
-For accessing the latest development version of parallel (from here) using Stata version \>=13
+For accessing the latest development version of parallel (from here) using Stata version &gt;=13
 
 ``` stata
 . net install parallel, from(https://raw.github.com/gvegayon/parallel/master/) replace
 . mata mata mlib index
 ```
 
-For Stata version \<13, download as zip, unzip, and then replace the above -net install- with
+For Stata version &lt;13, download as zip, unzip, and then replace the above -net install- with
 
 ``` stata
 . net install parallel, from(full_local_path_to_files) replace
@@ -51,12 +52,12 @@ Access other development releases via the [Releases Page](https://github.com/gve
 . mata mata mlib index
 ```
 
-Or you can download the release and install locally (for Stata \<13).
+Or you can download the release and install locally (for Stata &lt;13).
 
 Minimal examples
 ================
 
-The following minimal examples have been written to introduce how to use the module. Please notice that the only examples actually designed to show potential speed gains are [parfor](#parfor) and [bootstrap](#bootstrapping).
+The following minimal examples have been written to introduce how to use the module. Please notice that the only examples actually designed to show potential speed gains are [parfor](#parfor) and [bootstrap](#bootstraping).
 
 The examples have been executed on a Dell Vostro 3300 notebook running Ubuntu 14.04 with an Intel Core i5 CPU M 560 (2 physical cores) with 8Gb of RAM, using Stata/IC 12.1 for Unix (Linux 64-bit x86-64).
 
@@ -68,20 +69,21 @@ Simple parallelization of egen
 When conducted over groups, parallelizing `egen` can be useful. In the following example we show how to use `parallel` with `by: egen`.
 
 
-    . parallel setclusters 2
+    . parallel setclusters 2, f
     N Clusters: 2
-    Stata dir:  /usr/local/stata12/stata
+    Stata dir:  /usr/local/stata13/stata
 
     . sysuse auto
     (1978 Automobile Data)
 
     . parallel, by(foreign): egen maxp = max(price)
     -------------------------------------------------------------------------------
-    Parallel Computing with Stata (by GVY)
+    Parallel Computing with Stata
     Clusters   : 2
-    pll_id     : rf278ev5y1
-    Running at : /home/george/Documents/projects/parallel
+    pll_id     : m61jt2abc1
+    Running at : /home/vegayon/Dropbox/repos/parallel
     Randtype   : datetime
+
     Waiting for the clusters to finish...
     cluster 0001 has exited without error...
     cluster 0002 has exited without error...
@@ -124,24 +126,25 @@ In this example we'll evaluate a regression model using bootstrapping which, tog
     . sysuse auto, clear
     (1978 Automobile Data)
 
-    . parallel setclusters 4
+    . parallel setclusters 4, f
     N Clusters: 4
-    Stata dir:  /usr/local/stata12/stata
+    Stata dir:  /usr/local/stata13/stata
 
     . timer on 1
 
     . parallel bs, reps(5000): reg price c.weig##c.weigh foreign rep
     -------------------------------------------------------------------------------
-    Parallel Computing with Stata (by GVY)
+    Parallel Computing with Stata
     Clusters   : 4
-    pll_id     : rf278ev5y1
-    Running at : /home/george/Documents/projects/parallel
+    pll_id     : m61jt2abc1
+    Running at : /home/vegayon/Dropbox/repos/parallel
     Randtype   : datetime
+
     Waiting for the clusters to finish...
+    cluster 0001 has exited without error...
     cluster 0002 has exited without error...
     cluster 0003 has exited without error...
     cluster 0004 has exited without error...
-    cluster 0001 has exited without error...
     -------------------------------------------------------------------------------
     Enter -parallel printlog #- to checkout logfiles.
     -------------------------------------------------------------------------------
@@ -155,23 +158,23 @@ In this example we'll evaluate a regression model using bootstrapping which, tog
                  |   Observed   Bootstrap                         Normal-based
                  |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
     -------------+----------------------------------------------------------------
-          weight |  -4.317581   3.051228    -1.42   0.157    -10.29788    1.662716
+          weight |  -4.317581   3.033419    -1.42   0.155    -10.26297    1.627811
                  |
         c.weight#|
-        c.weight |   .0012192   .0004833     2.52   0.012     .0002719    .0021665
+        c.weight |   .0012192   .0004827     2.53   0.012     .0002732    .0021653
                  |
-         foreign |   3155.969   878.0604     3.59   0.000     1435.002    4876.936
-           rep78 |  -30.11387   322.2147    -0.09   0.926     -661.643    601.4153
-           _cons |   6415.187   5086.003     1.26   0.207    -3553.196    16383.57
+         foreign |   3155.969   890.4385     3.54   0.000     1410.742    4901.197
+           rep78 |  -30.11387   327.7725    -0.09   0.927    -672.5361    612.3084
+           _cons |   6415.187   5047.099     1.27   0.204    -3476.945    16307.32
     ------------------------------------------------------------------------------
 
     . timer off 1
 
     . timer list
-       1:     10.29 /        1 =      10.2890
-      97:      0.00 /        1 =       0.0000
-      98:      0.00 /        1 =       0.0000
-      99:     10.22 /        1 =      10.2160
+       1:     10.59 /        1 =      10.5930
+      97:      0.07 /        2 =       0.0340
+      98:      0.00 /        1 =       0.0030
+      99:     10.52 /        1 =      10.5190
 
 Which is the \`\`parallel way'' to do:
 
@@ -208,7 +211,7 @@ Which is the \`\`parallel way'' to do:
     . timer off 2
 
     . timer list
-       2:     22.55 /        1 =      22.5530
+       2:     17.78 /        1 =      17.7810
 
 Simulation
 ----------
@@ -216,9 +219,9 @@ Simulation
 From the `simulate` stata command:
 
 
-    . parallel setclusters 2
+    . parallel setclusters 2, f
     N Clusters: 2
-    Stata dir:  /usr/local/stata12/stata
+    Stata dir:  /usr/local/stata13/stata
 
     . program define lnsim, rclass
       1.   version 12.1
@@ -251,14 +254,15 @@ From the `simulate` stata command:
     -------------------------------------------------------------------------------
     > -
     -------------------------------------------------------------------------------
-    Parallel Computing with Stata (by GVY)
+    Parallel Computing with Stata
     Clusters   : 2
-    pll_id     : 2kb3dl9tl1
-    Running at : /home/george/Documents/projects/parallel
+    pll_id     : 93mwp9vps1
+    Running at : /home/vegayon/Dropbox/repos/parallel
     Randtype   : datetime
+
     Waiting for the clusters to finish...
-    cluster 0002 has exited without error...
     cluster 0001 has exited without error...
+    cluster 0002 has exited without error...
     -------------------------------------------------------------------------------
     Enter -parallel printlog #- to checkout logfiles.
     -------------------------------------------------------------------------------
@@ -268,8 +272,8 @@ From the `simulate` stata command:
 
         Variable |       Obs        Mean    Std. Dev.       Min        Max
     -------------+--------------------------------------------------------
-            mean |     10000    1.648777    .2169697   1.002971   2.835949
-             var |     10000    4.613049    3.952431   .7182144   97.69419
+            mean |     10000    1.648843    .2165041   1.021977   2.907977
+             var |     10000    4.650656    4.218584   .6159253   133.9232
 
 which is the parallel way to do
 
@@ -339,9 +343,9 @@ In this example we create a short program (`parfor`) which is intended to work a
     . // Running the algorithm in parallel fashion
     . timer on 1
 
-    . parallel setclusters 4
+    . parallel setclusters 4, f
     N Clusters: 4
-    Stata dir:  /usr/local/stata12/stata
+    Stata dir:  /usr/local/stata13/stata
 
     . parallel, prog(parfor): parfor y_pll
     -------------------------------------------------------------------------------
@@ -356,16 +360,17 @@ In this example we create a short program (`parfor`) which is intended to work a
     -------------------------------------------------------------------------------
     > -
     -------------------------------------------------------------------------------
-    Parallel Computing with Stata (by GVY)
+    Parallel Computing with Stata
     Clusters   : 4
-    pll_id     : oy6jow88d1
-    Running at : /home/george/Documents/projects/parallel
+    pll_id     : wrusvgqb91
+    Running at : /home/vegayon/Dropbox/repos/parallel
     Randtype   : datetime
+
     Waiting for the clusters to finish...
+    cluster 0001 has exited without error...
     cluster 0002 has exited without error...
     cluster 0003 has exited without error...
     cluster 0004 has exited without error...
-    cluster 0001 has exited without error...
     -------------------------------------------------------------------------------
     Enter -parallel printlog #- to checkout logfiles.
     -------------------------------------------------------------------------------
@@ -413,22 +418,20 @@ In this example we create a short program (`parfor`) which is intended to work a
     . 
     . // Comparing time
     . timer list
-       1:     15.89 /        1 =      15.8910
-       2:     29.55 /        1 =      29.5500
-      97:      1.03 /        1 =       1.0290
-      98:      0.00 /        1 =       0.0000
-      99:     14.32 /        1 =      14.3230
+       1:      8.93 /        1 =       8.9260
+       2:     16.06 /        1 =      16.0580
+      97:      0.42 /        1 =       0.4240
+      98:      0.32 /        1 =       0.3150
+      99:      8.17 /        1 =       8.1740
 
     . di "Parallel is `=round(r(t2)/r(t1),.1)' times faster"
-    Parallel is 1.9 times faster
+    Parallel is 1.8 times faster
 
     . 
 
-For more examples, see the [Gallery](https://github.com/gvegayon/parallel/wiki/Gallery).
-		
 Authors
 =======
 
-George G. Vega [aut,cre] gvegayon (at) caltech dot edu
+George G. Vega \[aut,cre\] g.vegayon %at% gmail
 
-Brian Quistorff [ctb]
+Brian Quistorff \[ctb\]
