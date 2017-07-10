@@ -1,5 +1,5 @@
 \documentclass[9pt]{beamer}
-\usepackage{etex} % Weird problem on dimentions
+\usepackage{etex} % Weird problem on dimensions
 %\usetheme{spensiones}
 %\mode<presentation> { \setbeamercovered{transparent} }
 %\usepackage{stata}
@@ -36,7 +36,7 @@ The usual disclaimers applies.}
 \begin{frame} % [allowframebreaks=.8]
 \frametitle{Motivation}
 \begin{itemize}
-\item Despite the availability of administrative data, its exploitation is still a novel issue.\pause
+\item Despite the availability of big data, using it can still be a challenge.\pause
 \item At the same time, currently home computers are arriving with extremely high computational capabilities.\pause
 \item Given its nature, matching both (big data problems and HPA) sounds strightforward.\pause
 \item But, implementing parallel computing for the social scientiest is not easy,
@@ -55,7 +55,7 @@ The usual disclaimers applies.}
 
 \begin{itemize}
 \item Inspired in the R package ``snow''\pause (several other examples exists: StataMP, HTCondor, Matlab's Parallel Toolbox, etc.)\pause
-\item Is designed to be used in multicore CPUs (dualcore, quadcore, etc.).\pause
+\item Is designed to be used in multiprocessor machines (e.g. simultaneous multithreading, multiple cores, multiple sockets).\pause
 \item It implements parallel computing methods through an OS's shell scripting (using Stata in batch mode) to accelerate computations.\pause
 %\item By starting determined number of clusters (stata instances) this module was design to repeat a task simultaneously over the clusters.\pause
 \item Depending on the task, can reach near to (or over) linear speedups proportional to the number of physical cores of the computer.\pause
@@ -387,7 +387,7 @@ Do syntax
 \begin{columns}
 \begin{column}{.5\textwidth}
 {\color{gray}
-{\tt parallel suit ...}
+{\tt parallel suits ...}
 \rule{\linewidth}{4pt}}
 \begin{itemize}
 \item Montecarlo simulation.\pause
@@ -429,6 +429,9 @@ thus an all new set of algorithms can be implemented:\pause
 \item {\tt parnnmatch}\pause
 \item ... {\large You name it!}
 \end{itemize}
+\item Caveat: Has not been tested on Stata 15.\pause
+\item Contribute, find help, and report bugs, go to \href{http://github.com/gvegayon/parallel}{github.com/gvegayon/parallel}\pause
+
 \end{itemize}
 
 \end{frame}
