@@ -1,3 +1,4 @@
+%Checklist: Spellcheck, style commands
 \providecommand*\ExtraDocOpts{}
 \documentclass[9pt,\ExtraDocOpts]{beamer}
 \usepackage{etex} % Weird problem on dimensions
@@ -7,14 +8,15 @@
 \usepackage{tikz, tabularx, ulem}
 %\usepackage{fancyvrb}
 \usetikzlibrary{arrows, fit,positioning}
+\usepackage{booktabs}
 
-\title[{\tt parallel}]{Just tired of endless loops! \\ {\it \footnotesize or} {\normalsize {\tt parallel}: Stata module for parallel computing}}
+\title[{\tt parallel}]{Just tired of endless loops! \\ \textit{\footnotesize or} {\normalsize {\tt parallel}: Stata module for parallel computing}}
 
 \author[Vega, Quistorff]{George G. Vega\inst{1} \and Brian Quistorff\inst{2}}
-\institute[USC and MSR]{\inst{1}University of Southern California\\ g.vegayon@gmail.com\and \inst{2}Microsoft AI and Resesarch\\Brian.Quistorff@microsoft.com}
+\institute[USC and MSR]{\inst{1}University of Southern California\\ g.vegayon@gmail.com\and \inst{2}Microsoft AI and Research\\Brian.Quistorff@microsoft.com}
 \def\unix1{Intel Xeon X470 (hexadeca-core)}
 \def\windows1{Intel i3 2120 (dual-core)}
-\date{Stata Conference Baltimore\\July 27-28, 2017}
+\date{Stata Conference Baltimore\\July 27--28, 2017}
 \begin{document}
 
 \frame{
@@ -37,11 +39,10 @@ The usual disclaimers applies.}
 \begin{frame} % [allowframebreaks=.8]
 \frametitle{Motivation}
 \begin{itemize}
-\item Despite the availability of big data, using it can still be a challenge.\pause
-\item At the same time, currently home computers are arriving with extremely high computational capabilities.\pause
-\item Given its nature, matching both (big data problems and HPA) sounds strightforward.\pause
-\item But, implementing parallel computing for the social scientiest is not easy,
-\pause most of this due to lack of (user-friendly) statistical computing tools.\pause
+\item Both computation speeds and size of data are ever increasing
+\item Often our work is easily broken down into independent chunks 
+\item But, implementing parallel computing even for these ``embarrassingly parallel'' problems is not easy,
+\pause{}most of this due to lack of (user-friendly) statistical computing tools.\pause{}
 \item {\tt parallel} aims to make a contribution to these issues.
 \end{itemize}
 \end{frame}
@@ -55,11 +56,17 @@ The usual disclaimers applies.}
 \framesubtitle{What is?}
 
 \begin{itemize}
-\item Inspired in the R package ``snow''\pause (several other examples exists: StataMP, HTCondor, Matlab's Parallel Toolbox, etc.)\pause
-\item Is designed to be used in multiprocessor machines (e.g. simultaneous multithreading, multiple cores, multiple sockets).\pause
-\item It implements parallel computing methods through an OS's shell scripting (using Stata in batch mode) to accelerate computations.\pause
-%\item By starting determined number of clusters (stata instances) this module was design to repeat a task simultaneously over the clusters.\pause
-\item Depending on the task, can reach near to (or over) linear speedups proportional to the number of physical cores of the computer.\pause
+\item NB: StataMP is available but only parallelizes some internal commands. Therefore a user-provided solution is needed.\pause{}
+\item Inspired by the R package ``snow'' (several other examples exists: StataMP, HTCondor, Matlab's Parallel Toolbox, etc.)\pause{}
+\item Is designed to be used in multiprocessor machines (e.g.\ simultaneous multi-threading, multiple cores, multiple sockets).\pause{}
+\item It implements parallel computing methods through an OS's shell scripting (using Stata in batch mode).\pause{}
+\item On Windows we have a compiled plugging allowing\pause{}
+\begin{itemize}
+\item Functionality when the parent Stata is in batch-mode\pause{}
+\item Seamless user experience by launching the child programs in a hidden desktop (otherwise GUI for each steals focus)\pause{}
+\end{itemize}
+%\item By starting determined number of clusters (stata instances) this module was design to repeat a task simultaneously over the clusters.\pause{}
+\item Depending on the task, can reach near to (or over) linear speedups proportional to the number of physical cores of the computer.\pause{}
 \item Thus having a quad-core computer can lead to a 400\% speedup.
 \end{itemize}
 
@@ -75,10 +82,32 @@ The usual disclaimers applies.}
 \end{figure}
 \end{frame}
 
-\begin{frame}
+\begin{frame} % [allowframebreaks=.8]
 \frametitle{What is and how does it work}
-{\Large Sounds ``pretty'' but...}\pause {\Huge is this for real!?}
+\framesubtitle{How does it work?}
+
+\begin{itemize}
+\item Method is \textit{split-apply-combine} like MapReduce\pause{}
+\item Straightforward usage when there is observation or group-level work\pause{}
+\item If each iteration needs the entire dataset, then can be reformulated as\pause{}
+\begin{enumerate}
+\item Save real dataset to file\pause{}
+\item Generate in-memory data as the list of tasks. For example,\pause{}
+\begin{itemize}
+\item List of seeds for each bootstrap resampling\pause{}
+\item List of parameter values for simulations\pause{}
+\end{itemize}
+\item Child process reads its list of tasks, loads the real dataset, and does it's own looping over tasks\pause{}
+\end{enumerate}
+\item If the list of tasks is not initially definable then the ``nodata'' alternative mechanism allows for more flexibility.
+\end{itemize}
+
 \end{frame}
+
+%\begin{frame}
+%\frametitle{What is and how does it work}
+%{\Large Sounds ``pretty'' but\ldots}\pause{} {\Huge is this for real!?}
+%\end{frame}
 
 \begin{frame}
 \frametitle{What is and how does it work}
@@ -92,7 +121,7 @@ When the user enters
 {\bf{\tt parallel: gen n = \_N}}
 \end{figure} 
 
-{\tt parallel} takes the command and writes something like this\pause
+{\tt parallel} takes the command and writes something like this\pause{}
 \bigskip
 \scriptsize
 
@@ -101,12 +130,12 @@ When the user enters
 %}
 \end{frame}
 
-\begin{frame}
-\frametitle{What is and how does it work}
-{\Large Ok, it works but...}\pause 
-
-{\Huge it must be really hard to use!}
-\end{frame}
+%\begin{frame}
+%\frametitle{What is and how does it work}
+%{\Large Ok, it works but\ldots}\pause{} 
+%
+%{\Huge it must be really hard to use!}
+%\end{frame}
 
 \section{Benchmarks}
 \frame{\tableofcontents[currentsection]}
@@ -150,16 +179,16 @@ forval i=1/`size' \{
 \centering
 \caption{Serial replacing using a loop on a Linux Server (16 clusters)}
 \scalebox{.9}{
-\begin{tabular}{l*{3}{c}}\hline
-& 100,000 &         1,000,000 &       10,000,000 \\ \hline
+\begin{tabular}{l*{3}{c}}\toprule
+& 100,000 &         1,000,000 &       10,000,000 \\ \midrule
 CPU &     1.43 &     16.94 &    144.68 \\
 Total &     0.34 &      3.20 &     12.49 \\
 \hspace{2mm} Setup &     0.00 &      0.00 &      0.00 \\
 \hspace{2mm} Compute &     0.32 &      3.07 &     11.54 \\
 \hspace{2mm} Finish &     0.02 &      0.12 &      0.95 \\
-\hline Ratio (compute) &     4.50 &      5.51 &     12.53 \\
+\midrule Ratio (compute) &     4.50 &      5.51 &     12.53 \\
 Ratio (total) &     4.22 (26\%) &      5.30 (30\%) &     11.58 (72\%) \\
-\hline
+\bottomrule
 \multicolumn{4}{l}{\footnotesize Tested on a \unix1 machine}
 \end{tabular}}
 \end{table}
@@ -253,16 +282,16 @@ forval i=`start'/`end' \{
 \centering
 \caption{Monte Carlo Experiment on a Windows Machine (4 clusters)}
 \scalebox{.85}{
-\begin{tabular}{l*{2}{c}}\hline
-& 2 &               4 \\ \hline
+\begin{tabular}{l*{2}{c}}\toprule
+& 2 &               4 \\ \midrule
 CPU &   111.49 &    114.13 \\
 Total &    58.02 &     37.48 \\
 \hspace{2mm} Setup &     0.00 &      0.00 \\
 \hspace{2mm} Compute &    58.02 &     37.48 \\
 \hspace{2mm} Finish &     0.00 &      0.00 \\
-\hline Ratio (compute) &     1.92 &      3.04 \\
+\midrule Ratio (compute) &     1.92 &      3.04 \\
 Ratio (total) &     1.92 (96\%)&      3.04 (76\%)\\
-\hline
+\bottomrule
 \multicolumn{3}{l}{\footnotesize Tested on a \windows1 machine}
 \end{tabular}}
 \end{table}
@@ -288,16 +317,16 @@ parallel do myexperiment.do, nodata
 \centering
 \caption{Monte Carlo Experiment on a Linux Server (16 clusters)}
 \scalebox{.85}{
-\begin{tabular}{l*{4}{c}}\hline
-& 2 &               4 &               8 &              16 \\ \hline
+\begin{tabular}{l*{4}{c}}\toprule
+& 2 &               4 &               8 &              16 \\ \midrule
 CPU &   164.79 &    164.04 &    162.84 &    163.89 \\
 Total &    69.85 &     34.28 &     19.00 &     10.78 \\
 \hspace{2mm} Setup &     0.00 &      0.00 &      0.00 &      0.00 \\
 \hspace{2mm} Compute &    69.85 &     34.28 &     19.00 &     10.78 \\
 \hspace{2mm} Finish &     0.00 &      0.00 &      0.00 &      0.00 \\
-\hline Ratio (compute) &     2.36 &      4.78 &      8.57 &     15.21 \\
+\midrule Ratio (compute) &     2.36 &      4.78 &      8.57 &     15.21 \\
 Ratio (total) &     2.36 (118\%) &      4.78 (120\%)&      8.57 (107\%) &     15.21 (95\%) \\
-\hline
+\bottomrule
 \multicolumn{4}{l}{\footnotesize Tested on a \unix1 machine}
 \end{tabular}}
 \end{table}
@@ -328,16 +357,16 @@ parallel, by(id) :reshape wide tipsolic rutemp opta derecho ngiros, ///
 \centering
 \caption{Reshaping wide a large database on a Linux Server (8 clusters)}
 \scalebox{.8}{
-\begin{tabular}{l*{3}{c}}\hline
-& 100,000 &         1,000,000 &         5,000,000 \\ \hline
+\begin{tabular}{l*{3}{c}}\toprule
+& 100,000 &         1,000,000 &         5,000,000 \\ \midrule
 CPU &     5.51 &     72.70 &    392.97 \\
 Total &     2.33 &     17.46 &     86.44 \\
 \hspace{2mm} Setup &     0.00 &      0.00 &      0.00 \\
 \hspace{2mm} Compute &     1.83 &     12.42 &     57.93 \\
 \hspace{2mm} Finish &     0.50 &      5.04 &     28.51 \\
-\hline Ratio (compute) &     3.01 &      5.85 &      6.78 \\
+\midrule Ratio (compute) &     3.01 &      5.85 &      6.78 \\
 Ratio (total) &     2.37 (29\%)&      4.16 (52\%)&      4.55 (57\%)\\
-\hline
+\bottomrule
 \multicolumn{4}{l}{\footnotesize Tested on a \unix1 machine}
 \end{tabular}}
 \end{table}
@@ -355,27 +384,27 @@ Setup
 
 \begin{semiverbatim}
 \footnotesize
-{\bf parallel setclusters} {\it \#}  [, \uline{f}orce] 
-\end{semiverbatim}\pause
+{\bf parallel setclusters} \textit{\#}  [, \uline{f}orce] 
+\end{semiverbatim}\pause{}
 
 By syntax
 
 \begin{semiverbatim}
 \footnotesize
-{\bf parallel} [, by({\it \color{blue} varlist}) \uline{p}rograms \uline{m}ata \uline{s}eeds({\it \color{blue} string}) \uline{r}andtype({\it \color{blue} random.org$|$datetime})
+{\bf parallel} [, by(\textit{\color{blue} varlist}) \uline{p}rograms \uline{m}ata \uline{s}eeds(\textit{\color{blue} string}) \uline{r}andtype(\textit{\color{blue} random.org$|$datetime})
 
-\hspace{1cm} \uline{pr}ocessors({\it \color{blue} integer}) \uline{nod}ata]:  {\it stata\_cmd}
-\end{semiverbatim}\pause
+\hspace{1cm} \uline{pr}ocessors(\textit{\color{blue} integer}) \uline{nod}ata]:  \textit{stata\_cmd}
+\end{semiverbatim}\pause{}
 
 Do syntax
 
 \begin{semiverbatim}
 \footnotesize
-{\bf parallel do} {\it \color{blue} filename}
+{\bf parallel do} \textit{\color{blue} filename}
 
-\hspace{1cm} [, by({\it \color{blue} varlist}) \uline{p}rograms \uline{m}ata \uline{s}eeds({\it \color{blue} string}) \uline{r}andtype({\it \color{blue} random.org$|$datetime})
+\hspace{1cm} [, by(\textit{\color{blue} varlist}) \uline{p}rograms \uline{m}ata \uline{s}eeds(\textit{\color{blue} string}) \uline{r}andtype(\textit{\color{blue} random.org$|$datetime})
 
-\hspace{1cm} \uline{pr}ocessors({\it \color{blue} integer}) \uline{nod}ata]
+\hspace{1cm} \uline{pr}ocessors(\textit{\color{blue} integer}) \uline{nod}ata]
 \end{semiverbatim}
 
 \end{frame}
@@ -383,30 +412,31 @@ Do syntax
 
 \begin{frame}
 \frametitle{Syntax and Usage}
-\framesubtitle{Recomendations on its usage}
+\framesubtitle{Recommendations on its usage}
 
 \begin{columns}
 \begin{column}{.5\textwidth}
 {\color{gray}
-{\tt parallel suits ...}
+{\tt parallel suits \ldots}
 \rule{\linewidth}{4pt}}
 \begin{itemize}
-\item Montecarlo simulation.\pause
-\item Extensive nested control flow (loops, while, ifs, etc.).\pause
-\item Bootstraping/Jacknife.\pause
-\item Simulations in general.\pause
+\item Monte-Carlo simulation.\pause{}
+\item Extensive nested control flow (loops, while, ifs, etc.).\pause{}
+\item Bootstrapping/Jackknife.\pause{}
+\item Simulations in general.\pause{}
 \end{itemize}
 \end{column}%
 \hfill%
 \begin{column}{.5\textwidth}
 {\color{gray}
-{\tt parallel doesn't suit ...}
+{\tt parallel doesn't suit \ldots}
 \rule{\linewidth}{4pt}}
 \begin{itemize}
-\item (already) fast commands.\pause
-\item Regressions, ARIMA, etc.\pause
-\item Linear Algebra.\pause
-\item Whatever StataMP does better.
+\item (already) fast commands.\pause{}
+\item Regressions, ARIMA, etc.\pause{}
+\item Linear Algebra.\pause{}
+\item Whatever StataMP does better.\pause{}
+\item (Currently) Tasks that already take up all of RAM.
 \end{itemize}
 \end{column}%
 \end{columns}
@@ -418,20 +448,12 @@ Do syntax
 \frametitle{Concluding Remarks}
 
 \begin{itemize}
-\item In the case of Stata, {\tt parallel} is, to the authors knowledge, the first public user-contribution to parallel computing\pause
-\item its major strengths/advantages are in simulation models and non-vectorized operations such as control-flow statements.\pause
-\item Depending on the proportion of the algorithm that can be de-serialized, it is possible to reach near to constant scale speedups.\pause
-\item {\tt parallel} establishes a new basis for parallel computing in Stata,\pause{}
-thus an all new set of algorithms can be implemented:\pause
-\begin{itemize}
-\item {\tt parsimulate}\pause
-\item {\tt parfor}\pause
-\item {\tt parbootstrap}\pause
-\item {\tt parnnmatch}\pause
-\item ... {\large You name it!}
-\end{itemize}
-\item Caveat: Has not been tested on Stata 15.\pause
-\item Contribute, find help, and report bugs, go to \href{http://github.com/gvegayon/parallel}{github.com/gvegayon/parallel}\pause
+\item Brings parallel computing to many more commands than StataMP \pause{}
+\item its major strengths/advantages are in simulation models and non-vectorized operations such as control-flow statements.\pause{}
+\item Depending on the proportion of the algorithm that can be de-serialized, it is possible to reach near to linear scale speedups.\pause{}
+\item {\tt parallel} can be incorporated into other user commands as an optional speedup.  \pause{}
+\item Caveat: Has not been tested on Stata 15.\pause{}
+\item Contribute, find help, and report bugs at \url{http://github.com/gvegayon/parallel}\pause{}
 
 \end{itemize}
 
