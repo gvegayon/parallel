@@ -2808,6 +2808,27 @@ LAST_PLL_N
  
 \end_layout
 
+\begin_layout Standard
+Expressions run in the child-processes that contain 
+\family typewriter
+_n
+\family default
+ or 
+\family typewriter
+_N
+\family default
+ will be evaluated locally to the child not the parent dataset.
+ These expressions may therefore be different if run in 
+\family typewriter
+parallel
+\family default
+ than without 
+\family typewriter
+parallel
+\family default
+.
+\end_layout
+
 \begin_layout Subsection
 Installation
 \begin_inset CommandInset label

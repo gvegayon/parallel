@@ -468,6 +468,11 @@ and {help mata:mata objects}, in the current version it is not capable of doing 
 If the number of tasks to be done is less than the number of clusters, {cmd:parallel} will temporarily reduce
 the number of clusters. This is reported in the global {cmd:$LAST_PLL_N}.
 {p_end}
+ 
+{pstd}
+Expressions run in the child-processes that contain {it:_n} or {it:_N} will be evaluated locally to the child not the parent dataset.
+These expressions may therefore be different if run in {cmd:parallel} than without {cmd:parallel}.
+{p_end}
 
 
 {marker tech}{...}
