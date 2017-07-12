@@ -12,8 +12,8 @@
 
 \title[{\tt parallel}]{Just tired of endless loops! \\ \textit{\footnotesize or} {\normalsize {\tt parallel}: Stata module for parallel computing}}
 
-\author[Vega, Quistorff]{George G. Vega\inst{1} \and Brian Quistorff\inst{2}}
-\institute[USC and MSR]{\inst{1}University of Southern California\\ g.vegayon@gmail.com\and \inst{2}Microsoft AI and Research\\Brian.Quistorff@microsoft.com}
+\author[Vega Yon, Quistorff]{George G. Vega Yon\inst{1} \and Brian Quistorff\inst{2}}
+\institute[USC and MSR]{\inst{1}University of Southern California\\ vegayon@usc.edu\and \inst{2}Microsoft AI and Research\\Brian.Quistorff@microsoft.com}
 \def\unix1{Intel Xeon X470 (hexadeca-core)}
 \def\windows1{Intel i3 2120 (dual-core)}
 \date{Stata Conference Baltimore\\July 27--28, 2017}
@@ -22,11 +22,7 @@
 \frame{
 \maketitle
 {\scriptsize
-Thanks to Damian C. Clarke, F\'elix Villatoro and Eduardo Fajnzylber, Tom\'as Rau, 
-Eric Melse, Valentina Moscoso, the 
-Research team of the Chilean Pension Supervisor and several Stata users worldwide
-for their valuable contributions.
-The usual disclaimers applies.}
+Thanks to Stata users worldwide for their valuable contributions. The usual disclaimers applies.}
 }
 
 \frame{
@@ -373,6 +369,113 @@ Ratio (total) &     2.37 (29\%)&      4.16 (52\%)&      4.55 (57\%)\\
 
 \end{frame}
 
+
+\begin{frame}[t]
+\frametitle{Benchmarks}
+\framesubtitle{Bootstrap with \tt{parallel bs}}
+\begin{semiverbatim}
+	\scriptsize
+sysuse auto, clear
+expand 10
+
+
+// Serial fashion
+
+bs, rep(\$size) nodots: regress mpg weight gear foreign
+
+
+// Parallel fashion
+parallel setclusters \$number\_of\_clusters
+
+parallel bs, rep(\$size) nodots: regress mpg weight gear foreign
+\end{semiverbatim}
+
+
+\begin{table}[!h]
+\centering\begin{tabular}{l*{3}{c}}
+	\toprule
+	Problem size & Serial & 2 Clusters & 4 Clusters\\\midrule
+	1,000 &   2.93s &   1.62s &   1.09s \\    
+	&  $\times$2.69 &  $\times$1.48 &  $\times$1.00 \\ \\
+	2,000 &   5.80s &   3.13s &   2.03s \\    
+	&  $\times$2.85 &  $\times$1.54 &  $\times$1.00 \\ \\
+	4,000 &  11.59s &   6.27s &   3.86s \\    
+	&  $\times$3.01 &  $\times$1.62 &  $\times$1.00 \\
+	\bottomrule
+\end{tabular}
+\caption{Absolute and relative computing times for each run of a basic bootstrap problem. For each given problem size, the first row shows the time in seconds, and the second row shows the relative time each method took to complete the task relative to using parallel with four clusters. Each cell represents a 1,000 runs.}
+	\end{table}
+	
+\end{frame}
+
+\begin{frame}[t]
+	\frametitle{Benchmarks}
+	\framesubtitle{Simulations with \tt{parallel sim}}
+	\begin{semiverbatim}
+		\scriptsize
+prog def mysim, rclass
+
+\hspace{.5cm}// Data generating process
+
+\hspace{.5cm}drop \_all
+
+\hspace{.5cm}set obs 1000 
+
+\hspace{.5cm}gen eps = rnormal()
+
+\hspace{.5cm}gen X   = rnormal()
+
+\hspace{.5cm}gen Y   = X*2 + eps 
+
+
+\hspace{.5cm}// Estimation
+
+\hspace{.5cm}reg Y X 
+
+\hspace{.5cm}mat def ans = e(b)
+
+\hspace{.5cm}return scalar beta = ans[1,1]
+
+end
+
+
+// Serial fashion
+
+simulate beta=r(beta), reps(\$size) nodots: mysim
+
+
+// Parallel fashion
+
+parallel setclusters \$number\_of\_clusters
+
+parallel sim, reps(\$size) expr(beta=r(beta)) nodots: mysim
+	\end{semiverbatim}
+	
+\end{frame}
+
+\begin{frame}[t]
+	\frametitle{Benchmarks}
+	\framesubtitle{Simulations with \tt{parallel sim} (cont.)}
+	
+	\begin{table}[!h]
+\centering\begin{tabular}{l*{3}{c}}
+	\toprule
+	Problem size & Serial & 2 Clusters & 4 Clusters\\\midrule
+	1000 &   2.19s &   1.18s &   0.73s \\    
+	&  $\times$3.01 &  $\times$1.62 &  $\times$1.00 \\ \\
+	2000 &   4.36s &   2.29s &   1.33s \\    
+	&  $\times$3.29 &  $\times$1.73 &  $\times$1.00 \\ \\
+	4000 &   8.69s &   4.53s &   2.55s \\    
+	&  $\times$3.40 &  $\times$1.77 &  $\times$1.00 \\
+	\bottomrule
+\end{tabular}
+		\caption{Absolute and relative computing times for each run of a simple Monte Carlo exercise. For each given problem size, the first row shows the time in seconds, and the second row shows the relative time each method took to complete the task relative to using parallel with four clusters. Each cell represents a 1,000 runs.}
+	\end{table}
+	
+Code for replicating this is available at \url{https://github.com/gvegayon/parallel}
+	
+\end{frame}
+
 \section{Syntax and Usage}
 
 \frame{\tableofcontents[currentsection]}
@@ -405,7 +508,37 @@ Do syntax
 \hspace{1cm} [, by(\textit{\color{blue} varlist}) \uline{p}rograms \uline{m}ata \uline{s}eeds(\textit{\color{blue} string}) \uline{r}andtype(\textit{\color{blue} random.org$|$datetime})
 
 \hspace{1cm} \uline{pr}ocessors(\textit{\color{blue} integer}) \uline{nod}ata]
+\end{semiverbatim}\pause{}
+
+Bootstrap syntax
+
+\begin{semiverbatim}
+	\footnotesize
+	{\bf parallel bs} [, by(\textit{\color{blue} varlist}) \uline{p}rograms \uline{m}ata \uline{s}eeds(\textit{\color{blue} string}) \uline{r}andtype(\textit{\color{blue} random.org$|$datetime})
+	
+	\hspace{1cm} \uline{pr}ocessors(\textit{\color{blue} integer}) \uline{nod}ata]:  \textit{stata\_cmd}
+\end{semiverbatim}\pause{}
+
+
+Simulations syntax
+
+\begin{semiverbatim}
+	\footnotesize
+	{\bf parallel sim} [, by(\textit{\color{blue} varlist}) \uline{p}rograms \uline{m}ata \uline{s}eeds(\textit{\color{blue} string}) \uline{r}andtype(\textit{\color{blue} random.org$|$datetime})
+	
+	\hspace{1cm} \uline{pr}ocessors(\textit{\color{blue} integer}) \uline{nod}ata]:  \textit{stata\_cmd}
+\end{semiverbatim}\pause{}
+
+
+Append syntax
+
+\begin{semiverbatim}
+	\footnotesize
+	{\bf parallel append} [, by(\textit{\color{blue} varlist}) \uline{p}rograms \uline{m}ata \uline{s}eeds(\textit{\color{blue} string}) \uline{r}andtype(\textit{\color{blue} random.org$|$datetime})
+	
+	\hspace{1cm} \uline{pr}ocessors(\textit{\color{blue} integer}) \uline{nod}ata]:  \textit{stata\_cmd}
 \end{semiverbatim}
+
 
 \end{frame}
 
