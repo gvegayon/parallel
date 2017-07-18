@@ -3,7 +3,7 @@ program drop _all
 macro drop _all
 sysuse auto, clear
 global nCl = 3
-parallel setclusters $nCl, force
+parallel setclusters $nCl, force hostnames(`: env PLL_TEST_NODES')
 set seed 1337
 
 //Test -parallel bs-
@@ -81,7 +81,7 @@ di "LAST_PLL_N=$LAST_PLL_N. PLL_CLUSTERS=$PLL_CLUSTERS"
 if 1{ 
 sysuse auto, clear
 replace foreign=. in 1/20
-parallel setclusters 4, force //max is 3
+parallel setclusters 4, force hostnames(`: env PLL_TEST_NODES') //max is 3
 sort foreign
 parallel, by(foreign): reg price mpg
 di "LAST_PLL_N=$LAST_PLL_N. PLL_CLUSTERS=$PLL_CLUSTERS"
@@ -90,7 +90,7 @@ gen str1 name = "A"
 replace name="B" if mod(_n,3)==0
 replace name=""  if foreign==1
 
-parallel setclusters 6, force //max is 5
+parallel setclusters 6, force hostnames(`: env PLL_TEST_NODES') //max is 5
 sort foreign name
 parallel, by(foreign name): reg price mpg
 di "LAST_PLL_N=$LAST_PLL_N. PLL_CLUSTERS=$PLL_CLUSTERS"

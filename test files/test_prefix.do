@@ -21,7 +21,7 @@ while ("`test`++i''" != "") {
 }
 
 foreach c of global clusters {
-	parallel setclusters `c', force
+	parallel setclusters `c', force hostnames(`: env PLL_TEST_NODES')
 	local i=0
 	while ("`test`++i''" != "") {
 		quietly {

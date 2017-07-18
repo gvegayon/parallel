@@ -3,7 +3,7 @@ set more off
 *set trace off
 
 if (c(os) == "Windows") parallel setclusters 2, force
-else parallel setclusters 8, force
+else parallel setclusters 8, force hostnames(`: env PLL_TEST_NODES')
 
 sysuse auto
 
