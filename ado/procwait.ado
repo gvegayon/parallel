@@ -4,11 +4,12 @@
 //   because you can handle breaks better?)
 /* Usage:
 cap noi procwait <PID>
+//cap noi procwait <PID>, connection(ssh node2)
 if(!_rc) <something if finished>
 */
 program procwait, rclass
 	version 11.0
-	syntax anything(everything)
+	syntax anything(everything) [, connection(string)]
 	
 	if (c(os) == "Windows") {
 		plugin call procwait_plug, `"`anything'"'
@@ -17,7 +18,7 @@ program procwait, rclass
 	else {
 		//kill -0 is the POSIX way of checking
 		tempfile kill_exit_code
-		shell kill -0 `anything' 2> /dev/null; echo \$? > "`kill_exit_code'"
+		shell `connection' kill -0 `anything' 2> /dev/null; echo \$? > "`kill_exit_code'"
 		//kill exits with 0 if exists, 1 otherwise
 		
 		tempname fh

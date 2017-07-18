@@ -433,7 +433,7 @@ program def parallel_do, rclass
 	
 	/* Running the dofiles */
 	timer on 99
-	mata: st_local("nerrors", strofreal(parallel_run("`parallelid'",$PLL_CLUSTERS,`"$PLL_STATA_PATH"',`=`timeout'*1000', `deterministicoutput')))
+	mata: st_local("nerrors", strofreal(parallel_run("`parallelid'",$PLL_CLUSTERS,`"$PLL_STATA_PATH"',`=`timeout'*1000', `deterministicoutput', tokens("$PLL_HOSTNAMES"), "$PLL_SSH")))
 	timer off 99
 	
 	cap timer list
@@ -517,7 +517,7 @@ end
 // Sets the number of clusters as a global macro
 program parallel_setclusters
 	version 11.0
-	syntax anything(name=nclusters)  [, Force Statapath(string asis) Gateway(string) Includefile(string) procexec(int 2)]
+	syntax anything(name=nclusters)  [, Force Statapath(string asis) Gateway(string) Includefile(string) Hostnames(string) ssh(string) procexec(int 2)]
 	
 	_assert inlist(`procexec',0,1,2), msg("procexec() must be 0, 1, or 2") rc(198)
 	cap parallel_numprocessors
@@ -531,6 +531,9 @@ program parallel_setclusters
 		_assert (`nclusters'>0 & `nclusters'!=.),  msg(`"Not allowed: "#" Should be a positive number"') rc(109)
 	}
 	global USE_PROCEXEC = `procexec'
+	global PLL_HOSTNAMES = "`hostnames'"
+	global PLL_SSH = "`ssh'"
+	if "$PLL_SSH"!="" global PLL_SSH = "$PLL_SSH "
 	
 	local force = (length("`force'")>0)
 	mata: parallel_setclusters(`nclusters', `force', `nproc')
