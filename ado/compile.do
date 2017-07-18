@@ -7,6 +7,10 @@ macro drop _all
 mata mata clear
 set matastrict on
 
+//use when debugging 
+//  See also matadebug setting in setup_ado.do
+//set matalnum on 
+
 vers 10.0
 
 /* Build documentation */
