@@ -12,6 +12,10 @@
 %
 % The Stata Press document class
 
+%Make locally deterministic
+\pdfinfo{ /Creator ()  /Producer () /ModDate ()  /CreationDate () }
+\pdftrailerid{} %Remove ID
+\pdfsuppressptexinfo15 %Suppress PTEX.Fullbanner and info of imported PDFs
 
 % Page dimensions
 \usepackage[crop,newcenter,frame]{pagedims}

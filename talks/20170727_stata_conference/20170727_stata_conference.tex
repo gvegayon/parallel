@@ -1,6 +1,12 @@
 %Checklist: Spellcheck, style commands
 \providecommand*\ExtraDocOpts{}
 \documentclass[9pt,\ExtraDocOpts]{beamer}
+
+%Make locally deterministic
+\pdfinfo{ /Creator ()  /Producer () /ModDate ()  /CreationDate () }
+\pdftrailerid{} %Remove ID
+\pdfsuppressptexinfo15 %Suppress PTEX.Fullbanner and info of imported PDFs
+
 \usepackage{etex} % Weird problem on dimensions
 %\usetheme{spensiones}
 %\mode<presentation> { \setbeamercovered{transparent} }
