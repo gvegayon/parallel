@@ -37,10 +37,12 @@ program def parallel
 	/* If not prefix */
 		parallel_`0'
 	} 
-	else if (regexm(`"`0'"', "^(bs|sim)[,]?[\s ]?")) {
+	else if (regexm(`"`0'"', "^(bootstrap|bstrap|bs|simulate|sim)[,]?[\s ]?")) {
 	/* Prefix bootstrap or simulate */
 		local cmd = regexs(1)
-		mata: st_local("0", regexr(st_local("0"), "^(bs|sim)", ""))
+    if inlist("`cmd'","bootstrap","bstrap") local cmd = "bs"
+    if "`cmd'"=="simulate" local cmd = "sim"
+		mata: st_local("0", regexr(st_local("0"), "^(bootstrap|bstrap|bs|simulate|sim)", ""))
 		gettoken x 0 : 0, parse(":") bind
 		local 0 = regexr(`"`0'"', "^[:]", "")
 		gettoken x options : x, parse(",") bind
