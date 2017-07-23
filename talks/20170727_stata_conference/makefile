@@ -8,7 +8,7 @@ endif
 
 slides:
 	$(MAKEPDF) 20170727_stata_conference.tex
-	@echo HELP: Also helpful targets: handout, all
+	@echo HELP: Targets: \(slides\), handout, all, check
 #Nice to list on the default target some helpful stuff.
 
 handout: 
