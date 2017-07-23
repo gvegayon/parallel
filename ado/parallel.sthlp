@@ -24,19 +24,19 @@
 {p2col: 9.  {help parallel##development:Development}}Up-to-date version and bug reporting{p_end}
 {p2col: 10. {help parallel##source:Source code}}parallel's (MATA) source code{p_end}
 
-{p2colset 5 31 31 2}
+{p2colset 5 32 32 2}
 {p2col:{bf:{ul:Available commands}}}{p_end}
 
 {p2col: 1.  {help parallel##setclusters:parallel setclusters}}Setting the number of clusters.{p_end}
-{p2col: 1.  {help parallel##numprocessors:parallel numprocessors}}Getting the number of processors on the system.{p_end}
-{p2col: 2.  {help parallel##do:parallel do}}Parallelizing a do-file.{p_end}
-{p2col: 3.  {help parallel##prefix:parallel : (prefix)}}Parallelizing a Stata command (parallel prefix).{p_end}
-{p2col: 4.  {help parallel##bs:parallel bs}}Parallel bootstrapping.{p_end}
-{p2col: 5.  {help parallel##bs:parallel sim}}Parallel simulate.{p_end}
-{p2col: 6.  {help parallel##append:parallel append}}Multiple file processing and appending.{p_end}
-{p2col: 7.  {help parallel##clean:parallel clean}}Removing auxiliary files.{p_end}
-{p2col: 8.  {help parallel##printlog:parallel printlog}}Checking out clusters' log files.{p_end}
-{p2col: 9.  {help parallel##version:parallel version}}Query parallel current version.{p_end}
+{p2col: 2.  {help parallel##numprocessors:parallel numprocessors}}Getting the number of processors on the system.{p_end}
+{p2col: 3.  {help parallel##do:parallel do}}Parallelizing a do-file.{p_end}
+{p2col: 4.  {help parallel##prefix:parallel : (prefix)}}Parallelizing a Stata command (parallel prefix).{p_end}
+{p2col: 5.  {help parallel##bs:parallel bs}}Parallel bootstrapping.{p_end}
+{p2col: 6.  {help parallel##bs:parallel sim}}Parallel simulate.{p_end}
+{p2col: 7.  {help parallel##append:parallel append}}Multiple file processing and appending.{p_end}
+{p2col: 8.  {help parallel##clean:parallel clean}}Removing auxiliary files.{p_end}
+{p2col: 9.  {help parallel##printlog:parallel printlog}}Checking out clusters' log files.{p_end}
+{p2col:10.  {help parallel##version:parallel version}}Query parallel current version.{p_end}
 
 
 {marker syntax}{...}
