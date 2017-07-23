@@ -1,4 +1,5 @@
 %Checklist: Spellcheck, style commands
+
 \providecommand*\ExtraDocOpts{}
 \documentclass[9pt,\ExtraDocOpts]{beamer}
 
@@ -41,99 +42,134 @@ Thanks to Stata users worldwide for their valuable contributions. The usual disc
 \begin{frame} % [allowframebreaks=.8]
 \frametitle{Motivation}
 \begin{itemize}
-\item Both computation speeds and size of data are ever increasing
-\item Often our work is easily broken down into independent chunks 
-\item But, implementing parallel computing even for these ``embarrassingly parallel'' problems is not easy,
-\pause{}most of this due to lack of (user-friendly) statistical computing tools.\pause{}
-\item {\tt parallel} aims to make a contribution to these issues.
+\item Both computation power and size of data are ever increasing
+\item Often our work is easily broken down into independent chunks \pause{}
+\item Implementing parallel computing even for these ``embarrassingly parallel'' problems, however, is not easy.\pause{}
+\item StataMP exists, but only parallelizes a limited set of internal commands, not user commands.\pause{}
+\item {\tt parallel} aims to make this more convenient.\pause{}
 \end{itemize}
 \end{frame}
 
-\section{What is and how does it work}
+\section{What is it and how does it work}
 
 \frame{\tableofcontents[currentsection]}
 
 \begin{frame} % [allowframebreaks=.8]
-\frametitle{What is and how does it work}
-\framesubtitle{What is?}
+\frametitle{What is it and how does it work}
+\framesubtitle{What is it?}
 
 \begin{itemize}
-\item NB: StataMP is available but only parallelizes some internal commands. Therefore a user-provided solution is needed.\pause{}
-\item Inspired by the R package ``snow'' (several other examples exists: StataMP, HTCondor, Matlab's Parallel Toolbox, etc.)\pause{}
-\item Is designed to be used in multiprocessor machines (e.g.\ simultaneous multi-threading, multiple cores, multiple sockets).\pause{}
-\item It implements parallel computing methods through an OS's shell scripting (using Stata in batch mode).\pause{}
-\item On Windows we have a compiled plugging allowing\pause{}
-\begin{itemize}
-\item Functionality when the parent Stata is in batch-mode\pause{}
-\item Seamless user experience by launching the child programs in a hidden desktop (otherwise GUI for each steals focus)\pause{}
-\end{itemize}
+\item Inspired by the R package ``snow'' (several other examples exists: HTCondor, Matlab's Parallel Toolbox, etc.)\pause{}
+\item Launches child batch-mode Stata processes across multiple processors (e.g.\ simultaneous multi-threading, multiple cores, sockets, cluster nodes).\pause{}
 %\item By starting determined number of clusters (stata instances) this module was design to repeat a task simultaneously over the clusters.\pause{}
-\item Depending on the task, can reach near to (or over) linear speedups proportional to the number of physical cores of the computer.\pause{}
+\item Depending on the task, can reach near linear speedups proportional to the number of processors.\pause{}
+\begin{itemize}
 \item Thus having a quad-core computer can lead to a 400\% speedup.
+\end{itemize}
 \end{itemize}
 
 \end{frame}
 
+
+
+\begin{frame}
+\frametitle{Simple usage}
+
+\begin{columns}
+\begin{column}{.5\textwidth}
+{\color{gray}
+{\tt Serial: }
+\rule{\linewidth}{4pt}}
+\begin{itemize}
+\item gen v2 = v*v
+\item do byobs\_calc.do
+\item bs, reps(5000): reg price foreign rep\pause{}
+\end{itemize}
+\end{column}%
+\hfill%
+\begin{column}{.5\textwidth}
+{\color{gray}
+{\tt Parallel:}
+\rule{\linewidth}{4pt}}
+\begin{itemize}
+\item parallel: gen v2 = v*v
+\item parallel bs, reps(5000): reg price foreign rep
+\item parallel do byobs\_calc.do
+\end{itemize}
+\end{column}%
+\end{columns}
+\end{frame}
+
+
 \begin{frame}[b]
-\frametitle{What is and how does it work}
+\frametitle{What is it and how does it work}
 \framesubtitle{How does it work?}
 \begin{figure}
 \centering
-\scalebox{.65}{\input{../../man/diagram.tex}}
+\scalebox{.7}{\input{../../man/diagram.tex}}
 %\scalebox{.7}{\input{diagram.tex}}
 \end{figure}
 \end{frame}
 
 \begin{frame} % [allowframebreaks=.8]
-\frametitle{What is and how does it work}
+\frametitle{What is it and how does it work}
 \framesubtitle{How does it work?}
 
 \begin{itemize}
-\item Method is \textit{split-apply-combine} like MapReduce\pause{}
-\item Straightforward usage when there is observation or group-level work\pause{}
-\item If each iteration needs the entire dataset, then can be reformulated as\pause{}
-\begin{enumerate}
-\item Save real dataset to file\pause{}
-\item Generate in-memory data as the list of tasks. For example,\pause{}
+\item Method is \textit{split-apply-combine} like MapReduce. Very flexible!\pause{}
+\item Straightforward usage when there is observation- or group-level work\pause{}
+\item If each iteration needs the entire dataset, then use procedure to split the tasks and load the data separately. Examples\pause{}
 \begin{itemize}
-\item List of seeds for each bootstrap resampling\pause{}
-\item List of parameter values for simulations\pause{}
+\item Table of seeds for each bootstrap resampling\pause{}
+\item Table of parameter values for simulations\pause{}
 \end{itemize}
-\item Child process reads its list of tasks, loads the real dataset, and does it's own looping over tasks\pause{}
-\end{enumerate}
-\item If the list of tasks is not initially definable then the ``nodata'' alternative mechanism allows for more flexibility.
+\item If the list of tasks is data-dependent then the ``nodata'' alternative mechanism allows for more flexibility.
 \end{itemize}
 
 \end{frame}
 
+
+\begin{frame}
+\frametitle{Implementation }
+\begin{itemize}
+\item Uses shell on Linux/MacOS. On Windows we have a compiled plugging allowing\pause{}
+\begin{itemize}
+\item Functionality when the parent Stata is in batch-mode\pause{}
+\item Seamless user experience by launching the child programs in a hidden desktop (otherwise GUI for each steals focus)\pause{}
+\end{itemize}
+\item For a computer cluster with a shared filesystem (e.g. NFS) can distribute across nodes. \pause{}
+\begin{itemize}
+\item New feature so we'd appreciate help from the community to extend to other cluster settings (e.g. \href{https://en.wikipedia.org/wiki/Portable_Batch_System}{PBS})\pause{}
+\end{itemize}
+
+\end{itemize}
+\end{frame}
+
 %\begin{frame}
-%\frametitle{What is and how does it work}
+%\frametitle{What is it and how does it work}
 %{\Large Sounds ``pretty'' but\ldots}\pause{} {\Huge is this for real!?}
 %\end{frame}
 
-\begin{frame}
-\frametitle{What is and how does it work}
-\framesubtitle{Parallel's backend}
-
-When the user enters 
-
-\begin{figure}[fragile]
-\small
-\centering
-{\bf{\tt parallel: gen x2 = x*x}}
-\end{figure} 
-
-{\tt parallel} takes the command and writes something like this\pause{}
-\bigskip
-\scriptsize
-
+%\begin{frame}
+%\frametitle{What is it and how does it work}
+%\framesubtitle{Parallel's backend}
+%When the user enters 
+%\begin{figure}[fragile]
+%\small
+%\centering
+%{\bf{\tt parallel: gen x2 = x*x}}
+%\end{figure} 
+%{\tt parallel} takes the command and writes something like this\pause{}
+%\bigskip
+%\scriptsize
 %\scalebox{.9}{
-\input{code.tex}
+%\input{code.tex}
 %}
-\end{frame}
+%\end{frame}
+
 
 %\begin{frame}
-%\frametitle{What is and how does it work}
+%\frametitle{What is it and how does it work}
 %{\Large Ok, it works but\ldots}\pause{} 
 %
 %{\Huge it must be really hard to use!}
@@ -142,238 +178,200 @@ When the user enters
 \section{Benchmarks}
 \frame{\tableofcontents[currentsection]}
 
-\begin{frame}[b,fragile]
-\frametitle{Benchmarks}
-\framesubtitle{Simple example: Serial replace}
 
-\begin{minipage}[c]{1\textwidth}
-\begin{minipage}[c]{.35\textwidth}
-Serial fashion
-\begin{semiverbatim}\scriptsize
-do mydofile.do
-\end{semiverbatim}
-Parallel fashion
-\begin{semiverbatim}\scriptsize
-parallel do mydofile.do
-\end{semiverbatim}
-\end{minipage}
-%SPLIT
-\fbox{
-\begin{minipage}[c]{.6\textwidth}\scriptsize
-\begin{figure}
-\caption{mydofile.do}
-\begin{semiverbatim}
-local size = \_N
+%Old timings so disable for now
+%\begin{frame}[b,fragile]
+%\frametitle{Benchmarks}
+%\framesubtitle{Simple example: Serial replace}
+%\begin{minipage}[c]{1\textwidth}
+%\begin{minipage}[c]{.35\textwidth}
+%Serial fashion
+%\begin{semiverbatim}\scriptsize
+%do mydofile.do
+%\end{semiverbatim}
+%Parallel fashion
+%\begin{semiverbatim}\scriptsize
+%parallel do mydofile.do
+%\end{semiverbatim}
+%\end{minipage}
+%%SPLIT
+%\fbox{
+%\begin{minipage}[c]{.6\textwidth}\scriptsize
+%\begin{figure}
+%\caption{mydofile.do}
+%\begin{semiverbatim}
+%local size = \_N
+%forval i=1/`size' \{
+%\hspace{1cm}qui replace x = ///
+%\hspace{1.5cm}1/sqrt(2*`c(pi)')*exp(-(x\^{}2/2)) in `i'
+%\}
+%\end{semiverbatim}
+%\end{figure}
+%\end{minipage}}
+%\end{minipage}
+%\begin{table}[!h]
+%\centering
+%\caption{Serial replacing using a loop on a Linux Server (16 clusters)}
+%\scalebox{.9}{
+%\begin{tabular}{l*{3}{c}}\toprule
+%& 100,000 &         1,000,000 &       10,000,000 \\ \midrule
+%CPU &     1.43 &     16.94 &    144.68 \\
+%Total &     0.34 &      3.20 &     12.49 \\
+%\hspace{2mm} Setup &     0.00 &      0.00 &      0.00 \\
+%\hspace{2mm} Compute &     0.32 &      3.07 &     11.54 \\
+%\hspace{2mm} Finish &     0.02 &      0.12 &      0.95 \\
+%\midrule Ratio (compute) &     4.50 &      5.51 &     12.53 \\
+%Ratio (total) &     4.22 (26\%) &      5.30 (30\%) &     11.58 (72\%) \\
+%\bottomrule
+%\multicolumn{4}{l}{\footnotesize Tested on a \unix1 machine}
+%\end{tabular}}
+%\end{table}
+%\end{frame}
 
-forval i=1/`size' \{
+%Old timings so disable for now
+%\begin{frame}[b,fragile]
+%\frametitle{Benchmarks}
+%\framesubtitle{Monte Carlo simulation (Windows Machine)}
+%\begin{minipage}[c]{1\textwidth}
+%\begin{minipage}[c]{.45\textwidth}
+%\bigskip
+%Serial fashion
+%\begin{semiverbatim}\scriptsize
+%do myexperiment.do
+%\end{semiverbatim}
+%Parallel fashion
+%\begin{semiverbatim}\scriptsize
+%parallel do myexperiment.do, nodata
+%\end{semiverbatim}
+%\end{minipage}
+%%SPLIT
+%\fbox{
+%\scalebox{.4}{
+%\begin{minipage}[c]{1\textwidth}\scriptsize
+%\begin{figure}
+%{\Huge \caption{myexperiment.do}}
+%\begin{semiverbatim}
+%local num\_of\_intervals = 50
+%if length("`pll\_id'") == 0 \{
+%\hspace{.5cm}local start = 1
+%\hspace{.5cm}local end = `num\_of\_intervals'
+%\}
+%else \{
+%\hspace{.5cm}local ntot = floor(`num\_of\_intervals'/\$PLL\_CLUSTERS)
+%\hspace{.5cm}local start = (`pll\_instance' - 1)*`ntot' + 1
+%\hspace{.5cm}local end = (`pll\_instance')*`ntot'
+%\hspace{.5cm}if `pll\_instance' == \$PLL\_CLUSTERS local end = 10
+%\}
+%local reps 10000
+%forval i=`start'/`end' \{
+%\hspace{.5cm}qui use census2, clear
+%\hspace{.5cm}gen true\_y = age
+%\hspace{.5cm}gen z\_factor = region
+%\hspace{.5cm}sum z\_factor, meanonly
+%\hspace{.5cm}scalar zmu = r(mean)
+%\hspace{.5cm}qui \{
+%\hspace{.5cm}\hspace{.5cm}gen y1 = .
+%\hspace{.5cm}\hspace{.5cm}gen y2 = .
+%\hspace{.5cm}\hspace{.5cm}local c = `i'
+%\hspace{.5cm}\hspace{.5cm}set seed `c'
+%\hspace{.5cm}\hspace{.5cm}simulate c=r(c) mu1=r(mu1) se\_mu1 = r(se\_mu1) ///
+%\hspace{.5cm}\hspace{.5cm}\hspace{.5cm}\hspace{.5cm}mu2=r(mu2) se\_mu2 = r(se\_mu2), /// 
+%\hspace{.5cm}\hspace{.5cm}\hspace{.5cm}\hspace{.5cm}saving(cc`i', replace) nodots reps(`reps'): ///
+%\hspace{.5cm}\hspace{.5cm}\hspace{.5cm}\hspace{.5cm}mcsimul1, c(`c')
+%\hspace{.5cm}\}
+%\}
+%\end{semiverbatim}
+%\end{figure}
+%\end{minipage}}}
+%\end{minipage}
+%\begin{table}[!h]
+%\centering
+%\caption{Monte Carlo Experiment on a Windows Machine (4 clusters)}
+%\scalebox{.85}{
+%\begin{tabular}{l*{2}{c}}\toprule
+%& 2 &               4 \\ \midrule
+%CPU &   111.49 &    114.13 \\
+%Total &    58.02 &     37.48 \\
+%\hspace{2mm} Setup &     0.00 &      0.00 \\
+%\hspace{2mm} Compute &    58.02 &     37.48 \\
+%\hspace{2mm} Finish &     0.00 &      0.00 \\
+%\midrule Ratio (compute) &     1.92 &      3.04 \\
+%Ratio (total) &     1.92 (96\%)&      3.04 (76\%)\\
+%\bottomrule
+%\multicolumn{3}{l}{\footnotesize Tested on a \windows1 machine}
+%\end{tabular}}
+%\end{table}
+%\end{frame}
 
-\hspace{1cm}qui replace x = ///
+%Old timings so disable for now
+%\begin{frame}[b]
+%\frametitle{Benchmarks}
+%\framesubtitle{Monte Carlo simulation (Unix Machine) and Reshaping Administrative Data}
+%\bigskip
+%Serial fashion
+%\begin{semiverbatim}
+%\scriptsize
+%do myexperiment.do
+%\end{semiverbatim}
+%Parallel fashion
+%\begin{semiverbatim}
+%\scriptsize
+%parallel do myexperiment.do, nodata
+%\end{semiverbatim}
+%\begin{table}[!h]
+%\centering
+%\caption{Monte Carlo Experiment on a Linux Server (16 clusters)}
+%\scalebox{.85}{
+%\begin{tabular}{l*{4}{c}}\toprule
+%& 2 &               4 &               8 &              16 \\ \midrule
+%CPU &   164.79 &    164.04 &    162.84 &    163.89 \\
+%Total &    69.85 &     34.28 &     19.00 &     10.78 \\
+%\hspace{2mm} Setup &     0.00 &      0.00 &      0.00 &      0.00 \\
+%\hspace{2mm} Compute &    69.85 &     34.28 &     19.00 &     10.78 \\
+%\hspace{2mm} Finish &     0.00 &      0.00 &      0.00 &      0.00 \\
+%\midrule Ratio (compute) &     2.36 &      4.78 &      8.57 &     15.21 \\
+%Ratio (total) &     2.36 (118\%) &      4.78 (120\%)&      8.57 (107\%) &     15.21 (95\%) \\
+%\bottomrule
+%\multicolumn{4}{l}{\footnotesize Tested on a \unix1 machine}
+%\end{tabular}}
+%\end{table}
+%\end{frame}
 
-\hspace{1.5cm}1/sqrt(2*`c(pi)')*exp(-(x\^{}2/2)) in `i'
-
-\}
-\end{semiverbatim}
-\end{figure}
-\end{minipage}}
-\end{minipage}
-
-\begin{table}[!h]
-\centering
-\caption{Serial replacing using a loop on a Linux Server (16 clusters)}
-\scalebox{.9}{
-\begin{tabular}{l*{3}{c}}\toprule
-& 100,000 &         1,000,000 &       10,000,000 \\ \midrule
-CPU &     1.43 &     16.94 &    144.68 \\
-Total &     0.34 &      3.20 &     12.49 \\
-\hspace{2mm} Setup &     0.00 &      0.00 &      0.00 \\
-\hspace{2mm} Compute &     0.32 &      3.07 &     11.54 \\
-\hspace{2mm} Finish &     0.02 &      0.12 &      0.95 \\
-\midrule Ratio (compute) &     4.50 &      5.51 &     12.53 \\
-Ratio (total) &     4.22 (26\%) &      5.30 (30\%) &     11.58 (72\%) \\
-\bottomrule
-\multicolumn{4}{l}{\footnotesize Tested on a \unix1 machine}
-\end{tabular}}
-\end{table}
-
-\end{frame}
-
-\begin{frame}[b,fragile]
-\frametitle{Benchmarks}
-\framesubtitle{Monte Carlo simulation (Windows Machine)}
-\begin{minipage}[c]{1\textwidth}
-\begin{minipage}[c]{.45\textwidth}
-\bigskip
-Serial fashion
-\begin{semiverbatim}\scriptsize
-do myexperiment.do
-\end{semiverbatim}
-Parallel fashion
-\begin{semiverbatim}\scriptsize
-parallel do myexperiment.do, nodata
-\end{semiverbatim}
-\end{minipage}
-%SPLIT
-\fbox{
-\scalebox{.4}{
-\begin{minipage}[c]{1\textwidth}\scriptsize
-\begin{figure}
-{\Huge \caption{myexperiment.do}}
-\begin{semiverbatim}
-local num\_of\_intervals = 50
-
-if length("`pll\_id'") == 0 \{
-
-\hspace{.5cm}local start = 1
-
-\hspace{.5cm}local end = `num\_of\_intervals'
-
-\}
-
-else \{
-
-\hspace{.5cm}local ntot = floor(`num\_of\_intervals'/\$PLL\_CLUSTERS)
-
-\hspace{.5cm}local start = (`pll\_instance' - 1)*`ntot' + 1
-
-\hspace{.5cm}local end = (`pll\_instance')*`ntot'
-
-\hspace{.5cm}if `pll\_instance' == \$PLL\_CLUSTERS local end = 10
-
-\}
-
-local reps 10000
-
-forval i=`start'/`end' \{
-
-\hspace{.5cm}qui use census2, clear
-
-\hspace{.5cm}gen true\_y = age
-
-\hspace{.5cm}gen z\_factor = region
-
-\hspace{.5cm}sum z\_factor, meanonly
-
-\hspace{.5cm}scalar zmu = r(mean)
-
-\hspace{.5cm}qui \{
-
-\hspace{.5cm}\hspace{.5cm}gen y1 = .
-
-\hspace{.5cm}\hspace{.5cm}gen y2 = .
-
-\hspace{.5cm}\hspace{.5cm}local c = `i'
-
-\hspace{.5cm}\hspace{.5cm}set seed `c'
-
-\hspace{.5cm}\hspace{.5cm}simulate c=r(c) mu1=r(mu1) se\_mu1 = r(se\_mu1) ///
-
-\hspace{.5cm}\hspace{.5cm}\hspace{.5cm}\hspace{.5cm}mu2=r(mu2) se\_mu2 = r(se\_mu2), /// 
-
-\hspace{.5cm}\hspace{.5cm}\hspace{.5cm}\hspace{.5cm}saving(cc`i', replace) nodots reps(`reps'): ///
-
-\hspace{.5cm}\hspace{.5cm}\hspace{.5cm}\hspace{.5cm}mcsimul1, c(`c')
-
-\hspace{.5cm}\}
-
-\}
-\end{semiverbatim}
-\end{figure}
-\end{minipage}}}
-\end{minipage}
-\begin{table}[!h]
-\centering
-\caption{Monte Carlo Experiment on a Windows Machine (4 clusters)}
-\scalebox{.85}{
-\begin{tabular}{l*{2}{c}}\toprule
-& 2 &               4 \\ \midrule
-CPU &   111.49 &    114.13 \\
-Total &    58.02 &     37.48 \\
-\hspace{2mm} Setup &     0.00 &      0.00 \\
-\hspace{2mm} Compute &    58.02 &     37.48 \\
-\hspace{2mm} Finish &     0.00 &      0.00 \\
-\midrule Ratio (compute) &     1.92 &      3.04 \\
-Ratio (total) &     1.92 (96\%)&      3.04 (76\%)\\
-\bottomrule
-\multicolumn{3}{l}{\footnotesize Tested on a \windows1 machine}
-\end{tabular}}
-\end{table}
-\end{frame}
-
-\begin{frame}[b]
-\frametitle{Benchmarks}
-\framesubtitle{Monte Carlo simulation (Unix Machine)}
-\bigskip
-Serial fashion
-\begin{semiverbatim}
-\scriptsize
-do myexperiment.do
-\end{semiverbatim}
-
-Parallel fashion
-\begin{semiverbatim}
-\scriptsize
-parallel do myexperiment.do, nodata
-\end{semiverbatim}
-
-\begin{table}[!h]
-\centering
-\caption{Monte Carlo Experiment on a Linux Server (16 clusters)}
-\scalebox{.85}{
-\begin{tabular}{l*{4}{c}}\toprule
-& 2 &               4 &               8 &              16 \\ \midrule
-CPU &   164.79 &    164.04 &    162.84 &    163.89 \\
-Total &    69.85 &     34.28 &     19.00 &     10.78 \\
-\hspace{2mm} Setup &     0.00 &      0.00 &      0.00 &      0.00 \\
-\hspace{2mm} Compute &    69.85 &     34.28 &     19.00 &     10.78 \\
-\hspace{2mm} Finish &     0.00 &      0.00 &      0.00 &      0.00 \\
-\midrule Ratio (compute) &     2.36 &      4.78 &      8.57 &     15.21 \\
-Ratio (total) &     2.36 (118\%) &      4.78 (120\%)&      8.57 (107\%) &     15.21 (95\%) \\
-\bottomrule
-\multicolumn{4}{l}{\footnotesize Tested on a \unix1 machine}
-\end{tabular}}
-\end{table}
-
-\end{frame}
-
-\begin{frame}[b]
-\frametitle{Benchmarks}
-\framesubtitle{Reshaping Administrative Data}
-\bigskip
-Serial fashion
-\begin{semiverbatim}
-\scriptsize
-reshape wide tipsolic rutemp opta derecho ngiros, ///
-
-\hspace{1cm}i(id) j(time)
-\end{semiverbatim}
-
-Parallel fashion
-\begin{semiverbatim}
-\scriptsize
-parallel, by(id) :reshape wide tipsolic rutemp opta derecho ngiros, ///
-
-\hspace{1cm}i(id) j(time)
-\end{semiverbatim}
-
-\begin{table}[!h]
-\centering
-\caption{Reshaping wide a large database on a Linux Server (8 clusters)}
-\scalebox{.8}{
-\begin{tabular}{l*{3}{c}}\toprule
-& 100,000 &         1,000,000 &         5,000,000 \\ \midrule
-CPU &     5.51 &     72.70 &    392.97 \\
-Total &     2.33 &     17.46 &     86.44 \\
-\hspace{2mm} Setup &     0.00 &      0.00 &      0.00 \\
-\hspace{2mm} Compute &     1.83 &     12.42 &     57.93 \\
-\hspace{2mm} Finish &     0.50 &      5.04 &     28.51 \\
-\midrule Ratio (compute) &     3.01 &      5.85 &      6.78 \\
-Ratio (total) &     2.37 (29\%)&      4.16 (52\%)&      4.55 (57\%)\\
-\bottomrule
-\multicolumn{4}{l}{\footnotesize Tested on a \unix1 machine}
-\end{tabular}}
-\end{table}
-
-\end{frame}
+%Old timings so disable for now
+%\begin{frame}[b]
+%\frametitle{Benchmarks}
+%\framesubtitle{Reshaping Administrative Data}
+%\bigskip
+%Serial fashion
+%\begin{semiverbatim}
+%\scriptsize
+%reshape wide tipsolic rutemp opta derecho ngiros, ///
+%\hspace{1cm}i(id) j(time)
+%\end{semiverbatim}
+%Parallel fashion
+%\begin{semiverbatim}
+%\scriptsize
+%parallel, by(id) :reshape wide tipsolic rutemp opta derecho ngiros, ///
+%\hspace{1cm}i(id) j(time)
+%\end{semiverbatim}
+%\begin{table}[!h]
+%\centering
+%\caption{Reshaping wide a large database on a Linux Server (8 clusters)}
+%\scalebox{.8}{
+%\begin{tabular}{l*{3}{c}}\toprule
+%& 100,000 &         1,000,000 &         5,000,000 \\ \midrule
+%CPU &     5.51 &     72.70 &    392.97 \\
+%Total &     2.33 &     17.46 &     86.44 \\
+%\hspace{2mm} Setup &     0.00 &      0.00 &      0.00 \\
+%\hspace{2mm} Compute &     1.83 &     12.42 &     57.93 \\
+%\hspace{2mm} Finish &     0.50 &      5.04 &     28.51 \\
+%\midrule Ratio (compute) &     3.01 &      5.85 &      6.78 \\
+%Ratio (total) &     2.37 (29\%)&      4.16 (52\%)&      4.55 (57\%)\\
+%\bottomrule
+%\multicolumn{4}{l}{\footnotesize Tested on a \unix1 machine}
+%\end{tabular}}
+%\end{table}
+%\end{frame}
 
 
 \begin{frame}[t]
@@ -493,58 +491,60 @@ Setup
 
 \begin{semiverbatim}
 \footnotesize
-{\bf parallel setclusters} \textit{\#}  [, \uline{f}orce] 
+{\bf parallel setclusters} \textit{\#}|default  [, \uline{f}orce \uline{h}ostnames(namelist)] 
+%Infrequent options: statapath(), includefile(), ssh()
 \end{semiverbatim}\pause{}
 
-By syntax
+Main command types
 
 \begin{semiverbatim}
 \footnotesize
-{\bf parallel} [, by(\textit{\color{blue} varlist}) \uline{p}rograms \uline{m}ata \uline{s}eeds(\textit{\color{blue} string}) \uline{r}andtype(\textit{\color{blue} random.org$|$datetime})
+{\bf parallel} [, by(\textit{\color{blue} varlist}) \uline{p}rograms(\textit{\color{blue} namelist}) \uline{m}ata \uline{s}eeds(\textit{\color{blue} string}) \uline{r}andtype(\textit{\color{blue} random.org$|$datetime})
 
-\hspace{1cm} \uline{pr}ocessors(\textit{\color{blue} integer}) \uline{nod}ata]:  \textit{stata\_cmd}
+\hspace{1cm} \uline{nod}ata]:  \textit{stata\_cmd}
+%Infrequent options: force, setparallelid(). processors(), keep, keeplast, noglobal, timeout(), outputopts(), deterministicoutput
 \end{semiverbatim}\pause{}
-
-Do syntax
 
 \begin{semiverbatim}
 \footnotesize
-{\bf parallel do} \textit{\color{blue} filename}
+{\bf parallel do} \textit{\color{blue} filename} [, by(\textit{\color{blue} varlist}) \uline{p}rograms(\textit{\color{blue} namelist}) \uline{m}ata \uline{s}eeds(\textit{\color{blue} string})
 
-\hspace{1cm} [, by(\textit{\color{blue} varlist}) \uline{p}rograms \uline{m}ata \uline{s}eeds(\textit{\color{blue} string}) \uline{r}andtype(\textit{\color{blue} random.org$|$datetime})
-
-\hspace{1cm} \uline{pr}ocessors(\textit{\color{blue} integer}) \uline{nod}ata]
+\hspace{1cm}  \uline{r}andtype(\textit{\color{blue} random.org$|$datetime}) \uline{nod}ata]
+%Infrequent options: force, setparallelid(). processors(), keep, keeplast, noglobal, timeout(), outputopts(), deterministicoutput
 \end{semiverbatim}\pause{}
 
-Bootstrap syntax
+Helper commands
 
 \begin{semiverbatim}
 	\footnotesize
-	{\bf parallel bs} [, by(\textit{\color{blue} varlist}) \uline{p}rograms \uline{m}ata \uline{s}eeds(\textit{\color{blue} string}) \uline{r}andtype(\textit{\color{blue} random.org$|$datetime})
+	{\bf parallel bs} [, \uline{exp}ression(\textit{\color{blue} exp\_list}) \uline{p}rograms(\textit{\color{blue} namelist}) \uline{m}ata \uline{s}eeds(\textit{\color{blue} string}) 
 	
-	\hspace{1cm} \uline{pr}ocessors(\textit{\color{blue} integer}) \uline{nod}ata]:  \textit{stata\_cmd}
+	\hspace{1cm} \uline{r}andtype(\textit{\color{blue} random.org$|$datetime}) \textit{bs\_options}]:  \textit{stata\_cmd}
+%Infrequent options: processors(), keep, keeplast, noglobal, timeout(), outputopts(), deterministicoutput
 \end{semiverbatim}\pause{}
-
-
-Simulations syntax
 
 \begin{semiverbatim}
 	\footnotesize
-	{\bf parallel sim} [, by(\textit{\color{blue} varlist}) \uline{p}rograms \uline{m}ata \uline{s}eeds(\textit{\color{blue} string}) \uline{r}andtype(\textit{\color{blue} random.org$|$datetime})
+	{\bf parallel sim} [, \uline{exp}ression(\textit{\color{blue} exp\_list}) \uline{p}rograms(\textit{\color{blue} namelist}) \uline{m}ata \uline{s}eeds(\textit{\color{blue} string})
 	
-	\hspace{1cm} \uline{pr}ocessors(\textit{\color{blue} integer}) \uline{nod}ata]:  \textit{stata\_cmd}
+	\hspace{1cm} \uline{r}andtype(\textit{\color{blue} random.org$|$datetime}) \textit{sim\_options})]:  \textit{stata\_cmd}
+%Infrequent options: processors(), keep, keeplast, noglobal, timeout(), outputopts(), deterministicoutput
 \end{semiverbatim}\pause{}
-
-
-Append syntax
 
 \begin{semiverbatim}
 	\footnotesize
-	{\bf parallel append} [, by(\textit{\color{blue} varlist}) \uline{p}rograms \uline{m}ata \uline{s}eeds(\textit{\color{blue} string}) \uline{r}andtype(\textit{\color{blue} random.org$|$datetime})
+	{\bf parallel append} [\textit{files}], do(\textit{\color{blue} command|dofile}) [in(\textit{\color{blue} in}) if(\textit{\color{blue} if}) \uline{exp}ression(\textit{\color{blue} expand\_exp})
 	
-	\hspace{1cm} \uline{pr}ocessors(\textit{\color{blue} integer}) \uline{nod}ata]:  \textit{stata\_cmd}
+	\hspace{1cm} \uline{p}rograms(\textit{\color{blue} namelist}) \uline{m}ata \uline{s}eeds(\textit{\color{blue} string}) \uline{r}andtype(\textit{\color{blue} random.org$|$datetime})]
+%Infrequent options: processors(), keep, keeplast, noglobal, timeout(), outputopts(), deterministicoutput
+\end{semiverbatim}\pause{}
+
+Additional Utilities
+\begin{semiverbatim}
+	\footnotesize
+	{\bf parallel version}/{\bf clean}/{\bf printlog}/{\bf viewlog}/{\bf numprocessors}
+%Infrequent options: . event, all, force. event. event.
 \end{semiverbatim}
-
 
 \end{frame}
 
@@ -562,6 +562,7 @@ Append syntax
 \item Monte-Carlo simulation.\pause{}
 \item Extensive nested control flow (loops, while, ifs, etc.).\pause{}
 \item Bootstrapping/Jackknife.\pause{}
+\item Multiple MCMC chains to test for convergence (Gelman-Rubin test).\pause{}
 \item Simulations in general.\pause{}
 \end{itemize}
 \end{column}%
@@ -581,6 +582,19 @@ Append syntax
 \end{columns}
 \end{frame}
 
+
+\begin{frame}
+\frametitle{Use in other Stata modules}
+
+\begin{itemize}
+\item \href{https://ideas.repec.org/c/boc/bocode/s458086.html}{EVENTSTUDY2}: Perform event studies with complex test statistics 
+\item \href{https://ideas.repec.org/c/boc/bocode/s457822.html}{MIPARALLEL}: Perform parallel estimation for multiple imputed datasets 
+\item \href{https://github.com/bquistorff/synth_runner}{Synth\_Runner}: Performs multiple Synthetic Control estimations for permutation testing 
+
+\end{itemize}
+
+\end{frame}
+
 \section{Concluding Remarks}
 
 \begin{frame}
@@ -588,10 +602,10 @@ Append syntax
 
 \begin{itemize}
 \item Brings parallel computing to many more commands than StataMP \pause{}
-\item its major strengths/advantages are in simulation models and non-vectorized operations such as control-flow statements.\pause{}
-\item Depending on the proportion of the algorithm that can be de-serialized, it is possible to reach near to linear scale speedups.\pause{}
-\item {\tt parallel} can be incorporated into other user commands as an optional speedup.  \pause{}
-\item Caveat: Has not been tested on Stata 15.\pause{}
+\item Its major strengths/advantages are in simulation models and non-vectorized operations such as control-flow statements.\pause{}
+\item Depending on the proportion of the algorithm that can be parallelized, it is possible to reach near to linear scale speedups.\pause{}
+\item We welcome other user commands optionally including {\tt parallel} for speedup. \pause{}
+%\item Caveat: Has not been tested yet on Stata 15.\pause{}
 \item Contribute, find help, and report bugs at \url{http://github.com/gvegayon/parallel}\pause{}
 
 \end{itemize}
