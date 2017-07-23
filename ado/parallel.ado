@@ -534,6 +534,7 @@ program parallel_setclusters
 	global PLL_HOSTNAMES = "`hostnames'"
 	global PLL_SSH = "`ssh'"
 	if "$PLL_SSH"!="" global PLL_SSH = "$PLL_SSH "
+  if "`hostnames'"!="" local nproc "." //don't use softmax when in cluster
 	
 	local force = (length("`force'")>0)
 	mata: parallel_setclusters(`nclusters', `force', `nproc')
