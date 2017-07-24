@@ -12,7 +12,7 @@ mata:
 //File syncing across clusters can be slow so use this to help sync
 //tested on NFS
 //If your cluster is different, overload this function (same name and earlier in the mlib search path).
-void parallel_net_sync(){
+void parallel_net_sync(string scalar fname, string scalar hostname){
 	string matrix dummy
 	//trying to fopen/close the file doesn't work
 	//best bet is to restat the folder
@@ -190,7 +190,7 @@ real scalar parallel_finito(
 					stata("cap procwait " + strofreal(pids[i,1])+connection_opt)
 					if(!c("rc")){ //not running. 
 						if(length(hostnames)>0){
-							parallel_net_sync()
+							parallel_net_sync(fname, hostname)
 						}
 						if (!fileexists(fname)){ //Recheck file because of scheduling
 							//simulate a error-ed shutdown. 700 is an unlabelled Operating System error

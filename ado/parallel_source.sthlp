@@ -856,7 +856,9 @@ end
 *! author: George G. Vega Yon
 
 mata:
-//NFS could be slow at syncing
+//File syncing across clusters can be slow so use this to help sync
+//tested on NFS
+//If your cluster is different, overload this function (same name and earlier in the mlib search path).
 {smcl}
 *! {marker parallel_net_sync}{bf:function -{it:parallel_net_sync}- in file -{it:parallel_finito.mata}-}
 *! {back:{it:(previous page)}}
@@ -869,7 +871,7 @@ mata:
 *!{col 4}{bf:returns:}
 *!{col 6}{it:Number of clusters that stopped with error.}
 *!{dup 78:{c -}}{asis}
-void parallel_net_sync(){
+void parallel_net_sync(string scalar fname, string scalar hostname){
     string matrix dummy
     //trying to fopen/close the file doesn't work
     //best bet is to restat the folder
@@ -1051,7 +1053,7 @@ real scalar parallel_finito(
                     stata("cap procwait " + strofreal(pids[i,1])+connection_opt)
                     if(!c("rc")){ //not running. 
                         if(length(hostnames)>0){
-                            parallel_net_sync()
+                            parallel_net_sync(fname, hostname)
                         }
                         if (!fileexists(fname)){ //Recheck file because of scheduling
                             //simulate a error-ed shutdown. 700 is an unlabelled Operating System error
