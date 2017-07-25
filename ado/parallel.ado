@@ -1,13 +1,13 @@
 *! version 1.18.3 09jul2017
 *! PARALLEL: Stata module for parallel computing
-*! by George G. Vega [cre,aut], Brian Quistorff [ctb]
+*! by George G. Vega [cre,aut], Brian Quistorff [aut]
 *! 
 *! Project website: 
 *!   https://github.com/gvegayon/parallel
 *! Bug reports:
 *!   https://github.com/gvegayon/parallel/issues
 /*
-Copyright (c) 2014  <George G. Vega>
+Copyright (c) 2014  <George G. Vega> and <Brian Quistorff>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -103,7 +103,7 @@ program def parallel_version, rclass
 	version 11.0
 	di as result "parallel" as text " Stata module for parallel computing"
 	di as result "vers" as text " 1.18.3 09jul2017"
-	di as result "auth" as text " George G. Vega [cre,aut], Brian Quistorff [ctb]"
+	di as result "auth" as text " George G. Vega [cre,aut], Brian Quistorff [aut]"
 	
 	return local pll_vers = "1.18.3"
 end

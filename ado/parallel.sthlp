@@ -862,7 +862,7 @@ links:
 {phang}George Vega Y (2013). {it:Introducing PARALLEL: Stata Module for Parallel Computing}. Stata Conference 2013, New Orleans (USA), URL {browse "http://ideas.repec.org/p/boc/norl13/4.html"}.{p_end}
 {phang}Haahr, M. (2006). {it:Random.org: True random number service}. Random.org. {browse "http://www.random.org/clients/http/"}.{p_end}
 
-{title:12. Author}
+{title:12. Authors}
 
 {pstd}
 George Vega Yon [cre,aut], University of Southern California. {browse "mailto:g.vegayon@gmail.com"}
@@ -870,7 +870,7 @@ George Vega Yon [cre,aut], University of Southern California. {browse "mailto:g.
 {p_end}
 
 {pstd}
-Brian Quistorff [ctb], Microsoft Research. {browse "mailto:Brian.Quistorff@microsoft.com"} {browse "http://quistorff.com"}
+Brian Quistorff [aut], Microsoft Research. {browse "mailto:Brian.Quistorff@microsoft.com"} {browse "http://quistorff.com"}
 {p_end}
 
 

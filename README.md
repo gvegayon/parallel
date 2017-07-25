@@ -434,4 +434,4 @@ Authors
 
 George G. Vega \[aut,cre\] g.vegayon %at% gmail
 
-Brian Quistorff \[ctb\]
+Brian Quistorff \[aut\] bquistorff %at% gmail

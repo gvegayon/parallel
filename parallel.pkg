@@ -36,7 +36,8 @@ d Requires: Stata version 11
 d
 d Distribution-Date: 20170709
 d
-d Author: George Vega Yon , California Institute of Technology, USA
+d Authors: George Vega Yon , California Institute of Technology, USA
+d          Brian Quistorff, Microsoft AI and Research, USA
 d Support: email gvegayon@@caltech.edu
 d
 f ado/parallel.ado
