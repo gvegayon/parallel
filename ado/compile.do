@@ -11,7 +11,7 @@ set matastrict on
 //  See also matadebug setting in setup_ado.do
 //set matalnum on 
 
-vers 10.0
+vers 11.0
 
 /* Build documentation */
 mata:
