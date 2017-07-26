@@ -9,12 +9,27 @@
  * @returns Number of clusters that stopped with error.
  */
 mata:
+//File syncing across clusters can be slow so use this to help sync
+//tested on NFS
+//If your cluster is different, overload this function (same name and earlier in the mlib search path).
+void parallel_net_sync(string scalar fname, string scalar hostname){
+	string matrix dummy
+	//trying to fopen/close the file doesn't work
+	//best bet is to restat the folder
+	//errprintf("Uh oh\n"); displayflush();
+	stata("sleep 100")
+	dummy = dir(".","files","__pll*")
+}
+
+
 real scalar parallel_finito(
 	string scalar parallelid,
 	| real scalar nclusters,
 	real scalar timeout,
 	real colvector pids,
-	real scalar deterministicoutput
+	real scalar deterministicoutput,
+	string matrix hostnames,
+	string scalar ssh_str
 	)
 	{
 	
@@ -27,7 +42,7 @@ real scalar parallel_finito(
 	// Variable definitios
 	real scalar in_fh, out_fh, time
 	real scalar suberrors, i, j, errornum, retcode
-	string scalar fname, fname_break, fname_j
+	string scalar fname, fname_break, fname_j, hostname
 	string scalar msg
 	real scalar bk, pressed
 	real rowvector pendingcl
@@ -66,8 +81,9 @@ real scalar parallel_finito(
 	/* If there are as many errors as clusters, then exit */
 	if (suberrors == nclusters) return(suberrors)
 	
-	string scalar logfilename, tmpdirname
+	string scalar logfilename, tmpdirname, connection_opt
 	real scalar ret
+	hostname=""
 
 	while(length(pendingcl)>0)
 	{
@@ -97,7 +113,12 @@ real scalar parallel_finito(
 				if (pids!=J(0,1,.)) {
 					for (j=1;j<=rows(pids);j++)
 					{
-						stata("prockill " + strofreal(pids[j,1]))
+						connection_opt=""
+						if(length(hostnames)>0) hostname = hostnames[1,mod(j-1,length(hostnames))+1]
+						if(length(hostnames)>0 & hostname!="localhost"){
+							connection_opt = ", connection("+ssh_str+hostname+")"
+						}
+						stata("prockill " + strofreal(pids[j,1])+connection_opt)
 						//fake as if the child stata caught the break and exited
 						fname_j=sprintf("__pll%s_finito%04.0f", parallelid, j)
 						if(!fileexists(fname_j)){
@@ -108,13 +129,19 @@ real scalar parallel_finito(
 				pressed = 1
 				
 			}
+			
+			connection_opt=""
+			if(length(hostnames)>0) hostname = hostnames[1,mod(i-1,length(hostnames))+1]
+			if(length(hostnames)>0 & hostname!="localhost"){
+				connection_opt = ", connection("+ssh_str+hostname+")"
+			}
 		
 			if (fileexists(fname)) // If the file exists
 			{
 				/* Child process might have made file but not exited yet
 				  (so still might have it open, which would cause error when we try to delete it) */
 				if(rows(pids)>0){
-					stata("cap procwait " + strofreal(pids[i,1]))
+					stata("cap procwait " + strofreal(pids[i,1])+connection_opt)
 					if(c("rc")){ //not done yet
 						continue; //try again later
 					}
@@ -160,12 +187,17 @@ real scalar parallel_finito(
 			else{ //no finish file yet
 				//check if the child process was killed (or stopped w/o making finish file)
 				if(rows(pids)>0){
-					stata("cap procwait " + strofreal(pids[i,1]))
-					if(!c("rc") & !fileexists(fname)){ //not running. Recheck file because of scheduling
-						//simulate a error-ed shutdown. 700 is an unlabelled Operating System error
-						parallel_write_diagnosis("700",sprintf("__pll%s_finito%04.0f", parallelid, i),"while running the command/dofile")
-						// It'll be picked up next time around.
-						continue 
+					stata("cap procwait " + strofreal(pids[i,1])+connection_opt)
+					if(!c("rc")){ //not running. 
+						if(length(hostnames)>0){
+							parallel_net_sync(fname, hostname)
+						}
+						if (!fileexists(fname)){ //Recheck file because of scheduling
+							//simulate a error-ed shutdown. 700 is an unlabelled Operating System error
+							parallel_write_diagnosis("700",sprintf("__pll%s_finito%04.0f", parallelid, i),"while running the command/dofile")
+							// It'll be picked up next time around.
+							continue 
+						}
 					}
 				}
 				stata("sleep 100")

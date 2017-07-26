@@ -49,6 +49,8 @@
 {cmdab:parallel setclusters} # [, {opt f:orce} 
 {opt s:tatapath}({it:{help filename:stata_path}})
 {opt i:ncludefile}({it:{help filename:filename}})
+{opt h:ostnames}({it:string})
+{opt ssh}({it:string})
 {opt proc:exec}({it:int})]
 
 {col 5}{hline}{marker numprocessors}{...}
@@ -139,6 +141,12 @@ Stata's exe path. By using this option you will override this and force
 {synopt:{opt i:ncludefile}}File path. This file will be included before parallel commands
 are executed. The target purpose for this is to allow one to copy over preferences that
 {cmd:parallel} does not copy automatically.{p_end}
+{synopt:{opt h:ostnames}} a space delimited list of hostnames. For the local machine, use {it:localhost}.
+Work will be assigned in the order of the list and the list elements will be re-used if numclusters is longer than the list.
+An example would be {it:localhost node2 node3}.
+If no option is provided, then {it:localhost} is assumed. Leave blank for local execution.{p_end}
+{synopt:{opt ssh}}The command used to connect to remote machines.
+If none is provided, this will be {it:ssh}. This option is not needed for local execution.{p_end}
 {synopt:{opt proc:exec}} On Windows, controls how child processes are spawned. 
 The default value 2 will launch them in a hidden desktop (they can still be seen in the task manager)
 so that the child applications don't briefly steal the window focus (which is annoying). 
@@ -473,6 +481,10 @@ the number of clusters. This is reported in the global {cmd:$LAST_PLL_N}.
 Expressions run in the child-processes that contain {it:_n} or {it:_N} will be evaluated locally to the child not the parent dataset.
 These expressions may therefore be different if run in {cmd:parallel} than without {cmd:parallel}.
 {p_end}
+ 
+{pstd}
+When executing Stata on separate machines via ssh, no environment variables except PWD and STATATMP are copied over.
+{p_end}
 
 
 {marker tech}{...}
@@ -784,7 +796,7 @@ rest of the clusters it will generate -z- equal to zero.
 {synopt:{cmd:$LAST_PLL_ID}}A copy of {cmd:r(pll_id)}.{p_end}
 {synopt:{cmd:$PLL_LASTRNG}}Number of times that -{cmd:parallel_randomid()}- has
 been executed.{p_end}
-{synopt:{cmd:$PLL_STATA_PATH, $PLL_CLUSTERS, $USE_PROCEXEC}}Internal usage.{p_end}
+{synopt:{cmd:$PLL_STATA_PATH, $PLL_CLUSTERS, $USE_PROCEXEC, $PLL_HOSTNAMES, $PLL_SSH}}Internal usage.{p_end}
 
 
 {marker development}{...}

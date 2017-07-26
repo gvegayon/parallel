@@ -3,7 +3,7 @@ program drop _all
 macro drop _all
 sysuse auto, clear
 global nCl = 3
-parallel setclusters $nCl, force
+parallel setclusters $nCl, force hostnames(`: env PLL_TEST_NODES')
 set seed 1337
 
 cap program drop my_prog

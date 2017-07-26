@@ -54,7 +54,7 @@ real scalar parallel_write_do(
 	string scalar memset, maxvarset, matsizeset
 	real scalar i, n_prev_tempnames
 	string colvector seeds
-	string scalar new_lib, output_args, output_opts_final
+	string scalar new_lib, output_opts_final
 	string rowvector output_opts_toks
 
 	// Checking optargs

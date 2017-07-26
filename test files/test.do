@@ -12,7 +12,7 @@ parallel clean, all
 
 sysuse auto, clear
 
-parallel setclusters 2, force
+parallel setclusters 2, force hostnames(`: env PLL_TEST_NODES')
 
 /* Simple tests */
 parallel, by(foreign) f keepl nog : egen maxp = max(price)
@@ -24,9 +24,9 @@ type __pll`r(pll_id)'_do0001.do
 parallel clean, all
 
 /* Testing cluster assigment */
-parallel setclusters default //just to check
+parallel setclusters default, hostnames(`: env PLL_TEST_NODES') //just to check
 parallel numprocessors
-parallel setclusters 2, force
+parallel setclusters 2, force hostnames(`: env PLL_TEST_NODES')
 sort rep78
 parallel, by(rep78) f keepl nog: gen n2 = _N
 parallel, by(rep78) f keepl nog: gen n3 = _N

@@ -19,7 +19,7 @@ gen ab = int((3)*runiform())
 gen cd = round(runiform())
 save `f0', replace
 
-parallel setclusters 4, force
+parallel setclusters 4, force hostnames(`: env PLL_TEST_NODES')
 
 /*
 
