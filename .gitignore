@@ -6,6 +6,7 @@ __pll*
 test files/all_tests_results.txt
 test files/platformname.txt
 ado/temp.txt
+*_env.sh
 
 *.log
 *.aux
