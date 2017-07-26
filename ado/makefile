@@ -12,13 +12,19 @@ ifeq "$(STATABATCH)" ""
   STATABATCH:=stata -b
 endif
 
-.PHONY: compile home inc_dist_date clean tests checks check_version releaseinfo
+.PHONY: compile home inc_dist_date clean tests checks check_version releasehelp release
 
 compile: inc_dist_date
 	$(STATABATCH) do compile.do
 	@echo Other helpful targets include: tests, checks, clean, and releaseinfo
 help:
-	@echo Helpful targets include: compile, tests, checks, clean, and releaseinfo
+	@echo Helpful targets include: compile, tests, checks, clean, releasehelp, release
+releasehelp:
+	@echo Make sure you run tests \(on Stata v11\)
+	@echo Make sure to update the README.Rmd \(md\) file \(w/ new vers\).
+	@echo Make sure you bump the version and -make inc_dist_date-
+	@echo Make sure you editted the Changelog
+	@echo After pushing to github, go to https://github.com/gvegayon/parallel/releases and make a release
 
 home:
 	$(STATABATCH) do compile_and_install.do
@@ -29,12 +35,7 @@ clean:
 	rm -f __pll*
 	-rm -f -r /tmp/__pll*
 
-releaseinfo: checks tests
-	@echo Make sure you run tests (on Stata v12)
-	@echo Make sure to update the README.Rmd (md) file (w/ new vers).
-	@echo Make sure you bump the version and -make inc_dist_date-
-	@echo Make sure you editted the Changelog
-	@echo After pushing to github, go to https://github.com/gvegayon/parallel/releases and make a release
+release: checks tests releasehelp
 
 include codechecks.mk
 
