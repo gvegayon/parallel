@@ -16,6 +16,7 @@ vers 11.0
 /* Build documentation */
 mata:
 archmata = dir(".","files","*.mata")
+//This includes for users some mata files not put in mlib: parallel_for, parallel_montecarlo
 _sort(archmata,1)
 dt_moxygen(archmata, "parallel_source.sthlp", 1)
 
@@ -38,6 +39,7 @@ run parallel_write_diagnosis.mata
 run parallel_break.mata
 run parallel_sandbox.mata
 run parallel_expand_expr.mata
+//eststore is "hidden" (undocumented and not called by normal functioning) utility
 run parallel_eststore.mata
 run parallel_recursively_rm.mata
 

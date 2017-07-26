@@ -1,5 +1,6 @@
 *! parallel_estout vers 0.14 10may2014
 *! auth George G Vega
+//Hidden (undocumented and not called by normal functioning) utility
 mata
 // mata clear
 /*

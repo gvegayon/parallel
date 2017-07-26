@@ -1,3 +1,4 @@
+//Helper file for George's machine.
 /* CREA ARCHIVO DE AYUDA PARA FUNCIONES MATA */
 
 clear all
