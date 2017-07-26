@@ -15,6 +15,9 @@ endif
 compile: inc_dist_date
 	$(STATABATCH) do compile.do
 	@echo Other helpful targets include: tests, checks, clean, and releaseinfo
+help:
+	@echo Helpful targets include: compile, tests, checks, clean, and releaseinfo
+
 home:
 	$(STATABATCH) do compile_and_install.do
 	make clean
