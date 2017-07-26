@@ -134,7 +134,7 @@ Checking out clusters' logfiles by showing the output in a view window.
 {synoptline}
 {syntab:Setting the number of clusters}
 {synopt:{opt f:orce}}Overrides the restriction on using more clusters than processors on your machine (see the 
-{help parallel##warnings:WARNING} in description).{p_end}
+{help parallel##warnings:WARNING} in description). This option is assumed when specifying {opt hostnames}.{p_end}
 {synopt:{opt s:tatapath}}File path. {cmd:parallel} tries to automatically identify
 Stata's exe path. By using this option you will override this and force 
 {cmd:parallel} to use a specific path to stata.exe.{p_end}
