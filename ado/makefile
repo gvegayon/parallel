@@ -21,7 +21,7 @@ help:
 	@echo Helpful targets include: compile, tests, checks, clean, releasehelp, release
 releasehelp:
 	@echo Make sure you run tests \(on Stata v11\)
-	@echo Make sure to update the README.Rmd \(md\) file \(w/ new vers\).
+	@echo Make sure you run the checks.
 	@echo Make sure you bump the version and -make inc_dist_date-
 	@echo Make sure you editted the Changelog
 	@echo After pushing to github, go to https://github.com/gvegayon/parallel/releases and make a release
