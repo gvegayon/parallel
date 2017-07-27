@@ -1,4 +1,4 @@
-%Checklist: Spellcheck, style commands
+%Checklist: Spellcheck, chktex, check the pauses
 
 \providecommand*\ExtraDocOpts{}
 \documentclass[9pt,\ExtraDocOpts]{beamer}
@@ -42,11 +42,11 @@ Thanks to Stata users worldwide for their valuable contributions. The usual disc
 \begin{frame} % [allowframebreaks=.8]
 \frametitle{Motivation}
 \begin{itemize}
-\item Both computation power and size of data are ever increasing
+\item Both computation power and size of data are ever increasing \pause{}
 \item Often our work is easily broken down into independent chunks \pause{}
-\item Implementing parallel computing even for these ``embarrassingly parallel'' problems, however, is not easy.\pause{}
+\item Implementing parallel computing, even for these ``embarrassingly parallel'' problems, however, is not easy.\pause{}
 \item StataMP exists, but only parallelizes a limited set of internal commands, not user commands.\pause{}
-\item {\tt parallel} aims to make this more convenient.\pause{}
+\item {\tt parallel} aims to make this more convenient.
 \end{itemize}
 \end{frame}
 
@@ -60,7 +60,7 @@ Thanks to Stata users worldwide for their valuable contributions. The usual disc
 
 \begin{itemize}
 \item Inspired by the R package ``snow'' (several other examples exists: HTCondor, Matlab's Parallel Toolbox, etc.)\pause{}
-\item Launches child batch-mode Stata processes across multiple processors (e.g.\ simultaneous multi-threading, multiple cores, sockets, cluster nodes).\pause{}
+\item Launches ``child'' batch-mode Stata processes across multiple processors (e.g.\ simultaneous multi-threading, multiple cores, sockets, cluster nodes).\pause{}
 %\item By starting determined number of clusters (stata instances) this module was design to repeat a task simultaneously over the clusters.\pause{}
 \item Depending on the task, can reach near linear speedups proportional to the number of processors.\pause{}
 \begin{itemize}
@@ -93,11 +93,20 @@ Thanks to Stata users worldwide for their valuable contributions. The usual disc
 \rule{\linewidth}{4pt}}
 \begin{itemize}
 \item parallel: gen v2 = v*v
-\item parallel bs, reps(5000): reg price foreign rep
 \item parallel do byobs\_calc.do
+\item parallel bs, reps(5000): reg price foreign rep
 \end{itemize}
 \end{column}%
 \end{columns}
+\end{frame}
+
+\begin{frame} % [allowframebreaks=.8]
+\frametitle{What is it and how does it work}
+\framesubtitle{How does it work?}
+
+\begin{itemize}
+\item Method is \textit{split-apply-combine} like MapReduce.
+\end{itemize}
 \end{frame}
 
 
@@ -118,7 +127,7 @@ Thanks to Stata users worldwide for their valuable contributions. The usual disc
 \begin{itemize}
 \item Method is \textit{split-apply-combine} like MapReduce. Very flexible!\pause{}
 \item Straightforward usage when there is observation- or group-level work\pause{}
-\item If each iteration needs the entire dataset, then use procedure to split the tasks and load the data separately. Examples\pause{}
+\item If each iteration needs the entire dataset, then use procedure to split the tasks and load the data separately. Examples:\pause{}
 \begin{itemize}
 \item Table of seeds for each bootstrap resampling\pause{}
 \item Table of parameter values for simulations\pause{}
@@ -131,17 +140,19 @@ Thanks to Stata users worldwide for their valuable contributions. The usual disc
 
 \begin{frame}
 \frametitle{Implementation }
+\framesubtitle{Some details}
 \begin{itemize}
-\item Uses shell on Linux/MacOS. On Windows we have a compiled plugging allowing\pause{}
+\item Uses shell on Linux/MacOS.\@ On Windows we have a compiled plugging allowing:\pause{}
 \begin{itemize}
 \item Functionality when the parent Stata is in batch-mode\pause{}
 \item Seamless user experience by launching the child programs in a hidden desktop (otherwise GUI for each steals focus)\pause{}
 \end{itemize}
-\item For a computer cluster with a shared filesystem (e.g. NFS) can distribute across nodes. \pause{}
+\item For a computer cluster with a shared filesystem (e.g.\ NFS), can distribute across nodes. \pause{}
 \begin{itemize}
-\item New feature so we'd appreciate help from the community to extend to other cluster settings (e.g. \href{https://en.wikipedia.org/wiki/Portable_Batch_System}{PBS})\pause{}
+\item New feature so we'd appreciate help from the community to extend to other cluster settings (e.g.\ \href{https://en.wikipedia.org/wiki/Portable_Batch_System}{PBS})\pause{}
 \end{itemize}
-
+\item Make sure that child tempnames or tempvars don't clash with those coming from parent.\pause{}
+\item Passes through programs, macros and mata objects, but NOT Stata matrices or scalars. Nothing but datasets are returned to parent.
 \end{itemize}
 \end{frame}
 
@@ -393,7 +404,7 @@ parallel setclusters \$number\_of\_clusters
 
 parallel bs, rep(\$size) nodots: regress mpg weight gear foreign
 \end{semiverbatim}
-
+\pause{}
 
 \begin{table}[!h]
 \centering\begin{tabular}{l*{3}{c}}
@@ -548,6 +559,24 @@ Additional Utilities
 
 \end{frame}
 
+\begin{frame}
+\frametitle{Debugging }
+\begin{itemize}
+\item Use {\bf parallel printlog}/{\bf viewlog} to view the log of the child process (includes some setup code as well). Most useful.\pause{}
+\item Auxiliary files created during process:\pause{}
+\begin{itemize}
+\item (Unix) \_\_pll\textit{ID}\_shell.sh
+\item \_\_pll\textit{ID}\_dataset.dta
+\item \_\_pll\textit{ID}\_do\textit{NUM}.do
+\item \_\_pll\textit{ID}\_glob.do
+% There's a mlib file, not sure if I should mention
+\item \_\_pll\textit{ID}\_dta\textit{NUM}.dta
+\item \_\_pll\textit{ID}\_finito\textit{NUM}\pause{}
+\end{itemize}
+\item Can keep these around by specifying the {\bf keep} or {\bf keeplast} options 
+\end{itemize}
+\end{frame}
+
 
 \begin{frame}
 \frametitle{Syntax and Usage}
@@ -559,11 +588,10 @@ Additional Utilities
 {\tt parallel suits \ldots}
 \rule{\linewidth}{4pt}}
 \begin{itemize}
-\item Monte-Carlo simulation.\pause{}
-\item Extensive nested control flow (loops, while, ifs, etc.).\pause{}
-\item Bootstrapping/Jackknife.\pause{}
-\item Multiple MCMC chains to test for convergence (Gelman-Rubin test).\pause{}
-\item Simulations in general.\pause{}
+\item Repeated simulation\pause{}
+\item Extensive nested control flow (loops, while, ifs, etc.)\pause{}
+\item Bootstrapping/Jackknife\pause{}
+\item Multiple MCMC chains to test for convergence (Gelman-Rubin test)\pause{}
 \end{itemize}
 \end{column}%
 \hfill%
@@ -572,11 +600,10 @@ Additional Utilities
 {\tt parallel doesn't suit \ldots}
 \rule{\linewidth}{4pt}}
 \begin{itemize}
-\item (already) fast commands.\pause{}
+\item (already) fast commands\pause{}
 \item Regressions, ARIMA, etc.\pause{}
 \item Linear Algebra.\pause{}
-\item Whatever StataMP does better.\pause{}
-\item (Currently) Tasks that already take up all of RAM.
+\item Whatever StataMP does better
 \end{itemize}
 \end{column}%
 \end{columns}
@@ -604,9 +631,9 @@ Additional Utilities
 \item Brings parallel computing to many more commands than StataMP \pause{}
 \item Its major strengths/advantages are in simulation models and non-vectorized operations such as control-flow statements.\pause{}
 \item Depending on the proportion of the algorithm that can be parallelized, it is possible to reach near to linear scale speedups.\pause{}
-\item We welcome other user commands optionally including {\tt parallel} for speedup. \pause{}
+\item We welcome other user commands optionally utilizing {\tt parallel} for increased performance. \pause{}
 %\item Caveat: Has not been tested yet on Stata 15.\pause{}
-\item Contribute, find help, and report bugs at \url{http://github.com/gvegayon/parallel}\pause{}
+\item Contribute, find help, and report bugs at \url{http://github.com/gvegayon/parallel}
 
 \end{itemize}
 
