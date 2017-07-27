@@ -45,7 +45,7 @@ Thanks to Stata users worldwide for their valuable contributions. The usual disc
 \item Both computation power and size of data are ever increasing \pause{}
 \item Often our work is easily broken down into independent chunks \pause{}
 \item Implementing parallel computing, even for these ``embarrassingly parallel'' problems, however, is not easy.\pause{}
-\item StataMP exists, but only parallelizes a limited set of internal commands, not user commands.\pause{}
+\item Stata/MP exists, but only parallelizes a limited set of internal commands, not user commands.\pause{}
 \item {\tt parallel} aims to make this more convenient.
 \end{itemize}
 \end{frame}
@@ -147,12 +147,13 @@ Thanks to Stata users worldwide for their valuable contributions. The usual disc
 \item Functionality when the parent Stata is in batch-mode\pause{}
 \item Seamless user experience by launching the child programs in a hidden desktop (otherwise GUI for each steals focus)\pause{}
 \end{itemize}
-\item For a computer cluster with a shared filesystem (e.g.\ NFS), can distribute across nodes. \pause{}
+\item For a Linux/MacOS cluster with a shared filesystem (e.g.\ NFS) and ssh-like commands, can distribute across nodes. \pause{}
 \begin{itemize}
 \item New feature so we'd appreciate help from the community to extend to other cluster settings (e.g.\ \href{https://en.wikipedia.org/wiki/Portable_Batch_System}{PBS})\pause{}
 \end{itemize}
 \item Make sure that child tempnames or tempvars don't clash with those coming from parent.\pause{}
-\item Passes through programs, macros and mata objects, but NOT Stata matrices or scalars. Nothing but datasets are returned to parent.
+\item Passes through programs, macros and mata objects, but NOT Stata matrices or scalars. No state but datasets are returned to parent.\pause{}
+\item Recover gracefully from child failures. Currently no re-try support.
 \end{itemize}
 \end{frame}
 
@@ -400,6 +401,7 @@ bs, rep(\$size) nodots: regress mpg weight gear foreign
 
 
 // Parallel fashion
+
 parallel setclusters \$number\_of\_clusters
 
 parallel bs, rep(\$size) nodots: regress mpg weight gear foreign
@@ -562,8 +564,8 @@ Additional Utilities
 \begin{frame}
 \frametitle{Debugging }
 \begin{itemize}
-\item Use {\bf parallel printlog}/{\bf viewlog} to view the log of the child process (includes some setup code as well). Most useful.\pause{}
-\item Auxiliary files created during process:\pause{}
+\item Use {\bf parallel printlog}/{\bf viewlog} to view the log of the child process (includes some setup code as well). Can {\bf set trace} in the child do-file or command to see more. \pause{}
+\item Auxiliary files created during process (harder to use):\pause{}
 \begin{itemize}
 \item (Unix) \_\_pll\textit{ID}\_shell.sh
 \item \_\_pll\textit{ID}\_dataset.dta
@@ -602,8 +604,8 @@ Additional Utilities
 \begin{itemize}
 \item (already) fast commands\pause{}
 \item Regressions, ARIMA, etc.\pause{}
-\item Linear Algebra.\pause{}
-\item Whatever StataMP does better
+\item Linear Algebra\pause{}
+\item Whatever Stata/MP does better (on single machine)
 \end{itemize}
 \end{column}%
 \end{columns}
@@ -628,12 +630,12 @@ Additional Utilities
 \frametitle{Concluding Remarks}
 
 \begin{itemize}
-\item Brings parallel computing to many more commands than StataMP \pause{}
+\item Brings parallel computing to many more commands than Stata/MP \pause{}
 \item Its major strengths/advantages are in simulation models and non-vectorized operations such as control-flow statements.\pause{}
 \item Depending on the proportion of the algorithm that can be parallelized, it is possible to reach near to linear scale speedups.\pause{}
 \item We welcome other user commands optionally utilizing {\tt parallel} for increased performance. \pause{}
 %\item Caveat: Has not been tested yet on Stata 15.\pause{}
-\item Contribute, find help, and report bugs at \url{http://github.com/gvegayon/parallel}
+\item Install, contribute, find help, and report bugs at \url{http://github.com/gvegayon/parallel}
 
 \end{itemize}
 
