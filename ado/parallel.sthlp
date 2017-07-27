@@ -470,6 +470,9 @@ other object different from data.
 Although -{cmd:parallel}- passes-through {help program list:programs}, {help macro:macros}
 and {help mata:mata objects}, in the current version it is not capable of doing the same with
 {help matrix:matrices} or {help scalar:scalars}.
+The tempname internal state is copied to childre, but the parent does not receive any of this state from the children.
+That is, -{cmd:parallel}- advances the tempname (tempvar) sequence in the children to not overlap with any produced by
+the parent.
 {p_end}
  
 {pstd}
