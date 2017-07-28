@@ -1,7 +1,7 @@
 PARALLEL: Stata module for parallel computing
 =============================================
 
-Parallel lets you **run Stata faster**, sometimes faster than MP itself. By organizing your job in several Stata instances, parallel allows you to work with out-of-the-box parallel computing. Using the the 'parallel' prefix, you can get **faster simulations, bootstrapping, reshaping big data**, etc. without having to know a thing about parallel computing. With **no need of having Stata/MP** installed on your computer, parallel has showed to dramatically speedup computations up to two, four, or more times depending on how many processors your computer has.
+Parallel lets you **run Stata faster**, sometimes faster than MP itself. By organizing your job in several Stata instances, parallel allows you to work with out-of-the-box parallel computing. Using the the `parallel` prefix, you can get **faster simulations, bootstrapping, reshaping big data**, etc. without having to know a thing about parallel computing. With **no need of having Stata/MP** installed on your computer, parallel has showed to dramatically speedup computations up to two, four, or more times depending on how many processors your computer has.
 
 Stata conference presentation: <http://ideas.repec.org/p/boc/norl13/4.html>
 
@@ -14,7 +14,7 @@ SSC at Boston College: <http://ideas.repec.org/c/boc/bocode/s457527.html>
 Installation
 ============
 
-If you have a previous installation of -parallel- installed from a different source (SSC, specific folder, specific URL) you should uninstall that first. Once installed it is suggested to restart Stata.
+If you have a previous installation of `parallel` installed from a different source (SSC, specific folder, specific URL) you should uninstall that first. Once installed it is suggested to restart Stata.
 
 SSC
 ---
@@ -36,7 +36,7 @@ For accessing the latest development version of parallel (from here) using Stata
 . mata mata mlib index
 ```
 
-For Stata version &lt;13, download as zip, unzip, and then replace the above -net install- with
+For Stata version &lt;13, download as zip, unzip, and then replace the above `net install` with
 
 ``` stata
 . net install parallel, from(full_local_path_to_files) replace
@@ -61,7 +61,7 @@ The following minimal examples have been written to introduce how to use the mod
 
 The examples have been executed on a Dell Vostro 3300 notebook running Ubuntu 14.04 with an Intel Core i5 CPU M 560 (2 physical cores) with 8Gb of RAM, using Stata/IC 12.1 for Unix (Linux 64-bit x86-64).
 
-For more examples and details please refer to the module's help file.
+For more examples and details please refer to the module's help file or the wiki [Gallery page](https://github.com/gvegayon/parallel/wiki/Gallery).
 
 Simple parallelization of egen
 ------------------------------
@@ -434,4 +434,4 @@ Authors
 
 George G. Vega \[aut,cre\] g.vegayon %at% gmail
 
-Brian Quistorff \[aut\] bquistorff %at% gmail
+Brian Quistorff \[aut\] Brian.Quistorff %at% microsoft
