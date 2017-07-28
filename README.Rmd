@@ -11,9 +11,9 @@ output:
 
 Parallel lets you **run Stata faster**, sometimes faster than MP itself. By organizing your job in several Stata instances, parallel allows you to work with out-of-the-box parallel computing. Using the the `parallel` prefix, you can get **faster simulations, bootstrapping, reshaping big data**, etc. without having to know a thing about parallel computing. With **no need of having Stata/MP** installed on your computer, parallel has showed to dramatically speedup computations up to two, four, or more times depending on how many processors your computer has.
 
-Stata conference presentation: <http://ideas.repec.org/p/boc/norl13/4.html>
+Stata 2017 conference presentation: <https://github.com/gvegayon/parallel/blob/master/talks/20170727_stata_conference/20170727_stata_conference_handout.pdf>
 
-SSC at Boston College: <http://ideas.repec.org/c/boc/bocode/s457527.html>
+SSC at Boston College: <http://ideas.repec.org/c/boc/bocode/s457527.html> (though the SSC version is is a bit out-of-date, see below)
 
 1. [Installation](#installation)
 2. [Minimal examples](#minimal-examples)
