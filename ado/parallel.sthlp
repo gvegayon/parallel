@@ -393,6 +393,16 @@ example through Monte Carlo Simulations is provided
 {browse "http://fmwww.bc.edu/repec/bocode/p/parallel.pdf":here}.
 {p_end}
 
+{pstd}
+To distribute work across different machines in a computer cluster,
+the machines need to be Linux/MacOS,
+share a global file-system (e.g. NFS),
+and have a non-interactive way to remotely execute commands. 
+The most common way to remotely execute commands is to use {it:ssh} with
+keyfiles so that no password is needed.
+This is still a new feature, and synchronizing across machines in clusters can have odd corner cases, so users may encounter some trouble getting this to work.
+{p_end}
+
 {marker append_how}{...}
 {title:4. Parallel Append}
 
