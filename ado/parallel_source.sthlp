@@ -157,6 +157,7 @@ void parallel_clean(|string scalar parallelid, real scalar cleanall, real scalar
     
     /* Extracting files that are in use */
     if (!force) parallel_sandbox(6,"",&sbfiles)
+    //ignore error about sbfiles potentially being used before being set (this sets it).
 
     for(i=1;i<=length(sbfiles);i++)
         parallelids = select(parallelids, parallelids:!=sbfiles[i])
@@ -189,6 +190,7 @@ end
 *! {c BLC}{dup 78:{c -}}{c BRC}
 *! parallel_estout vers 0.14 10may2014
 *! auth George G Vega
+//Hidden (undocumented and not called by normal functioning) utility
 mata
 // mata clear
 /*
@@ -219,6 +221,7 @@ void function parallel_eststore(
     
     string scalar stmatname
     
+    randtype=""
     if (fappend   == J(1,1,.)) fappend = 1
     if (stlist == J(1,1,"")) stlist = "b"
     
@@ -872,12 +875,15 @@ mata:
 *!{col 6}{it:Number of clusters that stopped with error.}
 *!{dup 78:{c -}}{asis}
 void parallel_net_sync(string scalar fname, string scalar hostname){
-    string matrix dummy
+    //ignore error about unused fname and hostname - this is just an example. overriding functions may use these
+    
     //trying to fopen/close the file doesn't work
     //best bet is to restat the folder
-    //errprintf("Uh oh\n"); displayflush();
+    
+    string matrix dummy
     stata("sleep 100")
     dummy = dir(".","files","__pll*")
+    //ignore error about dummy being set but not used. It is there to suppress the output from dir() (we don't care about results)
 }
 
 
@@ -945,7 +951,6 @@ real scalar parallel_finito(
     if (suberrors == nclusters) return(suberrors)
     
     string scalar logfilename, tmpdirname, connection_opt
-    real scalar ret
     hostname=""
 
     while(length(pendingcl)>0)
@@ -1038,6 +1043,7 @@ real scalar parallel_finito(
                 /* Checking tmpdir */
                 tmpdirname = sprintf("%s"+ (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/") + "__pll%s_tmpdir%04.0f", c("tmpdir"),parallelid,i)
                 retcode = parallel_recursively_rm(parallelid,tmpdirname,1)
+                //ignore the fact that retcode isn't used.
                 if (_rmdir(tmpdirname)){
                     errprintf("Not able to remove temp dir\n")
                 }
@@ -1226,7 +1232,7 @@ transmorphic function parallel_normalizepath(
     )
     {
     
-    string scalar filename, fileext, fullpath, filedir, curpath
+    string scalar filename, fileext, fullpath, filedir //,curpath
     string rowvector parts
     real scalar i, isfile
     
@@ -1241,7 +1247,7 @@ transmorphic function parallel_normalizepath(
     else if (direxists(fullpath)) isfile = 0
     else _error(601)
     
-    curpath = regexr(pwd(), "/$", "")
+    //curpath = regexr(pwd(), "/$", "")
     
     if (isfile) {
         if(fileexists(pwd()+fullpath))
@@ -1278,6 +1284,7 @@ transmorphic function parallel_normalizepath(
     
     // Extracting details
     pathsplit(fullpath, filedir, filename)
+    //ignore error about filedir and filename possibly being used before set (this sets them).
     fileext = pathsuffix(filename)
     
     /* Checking last-bar */
@@ -1544,9 +1551,9 @@ real scalar parallel_run(
     string scalar gateway_fname
     ) {
 
-    real scalar fh, i, use_procexec, folder_has_space
+    real scalar fh, i, use_procexec
     string scalar tmpdir, tmpdir_i, line, line2, dofile_i, dofile_i_base, pidfile
-    string scalar stata_quiet, stata_batch, folder, exec_cmd, dofile_i_basename     
+    string scalar stata_quiet, folder, exec_cmd //, stata_batch
     string scalar hostname, env_tmp_assign, com_line_env, rmt_begin, rmt_end, fin_file
     string scalar finito_err_line, pid_err_line, log_err_cmd
     real colvector pids
@@ -1569,7 +1576,6 @@ real scalar parallel_run(
     //If there is a -cd- command in (sys)profile.do then we need to 
     // specify the full path for the do file.  so grab the directory
     folder = st_global("LAST_PLL_DIR")
-    folder_has_space = (length(tokens(folder))>1)
     
     if (c("os") != "Windows") { // MACOS/UNIX
         unlink("__pll"+parallelid+"_shell.sh")
@@ -1577,7 +1583,7 @@ real scalar parallel_run(
         pidfile = "__pll"+parallelid+"_pids"
         unlink(pidfile)
         stata_quiet = " -q"
-        stata_batch = (c("os") == "Unix" ?" -b":" -e")
+        //stata_batch = (c("os") == "Unix" ?" -b":" -e")
         // Writing file
         hostname = ""
         ssh_str = length(hostnames) ? (ssh_str == J(1,1,"")?"ssh ":ssh_str) : ""
@@ -1930,7 +1936,7 @@ mata:
 *!{dup 78:{c -}}{asis}
 real scalar parallel_setstatapath(string scalar statadir, | real scalar force) {
 
-    string scalar bit, flv, flv2, fname, sys_dir
+    string scalar bit, flv, flv2, fname
 
     // Is it 64bits?
     if (c("osdtl") != "" | c("bit") == 64) bit = "-64"

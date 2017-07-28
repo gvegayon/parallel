@@ -27,6 +27,7 @@ void function parallel_eststore(
 	
 	string scalar stmatname
 	
+	randtype=""
 	if (fappend   == J(1,1,.)) fappend = 1
 	if (stlist == J(1,1,"")) stlist = "b"
 	

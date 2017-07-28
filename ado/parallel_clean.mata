@@ -35,6 +35,7 @@ void parallel_clean(|string scalar parallelid, real scalar cleanall, real scalar
 	
 	/* Extracting files that are in use */
 	if (!force) parallel_sandbox(6,"",&sbfiles)
+	//ignore error about sbfiles potentially being used before being set (this sets it).
 
 	for(i=1;i<=length(sbfiles);i++)
 		parallelids = select(parallelids, parallelids:!=sbfiles[i])

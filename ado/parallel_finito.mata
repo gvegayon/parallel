@@ -13,12 +13,15 @@ mata:
 //tested on NFS
 //If your cluster is different, overload this function (same name and earlier in the mlib search path).
 void parallel_net_sync(string scalar fname, string scalar hostname){
-	string matrix dummy
+	//ignore error about unused fname and hostname - this is just an example. overriding functions may use these
+	
 	//trying to fopen/close the file doesn't work
 	//best bet is to restat the folder
-	//errprintf("Uh oh\n"); displayflush();
+	
+	string matrix dummy
 	stata("sleep 100")
 	dummy = dir(".","files","__pll*")
+	//ignore error about dummy being set but not used. It is there to suppress the output from dir() (we don't care about results)
 }
 
 
@@ -82,7 +85,6 @@ real scalar parallel_finito(
 	if (suberrors == nclusters) return(suberrors)
 	
 	string scalar logfilename, tmpdirname, connection_opt
-	real scalar ret
 	hostname=""
 
 	while(length(pendingcl)>0)
@@ -175,6 +177,7 @@ real scalar parallel_finito(
 				/* Checking tmpdir */
 				tmpdirname = sprintf("%s"+ (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/") + "__pll%s_tmpdir%04.0f", c("tmpdir"),parallelid,i)
 				retcode = parallel_recursively_rm(parallelid,tmpdirname,1)
+				//ignore the fact that retcode isn't used.
 				if (_rmdir(tmpdirname)){
 					errprintf("Not able to remove temp dir\n")
 				}

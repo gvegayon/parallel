@@ -11,7 +11,7 @@
 mata:
 real scalar parallel_setstatapath(string scalar statadir, | real scalar force) {
 
-	string scalar bit, flv, flv2, fname, sys_dir
+	string scalar bit, flv, flv2, fname
 
 	// Is it 64bits?
 	if (c("osdtl") != "" | c("bit") == 64) bit = "-64"

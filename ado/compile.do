@@ -25,23 +25,26 @@ end
 if `c(stata_version)'>=12 di "WARNING: compiled mlib will only work on Stata version >=`c(stata_version)'"
 
 /* Compiling */
-run parallel_setclusters.mata
-run parallel_run.mata 
-do parallel_write_do.mata
-run parallel_export_programs.mata
-run parallel_export_globals.mata  
-run parallel_randomid.mata     	
-run parallel_finito.mata
-run parallel_setstatapath.mata
-run parallel_normalizepath.mata
-run parallel_clean.mata
-run parallel_write_diagnosis.mata
-run parallel_break.mata
-run parallel_sandbox.mata
-run parallel_expand_expr.mata
+//"run" will be silent whereas "do" will show code and mata interpreter warnings
+//Nice check is to use "do" and check for "note:" entries that say things like "variable unused".
+local do_or_run "run"
+`do_or_run' parallel_setclusters.mata
+`do_or_run' parallel_run.mata 
+`do_or_run' parallel_write_do.mata
+`do_or_run' parallel_export_programs.mata
+`do_or_run' parallel_export_globals.mata  
+`do_or_run' parallel_randomid.mata     	
+`do_or_run' parallel_finito.mata
+`do_or_run' parallel_setstatapath.mata
+`do_or_run' parallel_normalizepath.mata
+`do_or_run' parallel_clean.mata
+`do_or_run' parallel_write_diagnosis.mata
+`do_or_run' parallel_break.mata
+`do_or_run' parallel_sandbox.mata
+`do_or_run' parallel_expand_expr.mata
 //eststore is "hidden" (undocumented and not called by normal functioning) utility
-run parallel_eststore.mata
-run parallel_recursively_rm.mata
+`do_or_run' parallel_eststore.mata
+`do_or_run' parallel_recursively_rm.mata
 
 cap rm lparallel.mlib
 mata: mata mlib create lparallel, replace

@@ -23,9 +23,9 @@ real scalar parallel_run(
 	string scalar gateway_fname
 	) {
 
-	real scalar fh, i, use_procexec, folder_has_space
+	real scalar fh, i, use_procexec
 	string scalar tmpdir, tmpdir_i, line, line2, dofile_i, dofile_i_base, pidfile
-	string scalar stata_quiet, stata_batch, folder, exec_cmd, dofile_i_basename	 
+	string scalar stata_quiet, folder, exec_cmd //, stata_batch
 	string scalar hostname, env_tmp_assign, com_line_env, rmt_begin, rmt_end, fin_file
 	string scalar finito_err_line, pid_err_line, log_err_cmd
 	real colvector pids
@@ -48,7 +48,6 @@ real scalar parallel_run(
 	//If there is a -cd- command in (sys)profile.do then we need to 
 	// specify the full path for the do file.  so grab the directory
 	folder = st_global("LAST_PLL_DIR")
-	folder_has_space = (length(tokens(folder))>1)
 	
 	if (c("os") != "Windows") { // MACOS/UNIX
 		unlink("__pll"+parallelid+"_shell.sh")
@@ -56,7 +55,7 @@ real scalar parallel_run(
 		pidfile = "__pll"+parallelid+"_pids"
 		unlink(pidfile)
 		stata_quiet = " -q"
-		stata_batch = (c("os") == "Unix" ?" -b":" -e")
+		//stata_batch = (c("os") == "Unix" ?" -b":" -e")
 		// Writing file
 		hostname = ""
 		ssh_str = length(hostnames) ? (ssh_str == J(1,1,"")?"ssh ":ssh_str) : ""

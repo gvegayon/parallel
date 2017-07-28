@@ -15,7 +15,7 @@ transmorphic function parallel_normalizepath(
 	)
 	{
 	
-	string scalar filename, fileext, fullpath, filedir, curpath
+	string scalar filename, fileext, fullpath, filedir //,curpath
 	string rowvector parts
 	real scalar i, isfile
 	
@@ -30,7 +30,7 @@ transmorphic function parallel_normalizepath(
 	else if (direxists(fullpath)) isfile = 0
 	else _error(601)
 	
-	curpath = regexr(pwd(), "/$", "")
+	//curpath = regexr(pwd(), "/$", "")
 	
 	if (isfile) {
 		if(fileexists(pwd()+fullpath))
@@ -67,6 +67,7 @@ transmorphic function parallel_normalizepath(
 	
 	// Extracting details
 	pathsplit(fullpath, filedir, filename)
+	//ignore error about filedir and filename possibly being used before set (this sets them).
 	fileext = pathsuffix(filename)
 	
 	/* Checking last-bar */
