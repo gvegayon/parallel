@@ -932,3 +932,7 @@ Online: Running Stata batch-mode in {browse "http://www.stata.com/support/faqs/m
 {browse "http://www.stata.com/support/faqs/unix/batch-mode/":Unix} and 
 {browse "http://www.stata.com/support/faqs/windows/batch-mode/":Windows}
 {p_end}
+
+{psee}
+Project's wiki {browse "https://github.com/gvegayon/parallel/wiki/Gallery":page of other examples}.
+{p_end}
