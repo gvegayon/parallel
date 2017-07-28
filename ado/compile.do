@@ -22,6 +22,12 @@ dt_moxygen(archmata, "parallel_source.sthlp", 1)
 
 end
 
+//make the HTML version of help
+//Use log2html. Couldn't get parse-smcl to work with code that had tabs (loops).
+copy parallel.sthlp parallel.smcl, replace
+log2html parallel, replace
+erase parallel.smcl
+
 if `c(stata_version)'>=12 di "WARNING: compiled mlib will only work on Stata version >=`c(stata_version)'"
 
 /* Compiling */
