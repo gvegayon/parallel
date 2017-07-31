@@ -2,6 +2,7 @@
 Before submitting an issue, please check (with `x` in brackets) that you:
 - [ ] Are using the newest release (see [here](https://github.com/gvegayon/parallel/releases) for latest release version number).
 - [ ] Have checked that the examples in the help work.
+- [ ] Have read the help ([HTML version](https://rawgit.com/gvegayon/parallel/master/ado/parallel.html)) and the [gallery](https://github.com/gvegayon/parallel/wiki/Gallery) of examples.
 - [ ] Have checked that there is not already an existing issues for what you are reporting.
 
 # Expected behavior and actual behavior
