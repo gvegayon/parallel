@@ -2,8 +2,7 @@ SHELL := /bin/bash
 PATH:=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/stata12/:$(PATH)
 TESTS=test_bs.do test_append.do test_sim.do test_prefix.do test.do \
 	test_append_loop.do test_length.do test_aux_out.do
-TESTS_LOGS=test_bs.log test_append.log test_sim.log test_prefix.log test.log \
-	test_append_loop.log test_length.do test_aux_out.log
+TESTS_LOGS:= $(TESTS:.do=.log)
 #Not currently using: test_sim_within_sim.do
 #Test the cluster by specifying hostnames via env variable PLL_TEST_NODES
 
@@ -56,7 +55,7 @@ tests:
 	@echo Running tests 
 	@echo When looking at the combined log, search for "^r\(".
 	echo $$PATH > temp.txt
-	cd "../test files" && if [ ! -f platformname.txt ]; then $(STATABATCH) do export_platformname.do platformname.txt; fi;
+	cd "../test files" && $(STATABATCH) do export_platformname.do platformname.txt;
 	cd "../test files" && \
 		PLAT=$$(<platformname.txt) && \
 		export S_ADO="../ado/;../ado/$$PLAT;UPDATES;BASE;SITE;.;PERSONAL;PLUS;OLDPLACE" && \
