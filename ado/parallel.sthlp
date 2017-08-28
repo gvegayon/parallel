@@ -23,6 +23,11 @@
 {p2col: 8.  {help parallel##saved_results:Saved results}}A list of parallel's save results{p_end}
 {p2col: 9.  {help parallel##development:Development}}Up-to-date version and bug reporting{p_end}
 {p2col: 10. {help parallel##source:Source code}}parallel's (MATA) source code{p_end}
+{p2col: 11. {help parallel##authors:Authors}}Authors behind parallel{p_end}
+{p2col: 12. {help parallel##contrib:Contributors}}Notable contributors{p_end}
+{p2col: 13. {help parallel##also:Also see}}Other modules related to parallel{p_end}
+{p2col: 14. {help parallel##faqs:FAQs}}Frequently Asked Questions{p_end}
+
 
 {p2colset 5 32 32 2}
 {p2col:{bf:{ul:Available commands}}}{p_end}
@@ -876,7 +881,6 @@ links:
         Write a ``diagnosis'' {col 58} {help parallel_source##parallel_write_diagnosis:parallel_write_diagnosis.mata}
         Write a dofile to be paralellized {col 58} {help parallel_source##parallel_write_do:parallel_write_do.mata}
 
-
 {marker references}{...}
 
 {title:11. References}
@@ -887,6 +891,8 @@ links:
 {phang}George Vega Y (2013). {it:Introducing PARALLEL: Stata Module for Parallel Computing}. Stata Conference 2013, New Orleans (USA), URL {browse "http://ideas.repec.org/p/boc/norl13/4.html"}.{p_end}
 {phang}Haahr, M. (2006). {it:Random.org: True random number service}. Random.org. {browse "http://www.random.org/clients/http/"}.{p_end}
 
+
+{marker authors}{...}
 {title:12. Authors}
 
 {pstd}
@@ -898,7 +904,7 @@ George Vega Yon [cre,aut], University of Southern California. {browse "mailto:g.
 Brian Quistorff [aut], Microsoft Research. {browse "mailto:Brian.Quistorff@microsoft.com"} {browse "http://quistorff.com"}
 {p_end}
 
-
+{marker contrib}{...}
 {title:13. Contributors}
 
 {pstd}{it:Special Thanks to:}
@@ -919,6 +925,7 @@ Michael Lacy (Colorado State).
 {p_end}
 
 
+{marker also}{...}
 {title:14. Also see}
 
 {psee}
@@ -936,3 +943,24 @@ Online: Running Stata batch-mode in {browse "http://www.stata.com/support/faqs/m
 {psee}
 Project's wiki {browse "https://github.com/gvegayon/parallel/wiki/Gallery":page of other examples}.
 {p_end}
+
+
+{marker faqs}{...}
+{title:15. FAQs}
+
+{pstd}
+Here follows a list of Frequently Asked Questions:{p_end}
+
+{p2colset 6 10 10 2}
+{p2col: 1.}{bf:I'm getting error (608) {err: file is read-only; cannot be modified or erased}. What can I do to solve it?}{p_end}
+
+{p2col:}As Stata suggests, you are trying to either run parallel in a read-only
+directory, or your program/dofile is trying to write (save a dta file for
+example) in a read-only directory. Try running parallel (or making your program to
+write files) in a directory where you have writing priviledges (where you can
+save files).
+{p_end}
+
+{p2col: 2.} {p_end}
+
+

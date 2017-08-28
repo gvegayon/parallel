@@ -1,10 +1,14 @@
-2017-07-26 Brian Quistorff
-  * Add support for multiple machines (that use the same filesystem) via the hostnames option.
+2017-08-28 George G. Vega Yon
+	* Adding new FAQs section.
 
-2017-07-09  George G. Vega Yon:
+
+2017-07-26 Brian Quistorff
+	* Add support for multiple machines (that use the same filesystem) via the hostnames option.
+
+
+2017-07-09  George G. Vega Yon
 	* Updated the README files, but used the -f- option so that the
 	  examples would work.
-
 	* Remove a pretty old file that is not been used anymore.
 
 
