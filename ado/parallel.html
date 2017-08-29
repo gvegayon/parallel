@@ -36,6 +36,11 @@ BODY{background-color: ffffff;
     8.  Saved results         A list of parallel's save results
     9.  Development           Up-to-date version and bug reporting
     10. Source code           parallel's (MATA) source code
+    11. Authors               Authors behind parallel
+    12. Contributors          Notable contributors
+    13. Also see              Other modules related to parallel
+    14. FAQs                  Frequently Asked Questions
+<br><br>
 <br><br>
 <br><br>
     <span class=result><u>Available commands</u></span>         
@@ -681,7 +686,6 @@ BODY{background-color: ffffff;
         Write a ``diagnosis''                             parallel_write_diagnosis.mata
         Write a dofile to be paralellized                 parallel_write_do.mata
 <br><br>
-<br><br>
 <a name="references"></a><br><br>
 <span class=result><u>11. References</u></span>
 <br><br>
@@ -695,15 +699,15 @@ BODY{background-color: ffffff;
         URL http://ideas.repec.org/p/boc/norl13/4.html.
     Haahr, M. (2006). <i>Random.org: True random number service</i>. Random.org. http://www.random.org/clients/http/.
 <br><br>
-<span class=result><u>12. Authors</u></span>
+<br><br>
+<a name="authors"></a><span class=result><u>12. Authors</u></span>
 <br><br>
     George Vega Yon [cre,aut], University of Southern California. mailto:g.vegayon@gmail.com 
     http://www.its.caltech.edu/~gvegayon
 <br><br>
     Brian Quistorff [aut], Microsoft Research. mailto:Brian.Quistorff@microsoft.com http://quistorff.com
 <br><br>
-<br><br>
-<span class=result><u>13. Contributors</u></span>
+<a name="contrib"></a><span class=result><u>13. Contributors</u></span>
 <br><br>
     <i>Special Thanks to:</i>  Elan P. Kugelmass (aka as epkugelmass at github) [ctb], Timothy Mak (University of Hong Kong) (author
     of miparallel)
@@ -714,7 +718,7 @@ BODY{background-color: ffffff;
     (University of Zurich), Michael Lacy (Colorado State).
 <br><br>
 <br><br>
-<span class=result><u>14. Also see</u></span>
+<a name="also"></a><span class=result><u>14. Also see</u></span>
 <br><br>
     Manual: <span class=result>[GSM] Advanced Stata usage (Mac)</span>, <span class=result>[GSU] Advanced Stata usage (Unix)</span>, <span class=result>[GSW] Advanced Stata usage (Windows)</span>
 <br><br>
@@ -722,6 +726,22 @@ BODY{background-color: ffffff;
     Online: Running Stata batch-mode in  Mac, Unix and Windows
 <br><br>
     Project's wiki page of other examples.
+<br><br>
+<br><br>
+<a name="faqs"></a><span class=result><u>15. FAQs</u></span>
+<br><br>
+    Here follows a list of Frequently Asked Questions:
+<br><br>
+<br><br>
+     1.  <span class=result>I'm getting error (608)</span><span class=result> file is read-only; cannot be modified or erased</span><span class=input>. What can I do to solve it?</span>
+<br><br>
+         As Stata suggests, you are trying to either run parallel in a read-only directory, or your program/dofile is trying
+         to write (save a dta file for example) in a read-only directory. Try running parallel (or making your program to
+         write files) in a directory where you have writing priviledges (where you can save files).
+<br><br>
+     2.  
+<br><br>
+<br><br>
 </pre>
 </body>
 </html>
