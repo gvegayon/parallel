@@ -222,7 +222,7 @@ program def parallel_spliter
 			sort `xtstructure'
 		}
 		else {
-			gen _`parallelid'cut = ceil(_n*${PLL_CLUSTERS}/_N) //each of size _N/$PLL_CLUSTERS
+			gen _`parallelid'cut = min(${PLL_CLUSTERS}, ceil(_n*${PLL_CLUSTERS}/_N)) //numerical precision for big nubmers can make > PLL_CLUSTERS
 		}
 			
 		if (length("`keepusing'")) {

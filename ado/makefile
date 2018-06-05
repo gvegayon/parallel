@@ -15,6 +15,7 @@ endif
 
 compile: inc_dist_date
 	$(STATABATCH) do compile.do
+	@echo Check compile.log for errors
 	@echo Other helpful targets include: tests, checks, clean, and releaseinfo
 help:
 	@echo Helpful targets include: compile, tests, checks, clean, releasehelp, release

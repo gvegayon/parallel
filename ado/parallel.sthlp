@@ -952,7 +952,7 @@ Project's wiki {browse "https://github.com/gvegayon/parallel/wiki/Gallery":page 
 Here follows a list of Frequently Asked Questions:{p_end}
 
 {p2colset 6 10 10 2}
-{p2col: 1.}{bf:I'm getting error (608) {err: file is read-only; cannot be modified or erased}. What can I do to solve it?}{p_end}
+{p2col: 1.}{bf:I am getting error (608) {err: file is read-only; cannot be modified or erased}. What can I do to solve it?}{p_end}
 
 {p2col:}As Stata suggests, you are trying to either run parallel in a read-only
 directory, or your program/dofile is trying to write (save a dta file for

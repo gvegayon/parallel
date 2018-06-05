@@ -25,7 +25,8 @@ end
 //make the HTML version of help
 //Use log2html. Couldn't get parse-smcl to work with code that had tabs (loops).
 copy parallel.sthlp parallel.smcl, replace
-log2html parallel, replace
+//linesize needs to be sufficiently long or lines with quotes get cut-off and mis-parsed
+log2html parallel, replace linesize(145)
 erase parallel.smcl
 
 if `c(stata_version)'>=12 di "WARNING: compiled mlib will only work on Stata version >=`c(stata_version)'"
