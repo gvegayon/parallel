@@ -1,3 +1,5 @@
+<p align="center"><img src="logo/horizontal.png" alt="parallel" height="85px"></p>
+
 PARALLEL: Stata module for parallel computing
 =============================================
 
