@@ -185,7 +185,7 @@ and
 \begin_inset Newline newline
 \end_inset
 
-Microsoft Research
+Microsoft AI & Research
 \begin_inset Newline newline
 \end_inset
 
@@ -335,7 +335,12 @@ socket
 \begin_inset Quotes erd
 \end_inset
 
-/
+
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+aka 
 \begin_inset Quotes eld
 \end_inset
 
@@ -351,7 +356,12 @@ chip carrier
 \begin_inset Quotes erd
 \end_inset
 
-, and multiple packages in one system.
+
+\end_layout
+
+\end_inset
+
+, and multiple sockets in one system.
  There may be more logical processors if the cores use simultaneous multithreadi
 ng (e.g.
  Intel's Hyper-Threading Technology).
@@ -455,7 +465,7 @@ parallel
 \end_inset
 
  new instances of Stata.
- Those are referred to as child processes while the original is the parent.
+ These are referred to as child processes while the original is the parent.
  In each, one of the pieces of the split dataset is loaded, the command
  is executed, and the resultant data is saved.
 \end_layout
@@ -537,13 +547,13 @@ name "fig:howworks"
 There are two considerations that limit the parallelization in practice.
  First, it will never be useful to use more clusters than the number of
  processors on the machine.
- Second, processing a task in parallel using the 
+ Second, processing a task in parallel using 
 \family typewriter
 parallel
 \family default
- package uses more memory (i.e.
+ uses more memory (i.e.
  RAM).
- One is therefore trading memory capacity for processing capacity.
+ One is trading memory capacity for processing capacity.
  Therefore, there is likely to be little benefit if a sequential setup would
  already utilize close to all of the system memory.
 \end_layout
@@ -557,7 +567,7 @@ Some existing solution are able to take advantage of multiprocessors systems.
 parallel
 \family default
  allows this for generic commands which both expands the set of possible
- parallelizations and allows this for single-threaded flavors of the program.
+ parallelizations and allows this for single-threaded flavors of Stata.
  This module is similar to R's 
 \family typewriter
 parallel
@@ -720,16 +730,16 @@ The main usage of this command is to set the number of child processes to
 \family typewriter
 default
 \family default
- which set it to
+ which sets it to 
 \begin_inset Formula $\max(\lfloor(\mathrm{num\ processors})\cdot0.75\rfloor,1)$
 \end_inset
 
 .
- The default should be fine for testing on a personal computer (if there
- are multiple processors it will leave some free for other computer interactions
-).
- Note that when uing Stata/MP with child tasks that are automatically paralleliz
-ed by Stata care should be taken with this option and the 
+ If there are multiple processors, the default will leave some free for
+ other computer interactions, which should be fine for testing on a personal
+ computer.
+ Note that when using Stata/MP with child tasks that are automatically paralleli
+zed by Stata, care should be taken with this option and the 
 \family typewriter
 processors()
 \family default
@@ -819,8 +829,7 @@ filename
 include
 \family default
 d in the child processes before the parallelized tasks are executed.
- The target purpose for this is to allow one to copy over preferences that
- 
+ This allows one to copy over preferences that 
 \family typewriter
 parallel
 \family default
@@ -1221,8 +1230,7 @@ underbar{keepl}
 
 ast
 \family default
- - Keeps auxiliary files and remove those last saved during the current
- session.
+ - Keeps auxiliary files and removes those saved prior to the current execution.
 \end_layout
 
 \begin_layout Itemize
@@ -1242,7 +1250,7 @@ underbar{nog}
 
 lobal
 \family default
- - Avoid passing current session's global macros to the clusters.
+ - Avoids passing current session's global macros to the clusters.
 \end_layout
 
 \begin_layout Itemize
@@ -1311,9 +1319,9 @@ underbar{m}
 
 ata
 \family default
- - If the algorithm needs to use Mata objects, this option allows to pass
- to each cluster every Mata object loaded in the current session (including
- functions).
+ - If the algorithm needs to use Mata objects, this option causes each cluster
+ to receive every Mata object loaded in the current session (including functions
+).
  Note that when Mata objects are loaded into the child processes they will
  have different locations and therefore pointers may no longer be accurate.
  
@@ -1365,8 +1373,8 @@ numlist
 \emph default
 )
 \family default
- - With this option the user can pass a specific random seeds to be used
- within each cluster.
+ - With this option the user can pass specific random seeds to be used within
+ each cluster.
  
 \end_layout
 
@@ -1423,8 +1431,8 @@ integer
 \family typewriter
 parallel
 \family default
- has to wait until assume that there was a connection error and thus the
- child process (cluster) won't start.
+ wait until it assumes that there was a connection error and thus the child
+ process (cluster) won't start.
  The default value is 60.
  
 \end_layout
@@ -1450,9 +1458,9 @@ namelist
 \emph default
 )
 \family default
- - allows generic file-based appending.
- First, imagine a setup where a program generates multiple outputs and the
- extra outputs are stored in files as in
+ - Allows generic file-based appending.
+ First, imagine a non-parallel setup where a program generates multiple
+ outputs and the extra outputs are stored in files as in
 \begin_inset Newline newline
 \end_inset
 
@@ -1468,15 +1476,32 @@ my_prog, output1(outputfile1.dta) output2(outputfile2.dta)
 \begin_inset Newline newline
 \end_inset
 
-Calling 
+With 
 \family typewriter
 parallel
 \family default
- with 
+ we add the option 
 \family typewriter
 outputopts(output1 output2)
 \family default
- causes 
+ as in 
+\family typewriter
+
+\begin_inset Newline newline
+\end_inset
+
+.
+\begin_inset space \qquad{}
+\end_inset
+
+parallel, outputopts(output1 output2): my_prog, output1(outputfile1.dta)
+ output2(outputfile2.dta)
+\family default
+
+\begin_inset Newline newline
+\end_inset
+
+This causes 
 \family typewriter
 parallel
 \family default
@@ -1489,19 +1514,16 @@ output1
 \family typewriter
 output2
 \family default
- and then aggregates those to create a final pair of files.
- 
+ and then aggregates those to create 
 \family typewriter
-
-\begin_inset Newline newline
-\end_inset
-
+outputfile1.dta
+\family default
+ and 
+\family typewriter
+outputfile2.dta
+\family default
 .
-\begin_inset space \qquad{}
-\end_inset
-
-parallel, outputopts(output1 output2): my_prog, output1(outputfile1.dta)
- output2(outputfile2.dta)
+ 
 \end_layout
 
 \begin_layout Itemize
@@ -1521,7 +1543,7 @@ underbar{det}
 
 erministicoutput
 \family default
- will eliminates displayed output that would vary depending on the machine
+ will eliminate displayed output that would vary depending on the machine
  (e.g.
  timers, seeds, and number of parallel clusters) so that log files can be
  easily compared across runs.
@@ -1566,7 +1588,7 @@ varlist
 )
 \family default
  - Tells the command through which observations the current dataset can
- be divided, avoiding stories (panel) splitting over two or more clusters.
+ be divided, avoiding splitting stories (panels) over two or more clusters.
  
 \begin_inset Foot
 status open
@@ -1649,12 +1671,12 @@ by()
 \family typewriter
 parallel
 \family default
- checks whether if the dataset is properly sorted.
- By using 
+ checks whether the dataset is properly sorted.
+ The 
 \family typewriter
 force
 \family default
- the command skips this check.
+ option skips this check.
  
 \end_layout
 
@@ -1992,7 +2014,7 @@ ll
 \family typewriter
 parallel
 \family default
- to remove every remnant auxiliary files generated by it in the current
+ to remove every remaining auxiliary files generated by it in the current
  directory.
  
 \end_layout
@@ -2129,7 +2151,7 @@ parallel
 \family default
  for setting up the child process (loading data, global macros, settings,
  etc.).
- The final part of the log file is where the users task is.
+ The final part of the log file is where the users task is run.
  Options:
 \end_layout
 
@@ -2159,7 +2181,7 @@ pll_id
 \emph default
 )
 \family default
- - Specifies which event's log files should be displayed
+ - Specifies which event's log file should be displayed
 \end_layout
 
 \begin_layout Subsection
@@ -2704,8 +2726,9 @@ pll_instance
 \end_inset
 
  inside the last cluster), both as global and local macros.
- This allows the user setting different tasks/actions depending on the cluster.
- Also the global macro 
+ This allows the user to set different tasks/actions depending on the cluster
+ number.
+ Additionally, the global macro 
 \family typewriter
 PLL_CLUSTERS
 \family default
@@ -2776,10 +2799,9 @@ Child processes are managed.
 \end_layout
 
 \begin_layout Standard
-Results not explicitly saved in the child processes will not be available
- afterward.
- This is also true for matrices, scalars, Mata objects, returns, or whatever
- other object different from data.
+Results not explicitly saved in the child processes's datasets will not
+ be available afterward (e.g.
+ matrices, scalars, Mata objects, returns).
  Programs can often be modified to aggregate data in the primary dataset
  or using secondary files (see the 
 \emph on
@@ -3351,7 +3373,7 @@ status open
 \end_layout
 
 \begin_layout Standard
-to run it parallel we could instead use a very familiar syntax
+To run it parallel we could instead use a very familiar syntax
 \end_layout
 
 \begin_layout Standard
@@ -4159,7 +4181,7 @@ end{stexample}
 \end_layout
 
 \begin_layout Subsection
-Parallelizing own command
+Parallelizing user commands
 \end_layout
 
 \begin_layout Standard
@@ -4708,7 +4730,7 @@ George G.
 \end_layout
 
 \begin_layout AboutAuthors
-Brian Quistorff is an Economic Researcher at Microsoft Research.
+Brian Quistorff is an Economic Researcher at Microsoft AI & Research.
 \end_layout
 
 \end_body
