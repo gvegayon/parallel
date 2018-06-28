@@ -897,7 +897,7 @@ links:
 
 {pstd}
 George Vega Yon [cre,aut], University of Southern California. {browse "mailto:g.vegayon@gmail.com"}
-{browse "http://www.its.caltech.edu/~gvegayon"}
+{browse "http://ggvy.cl/"}
 {p_end}
 
 {pstd}
