@@ -4716,7 +4716,7 @@ parallel
 \begin_layout Standard
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
-bibfiles "bib"
+bibfiles "parallel"
 options "sj"
 
 \end_inset
