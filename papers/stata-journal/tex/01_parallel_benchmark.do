@@ -30,10 +30,10 @@ program def parallel_benchmark
 		if ("`options'" == "") local opt ""
 		else local opt , `options'
 		
-		if ("`inpll'" == "") parallel `opt': `anything'
+		if ("`inpll'" == "") qui parallel `opt': `anything'
 		else {
 			global INPLL 1
-			`anything'
+			qui `anything'
 			global INPLL 0
 		}
 		
@@ -44,7 +44,7 @@ program def parallel_benchmark
 		
 		timer clear 99
 		timer on 99 
-		`anything'
+		qui `anything'
 		timer off 99
 		
 		/* Saving results */
@@ -55,11 +55,12 @@ program def parallel_benchmark
 		/* Restoring and returning -------------------------------------------*/
 		restore
 		
-		if (~mod(`i',10)) {
-			display "{dup 80:*}" _newline "*"  _newline "* Simulation " ///
-				%04.0f `i' "/" %04.0f `times' _newline "*" ///
-				 _newline "{dup 80:*}"
-		}
+		*if (~mod(`i',10)) {
+		*	display "{dup 80:*}" _newline "*"  _newline "* Simulation " ///
+		*		%04.0f `i' "/" %04.0f `times' _newline "*" ///
+		*			 _newline "{dup 80:*}"
+		*}
+		print_dots `i' `times'
 		
 		
 	}
@@ -82,53 +83,7 @@ end
 *
 *******************************************************************************/
 
-/* Bootstrap */
-prog def BOOTTEST
-	// Loading data for boot
-	quietly {
-		sysuse auto, clear
-		expand 10
-	}
-	if ($INPLL == 1) {
-		parallel bs, rep($size) nodots: regress mpg weight gear foreign
-	}
-	else if ($INPLL == 0) {
-		bs, rep($size) nodots: regress mpg weight gear foreign
-	} 
-	else {
-		error 1
-	}
-end
-
-/* Monte carlo Simulation */
-prog def mysim, rclass
-	drop _all
-	set obs 1000
-	
-	gen eps = rnormal()
-	gen X   = rnormal()
-	gen Y   = X*2 + eps
-	
-	reg Y X
-	
-	mat def ans = e(b)
-	return scalar beta = ans[1,1]
-end
-
-
-prog def SIMTEST
-
-	if ($INPLL == 1) {
-		parallel sim, reps($size) expr(beta=r(beta)) nodots: mysim
-	}
-	else if ($INPLL == 0) {
-		simulate beta=r(beta), reps($size) nodots: mysim
-	}
-	else {
-		error 1
-	}
-end
-
+*** As, separate files now ***
 /* Reshape */
 
 
@@ -139,9 +94,9 @@ end
 *******************************************************************************/
 
 /* OVERALL PARAMETERS */
-global nreps  1000
-global CLUSTS 2 4
-global SIZES  1000 2000 4000
+global nreps  1000 // 1000
+global CLUSTS 2 4 
+global SIZES  1000 2000 4000 //1000 2000 4000
 global PROGS  SIMTEST BOOTTEST
 global DATE   20161102
 global OVERWRITE 1
@@ -155,16 +110,17 @@ foreach PROG of global PROGS {
 	foreach CLUST of global CLUSTS {
 		foreach SIZE of global SIZES {
 			// Cleaning space
-			parallel setclusters `CLUST'
-			parallel clean, all force
+			display "PROG=`PROG', CLUST=`CLUST', SIZE=`SIZE'."
+			qui parallel setclusters `CLUST'
+			qui parallel clean, all force
 			global size = `SIZE'
 			
 			// Running the program: This will generate a dataset with
 			// info about the computing times
-			parallel_benchmark `PROG', t($nreps) prog(`PROG') inpll
+			parallel_benchmark `PROG', t($nreps) inpll // prog(`PROG')
 			
 			// Adding additional information: Problem and pll vers
-			parallel version
+			qui parallel version
 			gen pll_version  = r(pll_vers)
 			gen test         = "`PROG'"
 			gen problem_size = `SIZE'
@@ -185,7 +141,7 @@ foreach PROG of global PROGS {
 				cap append using "$filename"
 			}
 			
-			save "$filename", replace
+			qui save "$filename", replace
 			
 			// Sleeping a bit				 
 			sleep 1000
