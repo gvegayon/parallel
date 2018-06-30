@@ -1,2 +1,5 @@
 *.plugin
 *.pkg
+package_files/
+paper_source/
+paper_examples/

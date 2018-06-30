@@ -116,6 +116,8 @@ mata: rseed(st_local("final_seed"))
 sort n
 
 ** Benchmarking
-* These take a long time and will produce different numbers dependon on the machine
-do "tex/01_parallel_benchmark.do"
-do "tex/02_parallel_benchmark.do"
+* These take a long time and will produce different numbers depending on on the machine
+* See the included 20161102_parallel-bechmark_nreps=1000.dta for original output
+* If you edit global DATE and nreps and PROGS/TESTS in 01 make sure to edit in 02
+do "01_parallel_benchmark.do"
+do "02_parallel_benchmark.do"
