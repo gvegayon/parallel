@@ -12,14 +12,58 @@ clear all
 set more off
 set trace off
 
+// Function to print data
+mata:
+void output_the_table() {
+	psize    = st_data(.,"psize")
+	avgtimes = st_data(.,2..st_nvar())
+	testname = strlower(st_global("TEST"))
+	fn       = "tables_and_figures/parallel_benchmarks_test="+testname+".tex"
+	if (fileexists(fn)) unlink(fn)
+	fh       = fopen(fn, "w")
+		
+	// fput(fh, "\begin{tabular}{*{2}{m{.2\textwidth}}*{2}{m{.25\textwidth}}}")
+	fput(fh, "\centering\begin{tabular}{l*{3}{c}}")
+	fput(fh, "\toprule")
+	fput(fh, "Problem size & Serial & 2 Clusters & 4 Clusters\\\midrule")
+	for(i=1;i<=length(psize);i++) {
+
+		// Times
+		fwrite(fh, sprintf("%3.0f", psize[i]))
+		for(j=1;j<=cols(avgtimes);j++) {
+			// ans = ans + " &  "  + sprintf("%5.2f", avgtimes[i,j])
+			fwrite(fh, " &  "  + sprintf("%5.2fs", avgtimes[i,j]))
+		}
+		
+		fput(fh, " \\    ")
+		
+		// Relative times
+		tmp = 1:/(J(1,cols(avgtimes),min(avgtimes[i,.])) :/avgtimes[i,.])
+		for(j=1;j<=length(tmp);j++) {
+			fwrite(fh, " &  x"  + sprintf("%4.2f", tmp[j]))
+		}
+		
+		if (i != length(psize)) fput(fh, " \\ \\")
+		else fput(fh, " \\")
+	}
+
+	fput(fh, "\bottomrule")
+	fput(fh, "\end{tabular}")
+	fclose(fh)
+}
+end
+
 // Parameters
 global DATE         20161102
 global nreps        1000
-global TEST         BOOTTEST
+global TESTS          BOOTTEST SIMTEST
 global PROCESSOR    "Intel Core i7-4790 CPU @ 3.60GHz × 8"
 
 m: st_global("filename", sprintf("%f_parallel-bechmark_nreps=%04.0f.dta",$DATE, $nreps))
+cap mkdir "tables_and_figures", public
 
+foreach testname of global TESTS {
+global TEST `testname'
 use "$filename", clear
 
 // Getting the parameters
@@ -28,12 +72,10 @@ global whichstata = "Stata `=flavor[1]' `statav' on a `=os[1]' machine with an $
 
 // Filtering data and stacking times and nclusters
 keep if test == "$TEST"
-mata:
-TIMES = st_data(.,"tot_pll")\st_data(.,"tot_serial")
-PSIZE = st_data(.,"problem_size")\st_data(.,"problem_size")
-NCLUS = st_data(.,"nclusters")\J(st_nobs(),1,1)
-st_local("n", strofreal(st_nobs()*2))
-end
+mata: TIMES = st_data(.,"tot_pll")\st_data(.,"tot_serial")
+mata: PSIZE = st_data(.,"problem_size")\st_data(.,"problem_size")
+mata: NCLUS = st_data(.,"nclusters")\J(st_nobs(),1,1)
+mata: st_local("n", strofreal(st_nobs()*2))
 
 // Storing the data back into stata
 drop _all
@@ -64,40 +106,6 @@ graph twoway (connected avg* psize), ///
 
 graph export "tables_and_figures/parallel_benchmarks_test=`=lower("$TEST")'.eps", replace
 
-// Function to print data
-mata:
-psize    = st_data(.,"psize")
-avgtimes = st_data(.,2..st_nvar())
-fn       = "tables_and_figures/parallel_benchmarks_test=`=lower("$TEST")'.tex"
-if (fileexists(fn)) unlink(fn)
-fh       = fopen(fn, "w")
-	
-// fput(fh, "\begin{tabular}{*{2}{m{.2\textwidth}}*{2}{m{.25\textwidth}}}")
-fput(fh, "\centering\begin{tabular}{l*{3}{c}}")
-fput(fh, "\toprule")
-fput(fh, "Problem size & Serial & 2 Clusters & 4 Clusters\\\midrule")
-for(i=1;i<=length(psize);i++) {
+mata: output_the_table()
 
-	// Times
-	fwrite(fh, sprintf("%3.0f", psize[i]))
-	for(j=1;j<=cols(avgtimes);j++) {
-		// ans = ans + " &  "  + sprintf("%5.2f", avgtimes[i,j])
-		fwrite(fh, " &  "  + sprintf("%5.2fs", avgtimes[i,j]))
-	}
-	
-	fput(fh, " \\    ")
-	
-	// Relative times
-	tmp = 1:/(J(1,cols(avgtimes),min(avgtimes[i,.])) :/avgtimes[i,.])
-	for(j=1;j<=length(tmp);j++) {
-		fwrite(fh, " &  x"  + sprintf("%4.2f", tmp[j]))
-	}
-	
-	if (i != length(psize)) fput(fh, " \\ \\")
-	else fput(fh, " \\")
 }
-
-fput(fh, "\bottomrule")
-fput(fh, "\end{tabular}")
-fclose(fh)
-end
