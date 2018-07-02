@@ -18,7 +18,7 @@ cd tex
 lyx --export pdflatex parallel.lyx
 #lyx --export pdf2 lyxmain.lyx #should've already main since versioned
 zip ../deliverable/paper_source.zip parallel.lyx parallel.tex tables_and_figures/diagram.tex tables_and_figures/parallel_benchmarks_test=boottest.tex tables_and_figures/parallel_benchmarks_test=simtest.tex parallel.bib statapress.layout statapress.cls sj.sty sj.bst tl.eps tr.eps tl.pdf tr.pdf stata.sty multind.sty pagedims.sty
-rm tex/lyxmain.tex
+rm parallel.tex
 cd ..
 
 zip -j deliverable/paper_examples.zip tex/01_parallel_benchmark.do tex/02_parallel_benchmark.do tex/BOOTTEST.ado tex/make_polynomial.do tex/mysim.ado tex/paper_examples.do tex/print_dots.ado tex/SIMTEST.ado tex/20161102_parallel-bechmark_nreps=1000.dta

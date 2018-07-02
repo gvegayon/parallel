@@ -1,4 +1,10 @@
-* net install parallel, from("`c(pwd)'/deliverable/package_files")
+* Note: The benchmarking scripts at the bottom will produce different output per run.
+*   We have included the original output dataset. If you don't want to overwrite that
+*   then modify DATE and/or nreps in the new benchmarking files.
+* Easy installation command:
+*   net install parallel, from("`c(pwd)'/package_files")
+*   mata: mata mlib index
+
 ** EXAMPLES
 * 1) Example Prefix
 sysuse auto, clear 
@@ -69,7 +75,7 @@ parallel append, do(myprogram) prog(myprogram) ///
 forval year=2008/2012{
 	forval month=1/12{
 		local month_pad : display %02.0f `month'
-		rm `year'_`month_pad'/income.dta, replace
+		rm `year'_`month_pad'/income.dta
 		rmdir `year'_`month_pad'
 	}
 }
