@@ -519,12 +519,12 @@ end
 // Sets the number of clusters as a global macro
 program parallel_setclusters
 	version 11.0
-	syntax anything(name=nclusters)  [, Force Statapath(string asis) Gateway(string) Includefile(string) Hostnames(string) ssh(string) procexec(int 2)]
+	syntax [anything(name=nclusters)] [, Force Statapath(string asis) Gateway(string) Includefile(string) Hostnames(string) ssh(string) procexec(int 2)]
 	
 	_assert inlist(`procexec',0,1,2), msg("procexec() must be 0, 1, or 2") rc(198)
 	cap parallel_numprocessors
 	local nproc = int(real("`r(numprocessors)'"))
-	if "`nclusters'"=="default"{
+	if "`nclusters'"=="default" | "`nclusters'"==""{
 		_assert `nproc'!=., msg("Couldn't determine number of available processors for default configuration.")
 		local nclusters = max(floor(`nproc'*3/4),1)
 	}

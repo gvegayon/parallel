@@ -51,7 +51,7 @@
 {pstd}Setting the number of clusters (threads/processors)
 
 {p 8 17 2}
-{cmdab:parallel setclusters} # [, {opt f:orce} 
+{cmdab:parallel setclusters} [ # , {opt f:orce} 
 {opt s:tatapath}({it:{help filename:stata_path}})
 {opt i:ncludefile}({it:{help filename:filename}})
 {opt h:ostnames}({it:string})
@@ -138,6 +138,7 @@ Checking out clusters' logfiles by showing the output in a view window.
 {synopthdr}
 {synoptline}
 {syntab:Setting the number of clusters}
+{synopt:{opt #}} The number of clusters. If omitted the default is max(floor(num_processors*0.75),1)
 {synopt:{opt f:orce}}Overrides the restriction on using more clusters than processors on your machine (see the 
 {help parallel##warnings:WARNING} in description). This option is assumed when specifying {opt hostnames}.{p_end}
 {synopt:{opt s:tatapath}}File path. {cmd:parallel} tries to automatically identify

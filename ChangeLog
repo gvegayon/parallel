@@ -1,4 +1,5 @@
 Unreleased:
+  * Allow blank 'parallel setclusters' to use the default - Brian Quistorff 
 	* Fix bug with cut IDs when big data - Brian Quistorff
 
 2017-08-28 George G. Vega Yon

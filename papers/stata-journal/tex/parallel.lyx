@@ -670,18 +670,18 @@ parallel setclusters
 
 \begin_layout Plain Layout
 
-    {
+    
 \backslash
-it 
-\backslash
-#|default}
+optional{
 \end_layout
 
 \begin_layout Plain Layout
 
-    
+    {
 \backslash
-optional{,
+it 
+\backslash
+#},
 \end_layout
 
 \begin_layout Plain Layout
@@ -726,11 +726,7 @@ The main usage of this command is to set the number of child processes to
 #
 \family default
  - The number of clusters to use.
- One can also input 
-\family typewriter
-default
-\family default
- which sets it to 
+ If omitted the default is to use 
 \begin_inset Formula $\max(\lfloor(\mathrm{num\ processors})\cdot0.75\rfloor,1)$
 \end_inset
 
