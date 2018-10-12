@@ -33,10 +33,13 @@ program def parallel
     version 11.0
 
 	// Checks wether if is parallel prefix or not
-	if  (regexm(`"`0'"', "^(do|clean|setclusters|break|version|append|printlog|viewlog|numprocessors)")) {
+	if  (regexm(`"`0'"', "^(do|clean|break|version|append|printlog|viewlog|numprocessors)")) {
 	/* If not prefix */
 		parallel_`0'
 	} 
+	else if (regexm(`"`0'"', "^(setclusters|initialize|init)")) {
+		parallel_setclusters
+	}
 	else if (regexm(`"`0'"', "^(bootstrap|bstrap|bs|simulate|sim)[,]?[\s ]?")) {
 	/* Prefix bootstrap or simulate */
 		local cmd = regexs(1)

@@ -17,6 +17,6 @@ void parallel_setclusters(real scalar nclusters, |real scalar force, real scalar
 		st_global("PLL_CLUSTERS", strofreal(nclusters))
 	}
 	else _error(912,`"Use -force- if you want to set clusters than there are processors."')
-	display(sprintf("{text:N Clusters}: {result:%g}",nclusters))
+	display(sprintf("{text:N Child processes}: {result:%g}",nclusters))
 }
 end

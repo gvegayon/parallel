@@ -1,5 +1,6 @@
 Unreleased:
-  * Allow blank 'parallel setclusters' to use the default - Brian Quistorff 
+	* Rename setclusters -> initialize (keep, but deprecate old name) - Brian Quistorff
+	* Allow blank 'parallel setclusters' to use the default - Brian Quistorff 
 	* Fix bug with cut IDs when big data - Brian Quistorff
 
 2017-08-28 George G. Vega Yon

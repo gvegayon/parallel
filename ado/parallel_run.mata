@@ -38,11 +38,11 @@ real scalar parallel_run(
 	// Message
 	display(sprintf("{hline %g}",c("linesize") > 80?80:c("linesize")))
 	display("{result:Parallel Computing with Stata}")
-	if (!deterministicoutput) display("{text:Clusters   :} {result:"+strofreal(nclusters)+"}")
-	if (!deterministicoutput) display("{text:pll_id     :} {result:"+parallelid+"}")
+	if (!deterministicoutput) display("{text:Child processes:} {result:"+strofreal(nclusters)+"}")
+	if (!deterministicoutput) display("{text:pll_id         :} {result:"+parallelid+"}")
 	if (!deterministicoutput & length(hostnames)) display("{text:Hostnames :} {result:"+st_global("PLL_HOSTNAMES")+"}")
-	if (!deterministicoutput) display("{text:Running at :} {result:"+c("pwd")+"}")
-	display("{text:Randtype   :} {result:"+st_local("randtype")+"}")
+	if (!deterministicoutput) display("{text:Running at     :} {result:"+c("pwd")+"}")
+	display("{text:Randtype       :} {result:"+st_local("randtype")+"}")
 
 	tmpdir = c("tmpdir") + (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/")
 	//If there is a -cd- command in (sys)profile.do then we need to 

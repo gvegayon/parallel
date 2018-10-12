@@ -431,15 +431,7 @@ parallel
 \begin_inset Formula $N$
 \end_inset
 
- parallel 
-\begin_inset Quotes eld
-\end_inset
-
-clusters
-\begin_inset Quotes erd
-\end_inset
-
-.
+ parallel child processes.
  It proceeds as follows,
 \end_layout
 
@@ -545,8 +537,8 @@ name "fig:howworks"
 
 \begin_layout Standard
 There are two considerations that limit the parallelization in practice.
- First, it will never be useful to use more clusters than the number of
- processors on the machine.
+ First, it will never be useful to use more child processes than the number
+ of processors on the machine.
  Second, processing a task in parallel using 
 \family typewriter
 parallel
@@ -654,7 +646,7 @@ Initialization
 \begin_layout Standard
 To initialize the parallel setup use the 
 \family typewriter
-setclusters
+initialize
 \family default
  subcommand 
 \end_layout
@@ -665,7 +657,7 @@ status open
 
 \begin_layout Plain Layout
 
-parallel setclusters
+parallel initialize
 \end_layout
 
 \begin_layout Plain Layout
@@ -725,7 +717,7 @@ The main usage of this command is to set the number of child processes to
 \family typewriter
 #
 \family default
- - The number of clusters to use.
+ - The number of child processes to use.
  If omitted the default is to use 
 \begin_inset Formula $\max(\lfloor(\mathrm{num\ processors})\cdot0.75\rfloor,1)$
 \end_inset
@@ -761,7 +753,8 @@ underbar{f}
 orce
 \family default
  - To prevent slowdowns there is a soft limit that restricts setting the
- number of clusters to be more than the number of processors on the system.
+ number of child processes to be more than the number of processors on the
+ system.
  Use this option to override the limit.
 \end_layout
 
@@ -1246,7 +1239,7 @@ underbar{nog}
 
 lobal
 \family default
- - Avoids passing current session's global macros to the clusters.
+ - Avoids passing current session's global macros to the child processes.
 \end_layout
 
 \begin_layout Itemize
@@ -1270,7 +1263,7 @@ namelist
 \emph default
 )
 \family default
- - A list of programs to be passed to each cluster.
+ - A list of programs to be passed to each child processes.
  To do this, 
 \family typewriter
 parallel
@@ -1315,9 +1308,9 @@ underbar{m}
 
 ata
 \family default
- - If the algorithm needs to use Mata objects, this option causes each cluster
- to receive every Mata object loaded in the current session (including functions
-).
+ - If the algorithm needs to use Mata objects, this option causes each child
+ process to receive every Mata object loaded in the current session (including
+ functions).
  Note that when Mata objects are loaded into the child processes they will
  have different locations and therefore pointers may no longer be accurate.
  
@@ -1345,7 +1338,8 @@ ype(current|datetime|random.org)
 parallel
 \family default
  whether to use the current random number generator seed (default), the
- current datetime or random.org API to generate the seeds for each clusters.
+ current datetime or random.org API to generate the seeds for each child
+ process.
 \end_layout
 
 \begin_layout Itemize
@@ -1370,7 +1364,7 @@ numlist
 )
 \family default
  - With this option the user can pass specific random seeds to be used within
- each cluster.
+ each child process.
  
 \end_layout
 
@@ -1395,8 +1389,8 @@ integer
 \emph default
 )
 \family default
- - If running on Stata/MP, sets the number of processors each cluster should
- use.
+ - If running on Stata/MP, sets the number of processors each child process
+ should use.
  The default value is 0 which means to take no specific change in the child
  processes.
  
@@ -1423,12 +1417,12 @@ integer
 \emph default
 )
 \family default
- - If a cluster hasn't started, how much time in seconds does 
+ - If a child process hasn't started, how much time in seconds does 
 \family typewriter
 parallel
 \family default
  wait until it assumes that there was a connection error and thus the child
- process (cluster) won't start.
+ process won't start.
  The default value is 60.
  
 \end_layout
@@ -1541,8 +1535,8 @@ erministicoutput
 \family default
  will eliminate displayed output that would vary depending on the machine
  (e.g.
- timers, seeds, and number of parallel clusters) so that log files can be
- easily compared across runs.
+ timers, seeds, and number of parallel child processes) so that log files
+ can be easily compared across runs.
  Errors are still printed.
 \end_layout
 
@@ -1584,7 +1578,8 @@ varlist
 )
 \family default
  - Tells the command through which observations the current dataset can
- be divided, avoiding splitting stories (panels) over two or more clusters.
+ be divided, avoiding splitting stories (panels) over two or more child
+ processes.
  
 \begin_inset Foot
 status open
@@ -1613,8 +1608,9 @@ parallel
 \family typewriter
 by
 \family default
--values will be in different clusters.
- It pools together combinations when there are fewer clusters than 
+-values will be in different child processes.
+ It pools together combinations when there are fewer child processes than
+ 
 \family typewriter
 by
 \family default
@@ -2152,7 +2148,8 @@ parallel
 \end_layout
 
 \begin_layout Itemize
-# - specifies which cluster number of an event to display (default is 1).
+# - specifies which child process number of an event to display (default
+ is 1).
  
 \end_layout
 
@@ -2242,7 +2239,7 @@ r(pll_n)
 \begin_inset Text
 
 \begin_layout Plain Layout
-Number of parallel clusters last used.
+Number of parallel child processes last used.
 \end_layout
 
 \end_inset
@@ -2343,7 +2340,7 @@ r(pll_errs)
 \begin_inset Text
 
 \begin_layout Plain Layout
-Number of clusters which stopped with an error.
+Number of child processes which stopped with an error.
 \end_layout
 
 \end_inset
@@ -2693,7 +2690,7 @@ Given
 \begin_inset Formula $N$
 \end_inset
 
- clusters, within each cluster 
+ child processes, within each child process 
 \family typewriter
 parallel
 \family default
@@ -2701,7 +2698,7 @@ parallel
 \family typewriter
 pll_id
 \family default
- (equal for all the clusters) and 
+ (equal for all the child processes) and 
 \family typewriter
 pll_instance
 \family default
@@ -2717,13 +2714,13 @@ pll_instance
 \begin_inset Formula $1$
 \end_inset
 
- inside the first cluster and 
+ inside the first child process and 
 \begin_inset Formula $N$
 \end_inset
 
- inside the last cluster), both as global and local macros.
- This allows the user to set different tasks/actions depending on the cluster
- number.
+ inside the last child process), both as global and local macros.
+ This allows the user to set different tasks/actions depending on the child
+ process number.
  Additionally, the global macro 
 \family typewriter
 PLL_CLUSTERS
@@ -2732,7 +2729,7 @@ PLL_CLUSTERS
 \begin_inset Formula $N$
 \end_inset
 
-) is available within each cluster.
+) is available within each child process.
  Note that the locals will be not available inside of programs that are
  called from 
 \family typewriter
@@ -2817,11 +2814,12 @@ parallel
 \end_layout
 
 \begin_layout Standard
-If the number of tasks to be done is less than the number of clusters, 
+If the number of tasks to be done is less than the number of child processes,
+ 
 \family typewriter
 parallel
 \family default
- will temporarily reduce the number of clusters.
+ will temporarily reduce the number of child processes.
  This is reported in the global macro 
 \family typewriter
 LAST_PLL_N
@@ -2968,12 +2966,12 @@ status open
 \begin_layout Plain Layout
 
 .
- parallel setclusters 2
+ parallel initialize 2
 \end_layout
 
 \begin_layout Plain Layout
 
-N Clusters: 2 
+N Child processes: 2 
 \end_layout
 
 \begin_layout Plain Layout
@@ -3007,39 +3005,39 @@ Parallel Computing with Stata
 
 \begin_layout Plain Layout
 
-Clusters   : 2 
+Child processes: 2 
 \end_layout
 
 \begin_layout Plain Layout
 
-pll_id     : <unique ID> 
+pll_id         : <unique ID> 
 \end_layout
 
 \begin_layout Plain Layout
 
-Running at : <pwd> 
+Running at     : <pwd> 
 \end_layout
 
 \begin_layout Plain Layout
 
-Randtype   : datetime 
+Randtype       : datetime 
 \end_layout
 
 \begin_layout Plain Layout
 
-Waiting for the clusters to finish...
+Waiting for the child processes to finish...
  
 \end_layout
 
 \begin_layout Plain Layout
 
-cluster 0001 has exited without error...
+child process 0001 has exited without error...
  
 \end_layout
 
 \begin_layout Plain Layout
 
-cluster 0002 has exited without error...
+child process 0002 has exited without error...
  
 \end_layout
 
@@ -3617,7 +3615,8 @@ prog(myprogram)
 \family typewriter
 myprogram
 \family default
- is a user written program that needs to passed to child clusters, and 
+ is a user written program that needs to passed to child child processes,
+ and 
 \end_layout
 
 \begin_layout Itemize
@@ -3655,17 +3654,17 @@ parallel append
 \family typewriter
 parallel
 \family default
- manages to process these files in groups of as many files as clusters are
- set.
+ manages to process these files in groups of as many files as child processes
+ are set.
  Step-by-step, what this command does is:
 \end_layout
 
 \begin_layout Enumerate
-Distribute groups of files across clusters
+Distribute groups of files across child processes
 \end_layout
 
 \begin_layout Enumerate
-Once each cluster starts, for each dta file:
+Once each child process starts, for each dta file:
 \end_layout
 
 \begin_deeper
@@ -3798,7 +3797,7 @@ if `n_proc'>1 {
 
 \begin_layout Plain Layout
 
-  parallel setclusters `n_proc'
+  parallel initialize `n_proc'
 \end_layout
 
 \begin_layout Plain Layout
@@ -3907,8 +3906,8 @@ For many tasks we will want to ensure that there is exact consistency between
  Deterministic programs virtually ensure this.
  With random functions, a sequential program is usually made consistent
  by specifying a fixed random seed at the beginning of the program.
- If one is always using the same number of clusters then the same can be
- achieved by pre-specifying the seeds with the 
+ If one is always using the same number of child processes then the same
+ can be achieved by pre-specifying the seeds with the 
 \family typewriter
 seeds
 \family default
@@ -3971,7 +3970,7 @@ sysuse auto, clear
 
 \begin_layout Plain Layout
 
-parallel setclusters 2
+parallel initialize 2
 \end_layout
 
 \begin_layout Plain Layout
@@ -4149,7 +4148,8 @@ sort n
 \end_layout
 
 \begin_layout Standard
-The output be the same no matter the number of clusters or if the 
+The output be the same no matter the number of child processes or if the
+ 
 \family typewriter
 do_work
 \family default
@@ -4259,7 +4259,8 @@ Tests were run using StataIC 12.1 on a Unix machine with an Intel i7-4790
 
 \end_inset
 
-: serial, parallel using two clusters, and parallel using four clusters.
+: serial, parallel using two child processes, and parallel using four child
+ processes.
  While the tasks over which we performed the comparisons are rather simple
  (and not particularly time consuming since all of them took less than a
  minute to complete), they are useful to illustrate the benefits of using
@@ -4336,7 +4337,7 @@ bs, rep($size) nodots: regress mpg weight gear foreign
 
 \begin_layout Plain Layout
 
-parallel setclusters 2
+parallel initialize 2
 \end_layout
 
 \begin_layout Plain Layout
@@ -4346,7 +4347,7 @@ parallel bs, rep($size) nodots: regress mpg weight gear foreign
 
 \begin_layout Plain Layout
 
-parallel setclusters 4
+parallel initialize 4
 \end_layout
 
 \begin_layout Plain Layout
@@ -4402,7 +4403,7 @@ Absolute and relative computing times for each run of a basic bootstrap
 \family typewriter
 parallel
 \family default
- with four clusters.
+ with four child processes.
 \begin_inset CommandInset label
 LatexCommand label
 name "tab:bootstrap"
@@ -4546,7 +4547,7 @@ simulate beta=r(beta), reps($size) nodots: mysim
 
 \begin_layout Plain Layout
 
-parallel setclusters 2
+parallel initialize 2
 \end_layout
 
 \begin_layout Plain Layout
@@ -4556,7 +4557,7 @@ parallel sim, reps($size) expr(beta=r(beta)) nodots: mysim
 
 \begin_layout Plain Layout
 
-parallel setclusters 4
+parallel initialize 4
 \end_layout
 
 \begin_layout Plain Layout
@@ -4612,7 +4613,7 @@ Absolute and relative computing times for each run of a simple Monte Carlo
 \family typewriter
 parallel
 \family default
- with four clusters.
+ with four child processes.
 \begin_inset CommandInset label
 LatexCommand label
 name "tab:simulation"

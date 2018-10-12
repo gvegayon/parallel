@@ -32,7 +32,7 @@
 {p2colset 5 32 32 2}
 {p2col:{bf:{ul:Available commands}}}{p_end}
 
-{p2col: 1.  {help parallel##setclusters:parallel setclusters}}Setting the number of clusters.{p_end}
+{p2col: 1.  {help parallel##initialize:parallel initialize}}Setting the number of child processes.{p_end}
 {p2col: 2.  {help parallel##numprocessors:parallel numprocessors}}Getting the number of processors on the system.{p_end}
 {p2col: 3.  {help parallel##do:parallel do}}Parallelizing a do-file.{p_end}
 {p2col: 4.  {help parallel##prefix:parallel : (prefix)}}Parallelizing a Stata command (parallel prefix).{p_end}
@@ -40,18 +40,18 @@
 {p2col: 6.  {help parallel##bs:parallel sim}}Parallel simulate.{p_end}
 {p2col: 7.  {help parallel##append:parallel append}}Multiple file processing and appending.{p_end}
 {p2col: 8.  {help parallel##clean:parallel clean}}Removing auxiliary files.{p_end}
-{p2col: 9.  {help parallel##printlog:parallel printlog}}Checking out clusters' log files.{p_end}
+{p2col: 9.  {help parallel##printlog:parallel printlog}}Checking out child processes' log files.{p_end}
 {p2col:10.  {help parallel##version:parallel version}}Query parallel current version.{p_end}
 
 
 {marker syntax}{...}
 {title:1. Syntax}
 
-{col 5}{hline}{marker setclusters}{...}
-{pstd}Setting the number of clusters (threads/processors)
+{col 5}{hline}{marker initialize}{...}
+{pstd}Setting the number of child processes (threads/processors)
 
 {p 8 17 2}
-{cmdab:parallel setclusters} [ # , {opt f:orce} 
+{cmdab:parallel initialize} [ # , {opt f:orce} 
 {opt s:tatapath}({it:{help filename:stata_path}})
 {opt i:ncludefile}({it:{help filename:filename}})
 {opt h:ostnames}({it:string})
@@ -116,13 +116,13 @@
 {cmdab:parallel clean} [, {opt e:vent}({it:pll_id}) {opt a:ll} {opt f:orce}]
 
 {col 5}{hline}{marker printlog}{...}
-{pstd}Checking out clusters' logfiles by printing the output.
+{pstd}Checking out child processes' logfiles by printing the output.
 
 {p 8 17 2}
 {cmdab:parallel printlog} [{it:#}] [, {opt e:vent}({it:pll_id})]
 
 {p 4 17 2}
-Checking out clusters' logfiles by showing the output in a view window.
+Checking out child processes' logfiles by showing the output in a view window.
 
 {p 8 8 2}
 {cmdab:parallel viewlog} [{it:#}] [, {opt e:vent}({it:pll_id})]
@@ -137,9 +137,9 @@ Checking out clusters' logfiles by showing the output in a view window.
 {synoptset 15 tabbed}{...}
 {synopthdr}
 {synoptline}
-{syntab:Setting the number of clusters}
-{synopt:{opt #}} The number of clusters. If omitted the default is max(floor(num_processors*0.75),1)
-{synopt:{opt f:orce}}Overrides the restriction on using more clusters than processors on your machine (see the 
+{syntab:Setting the number of child processes}
+{synopt:{opt #}} The number of child processes. If omitted the default is max(floor(num_processors*0.75),1)
+{synopt:{opt f:orce}}Overrides the restriction on using more child processes than processors on your machine (see the 
 {help parallel##warnings:WARNING} in description). This option is assumed when specifying {opt hostnames}.{p_end}
 {synopt:{opt s:tatapath}}File path. {cmd:parallel} tries to automatically identify
 Stata's exe path. By using this option you will override this and force 
@@ -148,7 +148,7 @@ Stata's exe path. By using this option you will override this and force
 are executed. The target purpose for this is to allow one to copy over preferences that
 {cmd:parallel} does not copy automatically.{p_end}
 {synopt:{opt h:ostnames}} a space delimited list of hostnames. For the local machine, use {it:localhost}.
-Work will be assigned in the order of the list and the list elements will be re-used if numclusters is longer than the list.
+Work will be assigned in the order of the list and the list elements will be re-used if num child processes is longer than the list.
 An example would be {it:localhost node2 node3}.
 If no option is provided, then {it:localhost} is assumed. Leave blank for local execution.{p_end}
 {synopt:{opt ssh}}The command used to connect to remote machines.
@@ -164,27 +164,27 @@ and will steal focus and perhaps briefly show the windows of the child processes
 Use this and the next option with care as there can be many file that take up space.{p_end}
 {synopt:{opt keepl:ast}}Keeps auxiliary files and remove those last time saved 
 during the current session.{p_end}
-{synopt:{opt prog:rams}}A list of programs to be passed to each cluster. 
+{synopt:{opt prog:rams}}A list of programs to be passed to each child process. 
 To do this, {cmd:parallel} needs to echo the contents of those programs to the output window. 
 If {cmd:parallel} is 
 being run from inside an ado (say {it:my_cmd.ado}) and you need to access local subroutines (other programs
 defined in the ado beside the primary {it:my_cmd}), then you must pass their names in this option as
 {it:my_cmd.local_subroutine_name} for them to be accessible.{p_end}
 {synopt:{opt m:ata}}If the algorithm needs to use mata objects, this option allows
-to pass to each cluster every mata object loaded in the current session (including functions). 
+to pass to each child process every mata object loaded in the current session (including functions). 
 Note that when mata objects are loaded into the child processes they will have different 
 locations and therefore pointers may no longer be accurate.{p_end}
-{synopt:{opt nog:lobal}}Avoid passing current session's globals to the clusters.{p_end}
+{synopt:{opt nog:lobal}}Avoid passing current session's globals to the child processes.{p_end}
 {synopt:{opt s:eeds}}Numlist. With this option the user can pass an specific seed to be
-used within each cluster.{p_end}
+used within each child process.{p_end}
 {synopt:{opt randt:ype}}String. Tells parallel whether to use the current seed
 (-current-), the current datetime (-datetime-) or random.org API (-random.org-) to
-generate the seeds for each clusters (please read the Description section).{p_end}
+generate the seeds for each child processes (please read the Description section).{p_end}
 {synopt:{opt proc:essors}}Integer. If running on StataMP, sets the number of processors
-each cluster should use. Default value is 0 (do nothing).{p_end}
-{synopt:{opt t:imeout}}Integer. If a cluster hasn't started, how much time in seconds
+each child process should use. Default value is 0 (do nothing).{p_end}
+{synopt:{opt t:imeout}}Integer. If a child process hasn't started, how much time in seconds
 does {cmd:parallel} has to wait until assume that there was a connection error and thus
-the child process (cluster) won't start. Default value is 60.{p_end}
+the child process won't start. Default value is 60.{p_end}
 {synopt:{opt out:putopts}} A list of option names that are aggregating output options.
 {cmd:parallel} automtically aggregates main data from child processes. 
 Often, though, a program will aggregate more than one type of data.
@@ -194,16 +194,16 @@ A sequential call such as {cmd:my_prog, output1(outputfile.dta)} can be converte
 {cmd:parallel} will execute each child process with its own file passed to {opt output1}
 and at the end, append them all and save it to {it:outputfile.dta}.{p_end}
 {synopt:{opt det:erministicoutput}}will eliminates displayed output that would vary 
-depending on the machine (e.g. timers, seeds, and number of parallel clusters) so 
+depending on the machine (e.g. timers, seeds, and number of parallel child processes) so 
 that log files can be easily compared across runs. Errors are still printed.{p_end}
 
 {syntab:Byable parallelization}
 {synopt:{opt by}}Varlist. Tells the command through which observations the current dataset 
-can be divided, avoiding stories (panel) splitting over two or more clusters.
+can be divided, avoiding stories (panel) splitting over two or more child processes.
 The semantics for {opt by} are not the same as for Stata.
 When Stata implements {cmd:by}, the command that is run will only see a section of the data where the by-variables are the same.
-{cmd:parallel}'s semantics are that no observations with the same {opt by}-values will be in different clusters. 
-It pools together combinations when there are fewer clusters than by-var combinations. 
+{cmd:parallel}'s semantics are that no observations with the same {opt by}-values will be in different child processes. 
+It pools together combinations when there are fewer child processes than by-var combinations. 
 If you need Stata-style semantics, the solution is to add {cmd:by} in the subcommand. 
 For example, {cmd: parallel, by(byvar): by byvar: egen x_max = max(x)}.
 {p_end}
@@ -251,27 +251,27 @@ algorithms.
 {p_end}
 
 {pstd}
-In order to use -{cmd:parallel}- it is necessary to set the number of desired clusters
-with which the user wants to work with. To do this the user should use -{cmd:parallel setclusters}-
-syntaxes, replacing {it:#} with the desired number of clusters. Setting more clusters
+In order to use -{cmd:parallel}- it is necessary to set the number of desired child processes
+with which the user wants to work with. To do this the user should use -{cmd:parallel initialize}-
+syntaxes, replacing {it:#} with the desired number of child processes. Setting more child processes
 than physical cores the user's computer has it is not recommended (see the {help parallel##warnings:WARNING}
 in description).
 {p_end}
 
 {pstd}
 -{cmd:parallel do}- is the equivalent (wrapper) to -do-. When using this syntax
-parallel runs the dofile in as many clusters as there where specified by the user, this is,
+parallel runs the dofile in as many child processes as there where specified by the user, this is,
 start {cmd:$PLL_CLUSTERS} Stata instances in batch mode. By default the
-loaded dataset will be split into the number of clusters specified by -{cmd:parallel setclusters}-
+loaded dataset will be split into the number of child processes specified by -{cmd:parallel initialize}-
 and the {mansection U 16Do-files:do-file} will be executed independently over
-each and every one of the data clusters, so once after all the parallel-instances
+each and every one of the data chunks, so once after all the parallel-instances
 stops, the datasets will be appended. In order to avoid loading the current
-dataset in the clusters, the user should specify the -nodata- option.
+dataset in the child processes, the user should specify the -nodata- option.
 {p_end}
 
 {pstd}
 -{cmd:parallel :}- (as a prefix) allows to, after splitting the loaded dataset,
-execute a {it:stata_cmd} over the specified number of data clusters in order to
+execute a {it:stata_cmd} over the specified number of data chunks in order to
 speed up computations. Like -{cmd:parallel do}-, after all the parallel-instances
 stops, the datasets will be appended.
 {p_end}
@@ -313,12 +313,12 @@ processed; for information on how to use this feature, see the section
 {p_end}
 
 {pstd}
-Given {it:N} clusters, within each cluster -{cmd:parallel}- creates the macros 
-{it:pll_id} (equal for all the clusters) and {it:pll_instance} (ranging
-1 up to {it:N}, equaling 1 inside the first cluster and {it:N} inside the last cluster), 
+Given {it:N} child processes, within each child process -{cmd:parallel}- creates the macros 
+{it:pll_id} (equal for all the child processes) and {it:pll_instance} (ranging
+1 up to {it:N}, equaling 1 inside the first child process and {it:N} inside the last child process), 
 both as globals and locals macros. This allows the user setting different
-tasks/actions depending on the cluster. Also the global macro {it:PLL_CLUSTERS}
-(equal to {it:N}) is available within each cluster. For an example using this
+tasks/actions depending on the child process. Also the global macro {it:PLL_CLUSTERS}
+(equal to {it:N}) is available within each child process. For an example using this
 macros, please refer to the {help parallel##examples:Examples section}.
 {p_end}
 
@@ -326,13 +326,13 @@ macros, please refer to the {help parallel##examples:Examples section}.
 As by now, -{cmd:parallel}- by default automatically identifies Stata's
 executable file path. This is necessary as it is used to run Stata in batch mode
 (the mainstream of the module). Either way, after some reports, that file path is not
-always correctly identified; where the option -{opt s:tatadir}- in -{cmd:parallel setclusters}-
+always correctly identified; where the option -{opt s:tatadir}- in -{cmd:parallel initialize}-
 can be used to manually set it.
 {p_end}
 
 {pstd}
 In the case of pseudo-random-numbers, the module allows to pass different seed for
-each cluster (child process). Moreover, if the user does not provide a numlist of
+each child process. Moreover, if the user does not provide a numlist of
 seeds, -{cmd:parallel}- generates its own numlist of seeds using three different options:
 (1) based on the current seed; (2) using the current datetime and user as a seed to
 generate each seed, restoring the original seed afterwards; or
@@ -343,8 +343,8 @@ with the used seeds in the {cmd:r(pll_seeds)} macro.
 
 {marker warnings}{...}
 {pstd}
-{err:WARNINGS} For each cluster -{cmd:parallel}- starts a new Stata instance (thus
-running as many processes as clusters), this way, should the user set more clusters
+{err:WARNINGS} For each child process -{cmd:parallel}- starts a new Stata instance (thus
+running as many processes as child processes), this way, should the user set more child processes
 than cores the computer has, it is possible that the computer freezes.
 {p_end}
 
@@ -355,14 +355,14 @@ than cores the computer has, it is possible that the computer freezes.
 Inspired by the R library ``snow'' and to be used in multicore CPUs
 , -{cmd:parallel}- implements parallel computing methods through an OS's shell 
 scripting (using Stata in batch mode) to speedup computations by splitting the
-dataset into a determined number of clusters in such a way to implement a 
+dataset into a determined number of child processes in such a way to implement a 
 {browse "http://en.wikipedia.org/wiki/Data_parallelism":data parallelism} algorithm.
 {p_end}
 
 {pstd}
-The number of efficient computing clusters depends upon the number of physical
+The number of efficient computing child processes depends upon the number of physical
 cores (CPUs) with which your computer is built, e.g. if you have a quad-core
-computer, the correct cluster setting should be four. In the case of simultaneous
+computer, the correct child process setting should be four. In the case of simultaneous
 multithreading, such as that from
 {browse "http://www.intel.com/content/www/us/en/architecture-and-technology/hyper-threading/hyper-threading-technology.html":Intel's hyper-threading technology (HTT)},
 setting -{cmd:parallel}- following the number of processors threads, as it was expected,
@@ -406,7 +406,7 @@ share a global file-system (e.g. NFS),
 and have a non-interactive way to remotely execute commands. 
 The most common way to remotely execute commands is to use {it:ssh} with
 keyfiles so that no password is needed.
-This is still a new feature, and synchronizing across machines in clusters can have odd corner cases, so users may encounter some trouble getting this to work.
+This is still a new feature, and synchronizing across machines in child processes can have odd corner cases, so users may encounter some trouble getting this to work.
 {p_end}
 
 {marker append_how}{...}
@@ -455,12 +455,12 @@ this with the following command.{p_end}
 {pstd}Besides of the simplicity of its syntax, the advantage of using -{cmd:parallel append}-
 lies in doing so in a parallel fashion, this is, instead of processing one file
 at a time, -{cmd:parallel}- manages to process these files in groups of as
-many files as clusters are set. Step-by-step, what this command does is:{p_end}
+many files as child processes are set. Step-by-step, what this command does is:{p_end}
 
 {p2colset 8 11 11 4}
-{p2col:1.}Distribute groups of files across clusters{p_end}
+{p2col:1.}Distribute groups of files across child processes{p_end}
 
-{tab}Once each cluster starts, for each dta file
+{tab}Once each child process starts, for each dta file
 
 {p2col:2.}Opens the file using {ifin} accordingly to {opt in} and {opt if} options.{p_end}
 {p2col:3.}Executes the command/dofile specified by the user.{p_end}
@@ -492,8 +492,8 @@ the parent.
 {p_end}
  
 {pstd}
-If the number of tasks to be done is less than the number of clusters, {cmd:parallel} will temporarily reduce
-the number of clusters. This is reported in the global {cmd:$LAST_PLL_N}.
+If the number of tasks to be done is less than the number of child processes, {cmd:parallel} will temporarily reduce
+the number of child processes. This is reported in the global {cmd:$LAST_PLL_N}.
 {p_end}
  
 {pstd}
@@ -595,7 +595,7 @@ directory and do the following:
 process can stay running through multiple uses.{p_end}
 
 {pstd}The default gateway file assumed is pll_gateway.sh. If you would like a different
-file modify the Cygwin script above and pass a new value for {opt g:ateway}({it:{help filename:gateway_path}}) to {cmd:parallel setclusters}.{p_end}
+file modify the Cygwin script above and pass a new value for {opt g:ateway}({it:{help filename:gateway_path}}) to {cmd:parallel initialize}.{p_end}
 
 {pstd}Since Cygwin is going to execute the commands to start the parallel Stata instances
 it needs a Cygwin-like Stata path. If the user does not specify the Stata path then
@@ -605,7 +605,7 @@ If this does not work you will need to specify the {it:statapath} explicitly.{p_
 {pstd}In this mode, there is no automatic way for the parent process to stop the child processes in case the user has requested a break in execution. 
 The original (but now deprecated) {cmd:parallel break} can still be used (and mata equivalents {cmd:parallel_break()} and {cmd:_parallel_break()}). 
 This is a call that is you write into the code that executes in the children that queries if the mother process has requested to break. 
-If this is not used appropriately, and a child cluster is executing for a long period (e.g. an endless loop) the user must kill the child processes manually.{p_end}
+If this is not used appropriately, and a child process is executing for a long period (e.g. an endless loop) the user must kill the child processes manually.{p_end}
 
 
 {marker examples}{...}
@@ -618,7 +618,7 @@ blood-pressure measurement ({it:bp}) by patient.{p_end}
 {tab}{cmd:. sysuse bplong.dta}
 {tab}{cmd:. sort patient}
 	
-{tab}{cmd:. parallel setclusters 4}
+{tab}{cmd:. parallel initialize 4}
 
 {pstd}Computes the maximum of {it:bp} for each patient. We add the option {opt by(patient)}
 to tell parallel not to split stories.{p_end}
@@ -645,7 +645,7 @@ syntax
 
 {tab}{cmd:. use mybigpanel.dta, clear}
 
-{tab}{cmd:. parallel setclusters 4}
+{tab}{cmd:. parallel initialize 4}
 {tab}{cmd:. parallel do mymodel.do}
 	
 {tab}{cmd:. collapse ...}
@@ -676,7 +676,7 @@ syntax
 {it:"C:\Archivos de programa\Stata12/stata.exe"} is the right path we only have
 to write:
 
-{tab}{cmd:. parallel setclusters 2, s("C:\Archivos de programa\Stata12/stata.exe")}
+{tab}{cmd:. parallel initialize 2, s("C:\Archivos de programa\Stata12/stata.exe")}
 
 
 {title:Example 4: Using -{cmd:parallel bs}-}
@@ -686,7 +686,7 @@ to write:
 {pstd}Setup for a quad-core computer{p_end}
 {tab}{cmd:. sysuse auto, clear}
 	
-{tab}{cmd:. parallel setclusters 4}
+{tab}{cmd:. parallel initialize 4}
 
 {pstd}Running parallel bs.{p_end}
 {tab}{cmd:. parallel bs: reg price c.weig##c.weigh foreign rep}
@@ -701,7 +701,7 @@ to write:
 {pstd}Example from {help simulate##examples:simulate}{p_end}
 
 {pstd}Setup for a quad-core computer{p_end}
-{tab}{cmd:. parallel setclusters 4}
+{tab}{cmd:. parallel initialize 4}
 
 {pstd}Experiment that will be performed{p_end}
 {tab}{cmd:program define lnsim, rclass}
@@ -728,28 +728,28 @@ to write:
 
 {pstd}
 By using -pll_instance- and -PLL_CLUSTERS- global macros the
-user can run -{cmd:parallel}- in such a way that each cluster performs a different
+user can run -{cmd:parallel}- in such a way that each child process performs a different
 task. Take the following example:
 {p_end}
 
 {pstd}Setup for a quad-core computer{p_end}
-{tab}{cmd:. parallel setclusters 4}
+{tab}{cmd:. parallel initialize 4}
 {tab}{cmd:. sysuse auto, clear}
 
 {tab}{cmd:program def myprog}
 {tab}{tab}{cmd:gen x = $pll_instance}
 {tab}{tab}{cmd:gen y = $PLL_CLUSTERS}
 	
-{tab}{tab}{it:// For the first cluster}
+{tab}{tab}{it:// For the first child process}
 {tab}{tab}{cmd:if ($pll_instance == 1) gen z = exp(2)}
 	
-{tab}{tab}{it:// For the second cluster}
+{tab}{tab}{it:// For the second child process}
 {tab}{tab}{cmd:else if ($pll_instance == 2) {c -(}}
 {tab}{tab}{tab}{cmd:summ price}
 {tab}{tab}{tab}{cmd:gen z = r(mean)}
 {tab}{tab}{cmd:{c )-}}
 	
-{tab}{tab}{cmd:// For the third and fourth clusters}
+{tab}{tab}{cmd:// For the third and fourth child processes}
 {tab}{tab}{cmd:else gen z = 0}
 {tab}{cmd:end}
 
@@ -759,9 +759,9 @@ task. Take the following example:
 {pstd}
 Here, running with 4 cores, the program -{cmd:myprog}- performs different actions
 depending on the value (number) of -pll_instance-. For those observation in the
-first cluster, -{cmd:parallel}- will generate -z- equal to exp(2), for those in 
-the second cluster it will compute -z- equal to the average price and for the
-rest of the clusters it will generate -z- equal to zero.
+first child process, -{cmd:parallel}- will generate -z- equal to exp(2), for those in 
+the second child process it will compute -z- equal to the average price and for the
+rest of the child processes it will generate -z- equal to zero.
 {p_end}
 
 {marker saved_results}{...}
@@ -772,16 +772,16 @@ rest of the clusters it will generate -z- equal to zero.
 
 {synoptset 20 tabbed}{...}
 {p2col 5 20 24 2: Scalars}{p_end}
-{synopt:{cmd:r(pll_n)}}Number of parallel clusters last used{p_end}
+{synopt:{cmd:r(pll_n)}}Number of parallel child processes last used{p_end}
 {synopt:{cmd:r(pll_t_fini)}}Time took to appending and cleaning{p_end}
 {synopt:{cmd:r(pll_t_calc)}}Time took to complete the parallel job{p_end}
 {synopt:{cmd:r(pll_t_setu)}}Time took to setup (before the parallelization) and to finish the job (after the parallelization){p_end}
-{synopt:{cmd:r(pll_errs)}}Number of clusters which stopped with an error.{p_end}
+{synopt:{cmd:r(pll_errs)}}Number of child processes which stopped with an error.{p_end}
 
 {p2col 5 20 24 2: Macros}{p_end}
 {synopt:{cmd:r(pll_id)}}Id of the last parallel instance executed (needed to use {cmd:parallel clean}){p_end}
 {synopt:{cmd:r(pll_dir)}}Directory where parallel ran and stored the auxiliary files.{p_end}
-{synopt:{cmd:r(pll_seeds)}}Seeds used within each cluster.{p_end}
+{synopt:{cmd:r(pll_seeds)}}Seeds used within each child process.{p_end}
 
 
 {pstd}
@@ -866,18 +866,18 @@ in the package, help file which contains the source code in a fancy way.
 In order to get access to different sections of the source code you can follow these
 links:
 		
-        Stops a cluster after the user pressed break {col 58} {help parallel_source##parallel_break:parallel_break.mata}
+        Stops a child process after the user pressed break {col 58} {help parallel_source##parallel_break:parallel_break.mata}
         Remove auxiliary files {col 58} {help parallel_source##parallel_clean:parallel_clean.mata}
-        Distributes observations across clusters {col 58} {help parallel_source##parallel_divide_index:parallel_divide_index.mata}
+        Distributes observations across child processes {col 58} {help parallel_source##parallel_divide_index:parallel_divide_index.mata}
         Export global macros {col 58} {help parallel_source##parallel_export_globals:parallel_export_globals.mata}
         Export programs {col 58} {help parallel_source##parallel_export_programs:parallel_export_programs.mata}
-        Wait until a cluster finishes {col 58} {help parallel_source##parallel_finito:parallel_finito.mata}
+        Wait until a child process finishes {col 58} {help parallel_source##parallel_finito:parallel_finito.mata}
         (on development) {col 58} {help parallel_source##parallel_for:parallel_for.mata}
         Normalize a filepath {col 58} {help parallel_source##parallel_normalizepath:parallel_normalizepath.mata}
         Generate random alphanum {col 58} {help parallel_source##parallel_randomid:parallel_randomid.mata}
         Lunch simultaneous Stata instances in batch mode {col 58} {help parallel_source##parallel_run:parallel_run.mata}
         Set of tools to protect parallel aux files {col 58} {help parallel_source##parallel_sandbox:parallel_sandbox.mata}
-        Set the number of clusters {col 58} {help parallel_source##parallel_setclusters:parallel_setclusters.mata}
+        Set the number of child processes {col 58} {help parallel_source##parallel_setclusters:parallel_setclusters.mata}
         Set the Stata EXE directory {col 58} {help parallel_source##parallel_setstatapath:parallel_setstatapath.mata}
         Write a ``diagnosis'' {col 58} {help parallel_source##parallel_write_diagnosis:parallel_write_diagnosis.mata}
         Write a dofile to be paralellized {col 58} {help parallel_source##parallel_write_do:parallel_write_do.mata}
