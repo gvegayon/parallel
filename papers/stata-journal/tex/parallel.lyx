@@ -1,5 +1,5 @@
-#LyX 2.2 created this file. For more info see http://www.lyx.org/
-\lyxformat 508
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
 \begin_document
 \begin_header
 \save_transient_properties true
@@ -66,6 +66,8 @@ graphicboxes
 \font_osf false
 \font_sf_scale 100 100
 \font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures false
 \graphics default
 \default_output_format default
 \output_sync 0
@@ -95,6 +97,7 @@ graphicboxes
 \suppress_date false
 \justification true
 \use_refstyle 1
+\use_minted 0
 \index Index
 \shortcut idx
 \color #008000
@@ -103,15 +106,19 @@ graphicboxes
 \tocdepth 3
 \paragraph_separation indent
 \paragraph_indentation default
-\quotes_language english
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
 \papercolumns 1
 \papersides 1
 \paperpagestyle default
-\tracking_changes false
+\tracking_changes true
 \output_changes false
 \html_math_output 0
 \html_css_as_file 0
 \html_be_strict false
+\author -1260403458 "George"
 \end_header
 
 \begin_body
@@ -319,6 +326,8 @@ processors
 \end_inset
 
 .
+
+\change_deleted -1260403458 1540362018
  Physically there may be multiple 
 \begin_inset Quotes eld
 \end_inset
@@ -365,7 +374,11 @@ chip carrier
  There may be more logical processors if the cores use simultaneous multithreadi
 ng (e.g.
  Intel's Hyper-Threading Technology).
- Stata currently uses only one processor except for Stata/MP with certain
+ 
+\change_inserted -1260403458 1540362032
+ 
+\change_unchanged
+Stata currently uses only one processor except for Stata/MP with certain
  built-in commands
 \begin_inset Foot
 status open
@@ -376,6 +389,7 @@ For a list of commands explicitly parallelized see the Stata/MP Performance
 \begin_inset CommandInset citation
 LatexCommand cite
 key "stata2010"
+literal "true"
 
 \end_inset
 
@@ -395,7 +409,14 @@ embarrassingly parallel
 \end_inset
 
 , are ones where there are no dependencies (or need for communication) between
- the parallel tasks.
+ the parallel tasks
+\change_inserted -1260403458 1540362200
+, for example, reshaping a large dataset, boostrapping and its alike, the
+ jacknife, Monte carlo simulations, etc.
+\change_deleted -1260403458 1540362206
+.
+
+\change_unchanged
  We provide here the package 
 \family typewriter
 parallel
@@ -419,6 +440,21 @@ fine-grained
 
 \end_inset
 
+
+\change_inserted -1260403458 1540362318
+
+\end_layout
+
+\begin_layout Standard
+
+\change_inserted -1260403458 1540362474
+In general, the way that parallel works is essentially creating multiple
+ Stata instancs in which each one of these has its own copy of whatever
+ data it is supposed to work with.
+ By doing this, embarrasingly parallel tasks can be distributed across those
+ instances taking advantage of the user's multicore computer.
+ 
+\change_deleted -1260403458 1540362475
 
 \end_layout
 
@@ -547,13 +583,34 @@ parallel
  RAM).
  One is trading memory capacity for processing capacity.
  Therefore, there is likely to be little benefit if a sequential setup would
- already utilize close to all of the system memory.
+ already utilize close to all of the system memory
+\change_deleted -1260403458 1540362744
+.
+\change_inserted -1260403458 1540362829
+.
+ This way, in the simplest case, when splitting the dataset, the child processes
+' memory will add up tp tje same amount of memory used in the parent Stata
+ instance.
+ And to this add the amount of memory that Stata uses while doing some operation
+s such as matrix invertion.
+\change_deleted -1260403458 1540362744
+
 \end_layout
 
 \begin_layout Standard
-Some existing solution are able to take advantage of multiprocessors systems.
- Stata/MP is a version where internal routines are able to take advantage
- of multiple processors on a machine.
+Some existing solution are able to take advantage of multiprocessors systems
+\change_inserted -1260403458 1540362862
+ while implementing a shared memory model
+\change_unchanged
+.
+ Stata/MP is a 
+\change_deleted -1260403458 1540362898
+version
+\change_inserted -1260403458 1540362904
+flavor of Stata
+\change_unchanged
+ where internal routines are able to take advantage of multiple processors
+ on a machine.
  
 \family typewriter
 parallel
@@ -572,7 +629,19 @@ snow
 \end_layout
 
 \begin_layout Standard
-The document proceeds as follows.
+The 
+\change_deleted -1260403458 1540362982
+document
+\change_inserted -1260403458 1540363054
+rest of the paper introduces more details about the usage of the command,
+ and provides examples and benchmarks for the reader to get a better understandi
+ng of the potential benefits of using 
+\family typewriter
+parallel
+\change_deleted -1260403458 1540363062
+
+\family default
+ proceeds as follows.
  Section 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -601,7 +670,9 @@ reference "sec:discussion"
 
 \end_inset
 
- discusses and concludes.
+ discusses and concludes
+\change_unchanged
+.
 \end_layout
 
 \begin_layout Section
@@ -635,7 +706,16 @@ parallel
 \family default
  subcommands for initialization, parallel task execution, and finally for
  cleanup.
- Diagnostic tool commands are also available.
+ Diagnostic tool commands are also available
+\change_inserted -1260403458 1540363407
+ for those cases in which the user needs to debug its code to address possible
+ failures reported by 
+\family typewriter
+parallel
+\change_unchanged
+
+\family default
+.
  
 \end_layout
 
@@ -1981,7 +2061,15 @@ pll_id
 \emph default
 )
 \family default
- - Specifies which executed (and stored) event's files should be removed.
+ - Specifies which executed (and stored) event's 
+\change_inserted -1260403458 1540365357
+(a given run of 
+\family typewriter
+parallel
+\family default
+) 
+\change_unchanged
+files should be removed.
  
 \end_layout
 
@@ -2031,6 +2119,24 @@ orce
  - Forces the command to remove (apparently) in-use auxiliary files.
  Otherwise these will not get deleted.
  
+\change_inserted -1260403458 1540365415
+
+\end_layout
+
+\begin_layout Standard
+
+\change_inserted -1260403458 1540365504
+By default,
+\family typewriter
+ parallel
+\family default
+ will use the most recent run's 
+\family typewriter
+\emph on
+pll_id
+\family default
+\emph default
+ if not provided by the user.
 \end_layout
 
 \begin_layout Subsubsection
@@ -2847,6 +2953,48 @@ parallel
 parallel
 \family default
 .
+\change_inserted -1260403458 1540363924
+
+\end_layout
+
+\begin_layout Subsection
+
+\change_inserted -1260403458 1540364096
+Extending parallel
+\end_layout
+
+\begin_layout Standard
+
+\change_inserted -1260403458 1540364973
+One of the key features of 
+\family typewriter
+parallel
+\family default
+ lies on its developer-friendly design.
+ Motivated by ease of code maitenence, 
+\family typewriter
+parallel
+\family default
+'s design consists on a rich and throughly documented API that facilitates
+ the creation of new routines.
+ Mostly implemented in Mata, 
+\family typewriter
+parallel
+\family default
+'s API contains functions for spliting datasets, exporting Mata and Stata
+ routines, writing do-files to be executed by the child processes, lunch
+ Stata instances, monitor child processes, and collecting the results generated
+ by the child instances.
+\end_layout
+
+\begin_layout Standard
+
+\change_inserted -1260403458 1540365143
+To the date, we have knowledge of at least three Stata modules that make
+ use of the API: EVENTSTUDY2, MIPARALLE, and Synth_Runner–the last developed
+ by one of us.
+\change_unchanged
+
 \end_layout
 
 \begin_layout Subsection
@@ -4428,9 +4576,12 @@ Simulations
 \end_layout
 
 \begin_layout Standard
-In the case of simulations, we perform a simple (and uninteresting) Monte
- Carlo experiment which consists in two main steps: (1) Generate 1,000 observati
-ons as 
+In the case of simulations, we perform a simple 
+\change_deleted -1260403458 1540365616
+(and uninteresting) 
+\change_unchanged
+Monte Carlo experiment which consists in two main steps: (1) Generate 1,000
+ observations as 
 \begin_inset Formula $Y=X\beta+\varepsilon$
 \end_inset
 
@@ -4571,8 +4722,23 @@ parallel sim, reps($size) expr(beta=r(beta)) nodots: mysim
 \end_layout
 
 \begin_layout Standard
-As before, for each number of simulations (1000; 2000; 4000), we ran the
- problem 1000 times and recorded average computing time.
+As before, for each number of simulations (1
+\change_inserted -1260403458 1540365627
+,
+\change_unchanged
+000; 2
+\change_inserted -1260403458 1540365629
+,
+\change_unchanged
+000; 4
+\change_inserted -1260403458 1540365630
+,
+\change_unchanged
+000), we ran the problem 1
+\change_inserted -1260403458 1540365633
+,
+\change_unchanged
+000 times and recorded average computing time.
  The results are presented in table 
 \begin_inset CommandInset ref
 LatexCommand ref
