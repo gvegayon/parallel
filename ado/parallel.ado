@@ -38,7 +38,8 @@ program def parallel
 		parallel_`0'
 	} 
 	else if (regexm(`"`0'"', "^(setclusters|initialize|init)")) {
-		parallel_setclusters
+		gettoken temp 0 : 0
+		parallel_setclusters `0'
 	}
 	else if (regexm(`"`0'"', "^(bootstrap|bstrap|bs|simulate|sim)[,]?[\s ]?")) {
 	/* Prefix bootstrap or simulate */
