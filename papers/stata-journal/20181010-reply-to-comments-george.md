@@ -139,6 +139,8 @@ This will probably return more results than they would hope, but it at least cou
 
 > Similarly, someone recently gave a talk at Juliacon 2018 about performance benchmarks between Julia, Stata, R, and maybe Python (can't remember if Python was included in the talk or not).  You can find the abstract for that talk here: http://juliacon.org/2018/talks_workshops/110/ In the talk, the authors of -gsreg- had ported their command to the Julia language and run benchmarks of the command and/or comparable command in the languages mentioned above.  Again, in this instance Stata had the worst runtime performance of the languages.  Creating the benchmarks with similar examples could also provide a more contextualized benchmarking suite.
 
+*   That is a nice idea. Perhaps in the future we could try to build something like that. The problem is that, since we are already looking at embarasignly parallelizable tasks, most other languages have that, so the comparison is trivial.
+
 > It would probably be good to put the project website in parentheses so interested readers can go directly to the site instead of searching for it.
 
 *   Put the project website.
@@ -149,7 +151,7 @@ This will probably return more results than they would hope, but it at least cou
 
 > I think the second row in the table may be more confusing than helpful. Rather than displaying performance relative to the four core performance in the table, it might be easier to discuss it in the prose.  This would also provide the added flexibility of discussing relative performance gains for the case of the serial vs 2 core and 2 vs 4 core trials.  Additionally, it might be helpful to create a box plot for the different conditions to show the runtime variances and identify if there were any outliers (e.g., perhaps the load on the physical server increased and some resources on the Unix server were being reallocated in some of the runs, or maybe other issues cropped up that are interesting).  It'd be interesting to see if the variance in runtimes were relatively stable as well and to see if the variance in the runtime was comparable across all conditions.  It isn't completely necessary, but you could also fit an ANOVA to your benchmark data to further support the performance benchmark claims.
 
-*   Perhaps we can have a graph for that...
+*   ~~Perhaps we can have a graph for that...~~ Done, we removed the relative unit row
 
 *   There's low variance on thecompute times.
 
