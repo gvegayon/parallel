@@ -586,10 +586,10 @@ parallel
  already utilize close to all of the system memory
 \change_deleted -1260403458 1540362744
 .
-\change_inserted -1260403458 1540362829
+\change_inserted -1260403458 1547624175
 .
  This way, in the simplest case, when splitting the dataset, the child processes
-' memory will add up tp tje same amount of memory used in the parent Stata
+' memory will add up to the same amount of memory used in the parent Stata
  instance.
  And to this add the amount of memory that Stata uses while doing some operation
 s such as matrix invertion.
@@ -603,7 +603,19 @@ Some existing solution are able to take advantage of multiprocessors systems
  while implementing a shared memory model
 \change_unchanged
 .
- Stata/MP is a 
+ Stata/MP
+\change_inserted -1260403458 1547624763
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "stata2016"
+literal "true"
+
+\end_inset
+
+
+\change_unchanged
+ is a 
 \change_deleted -1260403458 1540362898
 version
 \change_inserted -1260403458 1540362904
@@ -621,11 +633,35 @@ parallel
 \family typewriter
 parallel
 \family default
- package (superseding the 
+ package
+\change_inserted -1260403458 1547624728
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "R"
+literal "false"
+
+\end_inset
+
+
+\change_unchanged
+ (superseding the 
 \family typewriter
 snow
 \family default
- package) and Matlab's parallel toolbox.
+ package) and Matlab's parallel toolbox
+\change_inserted -1260403458 1547624745
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sharma2009"
+literal "false"
+
+\end_inset
+
+
+\change_unchanged
+.
 \end_layout
 
 \begin_layout Standard
@@ -4458,6 +4494,17 @@ sysuse auto, clear
 \begin_layout Plain Layout
 
 expand 10
+\change_inserted -1260403458 1547625813
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\change_inserted -1260403458 1547625881
+
+global size 1000 // 2000, 4000
+\change_unchanged
+
 \end_layout
 
 \begin_layout Plain Layout
@@ -4542,16 +4589,30 @@ filename "tables_and_figures/parallel_benchmarks_test=boottest.tex"
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Absolute and relative computing times for each run of a basic bootstrap
- problem.
- For each given problem size, the first row shows the time in seconds that
- each method took on average to complete the task; and the second row shows
- the relative time each method took to complete the task relative to using
- 
+
+\change_deleted -1260403458 1547626145
+Absolute and relative c
+\change_inserted -1260403458 1547626145
+C
+\change_unchanged
+omputing times for each run of a basic bootstrap problem.
+ For each given problem size, 
+\change_deleted -1260403458 1547626159
+the first
+\change_inserted -1260403458 1547626159
+each
+\change_unchanged
+ row shows the time in seconds that each method took on average to complete
+ the task
+\change_deleted -1260403458 1547626172
+; and the second row shows the relative time each method took to complete
+ the task relative to using 
 \family typewriter
 parallel
 \family default
- with four child processes.
+ with four child processes
+\change_unchanged
+.
 \begin_inset CommandInset label
 LatexCommand label
 name "tab:bootstrap"
@@ -4770,16 +4831,30 @@ filename "tables_and_figures/parallel_benchmarks_test=simtest.tex"
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Absolute and relative computing times for each run of a simple Monte Carlo
- exercise.
- For each given problem size, the first row shows the time in seconds that
- each method took on average to complete the task; and the second row shows
- the relative time each method took to complete the task relative to using
- 
+
+\change_deleted -1260403458 1547626181
+Absolute and relative c
+\change_inserted -1260403458 1547626181
+C
+\change_unchanged
+omputing times for each run of a simple Monte Carlo exercise.
+ For each given problem size, 
+\change_deleted -1260403458 1547626189
+the first
+\change_inserted -1260403458 1547626189
+each
+\change_unchanged
+ row shows the time in seconds that each method took on average to complete
+ the task
+\change_deleted -1260403458 1547626198
+; and the second row shows the relative time each method took to complete
+ the task relative to using 
 \family typewriter
 parallel
 \family default
- with four child processes.
+ with four child processes
+\change_unchanged
+.
 \begin_inset CommandInset label
 LatexCommand label
 name "tab:simulation"
