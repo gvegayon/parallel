@@ -138,7 +138,7 @@ Checking out child processes' logfiles by showing the output in a view window.
 {synopthdr}
 {synoptline}
 {syntab:Setting the number of child processes}
-{synopt:{opt #}} The number of child processes. If omitted the default is max(floor(num_processors*0.75),1)
+{synopt:{opt #}} The number of child processes. If omitted the default is max(floor(num_processors*0.75),1){p_end}
 {synopt:{opt f:orce}}Overrides the restriction on using more child processes than processors on your machine (see the 
 {help parallel##warnings:WARNING} in description). This option is assumed when specifying {opt hostnames}.{p_end}
 {synopt:{opt s:tatapath}}File path. {cmd:parallel} tries to automatically identify
