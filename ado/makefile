@@ -25,6 +25,7 @@ releasehelp:
 	@echo Make sure you bump the version and -make inc_dist_date-
 	@echo Make sure you editted the Changelog
 	@echo After pushing to github, go to https://github.com/gvegayon/parallel/releases and make a release
+	@echo Make an update to the README with the release tag
 
 home:
 	$(STATABATCH) do compile_and_install.do
