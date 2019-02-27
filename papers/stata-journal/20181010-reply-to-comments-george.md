@@ -82,7 +82,7 @@ points more effectively?
 > What is the default behavior when a user does not pass any values to any of the optional parameters? Also, it would be useful to define what you mean by event.  Does event mean a spawned process, an individual command within a do file, or something else?
 
 
-*   It's right there., right?
+*   Clarified
 
 > See the note above about defining the term event.  This part of the information gets a bit difficult to understand precisely what you are trying to convey.
 
@@ -98,7 +98,7 @@ points more effectively?
 
 > I cannot express the look on my face reading the last few sentences sufficiently enough, but know that my response was wholeheartedly positive. Is there potentially some way to use the OS to suppress launching the GUI or to potentially launch the GUI with the application forced into the background or minimized? As an additional note, I attempted running the examples on a machine running Windows 10 and did not notice any screen flashing or anything like that.  However, there were some other errors when I attempted running things.  I'll try  running the examples again once I'm in the office, but am connected to a physical machine using Remote Desktop Connection at the moment.
 
-*   Brian.
+*   Yes, we use the Win32 mechanism to launch the child processes hidden.
 
 > How would this potentially effect estimation commands if matrices are not available once the child process finishes the execution of the commands?
 
@@ -110,6 +110,8 @@ points more effectively?
   . ado uninstall [#] 
 \end{lstlisting}
 This will probably return more results than they would hope, but it at least could illustrate how they would uninstall things.
+
+* Added a simple command example to this effect.
 
 > Make sure to let the users know that if they are trying to follow the examples here sequentially they will need to drop  the price2 variable first.
 
