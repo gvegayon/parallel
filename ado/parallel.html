@@ -45,7 +45,7 @@ BODY{background-color: ffffff;
 <br><br>
     <span class=result><u>Available commands</u></span>         
 <br><br>
-    1.  parallel setclusters   Setting the number of clusters.
+    1.  parallel initialize    Setting the number of child processes.
     2.  parallel numprocessors Getting the number of processors on the system.
     3.  parallel do            Parallelizing a do-file.
     4.  parallel : (prefix)    Parallelizing a Stata command (parallel prefix).
@@ -53,16 +53,16 @@ BODY{background-color: ffffff;
     6.  parallel sim           Parallel simulate.
     7.  parallel append        Multiple file processing and appending.
     8.  parallel clean         Removing auxiliary files.
-    9.  parallel printlog      Checking out clusters' log files.
+    9.  parallel printlog      Checking out child processes' log files.
     10.  parallel version      Query parallel current version.
 <br><br>
 <br><br>
 <a name="syntax"></a><span class=result><u>1. Syntax</u></span>
 <br><br>
-<a name="setclusters"></a>    ---------------------------------------------------------------------------------------------------------------------------------------------
-    Setting the number of clusters (threads/processors)
+<a name="initialize"></a>    ---------------------------------------------------------------------------------------------------------------------------------------------
+    Setting the number of child processes (threads/processors)
 <br><br>
-        <span class=result>parallel setclusters</span> # [, <span class=result><u>f</u></span><span class=result>orce</span> <span class=result><u>s</u></span><span class=result>tatapath</span>(<i>stata_path</i>) <span class=result><u>i</u></span><span class=result>ncludefile</span>(<i>filename</i>) <span class=result><u>h</u></span><span class=result>ostnames</span>(<i>string</i>) <span class=result>ssh</span>(<i>string</i>) <span class=result><u>proc</u></span><span class=result>exec</span>(<i>int</i>)]
+        <span class=result>parallel initialize</span> [ # , <span class=result><u>f</u></span><span class=result>orce</span> <span class=result><u>s</u></span><span class=result>tatapath</span>(<i>stata_path</i>) <span class=result><u>i</u></span><span class=result>ncludefile</span>(<i>filename</i>) <span class=result><u>h</u></span><span class=result>ostnames</span>(<i>string</i>) <span class=result>ssh</span>(<i>string</i>) <span class=result><u>proc</u></span><span class=result>exec</span>(<i>int</i>)]
 <br><br>
 <a name="numprocessors"></a>    ---------------------------------------------------------------------------------------------------------------------------------------------
     Getting the number of processors on the system
@@ -100,11 +100,11 @@ BODY{background-color: ffffff;
         <span class=result>parallel clean</span> [, <span class=result><u>e</u></span><span class=result>vent</span>(<i>pll_id</i>) <span class=result><u>a</u></span><span class=result>ll</span> <span class=result><u>f</u></span><span class=result>orce</span>]
 <br><br>
 <a name="printlog"></a>    ---------------------------------------------------------------------------------------------------------------------------------------------
-    Checking out clusters' logfiles by printing the output.
+    Checking out child processes' logfiles by printing the output.
 <br><br>
         <span class=result>parallel printlog</span> [<i>#</i>] [, <span class=result><u>e</u></span><span class=result>vent</span>(<i>pll_id</i>)]
 <br><br>
-    Checking out clusters' logfiles by showing the output in a view window.
+    Checking out child processes' logfiles by showing the output in a view window.
 <br><br>
         <span class=result>parallel viewlog</span> [<i>#</i>] [, <span class=result><u>e</u></span><span class=result>vent</span>(<i>pll_id</i>)]
 <br><br>
@@ -116,601 +116,293 @@ BODY{background-color: ffffff;
 <br><br>
     <i>options</i>          Description
     -------------------------------------------------------------------------------------------------------------------------------------------
-    Setting the number of clusters
-      <span class=result><u>f</u></span><span class=result>orce</span>          Overrides the restriction on using more clusters than processors on your machine (see the WARNING in description). This
-                       option is assumed when specifying <span class=result>hostnames</span>.
-      <span class=result><u>s</u></span><span class=result>tatapath</span>      File path. <span class=result>parallel</span> tries to automatically identify Stata's exe path. By using this option you will override this and
-                       force <span class=result>parallel</span> to use a specific path to stata.exe.
-      <span class=result><u>i</u></span><span class=result>ncludefile</span>    File path. This file will be included before parallel commands are executed. The target purpose for this is to allow one
-                       to copy over preferences that <span class=result>parallel</span> does not copy automatically.
-      <span class=result><u>h</u></span><span class=result>ostnames</span>       a space delimited list of hostnames. For the local machine, use <i>localhost</i>.  Work will be assigned in the order of the
-                       list and the list elements will be re-used if numclusters is longer than the list.  An example would be <i>localhost node2</i>
-                       <i>node3</i>.  If no option is provided, then <i>localhost</i> is assumed. Leave blank for local execution.
-      <span class=result>ssh</span>            The command used to connect to remote machines.  If none is provided, this will be <i>ssh</i>. This option is not needed for
-                       local execution.
-      <span class=result><u>proc</u></span><span class=result>exec</span>        On Windows, controls how child processes are spawned.  The default value 2 will launch them in a hidden desktop (they can
-                       still be seen in the task manager) so that the child applications don't briefly steal the window focus (which is
-                       annoying).  With value 1 the child processes will be launched in the user's desktop, will be launch auto-minimized, but
-                       will still briefly steal the focus.  and will steal focus and perhaps briefly show the windows of the child processes.
-<br><br>
-    <i>execution_options</i>
-      <span class=result><u>k</u></span><span class=result>eep</span>           Keeps auxiliary files generated by <span class=result>parallel</span>.  Use this and the next option with care as there can be many file that take
-                       up space.
-      <span class=result><u>keepl</u></span><span class=result>ast</span>       Keeps auxiliary files and remove those last time saved during the current session.
-      <span class=result><u>prog</u></span><span class=result>rams</span>       A list of programs to be passed to each cluster.  To do this, <span class=result>parallel</span> needs to echo the contents of those programs to the
-                       output window.  If <span class=result>parallel</span> is being run from inside an ado (say <i>my_cmd.ado</i>) and you need to access local subroutines
-                       (other programs defined in the ado beside the primary <i>my_cmd</i>), then you must pass their names in this option as
-                       <i>my_cmd.local_subroutine_name</i> for them to be accessible.
-      <span class=result><u>m</u></span><span class=result>ata</span>           If the algorithm needs to use mata objects, this option allows to pass to each cluster every mata object loaded in the
-                       current session (including functions).  Note that when mata objects are loaded into the child processes they will have
-                       different locations and therefore pointers may no longer be accurate.
-      <span class=result><u>nog</u></span><span class=result>lobal</span>       Avoid passing current session's globals to the clusters.
-      <span class=result><u>s</u></span><span class=result>eeds</span>          Numlist. With this option the user can pass an specific seed to be used within each cluster.
-      <span class=result><u>randt</u></span><span class=result>ype</span>       String. Tells parallel whether to use the current seed (-current-), the current datetime (-datetime-) or random.org API
-                       (-random.org-) to generate the seeds for each clusters (please read the Description section).
-      <span class=result><u>proc</u></span><span class=result>essors</span>     Integer. If running on StataMP, sets the number of processors each cluster should use. Default value is 0 (do nothing).
-      <span class=result><u>t</u></span><span class=result>imeout</span>        Integer. If a cluster hasn't started, how much time in seconds does <span class=result>parallel</span> has to wait until assume that there was a
-                       connection error and thus the child process (cluster) won't start. Default value is 60.
-      <span class=result><u>out</u></span><span class=result>putopts</span>      A list of option names that are aggregating output options.  <span class=result>parallel</span> automtically aggregates main data from child
-                       processes.  Often, though, a program will aggregate more than one type of data.  <span class=result>outputopts</span> allows generic file-based
-                       aggregation (appending).  A sequential call such as <span class=result>my_prog, output1(outputfile.dta)</span> can be converted to <span class=result>parallel,</span>
-                       <span class=result>outputopts(output1): my_prog, output1(outputfile.dta)</span>.  <span class=result>parallel</span> will execute each child process with its own file
-                       passed to <span class=result>output1</span> and at the end, append them all and save it to <i>outputfile.dta</i>.
-      <span class=result><u>det</u></span><span class=result>erministicoutput</span>
-                       will eliminates displayed output that would vary depending on the machine (e.g. timers, seeds, and number of parallel
-                       clusters) so that log files can be easily compared across runs. Errors are still printed.
-<br><br>
-    Byable parallelization
-      <span class=result>by</span>             Varlist. Tells the command through which observations the current dataset can be divided, avoiding stories (panel)
-                       splitting over two or more clusters.  The semantics for <span class=result>by</span> are not the same as for Stata.  When Stata implements <span class=result>by</span>, the
-                       command that is run will only see a section of the data where the by-variables are the same.  <span class=result>parallel</span>'s semantics are
-                       that no observations with the same <span class=result>by</span>-values will be in different clusters.  It pools together combinations when there
-                       are fewer clusters than by-var combinations.  If you need Stata-style semantics, the solution is to add <span class=result>by</span> in the
-                       subcommand.  For example,<span class=result> parallel, by(byvar): by byvar: egen x_max = max(x)</span>.
-      <span class=result><u>f</u></span><span class=result>orce</span>          When using <span class=result>by</span>, <span class=result>parallel</span> checks whether if the dataset is properly sorted. By using <span class=result>force</span> the command skips this check.
-<br><br>
-    Parallel bootstrap
-      <span class=result><u>exp</u></span><span class=result>ression</span>     An exp_list to be passed to the bootstrap command.
-      <span class=result>bs_options</span>      Further options to be passed to the bootstrap command, including the optional reps() parameter.
-<br><br>
-    Parallel simulate
-      <span class=result><u>exp</u></span><span class=result>ression</span>     An exp_list to be passed to the simulate command.
-      <span class=result>sim_options</span>     Further options to be passed to the simulate command, including the required reps() parameter.
-<br><br>
-    Multiple file processing and appending
-      <span class=result><u>d</u></span><span class=result>o</span>             Stata cmd or dofile.  Note that<span class=result> parallel do</span> does not support passing options to the do-file.  If you need arguments then
-                       use the prefix style.
-      <span class=result>files</span>          Explicit list of files to process.
-      <span class=result><u>e</u></span><span class=result>xpression</span>     String. Expression representing file names in the form of "<i>%fmts</i>, <i> numlist1 [, numlist2 [, ...]]</i>"
-<br><br>
-    Removing auxiliary files
-      <span class=result><u>e</u></span><span class=result>vent</span>          String. Specifies which executed (and stored) event's files should be removed.
-      <span class=result><u>a</u></span><span class=result>ll</span>            Tells <span class=result>parallel</span> to remove every remnant auxiliary files generated by it in the current directory.
-      <span class=result><u>f</u></span><span class=result>orce</span>          Forces the command to remove (apparently) in-use auxiliary files. Otherwise these will not get deleted.
-<br><br>
-    Other options
-      <span class=result><u>e</u></span><span class=result>vent</span>          String. With printlog and viewlog this specifies which event's log files should be displayed.
-      <span class=result><u>set</u></span><span class=result>parallelid</span>  Programmers' option. Forces parallel to use an specific id (<i>pll_id</i>) (see Technical Notes).
-      <span class=result><u>nod</u></span><span class=result>ata</span>         Tells <span class=result>parallel</span> not to use loaded data and thus not to try splitting or appending anything.
-<br><br>
-<a name="description"></a><span class=result><u>2. Description</u></span>
-<br><br>
-    -<span class=result>parallel</span>- allows to implement parallel computing, without having StataMP, substantially reducing computing time. Specially suitable for
-    bootstrapping and simulations, parallel includes out-of-the-box tools for implementing such algorithms.
-<br><br>
-    In order to use -<span class=result>parallel</span>- it is necessary to set the number of desired clusters with which the user wants to work with. To do this the
-    user should use -<span class=result>parallel setclusters</span>- syntaxes, replacing <i>#</i> with the desired number of clusters. Setting more clusters than physical cores
-    the user's computer has it is not recommended (see the WARNING in description).
-<br><br>
-    -<span class=result>parallel do</span>- is the equivalent (wrapper) to -do-. When using this syntax parallel runs the dofile in as many clusters as there where
-    specified by the user, this is, start <span class=result>$PLL_CLUSTERS</span> Stata instances in batch mode. By default the loaded dataset will be split into the
-    number of clusters specified by -<span class=result>parallel setclusters</span>- and the do-file will be executed independently over each and every one of the data
-    clusters, so once after all the parallel-instances stops, the datasets will be appended. In order to avoid loading the current dataset in
-    the clusters, the user should specify the -nodata- option.
-<br><br>
-    -<span class=result>parallel :</span>- (as a prefix) allows to, after splitting the loaded dataset, execute a <i>stata_cmd</i> over the specified number of data clusters in
-    order to speed up computations. Like -<span class=result>parallel do</span>-, after all the parallel-instances stops, the datasets will be appended.
-<br><br>
-    -<span class=result>parallel bs</span>- and -<span class=result>parallel sim</span>- are parallel wrappers for the commands -bootstrap- and -simulate-. Specially suited for these algorithms,
-    -<span class=result>parallel</span>- allows conducting embarrassingly parallel computing. In terms of syntax, besides cmd names, the only difference that these two
-    commands have with their serial versions is how are expressions passed (please refer to the examples section for this).
-<br><br>
-    Every time that -<span class=result>parallel</span>- runs several auxiliary files are generated which, after finishing, are automatically deleted. In the case that
-    the user sets -<span class=result>keep</span>- or -<span class=result>keeplast</span>- the auxiliary files are kept, thus the syntax -<span class=result>parallel clean</span>- becomes handy. With -<span class=result>parallel clean</span>- the
-    user can remove the last generated auxiliary files (default option), an specific parallel instance files (using <i>#pll_id</i> number), or every
-    stored auxiliary file (with -<span class=result>all</span>-). For security reasons, in-use auxiliary files will not be deleted unless the user specifies it through
-    the option <span class=result>force</span>, which will override not deleting in-use auxiliary files (see the Technical note section for more information about this).
-    Log files from the runs are stored in <i>c(tmpdir)</i> so that they can be inspected by the user.  The user will likely want to delete these
-    periodically with <span class=result>parallel clean, all</span>.
-<br><br>
-    In the case of handling multiple files (because it is, for example, a big dataset divided into multiple dta files), -<span class=result>parallel append</span>-
-    becomes handy as it allows the user to process them simultaneously. By providing a list of files and a Stata cmd or dofile, -<span class=result>parallel</span>
-    <span class=result>append</span>- opens and executes the cmd/dofile within each file, stores each file results and appends them into a single file.  Also, if the
-    files to be processed have a pattern base name, the user can provide -<span class=result>parallel append</span>- with an expression representing the list of files to
-    be processed; for information on how to use this feature, see the section Parallel Append.
-<br><br>
-    Given <i>N</i> clusters, within each cluster -<span class=result>parallel</span>- creates the macros <i>pll_id</i> (equal for all the clusters) and <i>pll_instance</i> (ranging 1 up to
-    <i>N</i>, equaling 1 inside the first cluster and <i>N</i> inside the last cluster), both as globals and locals macros. This allows the user setting
-    different tasks/actions depending on the cluster. Also the global macro <i>PLL_CLUSTERS</i> (equal to <i>N</i>) is available within each cluster. For an
-    example using this macros, please refer to the Examples section.
-<br><br>
-    As by now, -<span class=result>parallel</span>- by default automatically identifies Stata's executable file path. This is necessary as it is used to run Stata in
-    batch mode (the mainstream of the module). Either way, after some reports, that file path is not always correctly identified; where the
-    option -<span class=result><u>s</u></span><span class=result>tatadir</span>- in -<span class=result>parallel setclusters</span>- can be used to manually set it.
-<br><br>
-    In the case of pseudo-random-numbers, the module allows to pass different seed for each cluster (child process). Moreover, if the user does
-    not provide a numlist of seeds, -<span class=result>parallel</span>- generates its own numlist of seeds using three different options:  (1) based on the current
-    seed; (2) using the current datetime and user as a seed to generate each seed, restoring the original seed afterwards; or (3) using
-    random.org API (requires internet connection) to directly generate each seed (also restoring the original seed afterwards). -<span class=result>parallel</span>-
-    saves a macro with the used seeds in the <span class=result>r(pll_seeds)</span> macro.
-<br><br>
-<a name="warnings"></a>    WARNINGS For each cluster -<span class=result>parallel</span>- starts a new Stata instance (thus running as many processes as clusters), this way, should the user
-    set more clusters than cores the computer has, it is possible that the computer freezes.
-<br><br>
-<a name="details"></a><span class=result><u>3. Details</u></span>
-<br><br>
-    Inspired by the R library ``snow'' and to be used in multicore CPUs , -<span class=result>parallel</span>- implements parallel computing methods through an OS's
-    shell scripting (using Stata in batch mode) to speedup computations by splitting the dataset into a determined number of clusters in such a
-    way to implement a data parallelism algorithm.
-<br><br>
-    The number of efficient computing clusters depends upon the number of physical cores (CPUs) with which your computer is built, e.g. if you
-    have a quad-core computer, the correct cluster setting should be four. In the case of simultaneous multithreading, such as that from
-    Intel's hyper-threading technology (HTT), setting -<span class=result>parallel</span>- following the number of processors threads, as it was expected, hardly results
-    into a perfect speedup scaling. In spite of it, after several tests on HTT capable architectures, the results of implementing -<span class=result>parallel</span>-
-    according to the machines physical cores versus its logical cores shows small though significant differences.
-<br><br>
-    -<span class=result>parallel</span>- is especially handy when it comes to implementing loop-based simulation models (or simply loops), Stata commands such as reshape
-    , or any job that (a) can be repeated through data-blocks, and (b) routines that processes big datasets (see the append section).
-    Furthermore, the commands -parallel bs- and -parallel sim- are specially designed to easily implement bootstrapping and (monte carlo)
-    simulations in parallel fashion.
-<br><br>
-    At this time -<span class=result>parallel</span>- has been successfully tested in Windows, Unix and MacOS for Stata versions 11 to 14.
-<br><br>
-    -<span class=result>parallel</span>- does not change the RNG state (even if subcommands invoke randomization functions).
-<br><br>
-    After several tests, it has been proven that--thanks to how -<span class=result>parallel</span>- has been written--it is possible to use the algorithm in such a way
-    that other techniques of parallel computing can be implemented; such as Monte Carlo Simulations, simultaneously running models, etc.. An
-    extensive example through Monte Carlo Simulations is provided here.
-<br><br>
-    To distribute work across different machines in a computer cluster, the machines need to be Linux/MacOS, share a global file-system (e.g.
-    NFS), and have a non-interactive way to remotely execute commands.  The most common way to remotely execute commands is to use <i>ssh</i> with
-    keyfiles so that no password is needed.  This is still a new feature, and synchronizing across machines in clusters can have odd corner
-    cases, so users may encounter some trouble getting this to work.
-<br><br>
-<a name="append_how"></a><span class=result><u>4. Parallel Append</u></span>
-<br><br>
-    Imagine we have several dta files named -income.dta- stored in a set of folders ranging 2008_01 up to 2012_12, this is, a total of 60 files
-    (12 times 5) monthly ordered which may look something like this:
-<br><br>
-         <i>2008_01/income.dta</i>
-         <i>2008_02/income.dta</i>
-         <i>2008_03/income.dta</i>
-<br><br>
-         <i>...more files...</i>
-<br><br>
-         <i>2010_01/income.dta</i>
-         <i>2010_02/income.dta</i>
-         <i>2010_03/income.dta</i>
-<br><br>
-         <i>...more files...</i>
-<br><br>
-         <i>2012_10/income.dta</i>
-         <i>2012_11/income.dta</i>
-         <i>2012_12/income.dta</i>
-<br><br>
-    Now, imagine that for each and every one of those files we would like to execute the following program:
-<br><br>
-        <span class=result> program def myprogram</span>
-        <span class=result>         gen female = (gender == "female")</span>
-        <span class=result>         collapse (mean) income, by(female) fast</span>
-        <span class=result> end</span>
-<br><br>
-    Instead of writing a forval/foreach loop (which would be the natural solution for this situation), -<span class=result>parallel append</span>- allows us to smoothly
-    solve this with the following command.
-<br><br>
-        <span class=input>. parallel append, do(myprogram) prog(myprogram)</span> ///
-                <span class=result>e("%g_%02.0f/income.dta, 2008/2012, 1/12")</span>
-<br><br>
-    Where element by element, we are telling parallel:
-        (1) <span class=result>do(myprogram)</span>: execute the command -<span class=result>myprogram</span>-,
-        (2) <span class=result>prog(myprogram)</span>: -<span class=result>myprogram</span>- is a user written program, and
-        (3) <span class=result>e("%g_%02.0f/income.dta, 2008/2012, 1/12")</span>: this should process files 2008_01/income.dta up to 2012_12/income.dta.
-<br><br>
-    Besides of the simplicity of its syntax, the advantage of using -<span class=result>parallel append</span>- lies in doing so in a parallel fashion, this is, instead
-    of processing one file at a time, -<span class=result>parallel</span>- manages to process these files in groups of as many files as clusters are set. Step-by-step,
-    what this command does is:
-<br><br>
-<br><br>
-       1. Distribute groups of files across clusters
-<br><br>
-        Once each cluster starts, for each dta file
-<br><br>
-       2. Opens the file using [<i>if</i>] [<i>in</i>] accordingly to <span class=result>in</span> and <span class=result>if</span> options.
-       3. Executes the command/dofile specified by the user.
-       3. Stores the results in a temp dta file.
-<br><br>
-        Finally, once all the files have been processed
-<br><br>
-       4. Appends all the resulting files into a single one.
-<br><br>
-<br><br>
-<a name="caveats"></a><span class=result><u>5. Caveats</u></span>
-<br><br>
-    When the -<i>stata_cmd</i>- or -<i>do-file</i>- saves results, as -<span class=result>parallel</span>- runs Stata in batch mode, none of the results will be kept. This is also
-    true for matrices, scalars, mata objects, returns, or whatever other object different from data.
-<br><br>
-    Although -<span class=result>parallel</span>- passes-through programs, macros and mata objects, in the current version it is not capable of doing the same with
-    matrices or scalars.  The tempname internal state is copied to childre, but the parent does not receive any of this state from the
-    children.  That is, -<span class=result>parallel</span>- advances the tempname (tempvar) sequence in the children to not overlap with any produced by the parent.
- 
-    If the number of tasks to be done is less than the number of clusters, <span class=result>parallel</span> will temporarily reduce the number of clusters. This is
-    reported in the global <span class=result>$LAST_PLL_N</span>.
- 
-    Expressions run in the child-processes that contain <i>_n</i> or <i>_N</i> will be evaluated locally to the child not the parent dataset.  These
-    expressions may therefore be different if run in <span class=result>parallel</span> than without <span class=result>parallel</span>.
- 
-    When executing Stata on separate machines via ssh, no environment variables except PWD and STATATMP are copied over.
-<br><br>
-<br><br>
-<a name="tech"></a><span class=result><u>6. Technical note</u></span>
-<br><br>
-    In order to protect a <i>pll_id</i> code (and thus ancillary files), once -<span class=result>parallel</span>- is called it creates a new file called <i>__pll</i>[<i>pll_id</i>]<i>sandbox</i>
-    (stored at c(tmpdir), in your case: <u>C:\cygwin64\tmp/</u>). This forbids -<span class=result>parallel clean</span>- from deleting any auxiliary file used by that process
-    and reserves the <i>pll_id</i> so that no other call of -<span class=result>parallel</span>- can use this <i>pll_id</i>. Once every child process has finished, the sandbox file is
-    removed, freeing the <i>pll_id</i>.
-<br><br>
-    If for any reason the algorithm breaks due to a flaw or crush of the system, the sandbox file and the rest of auxiliary files will not be
-    deleted. In order to clean up this, the user will be able to do so manually (moving the file(s) to the OS recycle bin) or using parallel
-    clean, all force syntax. This way all sandbox files in the c(tmpdir) folder and auxiliary files stored at the current directory will be
-    deleted.
-<br><br>
-    In earlier versions of -<span class=result>parallel</span>-, tempfiles generation was not safe as while running multiple Stata instances simultaneously these could
-    overwrite each other's tempfiles. Starting version 1.14, this is no longer a problem as each Stata instance starts with a different
-    <span class=result>c(tmpdir)</span> location.  This way, instances' tempfile management will not interfere with each other, allowing to safely use commands or
-    algorithms depending on tempfile generation (such as preserve and restore).
-<br><br>
-    The option -<span class=result>setparallelid</span>- is designed to let programmers recycle a parallel id (<i>pll_id</i>). Intended to be used with -<span class=result>parallel_sandbox</span>-
-    (undocumented, please refer to the source code of -parallel_sandbox()-), this option allows calling parallel several times using the same
-    <i>pll_id</i>, which makes auxiliary files management far simpler. Take the following example
-<br><br>
-        <span class=result> program def mypllwrapper</span>
-                
-                <i> // Reserving a pll_id</i>
-                <span class=result> m: parallel_sandbox(5)</span>
-                
-                <i> // Using the generated pll_id</i>
-                <span class=result> save __pll`parallelid'_mypllwrapper, replace</span>
-                
-                <i> // Recycling the pll_id</i>
-                <span class=result> forval i=1/10 {</span>
-                        <span class=result> parallel, setparallelid(`parallelid') keep: some_other_cmd</span>
-                <span class=result> }</span>
-                
-                <i> // Cleanning up and freeing the pll_id. This will remove all files</i>
-                <i> // and folders named with prefix '__pll[parallelid]'</i>
-                <span class=result> parallel clean, e(`parallelid')</span>
-                <span class=result> m: parallel_sandbox(2,"`parallelid'")</span>
-                
-        <span class=result> end</span>
-<br><br>
-    For a real example of this, please see -parallel.bs- and -parallel_sim.ado-.
-<br><br>
-<span class=result><u>Windows-shell: Spawning child processes with shell command on Windows (Deprecated)</u></span>
-<br><br>
-    Originally child processes on Windows were spawned as they were on other platforms using Stata's shell methods (e.g. <span class=result>winexec</span>).  This had a
-    number of problems (spawned processes stole the UI focus, failure to recover from killed child processes, difficulty in batch-mode), so now
-    Windows uses a plugin that launches the child processes directly using Win32 system calls.  The original functionality is retained, but
-    deprecated. To enable it you must specified the <i>procexec(0)</i> option.
-<br><br>
-    Since shell commmands are ignored by Stata in batch-mode on Windows, a work around is needed. The method is to have Stata write out the
-    commands to be executed to a file (called the gateway) and have a separate process read new inputs to this file and execute the commands.
-    This latter part requires the user to install Cygwin and run a few commands prior to starting Stata. In a Cygwin terminal, navigate to the
-    appropriate directory and do the following:
-<br><br>
-        <span class=result>$ rm pll_gateway.sh</span>
-        <span class=result>$ touch pll_gateway.sh</span>
-        <span class=result>$ tail -f pll_gateway.sh | bash</span>
-<br><br>
-    Then you can execute your Stata script in batch-mode on Windows. The Cygwin tail process can stay running through multiple uses.
-<br><br>
-    The default gateway file assumed is pll_gateway.sh. If you would like a different file modify the Cygwin script above and pass a new value
-    for <span class=result><u>g</u></span><span class=result>ateway</span>(<i>gateway_path</i>) to <span class=result>parallel setclusters</span>.
-<br><br>
-    Since Cygwin is going to execute the commands to start the parallel Stata instances it needs a Cygwin-like Stata path. If the user does not
-    specify the Stata path then -<span class=result>parallel</span>- will take the generated windows path and convert it to "/cygdrive/&lt;drive letter&gt;/...".  If this does
-    not work you will need to specify the <i>statapath</i> explicitly.
-<br><br>
-    In this mode, there is no automatic way for the parent process to stop the child processes in case the user has requested a break in
-    execution.  The original (but now deprecated) <span class=result>parallel break</span> can still be used (and mata equivalents <span class=result>parallel_break()</span> and
-    <span class=result>_parallel_break()</span>).  This is a call that is you write into the code that executes in the children that queries if the mother process has
-    requested to break.  If this is not used appropriately, and a child cluster is executing for a long period (e.g. an endless loop) the user
-    must kill the child processes manually.
-<br><br>
-<br><br>
-<a name="examples"></a><span class=result><u>Example 1: using prefix syntax</u></span>
-<br><br>
-    In this example we'll generate a variable containing the maximum blood-pressure measurement (<i>bp</i>) by patient.
-<br><br>
-    Setup for a quad-core computer
-        <span class=input>. sysuse bplong.dta</span>
-        <span class=input>. sort patient</span>
-        
-        <span class=input>. parallel setclusters 4</span>
-<br><br>
-    Computes the maximum of <i>bp</i> for each patient. We add the option <span class=result>by(</span><i>patient</i><span class=result>)</span> to tell parallel not to split stories.
-        <span class=input>. parallel, by(patient): by patient: egen max_bp = max(bp)</span>
-        
-    Which is the ``parallel way'' to do:
-<br><br>
-        <span class=input>. by patient: egen max_bp = max(bp)</span>
-        
-    Giving you the same result.
-<br><br>
-        
-<span class=result><u> Example 2: using -</u></span><span class=result><u>parallel do</u></span><span class=result><u>- syntax</u></span>
-<br><br>
-    Another usage that may get big benefits from it is implementing loop-base simulations. Imagine that we have a model that requires looping
-    over each and every record of a panel-data dataset.
-<br><br>
-    Using -<span class=result>parallel</span>-, the proper way to do this would be using the ``parallel do'' syntax
-<br><br>
-        <span class=input>. use mybigpanel.dta, clear</span>
-<br><br>
-        <span class=input>. parallel setclusters 4</span>
-        <span class=input>. parallel do mymodel.do</span>
-        
-        <span class=input>. collapse ...</span>
-<br><br>
-    where <i>mymodel.do</i> would look something like this
-        
-        ----------------------------------- begin of do-file ------------
-                <span class=result>local maxiter = _N</span>
-                <span class=result>forval i = 1/`maxiter'</span> <span class=result>{</span>
-                        <i>...some routine...</i>
-                <span class=result>}</span>
-        ----------------------------------- end of the do-file ----------
-<br><br>
-    Or, in the case of using mata, this would look something like this
-<br><br>
-        ----------------------------------- begin of do-file ------------
-                <span class=result>mata:</span>
-                <span class=result>N=c("N")</span>
-                <span class=result>for(i = 1;i&lt;=N;i++) {</span>
-                        <i>...some routine...</i>
-                <span class=result>}</span>
-        ----------------------------------- end of the do-file ----------
-<br><br>
-<span class=result><u>Example 3: setting the right path</u></span>
-<br><br>
-    In the case of -<span class=result>parallel</span>- setting the stata.exe's path wrongly, using -<span class=result>setstatapath</span>- will correct the situation. So, if <i>"C:\Archivos de</i>
-    <i>programa\Stata12/stata.exe"</i> is the right path we only have to write:
-<br><br>
-        <span class=input>. parallel setclusters 2, s("C:\Archivos de programa\Stata12/stata.exe")</span>
-<br><br>
-<br><br>
-<span class=result><u>Example 4: Using -</u></span><span class=result><u>parallel bs</u></span><span class=result><u>-</u></span>
-<br><br>
-    In this example we'll evaluate a regression model using bootstrapping
-<br><br>
-    Setup for a quad-core computer
-        <span class=input>. sysuse auto, clear</span>
-        
-        <span class=input>. parallel setclusters 4</span>
-<br><br>
-    Running parallel bs.
-        <span class=input>. parallel bs: reg price c.weig##c.weigh foreign rep</span>
-        
-    Which is the ``parallel way'' to do:
-<br><br>
-        <span class=input>. bs: reg price c.weig##c.weigh foreign rep</span>
-<br><br>
-<br><br>
-<span class=result><u>Example 5: Using -</u></span><span class=result><u>parallel sim</u></span><span class=result><u>-</u></span>
-<br><br>
-    Example from simulate
-<br><br>
-    Setup for a quad-core computer
-        <span class=input>. parallel setclusters 4</span>
-<br><br>
-    Experiment that will be performed
-        <span class=result>program define lnsim, rclass</span>
-                <span class=result>version 14</span>
-                <span class=result>syntax [, obs(integer 1) mu(real 0) sigma(real 1) ]</span>
-                <span class=result>drop _all</span>
-                <span class=result>set obs `obs'</span>
-                <span class=result>tempvar z</span>
-                <span class=result>gen `z' = exp(rnormal(`mu',`sigma'))</span>
-                <span class=result>summarize `z'</span>
-                <span class=result>return scalar mean = r(mean)</span>
-                <span class=result>return scalar Var  = r(Var)</span>
-        <span class=result>end</span>
-<br><br>
-    Running parallel sim.
-        <span class=input>. parallel sim, expr(mean=r(mean) var=r(Var)) reps(10000): lnsim, obs(100)</span>
-        
-    Which is the ``parallel way'' to do:
-<br><br>
-        <span class=input>. simulate mean=r(mean) var=r(Var), reps(10000): lnsim, obs(100)</span>
-<br><br>
-<br><br>
-<span class=result><u>Example 6: Using -pll_instance- and -PLL_CLUSTERS- macros</u></span>
-<br><br>
-    By using -pll_instance- and -PLL_CLUSTERS- global macros the user can run -<span class=result>parallel</span>- in such a way that each cluster performs a different
-    task. Take the following example:
-<br><br>
-    Setup for a quad-core computer
-        <span class=input>. parallel setclusters 4</span>
-        <span class=input>. sysuse auto, clear</span>
-<br><br>
-        <span class=result>program def myprog</span>
-                <span class=result>gen x = $pll_instance</span>
-                <span class=result>gen y = $PLL_CLUSTERS</span>
-        
-                <i>// For the first cluster</i>
-                <span class=result>if ($pll_instance == 1) gen z = exp(2)</span>
-        
-                <i>// For the second cluster</i>
-                <span class=result>else if ($pll_instance == 2) {</span>
-                        <span class=result>summ price</span>
-                        <span class=result>gen z = r(mean)</span>
-                <span class=result>}</span>
-        
-                <span class=result>// For the third and fourth clusters</span>
-                <span class=result>else gen z = 0</span>
-        <span class=result>end</span>
-<br><br>
-    Running the program
-        <span class=input>. parallel, prog(myprog): myprog</span>
-<br><br>
-    Here, running with 4 cores, the program -<span class=result>myprog</span>- performs different actions depending on the value (number) of -pll_instance-. For those
-    observation in the first cluster, -<span class=result>parallel</span>- will generate -z- equal to exp(2), for those in the second cluster it will compute -z- equal
-    to the average price and for the rest of the clusters it will generate -z- equal to zero.
-<br><br>
-<a name="saved_results"></a><span class=result><u>8. Saved results</u></span>
-<br><br>
-    -<span class=result>parallel</span>- saves the following in <span class=result>r()</span>:
-<br><br>
-    Scalars        
-      <span class=result>r(pll_n)</span>            Number of parallel clusters last used
-      <span class=result>r(pll_t_fini)</span>       Time took to appending and cleaning
-      <span class=result>r(pll_t_calc)</span>       Time took to complete the parallel job
-      <span class=result>r(pll_t_setu)</span>       Time took to setup (before the parallelization) and to finish the job (after the parallelization)
-      <span class=result>r(pll_errs)</span>         Number of clusters which stopped with an error.
-<br><br>
-    Macros         
-      <span class=result>r(pll_id)</span>           Id of the last parallel instance executed (needed to use <span class=result>parallel clean</span>)
-      <span class=result>r(pll_dir)</span>          Directory where parallel ran and stored the auxiliary files.
-      <span class=result>r(pll_seeds)</span>        Seeds used within each cluster.
-<br><br>
-<br><br>
-    -<span class=result>parallel bs</span>- and -<span class=result>parallel sim</span>- save the following in <span class=result>e()</span>:
-<br><br>
-    Scalars        
-      <span class=result>e(pll)</span>              1.
-<br><br>
-<br><br>
-    -<span class=result>parallel version</span>- saves the following in <span class=result>r()</span>:
-<br><br>
-    Macros         
-      <span class=result>r(pll_vers)</span>         Current version of the module.
-<br><br>
-    -<span class=result>parallel numprocessors</span>- saves the following in <span class=result>r()</span>:
-<br><br>
-    Scalars        
-      <span class=result>r(numprocessors)</span>    Number of logical processors on the system.
-<br><br>
-<br><br>
-    -<span class=result>parallel</span>- saves the following global macros:
-<br><br>
-      <span class=result>$LAST_PLL_DIR</span>       A copy of <span class=result>r(pll_dir)</span>.
-      <span class=result>$LAST_PLL_N</span>         A copy of <span class=result>r(pll_n)</span>.
-      <span class=result>$LAST_PLL_ID</span>        A copy of <span class=result>r(pll_id)</span>.
-      <span class=result>$PLL_LASTRNG</span>        Number of times that -<span class=result>parallel_randomid()</span>- has been executed.
-      <span class=result>$PLL_STATA_PATH, $PLL_CLUSTERS, $USE_PROCEXEC, $PLL_HOSTNAMES, $PLL_SSH</span>
-                            Internal usage.
-<br><br>
-<br><br>
-<a name="development"></a><span class=result><u>9. Development</u></span>
-<br><br>
-    You can always have access to the latest version of -<span class=result>parallel</span>-. One option is from its github repo (on-development source code):
-<br><br>
-        https://github.com/gvegayon/parallel
-<br><br>
-    Or from the project's website:
-<br><br>
-        <span class=input>. net install parallel, from(https://raw.github.com/gvegayon/parallel/master/) replace</span>
-        <span class=input>. mata mata mlib index</span>
-<br><br>
-<br><br>
-    You can track new releases on GitHub or by following the RSS feed https://github.com/gvegayon/parallel/releases.atom
-<br><br>
-<br><br>
-    In the case of bug reporting, you can submit issues here:
-<br><br>
-        https://github.com/gvegayon/parallel/issues
-<br><br>
-    Please try the latest version to see if your problem has been solved.  Include the steps to reproduce the issue and the output of the Stata
-    command -creturn list-.
-<br><br>
-<br><br>
-<a name="source"></a><span class=result><u>10. </u></span><span class=result><u>mata</u></span><span class=result><u> source code</u></span>
-<br><br>
-    Most of -<span class=result>parallel</span>- has been programmed in <span class=result>mata</span>. This means that, as a difference from typical ado files, -<span class=result>parallel</span>- is distributed with
-    <span class=result>lparallel</span> mata library (compiled code) and thus source code can not be reached directly by users. Given this, the help file
-    parallel_source.sthlp is included in the package, help file which contains the source code in a fancy way.
-<br><br>
-    In order to get access to different sections of the source code you can follow these links:
-<br><br>
-        Stops a cluster after the user pressed break      parallel_break.mata
-        Remove auxiliary files                            parallel_clean.mata
-        Distributes observations across clusters          parallel_divide_index.mata
-        Export global macros                              parallel_export_globals.mata
-        Export programs                                   parallel_export_programs.mata
-        Wait until a cluster finishes                     parallel_finito.mata
-        (on development)                                  parallel_for.mata
-        Normalize a filepath                              parallel_normalizepath.mata
-        Generate random alphanum                          parallel_randomid.mata
-        Lunch simultaneous Stata instances in batch mode  parallel_run.mata
-        Set of tools to protect parallel aux files        parallel_sandbox.mata
-        Set the number of clusters                        parallel_setclusters.mata
-        Set the Stata EXE directory                       parallel_setstatapath.mata
-        Write a ``diagnosis''                             parallel_write_diagnosis.mata
-        Write a dofile to be paralellized                 parallel_write_do.mata
-<br><br>
-<a name="references"></a><br><br>
-<span class=result><u>11. References</u></span>
-<br><br>
-    Luke Tierney, A. J. Rossini, Na Li and H. Sevcikova (2012). <i>snow: Simple Network of Workstations</i>. R package version 0.3-9. 
-        http://CRAN.R-project.org/package=snow
-    R Core Team (2012). <i>R: A language and environment for statistical computing</i>. R Foundation for Statistical Computing, Vienna, Austria. ISBN
-        3-900051-07-0, URL http://www.R-project.org/.
-    George Vega Y (2012). <i>Introducing PARALLEL: Stata Module for Parallel Computing</i>. Chilean Pension Supervisor, Santiago de Chile, URL 
-        http://fmwww.bc.edu/repec/bocode/p/parallel.pdf.
-    George Vega Y (2013). <i>Introducing PARALLEL: Stata Module for Parallel Computing</i>. Stata Conference 2013, New Orleans (USA), URL 
-        http://ideas.repec.org/p/boc/norl13/4.html.
-    Haahr, M. (2006). <i>Random.org: True random number service</i>. Random.org. http://www.random.org/clients/http/.
-<br><br>
-<br><br>
-<a name="authors"></a><span class=result><u>12. Authors</u></span>
-<br><br>
-    George Vega Yon [cre,aut], University of Southern California. mailto:g.vegayon@gmail.com http://ggvy.cl/
-<br><br>
-    Brian Quistorff [aut], Microsoft Research. mailto:Brian.Quistorff@microsoft.com http://quistorff.com
-<br><br>
-<a name="contrib"></a><span class=result><u>13. Contributors</u></span>
-<br><br>
-    <i>Special Thanks to:</i>  Elan P. Kugelmass (aka as epkugelmass at github) [ctb], Timothy Mak (University of Hong Kong) (author of miparallel)
-<br><br>
-    Damian C. Clarke (Oxford University, England), Felix Villatoro (Superintendencia de Pensiones, Chile), Eduardo Fajnzylber (Universidad
-    Adolfo IbÃ¡Ã±ez, Chile), Eric Melse (CAREM, Netherlands), TomÃ¡s Rau (Universidad CatÃ³lica, Chile), Research Division (Superindentendia de
-    Pensiones, Chile), attendees to the Stata conference 2013 (New Orleans), Philippe Ruh (University of Zurich), Michael Lacy (Colorado
-    State).
-<br><br>
-<br><br>
-<a name="also"></a><span class=result><u>14. Also see</u></span>
-<br><br>
-    Manual: <span class=result>[GSM] Advanced Stata usage (Mac)</span>, <span class=result>[GSU] Advanced Stata usage (Unix)</span>, <span class=result>[GSW] Advanced Stata usage (Windows)</span>
-<br><br>
-                
-    Online: Running Stata batch-mode in  Mac, Unix and Windows
-<br><br>
-    Project's wiki page of other examples.
-<br><br>
-<br><br>
-<a name="faqs"></a><span class=result><u>15. FAQs</u></span>
-<br><br>
-    Here follows a list of Frequently Asked Questions:
-<br><br>
-<br><br>
-     1.  <span class=result>I am getting error (608)</span><span class=result> file is read-only; cannot be modified or erased</span><span class=input>. What can I do to solve it?</span>
-<br><br>
-         As Stata suggests, you are trying to either run parallel in a read-only directory, or your program/dofile is trying to write (save a
-         dta file for example) in a read-only directory. Try running parallel (or making your program to write files) in a directory where you
-         have writing priviledges (where you can save files).
-<br><br>
-     2.  
-<br><br>
-<br><br>
+    Setting the number of child processes
+      <span class=result>#</span>               The number of child processes. If omitted the default is max(floor(num_processors*0.75),1)
+<br><br>
+      <span class=result><u>f</u></span><span class=result>orce</span>          Overrides the restriction on using more child processes than processors on your machine (see the WARNING in description).
+                       This option is assumed when specifying <span class=result>hostnames</span>.{p_end} {synopt:<span class=result><u>s</u></span><span class=result>tatapath</span>}File path. <span class=result>parallel</span> tries to automatically
+                       identify Stata's exe path. By using this option you will override this and force <span class=result>parallel</span> to use a specific path to
+                       stata.exe.{p_end} {synopt:<span class=result><u>i</u></span><span class=result>ncludefile</span>}File path. This file will be included before parallel commands are executed. The
+                       target purpose for this is to allow one to copy over preferences that <span class=result>parallel</span> does not copy automatically.{p_end}
+                       {synopt:<span class=result><u>h</u></span><span class=result>ostnames</span>} a space delimited list of hostnames. For the local machine, use <i>localhost</i>.  Work will be assigned in
+                       the order of the list and the list elements will be re-used if num child processes is longer than the list.  An example
+                       would be <i>localhost node2 node3</i>.  If no option is provided, then <i>localhost</i> is assumed. Leave blank for local
+                       execution.{p_end} {synopt:<span class=result>ssh</span>}The command used to connect to remote machines.  If none is provided, this will be <i>ssh</i>.
+                       This option is not needed for local execution.{p_end} {synopt:<span class=result><u>proc</u></span><span class=result>exec</span>} On Windows, controls how child processes are
+                       spawned.  The default value 2 will launch them in a hidden desktop (they can still be seen in the task manager) so that
+                       the child applications don't briefly steal the window focus (which is annoying).  With value 1 the child processes will
+                       be launched in the user's desktop, will be launch auto-minimized, but will still briefly steal the focus.  and will
+                       steal focus and perhaps briefly show the windows of the child processes.{p_end} {syntab:<i>execution_options</i>}
+                       {synopt:<span class=result><u>k</u></span><span class=result>eep</span>}Keeps auxiliary files generated by <span class=result>parallel</span>.  Use this and the next option with care as there can be many
+                       file that take up space.{p_end} {synopt:<span class=result><u>keepl</u></span><span class=result>ast</span>}Keeps auxiliary files and remove those last time saved during the
+                       current session.{p_end} {synopt:<span class=result><u>prog</u></span><span class=result>rams</span>}A list of programs to be passed to each child process.  To do this, <span class=result>parallel</span>
+                       needs to echo the contents of those programs to the output window.  If <span class=result>parallel</span> is being run from inside an ado (say
+                       <i>my_cmd.ado</i>) and you need to access local subroutines (other programs defined in the ado beside the primary <i>my_cmd</i>), then
+                       you must pass their names in this option as <i>my_cmd.local_subroutine_name</i> for them to be accessible.{p_end}
+                       {synopt:<span class=result><u>m</u></span><span class=result>ata</span>}If the algorithm needs to use mata objects, this option allows to pass to each child process every mata
+                       object loaded in the current session (including functions).  Note that when mata objects are loaded into the child
+                       processes they will have different locations and therefore pointers may no longer be accurate.{p_end}
+                       {synopt:<span class=result><u>nog</u></span><span class=result>lobal</span>}Avoid passing current session's globals to the child processes.{p_end} {synopt:<span class=result><u>s</u></span><span class=result>eeds</span>}Numlist. With this
+                       option the user can pass an specific seed to be used within each child process.{p_end} {synopt:<span class=result><u>randt</u></span><span class=result>ype</span>}String. Tells
+                       parallel whether to use the current seed (-current-), the current datetime (-datetime-) or random.org API (-random.org-)
+                       to generate the seeds for each child processes (please read the Description section).{p_end} {synopt:<span class=result><u>proc</u></span><span class=result>essors</span>}Integer.
+                       If running on StataMP, sets the number of processors each child process should use. Default value is 0 (do
+                       nothing).{p_end} {synopt:<span class=result><u>t</u></span><span class=result>imeout</span>}Integer. If a child process hasn't started, how much time in seconds does <span class=result>parallel</span> has
+                       to wait until assume that there was a connection error and thus the child process won't start. Default value is
+                       60.{p_end} {synopt:<span class=result><u>out</u></span><span class=result>putopts</span>} A list of option names that are aggregating output options.  <span class=result>parallel</span> automtically
+                       aggregates main data from child processes.  Often, though, a program will aggregate more than one type of data.
+                       <span class=result>outputopts</span> allows generic file-based aggregation (appending).  A sequential call such as <span class=result>my_prog,</span>
+                       <span class=result>output1(outputfile.dta)</span> can be converted to <span class=result>parallel, outputopts(output1): my_prog, output1(outputfile.dta)</span>.  <span class=result>parallel</span>
+                       will execute each child process with its own file passed to <span class=result>output1</span> and at the end, append them all and save it to
+                       <i>outputfile.dta</i>.{p_end} {synopt:<span class=result><u>det</u></span><span class=result>erministicoutput</span>}will eliminates displayed output that would vary depending on the
+                       machine (e.g. timers, seeds, and number of parallel child processes) so that log files can be easily compared across
+                       runs. Errors are still printed.{p_end} {syntab:Byable parallelization} {synopt:<span class=result>by</span>}Varlist. Tells the command through
+                       which observations the current dataset can be divided, avoiding stories (panel) splitting over two or more child
+                       processes.  The semantics for <span class=result>by</span> are not the same as for Stata.  When Stata implements <span class=result>by</span>, the command that is run will
+                       only see a section of the data where the by-variables are the same.  <span class=result>parallel</span>'s semantics are that no observations with
+                       the same <span class=result>by</span>-values will be in different child processes.  It pools together combinations when there are fewer child
+                       processes than by-var combinations.  If you need Stata-style semantics, the solution is to add <span class=result>by</span> in the subcommand.
+                       For example,<span class=result> parallel, by(byvar): by byvar: egen x_max = max(x)</span>.  {p_end} {synopt:<span class=result><u>f</u></span><span class=result>orce</span>}When using <span class=result>by</span>, <span class=result>parallel</span> checks
+                       whether if the dataset is properly sorted. By using <span class=result>force</span> the command skips this check.{p_end} {syntab:Parallel
+                       bootstrap} {synopt:<span class=result><u>exp</u></span><span class=result>ression</span>}An exp_list to be passed to the bootstrap command.{p_end} {synopt:<span class=result>bs_options</span>} Further
+                       options to be passed to the bootstrap command, including the optional reps() parameter.  {syntab:Parallel simulate}
+                       {synopt:<span class=result><u>exp</u></span><span class=result>ression</span>}An exp_list to be passed to the simulate command.{p_end} {synopt:<span class=result>sim_options</span>} Further options to be
+                       passed to the simulate command, including the required reps() parameter.  {syntab:Multiple file processing and
+                       appending} {synopt:<span class=result><u>d</u></span><span class=result>o</span>}Stata cmd or dofile.  Note that<span class=result> parallel do</span> does not support passing options to the do-file.  If
+                       you need arguments then use the prefix style. {p_end} {synopt:<span class=result>files</span>}Explicit list of files to process.{p_end}
+                       {synopt:<span class=result><u>e</u></span><span class=result>xpression</span>}String. Expression representing file names in the form of "<i>%fmts</i>, <i> numlist1 [, numlist2 [, ...]]</i>"
+                       {syntab:Removing auxiliary files} {synopt:<span class=result><u>e</u></span><span class=result>vent</span>}String. Specifies which executed (and stored) event's files should be
+                       removed.{p_end} {synopt:<span class=result><u>a</u></span><span class=result>ll</span>}Tells <span class=result>parallel</span> to remove every remnant auxiliary files generated by it in the current
+                       directory.{p_end} {synopt:<span class=result><u>f</u></span><span class=result>orce</span>}Forces the command to remove (apparently) in-use auxiliary files. Otherwise these will
+                       not get deleted.{p_end} {syntab:Other options} {synopt:<span class=result><u>e</u></span><span class=result>vent</span>}String. With printlog and viewlog this specifies which
+                       event's log files should be displayed.{p_end} {synopt:<span class=result><u>set</u></span><span class=result>parallelid</span>}Programmers' option. Forces parallel to use an
+                       specific id (<i>pll_id</i>) (see Technical Notes).{p_end} {synopt:<span class=result><u>nod</u></span><span class=result>ata</span>}Tells <span class=result>parallel</span> not to use loaded data and thus not to
+<a name="description"></a>                       try splitting or appending anything.{p_end} 2. Description {pstd} -<span class=result>parallel</span>- allows to implement parallel computing,
+                       without having StataMP, substantially reducing computing time. Specially suitable for bootstrapping and simulations,
+                       parallel includes out-of-the-box tools for implementing such algorithms.  {p_end} {pstd} In order to use -<span class=result>parallel</span>- it
+                       is necessary to set the number of desired child processes with which the user wants to work with. To do this the user
+                       should use -<span class=result>parallel initialize</span>- syntaxes, replacing <i>#</i> with the desired number of child processes. Setting more child
+                       processes than physical cores the user's computer has it is not recommended (see the WARNING in description).  {p_end}
+                       {pstd} -<span class=result>parallel do</span>- is the equivalent (wrapper) to -do-. When using this syntax parallel runs the dofile in as many
+                       child processes as there where specified by the user, this is, start <span class=result>$PLL_CLUSTERS</span> Stata instances in batch mode. By
+                       default the loaded dataset will be split into the number of child processes specified by -<span class=result>parallel initialize</span>- and the
+                       do-file will be executed independently over each and every one of the data chunks, so once after all the
+                       parallel-instances stops, the datasets will be appended. In order to avoid loading the current dataset in the child
+                       processes, the user should specify the -nodata- option.  {p_end} {pstd} -<span class=result>parallel :</span>- (as a prefix) allows to, after
+                       splitting the loaded dataset, execute a <i>stata_cmd</i> over the specified number of data chunks in order to speed up
+                       computations. Like -<span class=result>parallel do</span>-, after all the parallel-instances stops, the datasets will be appended.  {p_end} {pstd}
+                       -<span class=result>parallel bs</span>- and -<span class=result>parallel sim</span>- are parallel wrappers for the commands -bootstrap- and -simulate-. Specially suited for
+                       these algorithms, -<span class=result>parallel</span>- allows conducting embarrassingly parallel computing. In terms of syntax, besides cmd names,
+                       the only difference that these two commands have with their serial versions is how are expressions passed (please refer
+                       to the examples section for this).  {p_end} {pstd} Every time that -<span class=result>parallel</span>- runs several auxiliary files are generated
+                       which, after finishing, are automatically deleted. In the case that the user sets -<span class=result>keep</span>- or -<span class=result>keeplast</span>- the auxiliary
+                       files are kept, thus the syntax -<span class=result>parallel clean</span>- becomes handy. With -<span class=result>parallel clean</span>- the user can remove the last
+                       generated auxiliary files (default option), an specific parallel instance files (using <i>#pll_id</i> number), or every stored
+                       auxiliary file (with -<span class=result>all</span>-). For security reasons, in-use auxiliary files will not be deleted unless the user specifies
+                       it through the option <span class=result>force</span>, which will override not deleting in-use auxiliary files (see the Technical note section for
+                       more information about this).  Log files from the runs are stored in <i>c(tmpdir)</i> so that they can be inspected by the
+                       user.  The user will likely want to delete these periodically with <span class=result>parallel clean, all</span>.  {p_end} {pstd} In the case of
+                       handling multiple files (because it is, for example, a big dataset divided into multiple dta files), -<span class=result>parallel append</span>-
+                       becomes handy as it allows the user to process them simultaneously. By providing a list of files and a Stata cmd or
+                       dofile, -<span class=result>parallel append</span>- opens and executes the cmd/dofile within each file, stores each file results and appends them
+                       into a single file.  Also, if the files to be processed have a pattern base name, the user can provide -<span class=result>parallel append</span>-
+                       with an expression representing the list of files to be processed; for information on how to use this feature, see the
+                       section Parallel Append.  {p_end} {pstd} Given <i>N</i> child processes, within each child process -<span class=result>parallel</span>- creates the
+                       macros <i>pll_id</i> (equal for all the child processes) and <i>pll_instance</i> (ranging 1 up to <i>N</i>, equaling 1 inside the first child
+                       process and <i>N</i> inside the last child process), both as globals and locals macros. This allows the user setting different
+                       tasks/actions depending on the child process. Also the global macro <i>PLL_CLUSTERS</i> (equal to <i>N</i>) is available within each
+                       child process. For an example using this macros, please refer to the Examples section.  {p_end} {pstd} As by now,
+                       -<span class=result>parallel</span>- by default automatically identifies Stata's executable file path. This is necessary as it is used to run
+                       Stata in batch mode (the mainstream of the module). Either way, after some reports, that file path is not always
+                       correctly identified; where the option -<span class=result><u>s</u></span><span class=result>tatadir</span>- in -<span class=result>parallel initialize</span>- can be used to manually set it.  {p_end}
+                       {pstd} In the case of pseudo-random-numbers, the module allows to pass different seed for each child process. Moreover,
+                       if the user does not provide a numlist of seeds, -<span class=result>parallel</span>- generates its own numlist of seeds using three different
+                       options:  (1) based on the current seed; (2) using the current datetime and user as a seed to generate each seed,
+                       restoring the original seed afterwards; or (3) using random.org API (requires internet connection) to directly generate
+                       each seed (also restoring the original seed afterwards). -<span class=result>parallel</span>- saves a macro with the used seeds in the
+<a name="warnings"></a>                       <span class=result>r(pll_seeds)</span> macro.  {p_end} {pstd} WARNINGS For each child process -<span class=result>parallel</span>- starts a new Stata instance (thus running
+                       as many processes as child processes), this way, should the user set more child processes than cores the computer has,
+<a name="details"></a>                       it is possible that the computer freezes.  {p_end} 3. Details {pstd} Inspired by the R library ``snow'' and to be used
+                       in multicore CPUs , -<span class=result>parallel</span>- implements parallel computing methods through an OS's shell scripting (using Stata in
+                       batch mode) to speedup computations by splitting the dataset into a determined number of child processes in such a way
+                       to implement a data parallelism algorithm.  {p_end} {pstd} The number of efficient computing child processes depends
+                       upon the number of physical cores (CPUs) with which your computer is built, e.g. if you have a quad-core computer, the
+                       correct child process setting should be four. In the case of simultaneous multithreading, such as that from Intel's
+                       hyper-threading technology (HTT), setting -<span class=result>parallel</span>- following the number of processors threads, as it was expected,
+                       hardly results into a perfect speedup scaling. In spite of it, after several tests on HTT capable architectures, the
+                       results of implementing -<span class=result>parallel</span>- according to the machines physical cores versus its logical cores shows small though
+                       significant differences.  {p_end} {pstd} -<span class=result>parallel</span>- is especially handy when it comes to implementing loop-based
+                       simulation models (or simply loops), Stata commands such as reshape , or any job that (a) can be repeated through
+                       data-blocks, and (b) routines that processes big datasets (see the append section). Furthermore, the commands -parallel
+                       bs- and -parallel sim- are specially designed to easily implement bootstrapping and (monte carlo) simulations in
+                       parallel fashion.  {p_end} {pstd} At this time -<span class=result>parallel</span>- has been successfully tested in Windows, Unix and MacOS for
+                       Stata versions 11 to 14.  {p_end} {pstd} -<span class=result>parallel</span>- does not change the RNG state (even if subcommands invoke
+                       randomization functions).  {p_end} {pstd} After several tests, it has been proven that--thanks to how -<span class=result>parallel</span>- has
+                       been written--it is possible to use the algorithm in such a way that other techniques of parallel computing can be
+                       implemented; such as Monte Carlo Simulations, simultaneously running models, etc.. An extensive example through Monte
+                       Carlo Simulations is provided here.  {p_end} {pstd} To distribute work across different machines in a computer cluster,
+                       the machines need to be Linux/MacOS, share a global file-system (e.g. NFS), and have a non-interactive way to remotely
+                       execute commands.  The most common way to remotely execute commands is to use <i>ssh</i> with keyfiles so that no password is
+                       needed.  This is still a new feature, and synchronizing across machines in child processes can have odd corner cases, so
+<a name="append_how"></a>                       users may encounter some trouble getting this to work.  {p_end} 4. Parallel Append {pstd}Imagine we have several dta
+                       files named -income.dta- stored in a set of folders ranging 2008_01 up to 2012_12, this is, a total of 60 files (12
+                       times 5) monthly ordered which may look something like this: {p_end} {col 10}<i>2008_01/income.dta</i> {col
+                       10}<i>2008_02/income.dta</i> {col 10}<i>2008_03/income.dta</i> {col 10}<i>...more files...</i>  {col 10}<i>2010_01/income.dta</i> {col
+                       10}<i>2010_02/income.dta</i> {col 10}<i>2010_03/income.dta</i> {col 10}<i>...more files...</i>  {col 10}<i>2012_10/income.dta</i> {col
+                       10}<i>2012_11/income.dta</i> {col 10}<i>2012_12/income.dta</i> {pstd}Now, imagine that for each and every one of those files we would
+                       like to execute the following program:{p_end}<span class=result> program def myprogram gen female = (gender == "female") collapse (mean)</span>
+                       <span class=result>income, by(female) fast end</span> {pstd}Instead of writing a forval/foreach loop (which would be the natural solution for this
+                       situation), -<span class=result>parallel append</span>- allows us to smoothly solve this with the following command.{p_end} <span class=input>. parallel append,</span>
+                       <span class=result>do(myprogram) prog(myprogram)</span> /// <span class=result>e("%g_%02.0f/income.dta, 2008/2012, 1/12")</span> {pstd}Where element by element, we are
+                       telling parallel:{p_end} (1) <span class=result>do(myprogram)</span>: execute the command -<span class=result>myprogram</span>-, (2) <span class=result>prog(myprogram)</span>: -<span class=result>myprogram</span>- is a user
+                       written program, and (3) <span class=result>e("%g_%02.0f/income.dta, 2008/2012, 1/12")</span>: this should process files 2008_01/income.dta up to
+                       2012_12/income.dta.  {pstd}Besides of the simplicity of its syntax, the advantage of using -<span class=result>parallel append</span>- lies in
+                       doing so in a parallel fashion, this is, instead of processing one file at a time, -<span class=result>parallel</span>- manages to process these
+                       files in groups of as many files as child processes are set. Step-by-step, what this command does is:{p_end}
+                       {p2col:1.}Distribute groups of files across child processes{p_end} Once each child process starts, for each dta file
+                       {p2col:2.}Opens the file using [<i>if</i>] [<i>in</i>] accordingly to <span class=result>in</span> and <span class=result>if</span> options.{p_end} {p2col:3.}Executes the command/dofile
+                       specified by the user.{p_end} {p2col:3.}Stores the results in a temp dta file.{p_end} Finally, once all the files have
+<a name="caveats"></a>                       been processed {p2col:4.}Appends all the resulting files into a single one.{p_end} 5. Caveats {pstd} When the
+                       -<i>stata_cmd</i>- or -<i>do-file</i>- saves results, as -<span class=result>parallel</span>- runs Stata in batch mode, none of the results will be kept. This
+                       is also true for matrices, scalars, mata objects, returns, or whatever other object different from data.  {p_end} {pstd}
+                       Although -<span class=result>parallel</span>- passes-through programs, macros and mata objects, in the current version it is not capable of doing
+                       the same with matrices or scalars.  The tempname internal state is copied to childre, but the parent does not receive
+                       any of this state from the children.  That is, -<span class=result>parallel</span>- advances the tempname (tempvar) sequence in the children to
+                       not overlap with any produced by the parent.  {p_end} {pstd} If the number of tasks to be done is less than the number
+                       of child processes, <span class=result>parallel</span> will temporarily reduce the number of child processes. This is reported in the global
+                       <span class=result>$LAST_PLL_N</span>.  {p_end} {pstd} Expressions run in the child-processes that contain <i>_n</i> or <i>_N</i> will be evaluated locally to
+                       the child not the parent dataset.  These expressions may therefore be different if run in <span class=result>parallel</span> than without
+                       <span class=result>parallel</span>.  {p_end} {pstd} When executing Stata on separate machines via ssh, no environment variables except PWD and
+<a name="tech"></a>                       STATATMP are copied over.  {p_end} 6. Technical note {pstd} In order to protect a <i>pll_id</i> code (and thus ancillary
+                       files), once -<span class=result>parallel</span>- is called it creates a new file called <i>__pll</i>[<i>pll_id</i>]<i>sandbox</i> (stored at c(tmpdir), in your case:
+                       <u>/tmp</u>). This forbids -<span class=result>parallel clean</span>- from deleting any auxiliary file used by that process and reserves the <i>pll_id</i> so
+                       that no other call of -<span class=result>parallel</span>- can use this <i>pll_id</i>. Once every child process has finished, the sandbox file is
+                       removed, freeing the <i>pll_id</i>.  {p_end} {pstd} If for any reason the algorithm breaks due to a flaw or crush of the
+                       system, the sandbox file and the rest of auxiliary files will not be deleted. In order to clean up this, the user will
+                       be able to do so manually (moving the file(s) to the OS recycle bin) or using parallel clean, all force syntax. This way
+                       all sandbox files in the c(tmpdir) folder and auxiliary files stored at the current directory will be deleted.  {p_end}
+                       {pstd} In earlier versions of -<span class=result>parallel</span>-, tempfiles generation was not safe as while running multiple Stata instances
+                       simultaneously these could overwrite each other's tempfiles. Starting version 1.14, this is no longer a problem as each
+                       Stata instance starts with a different <span class=result>c(tmpdir)</span> location.  This way, instances' tempfile management will not interfere
+                       with each other, allowing to safely use commands or algorithms depending on tempfile generation (such as preserve and
+                       restore).  {p_end} {pstd} The option -<span class=result>setparallelid</span>- is designed to let programmers recycle a parallel id (<i>pll_id</i>).
+                       Intended to be used with -<span class=result>parallel_sandbox</span>- (undocumented, please refer to the source code of -parallel_sandbox()-),
+                       this option allows calling parallel several times using the same <i>pll_id</i>, which makes auxiliary files management far
+                       simpler. Take the following example {p_end}<span class=result> program def mypllwrapper</span><i> // Reserving a pll_id</i><span class=result> m: parallel_sandbox(5)</span><i> //</i>
+                       <i>Using the generated pll_id</i><span class=result> save __pll`parallelid'_mypllwrapper, replace</span><i> // Recycling the pll_id</i><span class=result> forval i=1/10 {</span>
+                       <span class=result>parallel, setparallelid(`parallelid') keep: some_other_cmd }</span><i> // Cleanning up and freeing the pll_id. This will remove</i>
+                       <i>all files // and folders named with prefix '__pll[parallelid]'</i><span class=result> parallel clean, e(`parallelid') m:</span>
+                       <span class=result>parallel_sandbox(2,"`parallelid'") end</span> {pstd} For a real example of this, please see -parallel.bs- and -
+                       parallel_sim.ado-.  {p_end} Windows-shell: Spawning child processes with shell command on Windows (Deprecated) {pstd}
+                       Originally child processes on Windows were spawned as they were on other platforms using Stata's shell methods (e.g.
+                       <span class=result>winexec</span>).  This had a number of problems (spawned processes stole the UI focus, failure to recover from killed child
+                       processes, difficulty in batch-mode), so now Windows uses a plugin that launches the child processes directly using
+                       Win32 system calls.  The original functionality is retained, but deprecated. To enable it you must specified the
+                       <i>procexec(0)</i> option. {p_end} {pstd}Since shell commmands are ignored by Stata in batch-mode on Windows, a work around is
+                       needed. The method is to have Stata write out the commands to be executed to a file (called the gateway) and have a
+                       separate process read new inputs to this file and execute the commands. This latter part requires the user to install
+                       Cygwin and run a few commands prior to starting Stata. In a Cygwin terminal, navigate to the appropriate directory and
+                       do the following:  {p_end} <span class=result>$ rm pll_gateway.sh</span> <span class=result>$ touch pll_gateway.sh</span> <span class=result>$ tail -f pll_gateway.sh | bash</span> {pstd}Then you can
+                       execute your Stata script in batch-mode on Windows. The Cygwin tail process can stay running through multiple
+                       uses.{p_end} {pstd}The default gateway file assumed is pll_gateway.sh. If you would like a different file modify the
+                       Cygwin script above and pass a new value for <span class=result><u>g</u></span><span class=result>ateway</span>(<i>gateway_path</i>) to <span class=result>parallel initialize</span>.{p_end} {pstd}Since Cygwin is
+                       going to execute the commands to start the parallel Stata instances it needs a Cygwin-like Stata path. If the user does
+                       not specify the Stata path then -<span class=result>parallel</span>- will take the generated windows path and convert it to "/cygdrive/&lt;drive
+                       letter&gt;/...".  If this does not work you will need to specify the <i>statapath</i> explicitly.{p_end} {pstd}In this mode, there
+                       is no automatic way for the parent process to stop the child processes in case the user has requested a break in
+                       execution.  The original (but now deprecated) <span class=result>parallel break</span> can still be used (and mata equivalents <span class=result>parallel_break()</span>
+                       and <span class=result>_parallel_break()</span>).  This is a call that is you write into the code that executes in the children that queries if
+                       the mother process has requested to break.  If this is not used appropriately, and a child process is executing for a
+<a name="examples"></a>                       long period (e.g. an endless loop) the user must kill the child processes manually.{p_end} Example 1: using prefix
+                       syntax {pstd}In this example we'll generate a variable containing the maximum blood-pressure measurement (<i>bp</i>) by
+                       patient.{p_end} {pstd}Setup for a quad-core computer{p_end} <span class=input>. sysuse bplong.dta</span> <span class=result>. sort patient</span> <span class=result>. parallel initialize 4</span>
+                       {pstd}Computes the maximum of <i>bp</i> for each patient. We add the option <span class=result>by(</span><i>patient</i><span class=result>)</span> to tell parallel not to split
+                       stories.{p_end} <span class=input>. parallel, by(patient): by patient: egen max_bp = max(bp)</span> {pstd}Which is the ``parallel way'' to
+                       do:{p_end} <span class=input>. by patient: egen max_bp = max(bp)</span> {pstd}Giving you the same result.{p_end} Example 2: using -<span class=result>parallel do</span>-
+                       syntax {pstd}Another usage that may get big benefits from it is implementing loop-base simulations. Imagine that we have
+                       a model that requires looping over each and every record of a panel-data dataset.  {p_end} {pstd} Using -<span class=result>parallel</span>-, the
+                       proper way to do this would be using the ``parallel do'' syntax {p_end} <span class=input>. use mybigpanel.dta, clear</span> <span class=result>. parallel</span>
+                       <span class=result>initialize 4</span> <span class=input>. parallel do mymodel.do</span> <span class=result>. collapse ...</span>  {pstd}where <i>mymodel.do</i> would look something like this{p_end}
+                       ----------------------------------- begin of do-file ------------ <span class=result>local maxiter = _N</span> <span class=result>forval i = 1/`maxiter'</span> <span class=result>{</span> <i>...some</i>
+                       <i>routine...</i>  <span class=result>}</span> ----------------------------------- end of the do-file ---------- {pstd}Or, in the case of using mata,
+                       this would look something like this{p_end} ----------------------------------- begin of do-file ------------ <span class=result>mata:</span>
+                       <span class=result>N=c("N")</span> <span class=result>for(i = 1;i&lt;=N;i++) {</span> <i>...some routine...</i>  <span class=result>}</span> ----------------------------------- end of the do-file ----------
+                       Example 3: setting the right path {pstd}In the case of -<span class=result>parallel</span>- setting the stata.exe's path wrongly, using
+                       -<span class=result>setstatapath</span>- will correct the situation. So, if <i>"C:\Archivos de programa\Stata12/stata.exe"</i> is the right path we only
+                       have to write:  <span class=input>. parallel initialize 2, s("C:\Archivos de programa\Stata12/stata.exe")</span> Example 4: Using -<span class=result>parallel bs</span>-
+                       {pstd}In this example we'll evaluate a regression model using bootstrapping{p_end} {pstd}Setup for a quad-core
+                       computer{p_end} <span class=input>. sysuse auto, clear</span> <span class=result>. parallel initialize 4</span> {pstd}Running parallel bs.{p_end} <span class=result>. parallel bs: reg price</span>
+                       <span class=result>c.weig##c.weigh foreign rep</span> {pstd}Which is the ``parallel way'' to do:{p_end} <span class=input>. bs: reg price c.weig##c.weigh foreign</span>
+                       <span class=result>rep</span> Example 5: Using -<span class=result>parallel sim</span>- {pstd}Example from simulate{p_end} {pstd}Setup for a quad-core computer{p_end} <span class=result>.</span>
+                       <span class=result>parallel initialize 4</span> {pstd}Experiment that will be performed{p_end} <span class=result>program define lnsim, rclass</span> <span class=result>version 13</span> <span class=result>syntax [,</span>
+                       <span class=result>obs(integer 1) mu(real 0) sigma(real 1) ]</span> <span class=result>drop _all</span> <span class=result>set obs `obs'</span> <span class=result>tempvar z</span> <span class=result>gen `z' = exp(rnormal(`mu',`sigma'))</span>
+                       <span class=result>summarize `z'</span> <span class=result>return scalar mean = r(mean)</span> <span class=result>return scalar Var = r(Var)</span> <span class=result>end</span> {pstd}Running parallel sim.{p_end} <span class=input>. parallel</span>
+                       <span class=result>sim, expr(mean=r(mean) var=r(Var)) reps(10000): lnsim, obs(100)</span> {pstd}Which is the ``parallel way'' to do:{p_end} <span class=result>.</span>
+                       <span class=result>simulate mean=r(mean) var=r(Var), reps(10000): lnsim, obs(100)</span> Example 6: Using -pll_instance- and -PLL_CLUSTERS- macros
+                       {pstd} By using -pll_instance- and -PLL_CLUSTERS- global macros the user can run -<span class=result>parallel</span>- in such a way that each
+                       child process performs a different task. Take the following example:  {p_end} {pstd}Setup for a quad-core
+                       computer{p_end} <span class=input>. parallel initialize 4</span> <span class=result>. sysuse auto, clear</span> <span class=result>program def myprog</span> <span class=result>gen x = $pll_instance</span> <span class=result>gen y =</span>
+                       <span class=result>$PLL_CLUSTERS</span> <i>// For the first child process</i> <span class=result>if ($pll_instance == 1) gen z = exp(2)</span> <i>// For the second child process</i> <span class=result>else</span>
+                       <span class=result>if ($pll_instance == 2) {</span> <span class=result>summ price</span> <span class=result>gen z = r(mean)</span> <span class=result>}</span> <span class=result>// For the third and fourth child processes</span> <span class=result>else gen z = 0</span> <span class=result>end</span>
+                       {pstd}Running the program{p_end} <span class=input>. parallel, prog(myprog): myprog</span> {pstd} Here, running with 4 cores, the program
+                       -<span class=result>myprog</span>- performs different actions depending on the value (number) of -pll_instance-. For those observation in the
+                       first child process, -<span class=result>parallel</span>- will generate -z- equal to exp(2), for those in the second child process it will compute
+<a name="saved_results"></a>                       -z- equal to the average price and for the rest of the child processes it will generate -z- equal to zero.  {p_end} 8.
+                       Saved results {pstd} -<span class=result>parallel</span>- saves the following in <span class=result>r()</span>:  {p2col 5 20 24 2: Scalars}{p_end} {synopt:<span class=result>r(pll_n)</span>}Number
+                       of parallel child processes last used{p_end} {synopt:<span class=result>r(pll_t_fini)</span>}Time took to appending and cleaning{p_end}
+                       {synopt:<span class=result>r(pll_t_calc)</span>}Time took to complete the parallel job{p_end} {synopt:<span class=result>r(pll_t_setu)</span>}Time took to setup (before the
+                       parallelization) and to finish the job (after the parallelization){p_end} {synopt:<span class=result>r(pll_errs)</span>}Number of child processes
+                       which stopped with an error.{p_end} {p2col 5 20 24 2: Macros}{p_end} {synopt:<span class=result>r(pll_id)</span>}Id of the last parallel instance
+                       executed (needed to use <span class=result>parallel clean</span>){p_end} {synopt:<span class=result>r(pll_dir)</span>}Directory where parallel ran and stored the auxiliary
+                       files.{p_end} {synopt:<span class=result>r(pll_seeds)</span>}Seeds used within each child process.{p_end} {pstd} -<span class=result>parallel bs</span>- and -<span class=result>parallel sim</span>-
+                       save the following in <span class=result>e()</span>:  {p2col 5 20 24 2:Scalars}{p_end} {synopt:<span class=result>e(pll)</span>}1.{p_end} {pstd} -<span class=result>parallel version</span>- saves
+                       the following in <span class=result>r()</span>:  {p2col 5 20 24 2:Macros}{p_end} {synopt:<span class=result>r(pll_vers)</span>}Current version of the module.{p_end} {pstd}
+                       -<span class=result>parallel numprocessors</span>- saves the following in <span class=result>r()</span>:  {p2col 5 20 24 2:Scalars}{p_end} {synopt:<span class=result>r(numprocessors)</span>}Number
+                       of logical processors on the system.{p_end} {pstd}-<span class=result>parallel</span>- saves the following global macros:{p_end}
+                       {synopt:<span class=result>$LAST_PLL_DIR</span>}A copy of <span class=result>r(pll_dir)</span>.{p_end} {synopt:<span class=result>$LAST_PLL_N</span>}A copy of <span class=result>r(pll_n)</span>.{p_end} {synopt:<span class=result>$LAST_PLL_ID</span>}A
+                       copy of <span class=result>r(pll_id)</span>.{p_end} {synopt:<span class=result>$PLL_LASTRNG</span>}Number of times that -<span class=result>parallel_randomid()</span>- has been executed.{p_end}
+<a name="development"></a>                       {synopt:<span class=result>$PLL_STATA_PATH, $PLL_CLUSTERS, $USE_PROCEXEC, $PLL_HOSTNAMES, $PLL_SSH</span>}Internal usage.{p_end} 9. Development
+                       {pstd} You can always have access to the latest version of -<span class=result>parallel</span>-. One option is from its github repo
+                       (on-development source code):  {p_end} {pmore}https://github.com/gvegayon/parallel{p_end} {pstd} Or from the project's
+                       website:{p_end} <span class=input>. net install parallel, from(https://raw.github.com/gvegayon/parallel/master/) replace</span> <span class=result>. mata mata mlib</span>
+                       <span class=result>index</span> {pstd} You can track new releases on GitHub or by following the RSS feed
+                       https://github.com/gvegayon/parallel/releases.atom {p_end} {pstd} In the case of bug reporting, you can submit issues
+                       here:  {p_end} {pmore}https://github.com/gvegayon/parallel/issues {pstd} Please try the latest version to see if your
+                       problem has been solved.  Include the steps to reproduce the issue and the output of the Stata command -creturn list-.
+<a name="source"></a>                       {p_end} 10. <span class=result>mata</span> source code {pstd} Most of -<span class=result>parallel</span>- has been programmed in <span class=result>mata</span>. This means that, as a difference
+                       from typical ado files, -<span class=result>parallel</span>- is distributed with <span class=result>lparallel</span> mata library (compiled code) and thus source code can
+                       not be reached directly by users. Given this, the help file parallel_source.sthlp is included in the package, help file
+                       which contains the source code in a fancy way.  {pstd} In order to get access to different sections of the source code
+                       you can follow these links:  Stops a child process after the user pressed break {col 58} parallel_break.mata Remove
+                       auxiliary files {col 58} parallel_clean.mata Distributes observations across child processes {col 58}
+                       parallel_divide_index.mata Export global macros {col 58} parallel_export_globals.mata Export programs {col 58}
+                       parallel_export_programs.mata Wait until a child process finishes {col 58} parallel_finito.mata (on development) {col
+                       58} parallel_for.mata Normalize a filepath {col 58} parallel_normalizepath.mata Generate random alphanum {col 58}
+                       parallel_randomid.mata Lunch simultaneous Stata instances in batch mode {col 58} parallel_run.mata Set of tools to
+                       protect parallel aux files {col 58} parallel_sandbox.mata Set the number of child processes {col 58}
+                       parallel_setclusters.mata Set the Stata EXE directory {col 58} parallel_setstatapath.mata Write a ``diagnosis'' {col 58}
+<a name="references"></a>                       parallel_write_diagnosis.mata Write a dofile to be paralellized {col 58} parallel_write_do.mata 11. References
+                       {phang}Luke Tierney, A. J. Rossini, Na Li and H. Sevcikova (2012). <i>snow: Simple Network of Workstations</i>. R package
+                       version 0.3-9. http://CRAN.R-project.org/package=snow{p_end} {phang}R Core Team (2012). <i>R: A language and environment</i>
+                       <i>for statistical computing</i>. R Foundation for Statistical Computing, Vienna, Austria. ISBN 3-900051-07-0, URL 
+                       http://www.R-project.org/.{p_end} {phang}George Vega Y (2012). <i>Introducing PARALLEL: Stata Module for Parallel</i>
+                       <i>Computing</i>. Chilean Pension Supervisor, Santiago de Chile, URL http://fmwww.bc.edu/repec/bocode/p/parallel.pdf.{p_end}
+                       {phang}George Vega Y (2013). <i>Introducing PARALLEL: Stata Module for Parallel Computing</i>. Stata Conference 2013, New
+                       Orleans (USA), URL http://ideas.repec.org/p/boc/norl13/4.html.{p_end} {phang}Haahr, M. (2006). <i>Random.org: True random</i>
+<a name="authors"></a>                       <i>number service</i>. Random.org. http://www.random.org/clients/http/.{p_end} 12. Authors {pstd} George Vega Yon [cre,aut],
+                       University of Southern California. mailto:g.vegayon@gmail.com http://ggvy.cl/ {p_end} {pstd} Brian Quistorff [aut],
+<a name="contrib"></a>                       Microsoft Research. mailto:Brian.Quistorff@microsoft.com http://quistorff.com {p_end} 13. Contributors {pstd}<i>Special</i>
+                       <i>Thanks to:</i>  Elan P. Kugelmass (aka as epkugelmass at github) [ctb], Timothy Mak (University of Hong Kong) (author of
+                       miparallel) {p_end} {pstd} Damian C. Clarke (Oxford University, England), Felix Villatoro (Superintendencia de
+                       Pensiones, Chile), Eduardo Fajnzylber (Universidad Adolfo Ibáñez, Chile), Eric Melse (CAREM, Netherlands), Tomás Rau
+                       (Universidad Católica, Chile), Research Division (Superindentendia de Pensiones, Chile), attendees to the Stata
+<a name="also"></a>                       conference 2013 (New Orleans), Philippe Ruh (University of Zurich), Michael Lacy (Colorado State).  {p_end} 14. Also see
+                       {psee} Manual: <span class=result>[GSM] Advanced Stata usage (Mac)</span>, <span class=result>[GSU] Advanced Stata usage (Unix)</span>, <span class=result>[GSW] Advanced Stata usage (Windows)</span>
+                       {psee} Online: Running Stata batch-mode in  Mac, Unix and Windows {p_end} {psee} Project's wiki page of other examples.
+<a name="faqs"></a>                       {p_end} 15. FAQs {pstd} Here follows a list of Frequently Asked Questions:{p_end} {p2col: 1.}<span class=result>I am getting error (608)</span>
+                       <span class=result>file is read-only; cannot be modified or erased</span><span class=input>. What can I do to solve it?</span>{p_end} {p2col:}As Stata suggests, you are
+                       trying to either run parallel in a read-only directory, or your program/dofile is trying to write (save a dta file for
+                       example) in a read-only directory. Try running parallel (or making your program to write files) in a directory where you
 </pre>
 </body>
 </html>

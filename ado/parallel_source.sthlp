@@ -902,7 +902,7 @@ real scalar parallel_finito(
     )
     {
     
-    display(sprintf("{it:Waiting for the clusters to finish...}"))
+    display(sprintf("{it:Waiting for the child processes to finish...}"))
     
     // Setting default parameters
     if (nclusters == J(1,1,.)) nclusters = strtoreal(st_global("PLL_CLUSTERS"))
@@ -936,7 +936,7 @@ real scalar parallel_finito(
             
         if (!fileexists(fname))
         {
-            display(sprintf("{it:cluster %04.0f} {text:has finished with a connection error -601- (timeout) ({stata search r(601):see more})...}", i))
+            display(sprintf("{it:child process %04.0f} {text:has finished with a connection error -601- (timeout) ({stata search r(601):see more})...}", i))
             
             suberrors++
             st_local("pll_last_error", "601")
@@ -967,7 +967,7 @@ real scalar parallel_finito(
             if (breakkey() & !pressed) 
             { /* If the user pressed -break-, each instance will try to finish the work through parallel finito */
                 /* Message */
-                display(sprintf("{it:The user pressed -break-. Trying to stop the clusters...}"))
+                display(sprintf("{it:The user pressed -break-. Trying to stop the child processes...}"))
             
                 /* Openning and checking for the new file */
                 fname_break = sprintf("__pll%s_break", parallelid)
@@ -1030,13 +1030,13 @@ real scalar parallel_finito(
                 if ((errornum=strtoreal(fget(in_fh))))
                 {
                     msg = fget(in_fh)
-                    if (msg == J(0,0,"")) display(sprintf(`"{it:cluster %04.0f} {text:Exited with error -%g- ({stata parallel viewlog %g, e(%s):view log})...}"', i, errornum, i, parallelid))
-                    else display(sprintf(`"{it:cluster %04.0f} {text:Exited with error -%g- %s ({stata parallel viewlog %g, e(%s):view log})...}"', i, errornum, msg, i, parallelid))
+                    if (msg == J(0,0,"")) display(sprintf(`"{it:child process %04.0f} {text:Exited with error -%g- ({stata parallel viewlog %g, e(%s):view log})...}"', i, errornum, i, parallelid))
+                    else display(sprintf(`"{it:child process %04.0f} {text:Exited with error -%g- %s ({stata parallel viewlog %g, e(%s):view log})...}"', i, errornum, msg, i, parallelid))
                     suberrors++
                     st_local("pll_last_error", strofreal(errornum))
                 }
                 else{
-                    if (!deterministicoutput) display(sprintf("{it:cluster %04.0f} {text:has exited without error...}", i))
+                    if (!deterministicoutput) display(sprintf("{it:child process %04.0f} {text:has exited without error...}", i))
                 }
                 fclose(in_fh)
 
@@ -1566,11 +1566,11 @@ real scalar parallel_run(
     // Message
     display(sprintf("{hline %g}",c("linesize") > 80?80:c("linesize")))
     display("{result:Parallel Computing with Stata}")
-    if (!deterministicoutput) display("{text:Clusters   :} {result:"+strofreal(nclusters)+"}")
-    if (!deterministicoutput) display("{text:pll_id     :} {result:"+parallelid+"}")
+    if (!deterministicoutput) display("{text:Child processes:} {result:"+strofreal(nclusters)+"}")
+    if (!deterministicoutput) display("{text:pll_id         :} {result:"+parallelid+"}")
     if (!deterministicoutput & length(hostnames)) display("{text:Hostnames :} {result:"+st_global("PLL_HOSTNAMES")+"}")
-    if (!deterministicoutput) display("{text:Running at :} {result:"+c("pwd")+"}")
-    display("{text:Randtype   :} {result:"+st_local("randtype")+"}")
+    if (!deterministicoutput) display("{text:Running at     :} {result:"+c("pwd")+"}")
+    display("{text:Randtype       :} {result:"+st_local("randtype")+"}")
 
     tmpdir = c("tmpdir") + (regexm(c("tmpdir"),"(/|\\)$") ? "" : "/")
     //If there is a -cd- command in (sys)profile.do then we need to 
@@ -1907,7 +1907,7 @@ void parallel_setclusters(real scalar nclusters, |real scalar force, real scalar
         st_global("PLL_CLUSTERS", strofreal(nclusters))
     }
     else _error(912,`"Use -force- if you want to set clusters than there are processors."')
-    display(sprintf("{text:N Clusters}: {result:%g}",nclusters))
+    display(sprintf("{text:N Child processes}: {result:%g}",nclusters))
 }
 end
 *! {smcl}

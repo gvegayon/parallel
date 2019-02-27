@@ -82,7 +82,7 @@ points more effectively?
 > What is the default behavior when a user does not pass any values to any of the optional parameters? Also, it would be useful to define what you mean by event.  Does event mean a spawned process, an individual command within a do file, or something else?
 
 
-*   It's right there., right?
+*   Clarified
 
 > See the note above about defining the term event.  This part of the information gets a bit difficult to understand precisely what you are trying to convey.
 
@@ -98,7 +98,7 @@ points more effectively?
 
 > I cannot express the look on my face reading the last few sentences sufficiently enough, but know that my response was wholeheartedly positive. Is there potentially some way to use the OS to suppress launching the GUI or to potentially launch the GUI with the application forced into the background or minimized? As an additional note, I attempted running the examples on a machine running Windows 10 and did not notice any screen flashing or anything like that.  However, there were some other errors when I attempted running things.  I'll try  running the examples again once I'm in the office, but am connected to a physical machine using Remote Desktop Connection at the moment.
 
-*   Brian.
+*   Yes, we use the Win32 mechanism to launch the child processes hidden.
 
 > How would this potentially effect estimation commands if matrices are not available once the child process finishes the execution of the commands?
 
@@ -110,6 +110,8 @@ points more effectively?
   . ado uninstall [#] 
 \end{lstlisting}
 This will probably return more results than they would hope, but it at least could illustrate how they would uninstall things.
+
+* Added a simple command example to this effect.
 
 > Make sure to let the users know that if they are trying to follow the examples here sequentially they will need to drop  the price2 variable first.
 
@@ -139,6 +141,8 @@ This will probably return more results than they would hope, but it at least cou
 
 > Similarly, someone recently gave a talk at Juliacon 2018 about performance benchmarks between Julia, Stata, R, and maybe Python (can't remember if Python was included in the talk or not).  You can find the abstract for that talk here: http://juliacon.org/2018/talks_workshops/110/ In the talk, the authors of -gsreg- had ported their command to the Julia language and run benchmarks of the command and/or comparable command in the languages mentioned above.  Again, in this instance Stata had the worst runtime performance of the languages.  Creating the benchmarks with similar examples could also provide a more contextualized benchmarking suite.
 
+*   That is a nice idea. Perhaps in the future we could try to build something like that. The problem is that, since we are already looking at embarasignly parallelizable tasks, most other languages have that, so the comparison is trivial.
+
 > It would probably be good to put the project website in parentheses so interested readers can go directly to the site instead of searching for it.
 
 *   Put the project website.
@@ -149,7 +153,7 @@ This will probably return more results than they would hope, but it at least cou
 
 > I think the second row in the table may be more confusing than helpful. Rather than displaying performance relative to the four core performance in the table, it might be easier to discuss it in the prose.  This would also provide the added flexibility of discussing relative performance gains for the case of the serial vs 2 core and 2 vs 4 core trials.  Additionally, it might be helpful to create a box plot for the different conditions to show the runtime variances and identify if there were any outliers (e.g., perhaps the load on the physical server increased and some resources on the Unix server were being reallocated in some of the runs, or maybe other issues cropped up that are interesting).  It'd be interesting to see if the variance in runtimes were relatively stable as well and to see if the variance in the runtime was comparable across all conditions.  It isn't completely necessary, but you could also fit an ANOVA to your benchmark data to further support the performance benchmark claims.
 
-*   Perhaps we can have a graph for that...
+*   ~~Perhaps we can have a graph for that...~~ Done, we removed the relative unit row
 
 *   There's low variance on thecompute times.
 
