@@ -2,3 +2,11 @@ v 3
 d Parallel Stata module by George Vega and Brian Quistorff
 
 p parallel Stata module for parallel computing
+
+f ado/parallel.ado
+f ado/parallel_append.ado
+f ado/parallel_bs.ado
+f ado/parallel_sim.ado
+f ado/parallel.sthlp
+f ado/parallel_source.sthlp
+f ado/lparallel.mlib
