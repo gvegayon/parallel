@@ -5,7 +5,7 @@
  * @brief Writes a fully functional do-file to be runned by -parallel_run()-.
  * @param inputname Name of a do-file or string with a commando to be runned.
  * @param parallelid Parallel instance ID.
- * @param ncluster Number of clusters (files).
+ * @param nchildren Number of child processes (files).
  * @param prefix Whether this is a command (prefix != 0) or a do-file.
  * @param matsave Whether to include or not MATA objects.
  * @param getmacros Whete to include or not Globals.
@@ -13,9 +13,9 @@
  * @param randtype If no seeds provided, type of algorithm used to generate the seeds
  * @param nodata Wheter to load (1) data or not.
  * @param folder Folder where the do-file should be running.
- * @param programs A list of programs to be used within each cluster.
- * @param processors Number of statamp processors to use in each cluster.
- * @returns As many do-files as clusers used.
+ * @param programs A list of programs to be used within each child process.
+ * @param processors Number of statamp processors to use in each child process.
+ * @returns As many do-files as child processes used.
  */
 mata:
 
@@ -35,7 +35,7 @@ real scalar parallel_temp_sequence(string scalar id_part){
 real scalar parallel_write_do(
 	string scalar inputname,
 	string scalar parallelid,
-	| real scalar nclusters,
+	| real scalar nchildren,
 	real   scalar prefix,
 	real   scalar matasave,
 	real   scalar getmacros,
@@ -61,10 +61,10 @@ real scalar parallel_write_do(
 	if (matasave == J(1,1,.)) matasave = 0
 	if (prefix == J(1,1,.)) prefix = 1
 	if (getmacros == J(1,1,.)) getmacros = 0
-	if (nclusters == J(1,1,.)) {
-		if (strlen(st_global("PLL_CLUSTERS"))) nclusters = strtoreal(st_global("PLL_CLUSTERS"))
+	if (nchildren == J(1,1,.)) {
+		if (strlen(st_global("PLL_CHILDREN"))) nchildren = strtoreal(st_global("PLL_CHILDREN"))
 		else {
-			errprintf("You haven't set the number of clusters\nPlease set it with -{cmd:parallel setclusters} {it:#}-}\n")
+			errprintf("You haven't set the number of child processes\nPlease set it with -{cmd:parallel initialize} {it:#}-}\n")
 			return(198)
 		}
 	}
@@ -72,7 +72,7 @@ real scalar parallel_write_do(
 	/* Check seeds and seeds length */
 	if (seed == J(1,1,""))
 	{
-		seeds = parallel_randomid(5, randtype, 0, nclusters, 1)
+		seeds = parallel_randomid(5, randtype, 0, nchildren, 1)
 		st_local("pllseeds", invtokens(seeds'))
 	}
 	else
@@ -80,14 +80,14 @@ real scalar parallel_write_do(
 		st_local("pllseeds", seed)
 		seeds = tokens(seed)
 		/* Checking seeds length */
-		if (length(seeds) > nclusters)
+		if (length(seeds) > nchildren)
 		{
-			errprintf("Seeds provided -%g- doesn't match seeds needed -%g-\n", length(seeds), nclusters)
+			errprintf("Seeds provided -%g- doesn't match seeds needed -%g-\n", length(seeds), nchildren)
 			return(123)
 		}
-		else if (length(seeds) < nclusters)
+		else if (length(seeds) < nchildren)
 		{
-			errprintf("Seeds provided -%g- doesn't match seeds needed -%g-\n", length(seeds), nclusters)
+			errprintf("Seeds provided -%g- doesn't match seeds needed -%g-\n", length(seeds), nchildren)
 			return(122)
 		}
 	}
@@ -119,7 +119,7 @@ real scalar parallel_write_do(
 	nexttempname=st_tempname()
 	n_prev_tempnames = parallel_temp_sequence(substr(nexttempname,3))-1
 	
-	for(i=1;i<=nclusters;i++) 
+	for(i=1;i<=nchildren;i++) 
 	{
 		// Sets dofile
                 fname = folder+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do"
@@ -162,7 +162,7 @@ real scalar parallel_write_do(
 		fput(output_fh, `"noi di "{hline 80}""')
 		fput(output_fh, sprintf(`"noi di \`"cmd/dofile   : "%s""'"', inputname))
 		fput(output_fh, sprintf(`"noi di "pll_id       : %s""',parallelid))
-		fput(output_fh, sprintf(`"noi di "pll_instance : %g/%g""',i,nclusters))
+		fput(output_fh, sprintf(`"noi di "pll_instance : %g/%g""',i,nchildren))
 		fput(output_fh,         `"noi di "tmpdir       : \`c(tmpdir)'""')
 		fput(output_fh,         `"noi di "date-time    : \`c(current_time)' \`c(current_date)'""')
 		fput(output_fh,         `"noi di "seed         : \`c(seed)'""')
@@ -178,7 +178,7 @@ real scalar parallel_write_do(
 			if (c("MP") | c("SE")) 
 			{
 				// Building data limits
-				memset     = sprintf("%9.0f",c("memory")/nclusters)
+				memset     = sprintf("%9.0f",c("memory")/nchildren)
 				maxvarset  = sprintf("%g",c("maxvar"))
 				matsizeset = sprintf("%g",c("matsize"))
 

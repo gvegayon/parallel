@@ -258,7 +258,7 @@ void parallel_eststore_append(
 	string scalar expr)
 {
 
-	real scalar i, nclusters
+	real scalar i, nchildren
 	string scalar parallelid
 	string rowvector files
 	
@@ -267,10 +267,10 @@ void parallel_eststore_append(
 	{
 		/* Retrieving information from parallel */
 		parallelid = st_global("r(pll_id)")
-		nclusters  = strtoreal(st_global("PLL_CLUSTERS"))
+		nchildren  = strtoreal(st_global("PLL_CHILDREN"))
 		
-		files = J(1,nclusters,"")
-		for(i=1;i<=nclusters;i++)
+		files = J(1,nchildren,"")
+		for(i=1;i<=nchildren;i++)
 			files[i] = sprintf("__pll%s_eststore%04.0f.tab", parallelid, i)
 	}
 	else if (args() == 2) files = tokens(fns)

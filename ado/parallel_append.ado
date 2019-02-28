@@ -79,12 +79,12 @@ program def parallel_append
 	}
 	
 	/* Checking the groups clusters */
-	local size = `n'/$PLL_CLUSTERS
+	local size = `n'/$PLL_CHILDREN
 
-	local oldclusters = $PLL_CLUSTERS
+	local oldnchildren = $PLL_CHILDREN
 	local olddir = $PLL_STATA_PATH
 	if (`size' < 1) {
-		qui parallel setclusters `n', statapath(`olddir') f hostnames($PLL_HOSTNAMES) ssh($PLL_SSH)
+		qui parallel initialize `n', statapath(`olddir') f hostnames($PLL_HOSTNAMES) ssh($PLL_SSH)
 		local g = 1
 		forval i=1/`n' {
 			local group`g' `group`g'' `file`i''
@@ -95,7 +95,7 @@ program def parallel_append
 		local g = 1
 		forval i=1/`n' {
 			local group`g' `group`g'' `file`i''
-			if (!mod(`i',$PLL_CLUSTERS)) local ++g
+			if (!mod(`i',$PLL_CHILDREN)) local ++g
 		}
 	}
 	
@@ -142,7 +142,7 @@ program def parallel_append
 		
 		file close `fh'
 
-		qui parallel setclusters `--j', s(`olddir') f hostnames($PLL_HOSTNAMES) ssh($PLL_SSH)
+		qui parallel initialize `--j', s(`olddir') f hostnames($PLL_HOSTNAMES) ssh($PLL_SSH)
 
 		mata: parallel_sandbox(5)
 		local parallelid`i' = "`parallelid'"
@@ -157,7 +157,7 @@ program def parallel_append
 				mata: parallel_sandbox(2, "`parallelid`j''")
 				if ("`keep'"=="" & "`keeplast'"=="") qui parallel clean, e(`parallelid`j'') nologs
 			}
-			qui parallel setclusters `oldclusters', s(`olddir') f hostnames($PLL_HOSTNAMES) ssh($PLL_SSH)
+			qui parallel initialize `oldnchildren', s(`olddir') f hostnames($PLL_HOSTNAMES) ssh($PLL_SSH)
 			di as error "An error -`=_rc'- has occured while running parallel"
 			cap rm `f'
 			exit `orig_rc'
@@ -198,7 +198,7 @@ program def parallel_append
 
 	if (`"`err'"'!="") di "{result:Warning:}{text:The following files could't be found}" _newline as text `"`=regexr(`"`err'"',"^[0]","")'"'
 
-	qui parallel setclusters `oldclusters', s(`olddir') f hostnames($PLL_HOSTNAMES) ssh($PLL_SSH)
+	qui parallel initialize `oldnchildren', s(`olddir') f hostnames($PLL_HOSTNAMES) ssh($PLL_SSH)
 	
 end
 

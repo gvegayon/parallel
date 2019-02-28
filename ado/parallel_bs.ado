@@ -37,8 +37,8 @@ program def parallel_bootstrap, rclass
 	#delimit cr
 
 	/* Checking whereas parallel has been config */	
-	if length("$PLL_CLUSTERS") == 0 {
-		di "{error:You haven't set the number of clusters}" _n "{error:Please set it with: {cmd:parallel setclusters} {it:#}}"
+	if length("$PLL_CHILDREN") == 0 {
+		di "{error:You haven't set the number of child processes}" _n "{error:Please set it with: {cmd:parallel initialize} {it:#}}"
 		exit 198
 	}
 	
@@ -52,15 +52,15 @@ program def parallel_bootstrap, rclass
 		
 	/* Setting sizes */
 	//BS needs normally reps at least 2 (per cluster)
-	if `reps'<2*$PLL_CLUSTERS {
+	if `reps'<2*$PLL_CHILDREN {
 		_assert `reps'>1, msg("reps() must be an integer greater than 1") rc(198)
 
-		local orig_PLL_CLUSTERS = ${PLL_CLUSTERS}
-		global PLL_CLUSTERS = floor(`reps'/2)
-		di "Small workload. Temporarily setting number of clusters to ${PLL_CLUSTERS}"
+		local orig_PLL_CHILDREN = ${PLL_CHILDREN}
+		global PLL_CHILDREN = floor(`reps'/2)
+		di "Small workload. Temporarily setting number of child processes to ${PLL_CHILDREN}"
 	}
-	local csize = floor(`reps'/$PLL_CLUSTERS)
-	local lsize = `csize' + (`reps' - `csize'*$PLL_CLUSTERS)
+	local csize = floor(`reps'/$PLL_CHILDREN)
+	local lsize = `csize' + (`reps' - `csize'*$PLL_CHILDREN)
 	
 	/* Reserving a pll_id. This will be stored in the -parallelid- local
 	macro */	
@@ -90,7 +90,10 @@ program def parallel_bootstrap, rclass
 	cap confirm file `saving'
 	if (!_rc & "`replace'" == "") {
 		di "{error:File -`saving'- already exists, use the -replace- option}"
-		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
+		if "`orig_PLL_CHILDREN'"!="" {
+			global PLL_CLUSTERS=`orig_PLL_CHILDREN'
+			global PLL_CHILDREN=`orig_PLL_CHILDREN'
+		}
 		exit 602
 	}
 
@@ -103,7 +106,7 @@ program def parallel_bootstrap, rclass
 	tempname fh
 	cap file open `fh' using `"`simul'"', w replace
 	file write `fh' `"use `tmpdta', clear"' _n
-	file write `fh' "if (\`pll_instance'==\$PLL_CLUSTERS) local reps = `lsize'" _n
+	file write `fh' "if (\`pll_instance'==\$PLL_CHILDREN) local reps = `lsize'" _n
 	file write `fh' "else local reps = `csize'" _n
 	file write `fh' `"local pll_instance : di %04.0f \`pll_instance'"' _n
 	file write `fh' `"bs `expression', sav(__pll\`pll_id'_bs_eststore\`pll_instance', replace `double' `every') `options' rep(\`reps'): `model' `argopt'"' _n
@@ -130,14 +133,17 @@ program def parallel_bootstrap, rclass
 	if (_rc) {
 		if ("`keep'"=="" & "`keeplast'"=="") qui parallel clean, e(${LAST_PLL_ID}) force nologs
 		mata: parallel_sandbox(2, "`parallelid'")
-		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
+		if "`orig_PLL_CHILDREN'"!="" {
+			global PLL_CLUSTERS=`orig_PLL_CHILDREN'
+			global PLL_CHILDREN=`orig_PLL_CHILDREN'
+		}
 		exit _rc
 	}
 
 	preserve
 	
 	/* Appending datasets */
-	forval i=1/$PLL_CLUSTERS {
+	forval i=1/$PLL_CHILDREN {
 		quietly {
 			local pll_instance : di %04.0f `i'
 			use `"__pll$LAST_PLL_ID`'_bs_eststore`pll_instance'"', clear
@@ -169,7 +175,10 @@ program def parallel_bootstrap, rclass
 	parallel_bs_ereturn
 	
 	/* Getting macros back */
-	if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
+	if "`orig_PLL_CHILDREN'"!="" {
+		global PLL_CLUSTERS=`orig_PLL_CHILDREN'
+		global PLL_CHILDREN=`orig_PLL_CHILDREN'
+	}
 	foreach m of local macros {
 		return local `m'  `"``m''"'
 	}

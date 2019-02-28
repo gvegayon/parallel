@@ -205,7 +205,7 @@ BODY{background-color: ffffff;
     than physical cores the user's computer has it is not recommended (see the WARNING in description).
 <br><br>
     -<span class=result>parallel do</span>- is the equivalent (wrapper) to -do-. When using this syntax parallel runs the dofile in as many child processes as there
-    where specified by the user, this is, start <span class=result>$PLL_CLUSTERS</span> Stata instances in batch mode. By default the loaded dataset will be split into
+    where specified by the user, this is, start <span class=result>$PLL_CHILDREN</span> Stata instances in batch mode. By default the loaded dataset will be split into
     the number of child processes specified by -<span class=result>parallel initialize</span>- and the do-file will be executed independently over each and every one of
     the data chunks, so once after all the parallel-instances stops, the datasets will be appended. In order to avoid loading the current
     dataset in the child processes, the user should specify the -nodata- option.
@@ -233,7 +233,7 @@ BODY{background-color: ffffff;
 <br><br>
     Given <i>N</i> child processes, within each child process -<span class=result>parallel</span>- creates the macros <i>pll_id</i> (equal for all the child processes) and
     <i>pll_instance</i> (ranging 1 up to <i>N</i>, equaling 1 inside the first child process and <i>N</i> inside the last child process), both as globals and locals
-    macros. This allows the user setting different tasks/actions depending on the child process. Also the global macro <i>PLL_CLUSTERS</i> (equal to
+    macros. This allows the user setting different tasks/actions depending on the child process. Also the global macro <i>PLL_CHILDREN</i> (equal to
     <i>N</i>) is available within each child process. For an example using this macros, please refer to the Examples section.
 <br><br>
     As by now, -<span class=result>parallel</span>- by default automatically identifies Stata's executable file path. This is necessary as it is used to run Stata in
@@ -357,9 +357,9 @@ BODY{background-color: ffffff;
 <a name="tech"></a><span class=result><u>6. Technical note</u></span>
 <br><br>
     In order to protect a <i>pll_id</i> code (and thus ancillary files), once -<span class=result>parallel</span>- is called it creates a new file called <i>__pll</i>[<i>pll_id</i>]<i>sandbox</i>
-    (stored at c(tmpdir), in your case: <u>C:\Users\bquist\AppData\Local\Temp\3/</u>). This forbids -<span class=result>parallel clean</span>- from deleting any auxiliary file
-    used by that process and reserves the <i>pll_id</i> so that no other call of -<span class=result>parallel</span>- can use this <i>pll_id</i>. Once every child process has
-    finished, the sandbox file is removed, freeing the <i>pll_id</i>.
+    (stored at c(tmpdir), in your case: <u>C:\cygwin\tmp/</u>). This forbids -<span class=result>parallel clean</span>- from deleting any auxiliary file used by that process
+    and reserves the <i>pll_id</i> so that no other call of -<span class=result>parallel</span>- can use this <i>pll_id</i>. Once every child process has finished, the sandbox file is
+    removed, freeing the <i>pll_id</i>.
 <br><br>
     If for any reason the algorithm breaks due to a flaw or crush of the system, the sandbox file and the rest of auxiliary files will not be
     deleted. In order to clean up this, the user will be able to do so manually (moving the file(s) to the OS recycle bin) or using parallel
@@ -535,9 +535,9 @@ BODY{background-color: ffffff;
         <span class=input>. simulate mean=r(mean) var=r(Var), reps(10000): lnsim, obs(100)</span>
 <br><br>
 <br><br>
-<span class=result><u>Example 6: Using -pll_instance- and -PLL_CLUSTERS- macros</u></span>
+<span class=result><u>Example 6: Using -pll_instance- and -PLL_CHILDREN- macros</u></span>
 <br><br>
-    By using -pll_instance- and -PLL_CLUSTERS- global macros the user can run -<span class=result>parallel</span>- in such a way that each child process performs a
+    By using -pll_instance- and -PLL_CHILDREN- global macros the user can run -<span class=result>parallel</span>- in such a way that each child process performs a
     different task. Take the following example:
 <br><br>
     Setup for a quad-core computer
@@ -546,7 +546,7 @@ BODY{background-color: ffffff;
 <br><br>
         <span class=result>program def myprog</span>
                 <span class=result>gen x = $pll_instance</span>
-                <span class=result>gen y = $PLL_CLUSTERS</span>
+                <span class=result>gen y = $PLL_CHILDREN</span>
         
                 <i>// For the first child process</i>
                 <span class=result>if ($pll_instance == 1) gen z = exp(2)</span>
@@ -608,7 +608,7 @@ BODY{background-color: ffffff;
       <span class=result>$LAST_PLL_N</span>         A copy of <span class=result>r(pll_n)</span>.
       <span class=result>$LAST_PLL_ID</span>        A copy of <span class=result>r(pll_id)</span>.
       <span class=result>$PLL_LASTRNG</span>        Number of times that -<span class=result>parallel_randomid()</span>- has been executed.
-      <span class=result>$PLL_STATA_PATH, $PLL_CLUSTERS, $USE_PROCEXEC, $PLL_HOSTNAMES, $PLL_SSH</span>
+      <span class=result>$PLL_STATA_PATH, $PLL_CLUSTERS (deprecated), $PLL_CHILDREN, $USE_PROCEXEC, $PLL_HOSTNAMES, $PLL_SSH</span>
                             Internal usage.
 <br><br>
 <br><br>
@@ -654,7 +654,7 @@ BODY{background-color: ffffff;
         Generate random alphanum                          parallel_randomid.mata
         Lunch simultaneous Stata instances in batch mode  parallel_run.mata
         Set of tools to protect parallel aux files        parallel_sandbox.mata
-        Set the number of child processes                 parallel_setclusters.mata
+        Set the number of child processes                 parallel_initialize.mata
         Set the Stata EXE directory                       parallel_setstatapath.mata
         Write a ``diagnosis''                             parallel_write_diagnosis.mata
         Write a dofile to be paralellized                 parallel_write_do.mata

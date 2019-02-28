@@ -39,7 +39,7 @@ program def parallel
 	} 
 	else if (regexm(`"`0'"', "^(setclusters|initialize|init)")) {
 		gettoken temp 0 : 0
-		parallel_setclusters `0'
+		parallel_initialize `0'
 	}
 	else if (regexm(`"`0'"', "^(bootstrap|bstrap|bs|simulate|sim)[,]?[\s ]?")) {
 	/* Prefix bootstrap or simulate */
@@ -171,14 +171,14 @@ end
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// Splits the dataset into clusters
+// Splits the dataset for child processes
 program def parallel_spliter
 	version 11.0
 	syntax [namelist(name=xtstructure)] [,parallelid(string) sorting(integer 0) force(integer 0) keepusing(varlist) orig_cl_local(string)]
 	//args xtstructure parallelid Sorting Force
 	
-	if length("$PLL_CLUSTERS") == 0 {
-		di as err "Number of clusters not fixed." as text " Set the number of clusters with " _newline as err "-{cmd:parallel setclusters #}-"
+	if length("$PLL_CHILDREN") == 0 {
+		di as err "Number of child processes not fixed." as text " Set the number of child processes with " _newline as err "-{cmd:parallel initialize #}-"
 		exit 198
 	}
 	
@@ -193,7 +193,7 @@ program def parallel_spliter
 				else local strvars `strvars' `var'
 			}
 			
-			/* calculate max possible clusters */
+			/* calculate max possible child processes */
 			egen _`parallelid'grp = group(`xtstructure'), missing
 			summ _`parallelid'grp, meanonly
 			local max_n_cl = `r(max)'
@@ -202,11 +202,12 @@ program def parallel_spliter
 			local max_n_cl = _N
 		}
 		
-		/* Do we have too many clusters? */
-		if (`max_n_cl'<$PLL_CLUSTERS){
-			c_local `orig_cl_local' ${PLL_CLUSTERS}
+		/* Do we have too many child processes? */
+		if (`max_n_cl'<$PLL_CHILDREN){
+			c_local `orig_cl_local' ${PLL_CHILDREN}
 			global PLL_CLUSTERS = `max_n_cl'
-			di "Small workload/num groups. Temporarily setting number of clusters to ${PLL_CLUSTERS}"
+			global PLL_CHILDREN = `max_n_cl'
+			di "Small workload/num groups. Temporarily setting number of child processes to ${PLL_CHILDREN}"
 		}
 		
 		if (length("`xtstructure'")) {
@@ -216,7 +217,7 @@ program def parallel_spliter
 			sort _freq
 			//Figuring out the mapping from groupID to cut that equalizes sizes is the "Partition Problem"
 			//which is hard to solve exactly (it's NP-complete). A rough solution suffices here though.
-			gen _`parallelid'cut = mod(_n, ${PLL_CLUSTERS}) + 1
+			gen _`parallelid'cut = mod(_n, ${PLL_CHILDREN}) + 1
 			tempfile grp_to_cut_map
 			qui save `"`grp_to_cut_map'"'
 			restore
@@ -226,7 +227,7 @@ program def parallel_spliter
 			sort `xtstructure'
 		}
 		else {
-			gen _`parallelid'cut = min(${PLL_CLUSTERS}, ceil(_n*${PLL_CLUSTERS}/_N)) //numerical precision for big nubmers can make > PLL_CLUSTERS
+			gen _`parallelid'cut = min(${PLL_CHILDREN}, ceil(_n*${PLL_CHILDREN}/_N)) //numerical precision for big nubmers can make > PLL_CHILDREN
 		}
 			
 		if (length("`keepusing'")) {
@@ -282,7 +283,7 @@ program pll_collect
 			local outfile `outfile'
 			local emptyok ""
 			drop _all
-			forval i=1/$PLL_CLUSTERS{
+			forval i=1/$PLL_CHILDREN{
 				cap append using `"`folder'__pll`parallelid'_out_`outputopt'`=strofreal(`i',"%04.0f")'"'
 				if (_rc==0) local emptyok "emptyok"
 			}
@@ -297,7 +298,7 @@ end
 // There are things we need to possibly restore on exit
 // - Data/S_FN (this is taken care of by -preserve-)
 // - PWD (non-indented capture block)
-// - Temporaliy changed number of clusters (non-indented capture block)
+// - Temporaliy changed number of child processes (non-indented capture block)
 // - Turn off the timer (do within catch for capture blocks)
 program def parallel_do, rclass
 	version 11.0
@@ -326,8 +327,8 @@ program def parallel_do, rclass
 		];
 	#delimit cr
 	
-	if length("$PLL_CLUSTERS") == 0 {
-		di as err "You haven't set the number of clusters" _n "Please set it with: {cmd:parallel setclusters} {it:#}"
+	if length("$PLL_CHILDREN") == 0 {
+		di as err "You haven't set the number of child processes" _n "Please set it with: {cmd:parallel initialize} {it:#}"
 		exit 198
 	}
 	
@@ -377,23 +378,23 @@ program def parallel_do, rclass
 		
 	local initialdir = c(pwd)
 	qui cd "`pll_dir'"
-	capture noisily { //Start capture block for PWD & $PLL_CLUSTERS
+	capture noisily { //Start capture block for PWD & $PLL_CHILDREN
 	
 	/* Creates a unique ID for the process and secures it */
 	if ("`setparallelid'"=="") mata: parallel_sandbox(5)
 	else local parallelid = "`setparallelid'"
 
-	/* Generates database clusters */
+	/* Generates database child processes */
 	if (!`nodata'){
 		local sfn = "$S_FN" // be able to "fake" restore this
 		preserve
 		
-		parallel_spliter `by' , parallelid(`parallelid') sorting(`sorting') force(`force') keepusing(`keepusing') orig_cl_local(orig_PLL_CLUSTERS)
+		parallel_spliter `by' , parallelid(`parallelid') sorting(`sorting') force(`force') keepusing(`keepusing') orig_cl_local(orig_PLL_CHILDREN)
 	}
 
 	global LAST_PLL_ID = "`parallelid'"
 	global LAST_PLL_DIR = "`pll_dir'"	
-	global LAST_PLL_N = $PLL_CLUSTERS	
+	global LAST_PLL_N = $PLL_CHILDREN	
 	
 	/* Starts building the files */
 	local work_around_no_cwd = 0
@@ -406,9 +407,9 @@ program def parallel_do, rclass
 			cap which l__pll`parallelid'_mlib.mlib
 			if _rc!=0{
 				local work_around_no_cwd = 1
-				noi di "Note: In order to pass mata objects to the clusters, they are saved to a temporary mlib file in the current directly."
+				noi di "Note: In order to pass mata objects to the child processes, they are saved to a temporary mlib file in the current directly."
 				noi di "      Your ado-path doesn't contain the current directory."
-				noi di "      We have added the current directory to the end of the ado-path for the clusters.."
+				noi di "      We have added the current directory to the end of the ado-path for the child processes.."
 			}
 			cap mata: mata matsave __pll`parallelid'_mata.mmat *, replace			
 			if (`=_rc') local matasave = 0
@@ -424,7 +425,7 @@ program def parallel_do, rclass
 	}
 	
 	/* Writing the dofile */
-	mata: st_local("errornum", strofreal(parallel_write_do(strtrim(`"`dofile' `argopt'"'), "`parallelid'", $PLL_CLUSTERS, `prefix', `matasave', !`noglobals', "`seeds'", "`randtype'", `nodata', "`pll_dir'", "`programs'", `processors',`work_around_no_cwd',"`outputopts'")))
+	mata: st_local("errornum", strofreal(parallel_write_do(strtrim(`"`dofile' `argopt'"'), "`parallelid'", $PLL_CHILDREN, `prefix', `matasave', !`noglobals', "`seeds'", "`randtype'", `nodata', "`pll_dir'", "`programs'", `processors',`work_around_no_cwd',"`outputopts'")))
 	if (`errornum') {
 		/* Removes the sandbox file (unprotect the files) */
 		mata: parallel_sandbox(2, "`parallelid'") 
@@ -439,7 +440,7 @@ program def parallel_do, rclass
 	
 	/* Running the dofiles */
 	timer on 99
-	mata: st_local("nerrors", strofreal(parallel_run("`parallelid'",$PLL_CLUSTERS,`"$PLL_STATA_PATH"',`=`timeout'*1000', `deterministicoutput', tokens("$PLL_HOSTNAMES"), "$PLL_SSH")))
+	mata: st_local("nerrors", strofreal(parallel_run("`parallelid'",$PLL_CHILDREN,`"$PLL_STATA_PATH"',`=`timeout'*1000', `deterministicoutput', tokens("$PLL_HOSTNAMES"), "$PLL_SSH")))
 	timer off 99
 	
 	cap timer list
@@ -455,14 +456,14 @@ program def parallel_do, rclass
 	
 	// Paste the databases
 	if (!`nodata' & !`nerrors') {
-		parallel_fusion `parallelid', clusters($PLL_CLUSTERS) keepusing(`keepusing')
+		parallel_fusion `parallelid', nchildren($PLL_CHILDREN) keepusing(`keepusing')
 		cap drop _`parallelid'cut
 		
 		global S_FN = "`sfn'" // Restores original S_FN (file name) value
 		restore, not
 	}
 	
-	return scalar pll_n = $PLL_CLUSTERS
+	return scalar pll_n = $PLL_CHILDREN
 	
 	/* Removes the sandbox file (unprotect the files) */
 	if ("`setparallelid'" == "") {
@@ -474,14 +475,20 @@ program def parallel_do, rclass
 	if _rc {
 		local orig_rc = _rc
 		qui cd "`initialdir'"
-		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
+		if "`orig_PLL_CHILDREN'"!="" {
+			global PLL_CLUSTERS=`orig_PLL_CHILDREN'
+			global PLL_CHILDREN=`orig_PLL_CHILDREN'
+		}
 		cap timer off 97
 		cap timer off 98
 		cap timer off 99
 		exit `orig_rc'
 	}
 	qui cd "`initialdir'"
-	if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
+	if "`orig_PLL_CHILDREN'"!="" {
+		global PLL_CLUSTERS=`orig_PLL_CHILDREN'
+		global PLL_CHILDREN=`orig_PLL_CHILDREN'
+	}
 	
 	timer off 97
 	cap timer list
@@ -520,30 +527,30 @@ program def parallel_clean
 end
 
 ////////////////////////////////////////////////////////////////////////////////
-// Sets the number of clusters as a global macro
-program parallel_setclusters
+// Sets the number of child processes as a global macro
+program parallel_initialize
 	version 11.0
-	syntax [anything(name=nclusters)] [, Force Statapath(string asis) Gateway(string) Includefile(string) Hostnames(string) ssh(string) procexec(int 2)]
+	syntax [anything(name=nchildren)] [, Force Statapath(string asis) Gateway(string) Includefile(string) Hostnames(string) ssh(string) procexec(int 2)]
 	
 	_assert inlist(`procexec',0,1,2), msg("procexec() must be 0, 1, or 2") rc(198)
 	cap parallel_numprocessors
 	local nproc = int(real("`r(numprocessors)'"))
-	if "`nclusters'"=="default" | "`nclusters'"==""{
+	if "`nchildren'"=="default" | "`nchildren'"==""{
 		_assert `nproc'!=., msg("Couldn't determine number of available processors for default configuration.")
-		local nclusters = max(floor(`nproc'*3/4),1)
+		local nchildren = max(floor(`nproc'*3/4),1)
 	}
 	else{
-		local nclusters = int(real(`"`nclusters'"'))
-		_assert (`nclusters'>0 & `nclusters'!=.),  msg(`"Not allowed: "#" Should be a positive number"') rc(109)
+		local nchildren = int(real(`"`nchildren'"'))
+		_assert (`nchildren'>0 & `nchildren'!=.),  msg(`"Not allowed: "#" Should be a positive number"') rc(109)
 	}
 	global USE_PROCEXEC = `procexec'
 	global PLL_HOSTNAMES = "`hostnames'"
 	global PLL_SSH = "`ssh'"
 	if "$PLL_SSH"!="" global PLL_SSH = "$PLL_SSH "
-  if "`hostnames'"!="" local nproc "." //don't use softmax when in cluster
+  if "`hostnames'"!="" local nproc "." //don't use softmax when in child processes
 	
 	local force = (length("`force'")>0)
-	mata: parallel_setclusters(`nclusters', `force', `nproc')
+	mata: parallel_initialize(`nchildren', `force', `nproc')
 	mata: st_local("error", strofreal(parallel_setstatapath(`"`statapath'"', `force')))
 	_assert (!`error'), msg("Can not set Stata directory, try using -statapath()- option") rc(`error')
 	
@@ -576,10 +583,10 @@ end
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// Appends the clusterized dataset
+// Appends the child split dataset
 program def parallel_fusion
 	version 11.0
-	syntax anything(name=parallelid) , clusters(integer) [keepusing(string)]
+	syntax anything(name=parallelid) , nchildren(integer) [keepusing(string)]
 	
 	cap use "__pll`parallelid'_dta0001.dta", clear
 	if (_rc){
@@ -588,7 +595,7 @@ program def parallel_fusion
 	}
 	local sortlist: sortedby
 	
-	forval i = 2/`clusters' {
+	forval i = 2/`nchildren' {
 		cap append using `"__pll`parallelid'_dta`=string(`i',"%04.0f")'.dta"'
 		if (_rc){	
 			di as err "No dataset for instance `=string(`i',"%04.0f")'."

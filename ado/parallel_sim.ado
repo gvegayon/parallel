@@ -37,8 +37,8 @@ program def parallel_simulate, rclass
 	#delimit cr
 
 	/* Checking whereas parallel has been config */	
-	if length("$PLL_CLUSTERS") == 0 {
-		di "{error:You haven't set the number of clusters}" _n "{error:Please set it with: {cmd:parallel setclusters} {it:#}}"
+	if length("$PLL_CHILDREN") == 0 {
+		di "{error:You haven't set the number of child processes}" _n "{error:Please set it with: {cmd:parallel initialize} {it:#}}"
 		exit 198
 	}
 	
@@ -51,18 +51,19 @@ program def parallel_simulate, rclass
 	timer on 98
 	
 	/* Checking reps */
-	if `reps'<$PLL_CLUSTERS {
+	if `reps'<$PLL_CHILDREN {
 		_assert `reps'>=1, msg("reps() is required, and must be a positive intege") rc(198)
 
-		local orig_PLL_CLUSTERS = ${PLL_CLUSTERS}
+		local orig_PLL_CHILDREN = ${PLL_CHILDREN}
 		global PLL_CLUSTERS = `reps'
-		di "Small workload. Temporarily setting number of clusters to ${PLL_CLUSTERS}"
+		global PLL_CHILDREN = `reps'
+		di "Small workload. Temporarily setting number of child processes to ${PLL_CHILDREN}"
 	}
 
 		
 	/* Setting sizes */
-	local csize = floor(`reps'/$PLL_CLUSTERS)
-	local lsize = `csize' + (`reps' - `csize'*$PLL_CLUSTERS)
+	local csize = floor(`reps'/$PLL_CHILDREN)
+	local lsize = `csize' + (`reps' - `csize'*$PLL_CHILDREN)
 
 	/* Reserving a pll_id. This will be stored in the -parallelid- local
 	macro */
@@ -94,7 +95,10 @@ program def parallel_simulate, rclass
 	cap confirm file `saving'
 	if (!_rc & "`replace'" == "") {
 		di "{error:File -`saving'- already exists, use the -replace- option}"
-		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
+		if "`orig_PLL_CHILDREN'"!="" {
+			global PLL_CLUSTERS=`orig_PLL_CHILDREN'
+			global PLL_CHILDREN=`orig_PLL_CHILDREN'
+		}
 		exit 602
 	}
 	
@@ -107,7 +111,7 @@ program def parallel_simulate, rclass
 	tempname fh
 	cap file open `fh' using `"`simul'"', w replace
 	if (c(N)) file write `fh' `"use `tmpdta', clear"' _n
-	file write `fh' "if (\`pll_instance'==\$PLL_CLUSTERS) local reps = `lsize'" _n
+	file write `fh' "if (\`pll_instance'==\$PLL_CHILDREN) local reps = `lsize'" _n
 	file write `fh' "else local reps = `csize'" _n
 	file write `fh' `"local pll_instance : di %04.0f \`pll_instance'"' _n
 	file write `fh' `"simulate `expression', sav(__pll\`pll_id'_sim_eststore\`pll_instance', replace `double' `every') `options' rep(\`reps'): `model' `argopt'"' _n
@@ -136,19 +140,25 @@ program def parallel_simulate, rclass
 	if (_rc) {
 		if ("`keep'"=="" & "`keeplast'"=="") qui parallel clean, e(${LAST_PLL_ID}) force nologs
 		mata: parallel_sandbox(2, "`parallelid'")
-		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
+		if "`orig_PLL_CHILDREN'"!="" {
+			global PLL_CLUSTERS=`orig_PLL_CHILDREN'
+			global PLL_CHILDREN=`orig_PLL_CHILDREN'
+		}
 		exit _rc
 	}
 
 	if (_rc) {
 		if ("`keep'" == "" & "`keeplast'"=="") qui parallel clean, e(${LAST_PLL_ID}) force nologs
 		mata: parallel_sandbox(2, "`parallelid'")
-		if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
+		if "`orig_PLL_CHILDREN'"!="" {
+			global PLL_CLUSTERS=`orig_PLL_CHILDREN'
+			global PLL_CHILDREN=`orig_PLL_CHILDREN'
+		}
 		exit _rc
 	}
 	
 	/* Appending datasets */
-	forval i=1/$PLL_CLUSTERS {
+	forval i=1/$PLL_CHILDREN {
 		quietly {
 			local pll_instance : di %04.0f `i'
 			use `"__pll$LAST_PLL_ID`'_sim_eststore`pll_instance'"', clear
@@ -186,7 +196,10 @@ program def parallel_simulate, rclass
 	return local pll_seeds = "`pllseeds'"
 	
 	parallel_sim_ereturn
-	if "`orig_PLL_CLUSTERS'"!="" global PLL_CLUSTERS=`orig_PLL_CLUSTERS'
+	if "`orig_PLL_CHILDREN'"!="" {
+		global PLL_CLUSTERS=`orig_PLL_CHILDREN'
+		global PLL_CHILDREN=`orig_PLL_CHILDREN'
+	}
 	/*
 	/* Getting macros back */
 	foreach m of local macros {

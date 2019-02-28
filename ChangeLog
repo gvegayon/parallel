@@ -1,4 +1,6 @@
 Unreleased:
+	* Rename cluster -> child process in docs, comments, and internal variables - Brian Quistorff
+	* Rename PLL_CLUSTERS -> PLL_CHILDREN (keep, but deprecate old name) - Brian Quistorff
 	* Rename setclusters -> initialize (keep, but deprecate old name) - Brian Quistorff
 	* Allow blank 'parallel setclusters' to use the default - Brian Quistorff 
 	* Fix bug with cut IDs when big data - Brian Quistorff

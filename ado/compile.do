@@ -35,7 +35,7 @@ if `c(stata_version)'>=12 di "WARNING: compiled mlib will only work on Stata ver
 //"run" will be silent whereas "do" will show code and mata interpreter warnings
 //Nice check is to use "do" and check for "note:" entries that say things like "variable unused".
 local do_or_run "run"
-`do_or_run' parallel_setclusters.mata
+`do_or_run' parallel_initialize.mata
 `do_or_run' parallel_run.mata 
 `do_or_run' parallel_write_do.mata
 `do_or_run' parallel_export_programs.mata

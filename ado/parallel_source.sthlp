@@ -11,12 +11,12 @@ mata:
 *! {marker parallel_break}{bf:function -{it:parallel_break}- in file -{it:parallel_break.mata}-}
 *! {back:{it:(previous page)}}
 *!{dup 78:{c -}}
-*!{col 4}{it:Stops the cluster if the mother instance has requiered so.}
+*!{col 4}{it:Stops the child process if the mother instance has requiered so.}
 *!{col 4}{bf:parameters:}
 *!{col 6}{bf:parallelid}{col 20}Parallel process id. 
 *!{col 6}{bf:pllinstance}{col 20}Parallel instance id.
 *!{col 4}{bf:returns:}
-*!{col 6}{it:Stops the cluster.}
+*!{col 6}{it:Stops the child process.}
 *!{dup 78:{c -}}{asis}
 void parallel_break(
     |string scalar parallelid, 
@@ -62,7 +62,7 @@ void parallel_break(
 *! {marker _parallel_break}{bf:function -{it:_parallel_break}- in file -{it:parallel_break.mata}-}
 *! {back:{it:(previous page)}}
 *!{dup 78:{c -}}
-*!{col 4}{it:Stops the cluster if the mother instance has requiered so.}
+*!{col 4}{it:Stops the child process if the mother instance has requiered so.}
 *!{col 4}{bf:parameters:}
 *!{col 6}{bf:parallelid}{col 20}Parallel id. 
 *!{col 6}{bf:pllinstance}{col 20}Parallel instance
@@ -464,7 +464,7 @@ void parallel_eststore_append(
     string scalar expr)
 {
 
-    real scalar i, nclusters
+    real scalar i, nchildren
     string scalar parallelid
     string rowvector files
     
@@ -473,10 +473,10 @@ void parallel_eststore_append(
     {
         /* Retrieving information from parallel */
         parallelid = st_global("r(pll_id)")
-        nclusters  = strtoreal(st_global("PLL_CLUSTERS"))
+        nchildren  = strtoreal(st_global("PLL_CHILDREN"))
         
-        files = J(1,nclusters,"")
-        for(i=1;i<=nclusters;i++)
+        files = J(1,nchildren,"")
+        for(i=1;i<=nchildren;i++)
             files[i] = sprintf("__pll%s_eststore%04.0f.tab", parallelid, i)
     }
     else if (args() == 2) files = tokens(fns)
@@ -567,7 +567,6 @@ m parallel_eststore_append("__pllest.dta","","__pllest%g.tab,1/20")
 *! vers 0.14.4 9apr2014
 *! auth George G. Vega
 
- * @param 
 
 mata:
 {smcl}
@@ -580,6 +579,7 @@ mata:
 *!{col 4}{bf:parameters:}
 *!{col 6}{bf:expr}{col 20}An expression containing a fmt and numlists
 *!{col 6}{bf:pchar}{col 20}(optional) Parsing char which separates -fmt- and numlists
+*!{col 6}{bf:ep}{col 20}
 *!{col 4}{bf:returns:}
 *!{col 6}{it:}
 *!{dup 78:{c -}}{asis}
@@ -859,7 +859,7 @@ end
 *! author: George G. Vega Yon
 
 mata:
-//File syncing across clusters can be slow so use this to help sync
+//File syncing across child processes can be slow so use this to help sync
 //tested on NFS
 //If your cluster is different, overload this function (same name and earlier in the mlib search path).
 {smcl}
@@ -869,10 +869,10 @@ mata:
 *!{col 4}{it:Waits until every process finishes or stops the processes}
 *!{col 4}{bf:parameters:}
 *!{col 6}{bf:parallelid}{col 20}Parallel instance id.
-*!{col 6}{bf:nclusters}{col 20}Number of clusters.
+*!{col 6}{bf:nchildren}{col 20}Number of child processes.
 *!{col 6}{bf:timeout}{col 20}Time (in secs) before abort.
 *!{col 4}{bf:returns:}
-*!{col 6}{it:Number of clusters that stopped with error.}
+*!{col 6}{it:Number of child processes that stopped with error.}
 *!{dup 78:{c -}}{asis}
 void parallel_net_sync(string scalar fname, string scalar hostname){
     //ignore error about unused fname and hostname - this is just an example. overriding functions may use these
@@ -893,7 +893,7 @@ void parallel_net_sync(string scalar fname, string scalar hostname){
 *!{dup 78:{c -}}{asis}
 real scalar parallel_finito(
     string scalar parallelid,
-    | real scalar nclusters,
+    | real scalar nchildren,
     real scalar timeout,
     real colvector pids,
     real scalar deterministicoutput,
@@ -905,7 +905,7 @@ real scalar parallel_finito(
     display(sprintf("{it:Waiting for the child processes to finish...}"))
     
     // Setting default parameters
-    if (nclusters == J(1,1,.)) nclusters = strtoreal(st_global("PLL_CLUSTERS"))
+    if (nchildren == J(1,1,.)) nchildren = strtoreal(st_global("PLL_CHILDREN"))
     if (timeout == J(1,1,.)) timeout = 6000
     
     // Variable definitios
@@ -926,7 +926,7 @@ real scalar parallel_finito(
     
     /* Checking conextion timeout */
     pendingcl = J(1,0,.)
-    for(i=1;i<=nclusters;i++)
+    for(i=1;i<=nchildren;i++)
     {        
         /* Building filename */
         fname = sprintf("__pll%s_do%04.0f.log", parallelid, i)
@@ -947,8 +947,8 @@ real scalar parallel_finito(
         timeout = timeout - time*100
     }
     
-    /* If there are as many errors as clusters, then exit */
-    if (suberrors == nclusters) return(suberrors)
+    /* If there are as many errors as child processes, then exit */
+    if (suberrors == nchildren) return(suberrors)
     
     string scalar logfilename, tmpdirname, connection_opt
     hostname=""
@@ -957,9 +957,9 @@ real scalar parallel_finito(
     {
         
         // Building filename
-        for (i=1;i<=nclusters;i++)
+        for (i=1;i<=nchildren;i++)
         {
-            /* If this cluster is ready, then continue */
+            /* If this child process is ready, then continue */
             if (!any(pendingcl :== i)) continue
             
             fname = sprintf("__pll%s_finito%04.0f", parallelid, i)
@@ -1048,7 +1048,7 @@ real scalar parallel_finito(
                     errprintf("Not able to remove temp dir\n")
                 }
                 
-                /* Taking the finished cluster out of the list */
+                /* Taking the finished child process out of the list */
                 pendingcl = select(pendingcl, pendingcl :!= i)
                 
                 continue
@@ -1134,6 +1134,42 @@ mata: parallel_for(J(50,2,1),"sum[1..i]")
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:End of file -parallel_for.mata-}{col 83}{c |}
+*! {c BLC}{dup 78:{c -}}{c BRC}
+*! {smcl}
+*! {c TLC}{dup 78:{c -}}{c TRC}
+*! {c |} {bf:Beginning of file -parallel_initialize.mata-}{col 83}{c |}
+*! {c BLC}{dup 78:{c -}}{c BRC}
+*! vers 0.14.3 18mar2014
+*! author: George G. Vega Yon
+
+mata:
+{smcl}
+*! {marker parallel_initialize}{bf:function -{it:parallel_initialize}- in file -{it:parallel_initialize.mata}-}
+*! {back:{it:(previous page)}}
+*!{dup 78:{c -}}
+*!{col 4}{it:Initial child process setup for parallel.}
+*!{col 4}{bf:parameters:}
+*!{col 6}{bf:nchildren}{col 20}Number of child processes.
+*!{col 6}{bf:force}{col 20}Whether to force setting more than nproc child processes.
+*!{col 6}{bf:nproc}{col 20}Number of processors on the system.
+*!{col 4}{bf:returns:}
+*!{col 6}{it:Globals PLL_CLUSTERS (deprecated) and PLL_CHILDREN.}
+*!{dup 78:{c -}}{asis}
+void parallel_initialize(real scalar nchildren, |real scalar force, real scalar nproc) {
+        
+    // Setting number of child processes
+    if (force == J(1,1,.)) force = 0
+    if (nproc==. | nchildren <= nproc | force) {
+        st_global("PLL_CLUSTERS", strofreal(nchildren))
+        st_global("PLL_CHILDREN", strofreal(nchildren))
+    }
+    else _error(912,`"Use -force- if you want to set more child processes than there are processors."')
+    display(sprintf("{text:N Child processes}: {result:%g}",nchildren))
+}
+end
+*! {smcl}
+*! {c TLC}{dup 78:{c -}}{c TRC}
+*! {c |} {bf:End of file -parallel_initialize.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
@@ -1530,19 +1566,19 @@ mata:
 *! {marker parallel_run}{bf:function -{it:parallel_run}- in file -{it:parallel_run.mata}-}
 *! {back:{it:(previous page)}}
 *!{dup 78:{c -}}
-*!{col 4}{it:Runs parallel clusters in batch mode.}
+*!{col 4}{it:Runs parallel child processes in batch mode.}
 *!{col 4}{bf:parameters:}
 *!{col 6}{bf:parallelid}{col 20}Parallel id.
-*!{col 6}{bf:nclusters}{col 20}Number of clusters.
+*!{col 6}{bf:nchildren}{col 20}Number of child processes.
 *!{col 6}{bf:paralleldir}{col 20}Dir where the process should be running.
 *!{col 6}{bf:timeout}{col 20}Number of seconds to wait until stop the process for no conextion.
 *!{col 6}{bf:gateway_fname}{col 20}Name of file that a Cygwin process is listen to will execute from (Windows batch).
 *!{col 4}{bf:returns:}
-*!{col 6}{it:Number of clusters that stopped with an error.}
+*!{col 6}{it:Number of child processes that stopped with an error.}
 *!{dup 78:{c -}}{asis}
 real scalar parallel_run(
     string scalar parallelid, 
-    |real scalar nclusters, 
+    |real scalar nchildren, 
     string scalar paralleldir,
     real scalar timeout,
     real scalar deterministicoutput,
@@ -1560,13 +1596,13 @@ real scalar parallel_run(
     pids = J(0,1,.)
     
     // Setting default parameters
-    if (nclusters == J(1,1,.)) nclusters = strtoreal(st_global("PLL_CLUSTERS"))
+    if (nchildren == J(1,1,.)) nchildren = strtoreal(st_global("PLL_CHILDREN"))
     if (paralleldir == J(1,1,"")) paralleldir = st_global("PLL_STATA_PATH")
     
     // Message
     display(sprintf("{hline %g}",c("linesize") > 80?80:c("linesize")))
     display("{result:Parallel Computing with Stata}")
-    if (!deterministicoutput) display("{text:Child processes:} {result:"+strofreal(nclusters)+"}")
+    if (!deterministicoutput) display("{text:Child processes:} {result:"+strofreal(nchildren)+"}")
     if (!deterministicoutput) display("{text:pll_id         :} {result:"+parallelid+"}")
     if (!deterministicoutput & length(hostnames)) display("{text:Hostnames :} {result:"+st_global("PLL_HOSTNAMES")+"}")
     if (!deterministicoutput) display("{text:Running at     :} {result:"+c("pwd")+"}")
@@ -1587,7 +1623,7 @@ real scalar parallel_run(
         // Writing file
         hostname = ""
         ssh_str = length(hostnames) ? (ssh_str == J(1,1,"")?"ssh ":ssh_str) : ""
-        for(i=1;i<=nclusters;i++) {
+        for(i=1;i<=nchildren;i++) {
             tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f")
             mkdir(tmpdir_i,1) 
             dofile_i_base = "__pll"+parallelid+"_do"+strofreal(i,"%04.0f")
@@ -1635,7 +1671,7 @@ real scalar parallel_run(
             if (c("mode")=="batch"){ //Execute commands via Cygwin process
                 if (gateway_fname == J(1,1,"")) gateway_fname = st_global("PLL_GATEWAY_FNAME")
                 fh = fopen(gateway_fname,"a", 1)
-                for(i=1;i<=nclusters;i++) {
+                for(i=1;i<=nchildren;i++) {
                     tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f")
                     mkdir(tmpdir_i,1) // fput(fh, "mkdir "+c("tmpdir")+"/"+parallelid+strofreal(i,"%04.0f"))
                     fput(fh, `"export STATATMP=""'+tmpdir_i+`"""')
@@ -1651,7 +1687,7 @@ real scalar parallel_run(
                 fput(fh, "pushd "+pwd())
 
                 // Writing file
-                for(i=1;i<=nclusters;i++) {
+                for(i=1;i<=nchildren;i++) {
                     tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i, "%04.0f")
                     mkdir(tmpdir_i,1)
                     fwrite(fh, "start /MIN /HIGH set STATATMP="+tmpdir_i+" ^& ")
@@ -1671,7 +1707,7 @@ real scalar parallel_run(
             st_numscalar("PROCEXEC_HIDDEN",use_procexec)
             st_numscalar("PROCEXEC_ABOVE_NORMAL_PRIORITY",1)
 
-            for(i=1;i<=nclusters;i++) {
+            for(i=1;i<=nchildren;i++) {
                 tmpdir_i = tmpdir+"__pll"+parallelid+"_tmpdir"+strofreal(i,"%04.0f")
                 mkdir(tmpdir_i,1)
                 dofile_i = folder+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do"
@@ -1685,7 +1721,7 @@ real scalar parallel_run(
     }
     
     /* Waits until each process ends */
-    return(parallel_finito(parallelid,nclusters,timeout,pids, deterministicoutput, hostnames, ssh_str))
+    return(parallel_finito(parallelid,nchildren,timeout,pids, deterministicoutput, hostnames, ssh_str))
 }
 end
 
@@ -1881,41 +1917,6 @@ ls
 *! {c BLC}{dup 78:{c -}}{c BRC}
 *! {smcl}
 *! {c TLC}{dup 78:{c -}}{c TRC}
-*! {c |} {bf:Beginning of file -parallel_setclusters.mata-}{col 83}{c |}
-*! {c BLC}{dup 78:{c -}}{c BRC}
-*! vers 0.14.3 18mar2014
-*! author: George G. Vega Yon
-
-mata:
-{smcl}
-*! {marker parallel_setclusters}{bf:function -{it:parallel_setclusters}- in file -{it:parallel_setclusters.mata}-}
-*! {back:{it:(previous page)}}
-*!{dup 78:{c -}}
-*!{col 4}{it:Initial cluster setup for parallel.}
-*!{col 4}{bf:parameters:}
-*!{col 6}{bf:ncluster}{col 20}Number of clusters.
-*!{col 6}{bf:force}{col 20}Whether to force setting more than nproc clusters.
-*!{col 6}{bf:nproc}{col 20}Number of processors on the system.
-*!{col 4}{bf:returns:}
-*!{col 6}{it:A global PLL_CLUSTERS.}
-*!{dup 78:{c -}}{asis}
-void parallel_setclusters(real scalar nclusters, |real scalar force, real scalar nproc) {
-        
-    // Setting number of clusters
-    if (force == J(1,1,.)) force = 0
-    if (nproc==. | nclusters <= nproc | force) {
-        st_global("PLL_CLUSTERS", strofreal(nclusters))
-    }
-    else _error(912,`"Use -force- if you want to set clusters than there are processors."')
-    display(sprintf("{text:N Child processes}: {result:%g}",nclusters))
-}
-end
-*! {smcl}
-*! {c TLC}{dup 78:{c -}}{c TRC}
-*! {c |} {bf:End of file -parallel_setclusters.mata-}{col 83}{c |}
-*! {c BLC}{dup 78:{c -}}{c BRC}
-*! {smcl}
-*! {c TLC}{dup 78:{c -}}{c TRC}
 *! {c |} {bf:Beginning of file -parallel_setstatapath.mata-}{col 83}{c |}
 *! {c BLC}{dup 78:{c -}}{c BRC}
 *! vers 0.14.7 22jul2014
@@ -2071,7 +2072,7 @@ mata:
 *!{col 4}{bf:parameters:}
 *!{col 6}{bf:inputname}{col 20}Name of a do-file or string with a commando to be runned.
 *!{col 6}{bf:parallelid}{col 20}Parallel instance ID.
-*!{col 6}{bf:ncluster}{col 20}Number of clusters (files).
+*!{col 6}{bf:nchildren}{col 20}Number of child processes (files).
 *!{col 6}{bf:prefix}{col 20}Whether this is a command (prefix != 0) or a do-file.
 *!{col 6}{bf:matsave}{col 20}Whether to include or not MATA objects.
 *!{col 6}{bf:getmacros}{col 20}Whete to include or not Globals.
@@ -2079,10 +2080,10 @@ mata:
 *!{col 6}{bf:randtype}{col 20}If no seeds provided, type of algorithm used to generate the seeds
 *!{col 6}{bf:nodata}{col 20}Wheter to load (1) data or not.
 *!{col 6}{bf:folder}{col 20}Folder where the do-file should be running.
-*!{col 6}{bf:programs}{col 20}A list of programs to be used within each cluster.
-*!{col 6}{bf:processors}{col 20}Number of statamp processors to use in each cluster.
+*!{col 6}{bf:programs}{col 20}A list of programs to be used within each child process.
+*!{col 6}{bf:processors}{col 20}Number of statamp processors to use in each child process.
 *!{col 4}{bf:returns:}
-*!{col 6}{it:As many do-files as clusers used.}
+*!{col 6}{it:As many do-files as child processes used.}
 *!{dup 78:{c -}}{asis}
 real scalar parallel_temp_sequence(string scalar id_part){
     real rowvector ascii_codes, nice_ind
@@ -2104,7 +2105,7 @@ real scalar parallel_temp_sequence(string scalar id_part){
 real scalar parallel_write_do(
     string scalar inputname,
     string scalar parallelid,
-    | real scalar nclusters,
+    | real scalar nchildren,
     real   scalar prefix,
     real   scalar matasave,
     real   scalar getmacros,
@@ -2130,10 +2131,10 @@ real scalar parallel_write_do(
     if (matasave == J(1,1,.)) matasave = 0
     if (prefix == J(1,1,.)) prefix = 1
     if (getmacros == J(1,1,.)) getmacros = 0
-    if (nclusters == J(1,1,.)) {
-        if (strlen(st_global("PLL_CLUSTERS"))) nclusters = strtoreal(st_global("PLL_CLUSTERS"))
+    if (nchildren == J(1,1,.)) {
+        if (strlen(st_global("PLL_CHILDREN"))) nchildren = strtoreal(st_global("PLL_CHILDREN"))
         else {
-            errprintf("You haven't set the number of clusters\nPlease set it with -{cmd:parallel setclusters} {it:#}-}\n")
+            errprintf("You haven't set the number of child processes\nPlease set it with -{cmd:parallel initialize} {it:#}-}\n")
             return(198)
         }
     }
@@ -2141,7 +2142,7 @@ real scalar parallel_write_do(
     /* Check seeds and seeds length */
     if (seed == J(1,1,""))
     {
-        seeds = parallel_randomid(5, randtype, 0, nclusters, 1)
+        seeds = parallel_randomid(5, randtype, 0, nchildren, 1)
         st_local("pllseeds", invtokens(seeds'))
     }
     else
@@ -2149,14 +2150,14 @@ real scalar parallel_write_do(
         st_local("pllseeds", seed)
         seeds = tokens(seed)
         /* Checking seeds length */
-        if (length(seeds) > nclusters)
+        if (length(seeds) > nchildren)
         {
-            errprintf("Seeds provided -%g- doesn't match seeds needed -%g-\n", length(seeds), nclusters)
+            errprintf("Seeds provided -%g- doesn't match seeds needed -%g-\n", length(seeds), nchildren)
             return(123)
         }
-        else if (length(seeds) < nclusters)
+        else if (length(seeds) < nchildren)
         {
-            errprintf("Seeds provided -%g- doesn't match seeds needed -%g-\n", length(seeds), nclusters)
+            errprintf("Seeds provided -%g- doesn't match seeds needed -%g-\n", length(seeds), nchildren)
             return(122)
         }
     }
@@ -2188,7 +2189,7 @@ real scalar parallel_write_do(
     nexttempname=st_tempname()
     n_prev_tempnames = parallel_temp_sequence(substr(nexttempname,3))-1
     
-    for(i=1;i<=nclusters;i++) 
+    for(i=1;i<=nchildren;i++) 
     {
         // Sets dofile
                 fname = folder+"__pll"+parallelid+"_do"+strofreal(i,"%04.0f")+".do"
@@ -2231,7 +2232,7 @@ real scalar parallel_write_do(
         fput(output_fh, `"noi di "{hline 80}""')
         fput(output_fh, sprintf(`"noi di \`"cmd/dofile   : "%s""'"', inputname))
         fput(output_fh, sprintf(`"noi di "pll_id       : %s""',parallelid))
-        fput(output_fh, sprintf(`"noi di "pll_instance : %g/%g""',i,nclusters))
+        fput(output_fh, sprintf(`"noi di "pll_instance : %g/%g""',i,nchildren))
         fput(output_fh,         `"noi di "tmpdir       : \`c(tmpdir)'""')
         fput(output_fh,         `"noi di "date-time    : \`c(current_time)' \`c(current_date)'""')
         fput(output_fh,         `"noi di "seed         : \`c(seed)'""')
@@ -2247,7 +2248,7 @@ real scalar parallel_write_do(
             if (c("MP") | c("SE")) 
             {
                 // Building data limits
-                memset     = sprintf("%9.0f",c("memory")/nclusters)
+                memset     = sprintf("%9.0f",c("memory")/nchildren)
                 maxvarset  = sprintf("%g",c("maxvar"))
                 matsizeset = sprintf("%g",c("matsize"))
 

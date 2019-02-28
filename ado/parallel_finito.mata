@@ -4,12 +4,12 @@
 /**oxygen
  * @brief Waits until every process finishes or stops the processes
  * @param parallelid Parallel instance id.
- * @param nclusters Number of clusters.
+ * @param nchildren Number of child processes.
  * @param timeout Time (in secs) before abort.
- * @returns Number of clusters that stopped with error.
+ * @returns Number of child processes that stopped with error.
  */
 mata:
-//File syncing across clusters can be slow so use this to help sync
+//File syncing across child processes can be slow so use this to help sync
 //tested on NFS
 //If your cluster is different, overload this function (same name and earlier in the mlib search path).
 void parallel_net_sync(string scalar fname, string scalar hostname){
@@ -27,7 +27,7 @@ void parallel_net_sync(string scalar fname, string scalar hostname){
 
 real scalar parallel_finito(
 	string scalar parallelid,
-	| real scalar nclusters,
+	| real scalar nchildren,
 	real scalar timeout,
 	real colvector pids,
 	real scalar deterministicoutput,
@@ -39,7 +39,7 @@ real scalar parallel_finito(
 	display(sprintf("{it:Waiting for the child processes to finish...}"))
 	
 	// Setting default parameters
-	if (nclusters == J(1,1,.)) nclusters = strtoreal(st_global("PLL_CLUSTERS"))
+	if (nchildren == J(1,1,.)) nchildren = strtoreal(st_global("PLL_CHILDREN"))
 	if (timeout == J(1,1,.)) timeout = 6000
 	
 	// Variable definitios
@@ -60,7 +60,7 @@ real scalar parallel_finito(
 	
 	/* Checking conextion timeout */
 	pendingcl = J(1,0,.)
-	for(i=1;i<=nclusters;i++)
+	for(i=1;i<=nchildren;i++)
 	{		
 		/* Building filename */
 		fname = sprintf("__pll%s_do%04.0f.log", parallelid, i)
@@ -81,8 +81,8 @@ real scalar parallel_finito(
 		timeout = timeout - time*100
 	}
 	
-	/* If there are as many errors as clusters, then exit */
-	if (suberrors == nclusters) return(suberrors)
+	/* If there are as many errors as child processes, then exit */
+	if (suberrors == nchildren) return(suberrors)
 	
 	string scalar logfilename, tmpdirname, connection_opt
 	hostname=""
@@ -91,9 +91,9 @@ real scalar parallel_finito(
 	{
 		
 		// Building filename
-		for (i=1;i<=nclusters;i++)
+		for (i=1;i<=nchildren;i++)
 		{
-			/* If this cluster is ready, then continue */
+			/* If this child process is ready, then continue */
 			if (!any(pendingcl :== i)) continue
 			
 			fname = sprintf("__pll%s_finito%04.0f", parallelid, i)
@@ -182,7 +182,7 @@ real scalar parallel_finito(
 					errprintf("Not able to remove temp dir\n")
 				}
 				
-				/* Taking the finished cluster out of the list */
+				/* Taking the finished child process out of the list */
 				pendingcl = select(pendingcl, pendingcl :!= i)
 				
 				continue

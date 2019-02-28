@@ -261,7 +261,7 @@ in description).
 {pstd}
 -{cmd:parallel do}- is the equivalent (wrapper) to -do-. When using this syntax
 parallel runs the dofile in as many child processes as there where specified by the user, this is,
-start {cmd:$PLL_CLUSTERS} Stata instances in batch mode. By default the
+start {cmd:$PLL_CHILDREN} Stata instances in batch mode. By default the
 loaded dataset will be split into the number of child processes specified by -{cmd:parallel initialize}-
 and the {mansection U 16Do-files:do-file} will be executed independently over
 each and every one of the data chunks, so once after all the parallel-instances
@@ -317,7 +317,7 @@ Given {it:N} child processes, within each child process -{cmd:parallel}- creates
 {it:pll_id} (equal for all the child processes) and {it:pll_instance} (ranging
 1 up to {it:N}, equaling 1 inside the first child process and {it:N} inside the last child process), 
 both as globals and locals macros. This allows the user setting different
-tasks/actions depending on the child process. Also the global macro {it:PLL_CLUSTERS}
+tasks/actions depending on the child process. Also the global macro {it:PLL_CHILDREN}
 (equal to {it:N}) is available within each child process. For an example using this
 macros, please refer to the {help parallel##examples:Examples section}.
 {p_end}
@@ -724,10 +724,10 @@ to write:
 {tab}{cmd:. simulate mean=r(mean) var=r(Var), reps(10000): lnsim, obs(100)}
 
 
-{title:Example 6: Using -pll_instance- and -PLL_CLUSTERS- macros}
+{title:Example 6: Using -pll_instance- and -PLL_CHILDREN- macros}
 
 {pstd}
-By using -pll_instance- and -PLL_CLUSTERS- global macros the
+By using -pll_instance- and -PLL_CHILDREN- global macros the
 user can run -{cmd:parallel}- in such a way that each child process performs a different
 task. Take the following example:
 {p_end}
@@ -738,7 +738,7 @@ task. Take the following example:
 
 {tab}{cmd:program def myprog}
 {tab}{tab}{cmd:gen x = $pll_instance}
-{tab}{tab}{cmd:gen y = $PLL_CLUSTERS}
+{tab}{tab}{cmd:gen y = $PLL_CHILDREN}
 	
 {tab}{tab}{it:// For the first child process}
 {tab}{tab}{cmd:if ($pll_instance == 1) gen z = exp(2)}
@@ -815,7 +815,7 @@ rest of the child processes it will generate -z- equal to zero.
 {synopt:{cmd:$LAST_PLL_ID}}A copy of {cmd:r(pll_id)}.{p_end}
 {synopt:{cmd:$PLL_LASTRNG}}Number of times that -{cmd:parallel_randomid()}- has
 been executed.{p_end}
-{synopt:{cmd:$PLL_STATA_PATH, $PLL_CLUSTERS, $USE_PROCEXEC, $PLL_HOSTNAMES, $PLL_SSH}}Internal usage.{p_end}
+{synopt:{cmd:$PLL_STATA_PATH, $PLL_CLUSTERS (deprecated), $PLL_CHILDREN, $USE_PROCEXEC, $PLL_HOSTNAMES, $PLL_SSH}}Internal usage.{p_end}
 
 
 {marker development}{...}
@@ -877,7 +877,7 @@ links:
         Generate random alphanum {col 58} {help parallel_source##parallel_randomid:parallel_randomid.mata}
         Lunch simultaneous Stata instances in batch mode {col 58} {help parallel_source##parallel_run:parallel_run.mata}
         Set of tools to protect parallel aux files {col 58} {help parallel_source##parallel_sandbox:parallel_sandbox.mata}
-        Set the number of child processes {col 58} {help parallel_source##parallel_setclusters:parallel_setclusters.mata}
+        Set the number of child processes {col 58} {help parallel_source##parallel_initialize:parallel_initialize.mata}
         Set the Stata EXE directory {col 58} {help parallel_source##parallel_setstatapath:parallel_setstatapath.mata}
         Write a ``diagnosis'' {col 58} {help parallel_source##parallel_write_diagnosis:parallel_write_diagnosis.mata}
         Write a dofile to be paralellized {col 58} {help parallel_source##parallel_write_do:parallel_write_do.mata}

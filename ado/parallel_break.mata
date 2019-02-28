@@ -2,10 +2,10 @@
 *! author: George G. Vega Yon
 
 /**oxygen
-* @brief Stops the cluster if the mother instance has requiered so.
+* @brief Stops the child process if the mother instance has requiered so.
 * @param parallelid Parallel process id. 
 * @param pllinstance Parallel instance id.
-* @returns Stops the cluster.
+* @returns Stops the child process.
 */
 
 mata:
@@ -50,7 +50,7 @@ void parallel_break(
 }
 
 /**oxygen
-* @brief Stops the cluster if the mother instance has requiered so.
+* @brief Stops the child process if the mother instance has requiered so.
 * @param parallelid Parallel id. 
 * @param pllinstance Parallel instance
 * @returns Returns -1- if the mother process has stop, else returns -0-.
