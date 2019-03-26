@@ -1,4 +1,6 @@
 Unreleased:
+
+2018-03-26 (1.20.0):
 	* Rename cluster -> child process in docs, comments, and internal variables - Brian Quistorff
 	* Rename PLL_CLUSTERS -> PLL_CHILDREN (keep, but deprecate old name) - Brian Quistorff
 	* Rename setclusters -> initialize (keep, but deprecate old name) - Brian Quistorff
