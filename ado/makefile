@@ -25,7 +25,11 @@ releasehelp:
 	@echo Make sure you bump the version and -make inc_dist_date-
 	@echo Make sure you editted the Changelog
 	@echo After pushing to github, go to https://github.com/gvegayon/parallel/releases and make a release
-	@echo Make an update to the README with the release tag
+	@echo Update the 'stable' tag: 
+	@echo  $$ git tag -d stable
+	@echo  $$ echo put 7-char short hash after next command for explicit commit
+	@echo  $$ git tag stable 
+	@echo  $$ git push origin stable
 
 home:
 	$(STATABATCH) do compile_and_install.do

@@ -5,11 +5,7 @@ PARALLEL: Stata module for parallel computing
 
 Parallel lets you **run Stata faster**, sometimes faster than MP itself. By organizing your job in several Stata instances, parallel allows you to work with out-of-the-box parallel computing. Using the the `parallel` prefix, you can get **faster simulations, bootstrapping, reshaping big data**, etc. without having to know a thing about parallel computing. With **no need of having Stata/MP** installed on your computer, parallel has showed to dramatically speedup computations up to two, four, or more times depending on how many processors your computer has.
 
-See also the HTML version of the program [help file](https://rawgit.com/gvegayon/parallel/master/ado/parallel.html).
-
-Stata 2017 conference presentation: <https://github.com/gvegayon/parallel/blob/master/talks/20170727_stata_conference/20170727_stata_conference_handout.pdf>
-
-SSC at Boston College: <http://ideas.repec.org/c/boc/bocode/s457527.html> (though the SSC version is a bit out-of-date, see below)
+See the HTML version of the program [help file](https://rawgit.com/gvegayon/parallel/master/ado/parallel.html) for more info. Other resources include the Stata 2017 conference [presentation](https://github.com/gvegayon/parallel/blob/master/talks/20170727_stata_conference/20170727_stata_conference_handout.pdf) and the SSC [page](http://ideas.repec.org/c/boc/bocode/s457527.html) at Boston College (though the SSC version is a bit out-of-date, see below).
 
 1.  [Installation](#installation)
 2.  [Minimal examples](#minimal-examples)
@@ -18,45 +14,34 @@ SSC at Boston College: <http://ideas.repec.org/c/boc/bocode/s457527.html> (thoug
 Installation
 ============
 
-If you have a previous installation of `parallel` installed from a different source (SSC, specific folder, specific URL) you should uninstall that first. Once installed it is suggested to restart Stata.
+If you have a previous installation of `parallel` installed from a different source (SSC, specific folder, specific URL) you should uninstall that first (`ado uninstall parallel`). Once installed it is suggested to restart Stata.
+
+GitHub
+-----------------------------------
+
+Stata version &gt;=13 can install the latest stable version using a GitHub URL,
+
+``` stata
+. net install parallel, from(https://raw.github.com/gvegayon/parallel/stable/) replace
+. mata mata mlib index
+```
+
+For Stata version &lt;13, [download as zip](https://github.com/gvegayon/parallel/archive/stable.zip), unzip, and then replace the above URL with the full local path to the files.
+
+Latest version (master branch): Use the URL `https://raw.github.com/gvegayon/parallel/master/`. To get a zip click the "Clone or download" button and choose zip.
+
+
+Older releases: Go to the [Releases Page](https://github.com/gvegayon/parallel/releases). You can use the release tag to in the URL (e.g., `https://raw.github.com/gvegayon/parallel/v1.15.8.19/`). See also the associated zip download option.
 
 SSC
 ---
 
-For accessing SSC version of parallel
+An older version is available from the SSC. It does not have all the bug fixes so it is not recommended to install it. If it is required, however, use
 
 ``` stata
 . ssc install parallel, replace
 . mata mata mlib index
 ```
-
-Development Version (Latest/Master)
------------------------------------
-
-For accessing the latest development version of parallel (from here) using Stata version &gt;=13
-
-``` stata
-. net install parallel, from(https://raw.github.com/gvegayon/parallel/master/) replace
-. mata mata mlib index
-```
-
-For Stata version &lt;13, download as zip, unzip, and then replace the above `net install` with
-
-``` stata
-. net install parallel, from(full_local_path_to_files) replace
-```
-
-Development Version (Other Releases)
-------------------------------------
-
-Access other development releases via the [Releases Page](https://github.com/gvegayon/parallel/releases). You can use the release tag to install over the internet. For example,
-
-``` stata
-. net install parallel, from(https://raw.github.com/gvegayon/parallel/v1.15.8.19/) replace
-. mata mata mlib index
-```
-
-Or you can download the release and install locally (for Stata &lt;13).
 
 Minimal examples
 ================
@@ -73,7 +58,7 @@ Simple parallelization of egen
 When conducted over groups, parallelizing `egen` can be useful. In the following example we show how to use `parallel` with `by: egen`.
 
 
-    . parallel setclusters 2, f
+    . parallel initialize 2, f
     N Clusters: 2
     Stata dir:  /usr/local/stata13/stata
 
@@ -130,7 +115,7 @@ In this example we'll evaluate a regression model using bootstrapping which, tog
     . sysuse auto, clear
     (1978 Automobile Data)
 
-    . parallel setclusters 4, f
+    . parallel initialize 4, f
     N Clusters: 4
     Stata dir:  /usr/local/stata13/stata
 
@@ -223,7 +208,7 @@ Simulation
 From the `simulate` stata command:
 
 
-    . parallel setclusters 2, f
+    . parallel initialize 2, f
     N Clusters: 2
     Stata dir:  /usr/local/stata13/stata
 
@@ -347,7 +332,7 @@ In this example we create a short program (`parfor`) which is intended to work a
     . // Running the algorithm in parallel fashion
     . timer on 1
 
-    . parallel setclusters 4, f
+    . parallel initialize 4, f
     N Clusters: 4
     Stata dir:  /usr/local/stata13/stata
 
