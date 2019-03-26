@@ -21,11 +21,11 @@
 };
 
 % Data clusters
-\node [cluster] (cluster3) at (0,-3) {Cluster 3};
-\node [cluster, left=of cluster3] (cluster2) {Cluster 2};
-\node [cluster, left=of cluster2] (cluster1) {Cluster 1};
+\node [cluster] (cluster3) at (0,-3) {Child 3};
+\node [cluster, left=of cluster3] (cluster2) {Child 2};
+\node [cluster, left=of cluster2] (cluster1) {Child 1};
 \node [rectangle, right=of cluster3, text width=1cm, font=\Huge] (threepoints) {...};
-\node [cluster, right=of threepoints,text badly centered] (clustern) {Cluster $N$};
+\node [cluster, right=of threepoints,text badly centered] (clustern) {Child $N$};
 
 % Splitting
 \draw[->] (data) -- (cluster1);
@@ -36,11 +36,11 @@
 \draw[->, dashed] (others) -- node [fill=white, font=\scriptsize\it, below=.65cm, text width=1.2cm, minimum height=.7cm,text badly centered] {Passing objects} (2,-4);
 
 % Procesed clusters
-\node [cluster] (cluster3p) at (0,-6) {Cluster 3'};
-\node [cluster, left=of cluster3p] (cluster2p) {Cluster 2'};
-\node [cluster, left=of cluster2p] (cluster1p) {Cluster 1'};
+\node [cluster] (cluster3p) at (0,-6) {Child 3'};
+\node [cluster, left=of cluster3p] (cluster2p) {Child 2'};
+\node [cluster, left=of cluster2p] (cluster1p) {Child 1'};
 \node [rectangle, right=of cluster3p, text width=1cm, font=\Huge] (threepointsp) {...};
-\node [cluster, right=of threepointsp,text badly centered] (clusternp) {Cluster $N$'};
+\node [cluster, right=of threepointsp,text badly centered] (clusternp) {Child $N$'};
 
 \draw[->] (cluster1) -- (cluster1p);
 \draw[->] (cluster2) -- (cluster2p);
@@ -71,9 +71,9 @@
 \draw[->] (clusternp) -- (datap);
 
 % Text
-\node [explain, right=of Stata instance0] {Starting (parent) {\tt Stata} instance loaded with data plus user defined {\tt globals}, {\tt programs}, {\tt mata objects} and {\tt mata programs}};
+\node [explain, right=of Stata instance0] {Initial (parent) {\tt Stata} instance loaded with data plus user defined {\tt globals}, {\tt programs}, {\tt mata objects} and {\tt mata programs}};
 
-\node [explain, right=of Stata batch] {A new {\tt Stata} child instance (batch-mode) for every data-cluster. Programs, globals and mata objects/programs are passed to them.\\\bigskip The same algorithm (task) is simultaneously applied over the data-clusters.\\\bigskip After every instance stops, the data from the clusters are aggregated.};
+\node [explain, right=of Stata batch] {$N$ new {\tt Stata} child instance (batch-mode) started. Programs, globals and mata objects/programs are passed to them.\\\bigskip The same algorithm (task) is simultaneously applied over the child processes.\\\bigskip After every instance stops, the data are aggregated.};
 
 \node [explain, right=of Stata instance1] {Parent {\tt Stata} instance loaded with the new data.\\\bigskip User defined {\tt globals}, {\tt programs}, {\tt mata objects} and {\tt mata programs} remind unchanged.};
 

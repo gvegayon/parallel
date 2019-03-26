@@ -113,7 +113,7 @@ graphicboxes
 \papercolumns 1
 \papersides 1
 \paperpagestyle default
-\tracking_changes true
+\tracking_changes false
 \output_changes false
 \html_math_output 0
 \html_css_as_file 0
@@ -264,7 +264,7 @@ Sandbox example (left out for now)
 
 \begin_layout Itemize
 (G) I use the 'sandbox' in order to avoid overwriting processes.
- This is an issue when you have multiple computers or sessions of stata
+ This is an issue when you have multiple computers or sessions of Stata
  running at the same time.
  Furthermore, this was a measure to avoid removing files that are currently
  in use, for example, when you use parallel clean, all it will remove all
@@ -327,7 +327,7 @@ For a list of commands explicitly parallelized see the Stata/MP Performance
  Report (
 \begin_inset CommandInset citation
 LatexCommand cite
-key "stata2010"
+key "stata2016"
 literal "true"
 
 \end_inset
@@ -338,7 +338,7 @@ literal "true"
 \end_inset
 
 .
- Many other tasks, however, are logically very easy to parallelize.
+ Many tasks, however, are logically very easy to parallelize.
  These tasks, called 
 \begin_inset Quotes eld
 \end_inset
@@ -348,7 +348,7 @@ embarrassingly parallel
 \end_inset
 
 , are ones where there are no dependencies (or need for communication) between
- the parallel tasks, for example, reshaping a large dataset, boostrapping,
+ the parallel tasks, for example, reshaping a large dataset, bootstrapping,
  the jackknife, and Monte Carlo simulations.
  We provide here the package 
 \family typewriter
@@ -377,16 +377,27 @@ fine-grained
 \end_layout
 
 \begin_layout Standard
-In general, the way that parallel works is essentially creating multiple
- Stata instancs in which each one of these has its own copy of whatever
- data it is supposed to work with.
- By doing this, embarrasingly parallel tasks can be distributed across those
- instances taking advantage of the user's multiple processors.
- The primary process used is to invoke 
+In general, 
 \family typewriter
 parallel
 \family default
- with a command (or do-file) across 
+ works by creating multiple 
+\begin_inset Quotes eld
+\end_inset
+
+child
+\begin_inset Quotes erd
+\end_inset
+
+ instances of Stata in which each one has its own copy of whatever data
+ it is supposed to work with.
+ By doing this, embarrassingly parallel tasks can be distributed across
+ those instances taking advantage of the user's multiple processors.
+ The primary use case is to invoke 
+\family typewriter
+parallel
+\family default
+ with a command (or do-file) and distribute the load across 
 \begin_inset Formula $N$
 \end_inset
 
@@ -504,14 +515,14 @@ parallel
 \family default
  uses more memory (i.e.
  RAM).
- One is trading memory capacity for processing capacity.
+ The user is trading memory capacity for processing capacity.
  Therefore, there is likely to be little benefit if a sequential setup would
  already utilize close to all of the system memory.
- This way, in the simplest case, when splitting the dataset, the child processes
-' memory will add up to the same amount of memory used in the parent Stata
- instance.
- The aggregate will also include the amount of memory that Stata uses while
- doing some operations such as matrix invertion.
+ If run in parallel, the dataset is split, so the child processes' memory
+ will add up to the same amount of memory used in the parent Stata instance
+ plus the amount of memory that Stata uses while doing its computation.
+ Attempting to use more memroy than is available on the system will cause
+ performance degradations and possibly program errors.
 \end_layout
 
 \begin_layout Standard
@@ -532,12 +543,12 @@ literal "true"
 parallel
 \family default
  allows this for generic commands which both expands the set of possible
- parallelizations and allows this for single-threaded flavors of Stata.
+ parallelizations and allows this for other flavors of Stata.
  This module is similar to R's 
 \family typewriter
 parallel
 \family default
- package 
+ package (
 \begin_inset CommandInset citation
 LatexCommand cite
 key "R"
@@ -545,11 +556,7 @@ literal "false"
 
 \end_inset
 
- (superseding the 
-\family typewriter
-snow
-\family default
- package) and Matlab's parallel toolbox 
+) and Matlab's parallel toolbox (
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Sharma2009"
@@ -557,7 +564,7 @@ literal "false"
 
 \end_inset
 
-.
+).
 \end_layout
 
 \begin_layout Standard
@@ -599,15 +606,13 @@ A typical program will use separate
 \family typewriter
 parallel
 \family default
- subcommands for initialization, parallel task execution, and finally for
- cleanup.
- Diagnostic tool commands are also available for those cases in which the
- user needs to debug its code to address possible failures reported by 
+ subcommands for initialization, parallel task execution, cleanup, and possibly
+ diagnostics (for those cases in which the user needs to debug failures
+ reported by 
 \family typewriter
 parallel
 \family default
-.
- 
+).
 \end_layout
 
 \begin_layout Subsubsection
@@ -615,7 +620,11 @@ Initialization
 \end_layout
 
 \begin_layout Standard
-To initialize the parallel setup use the 
+To initialize the 
+\family typewriter
+parallel
+\family default
+ setup use the 
 \family typewriter
 initialize
 \family default
@@ -723,9 +732,9 @@ underbar{f}
 
 orce
 \family default
- - To prevent slowdowns there is a soft limit that restricts setting the
- number of child processes to be more than the number of processors on the
- system.
+ - To prevent slowdowns due to context switching between tasks there is
+ a soft limit that restricts setting the number of child processes to be
+ more than the number of processors on the system.
  Use this option to override the limit.
 \end_layout
 
@@ -755,12 +764,13 @@ stata_path
 parallel
 \family default
  tries to automatically identify Stata's executable path.
- Using this option will override this and force 
+ In the rare circumstance that this is not correct (e.g.
+ network mapped-drives) this option will override the default and force
+ 
 \family typewriter
 parallel
 \family default
  to use a specific path to the executable.
- 
 \end_layout
 
 \begin_layout Itemize
@@ -806,7 +816,11 @@ reference "subsec:Technical-Details"
 
 \begin_layout Standard
 Use the following subcommand to determine the number of processors on a
- system.
+ system (
+\family typewriter
+c(processors_mach)
+\family default
+returns this on Stata/MP, but it is not available on the other versions).
 \end_layout
 
 \begin_layout Standard
@@ -1235,7 +1249,12 @@ namelist
 )
 \family default
  - A list of programs to be passed to each child processes.
- To do this, 
+ This is useful for programs not in the 
+\family typewriter
+ADOPATH
+\family default
+.
+ To pass them, 
 \family typewriter
 parallel
 \family default
@@ -1836,7 +1855,8 @@ expand expression
 \family typewriter
 %fmts, numlist1 [, numlist2 [, ...]]
 \family default
-" 
+" .
+ See the Parallel Append example below for more details.
 \end_layout
 
 \begin_layout Itemize
@@ -1952,7 +1972,8 @@ pll_id
 \emph default
 )
 \family default
- - Specifies which executed (and stored) event's (a given run of 
+ - Specifies which executed (and stored) event's (a given invocation of
+ 
 \family typewriter
 parallel
 \family default
@@ -2009,7 +2030,15 @@ orce
 \end_layout
 
 \begin_layout Standard
-If neither an event or all are specified,
+If neither an 
+\family typewriter
+event
+\family default
+ or 
+\family typewriter
+all
+\family default
+ are specified,
 \family typewriter
  parallel
 \family default
@@ -2187,7 +2216,7 @@ parallel
 \begin_inset Tabular
 <lyxtabular version="3" rows="12" columns="2">
 <features islongtable="true" longtabularalignment="left">
-<column alignment="left" valignment="top" width="0pt">
+<column alignment="left" valignment="top" width="6cm">
 <column alignment="left" valignment="top" width="3in">
 <row>
 <cell alignment="left" valignment="top" usebox="none">
@@ -2210,7 +2239,7 @@ Scalars
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="left" valignment="top" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2336,7 +2365,7 @@ Number of child processes which stopped with an error.
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="left" valignment="top" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2356,7 +2385,7 @@ Global Macros
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="left" valignment="top" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2385,7 +2414,7 @@ r(pll_dir)
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="left" valignment="top" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2414,7 +2443,7 @@ r(pll_n)
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="left" valignment="top" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2443,7 +2472,7 @@ r(pll_id)
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="left" valignment="top" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2472,7 +2501,7 @@ parallel_randomid()
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="left" valignment="top" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2481,7 +2510,7 @@ parallel_randomid()
 \begin_inset space \quad{}
 \end_inset
 
-PLL_STATA_PATH, PLL_CLUSTERS, USE_PROCEXEC
+PLL_STATA_PATH, PLL_CLUSTERS, PLL_CHILDREN, USE_PROCEXEC
 \end_layout
 
 \end_inset
@@ -2491,6 +2520,11 @@ PLL_STATA_PATH, PLL_CLUSTERS, USE_PROCEXEC
 
 \begin_layout Plain Layout
 Internal usage.
+ 
+\family typewriter
+PLL_CLUSTERS
+\family default
+ is deprecated.
 \end_layout
 
 \end_inset
@@ -2626,7 +2660,15 @@ e(pll)
 \begin_inset Text
 
 \begin_layout Plain Layout
-1.
+Internal usage for 
+\family typewriter
+bs
+\family default
+ and 
+\family typewriter
+sim
+\family default
+ subcommands.
 \end_layout
 
 \end_inset
@@ -2712,7 +2754,7 @@ pll_instance
  process number.
  Additionally, the global macro 
 \family typewriter
-PLL_CLUSTERS
+PLL_CHILDREN
 \family default
  (equal to 
 \begin_inset Formula $N$
@@ -2756,8 +2798,7 @@ tempname
 tempvar
 \family default
  state.
- To start child processes with additional setting changes then one should
- use the 
+ To start child processes with additional setting changes use the 
 \family typewriter
 includefile()
 \family default
@@ -2779,11 +2820,16 @@ Child processes are managed.
 \end_layout
 
 \begin_layout Standard
-Results not explicitly saved in the child processes's datasets will not
- be available afterward (e.g.
+Results not explicitly saved in the child processes' datasets will not be
+ available afterward (e.g.
  matrices, scalars, Mata objects, returns).
- Programs can often be modified to aggregate data in the primary dataset
- or using secondary files (see the 
+ If the task to be paralellized returns results in this format (e.g.
+ 
+\family typewriter
+regression
+\family default
+), then modifications must be used to store (and later use) these results
+ in either the primary dataset or using secondary files (see the 
 \emph on
 outputopts
 \emph default
@@ -2795,7 +2841,7 @@ Although
 \family typewriter
 parallel
 \family default
- passes-through programs, macros and Mata objects, in the current version
+ passes through programs, macros and Mata objects, in the current version
  it is not capable of doing the same with matrices or scalars.
  
 \end_layout
@@ -2845,18 +2891,18 @@ One of the key features of
 \family typewriter
 parallel
 \family default
- lies on its developer-friendly design.
- Motivated by ease of code maitenence, 
+ lies in its developer-friendly design.
+ Motivated by ease of code maintenance, 
 \family typewriter
 parallel
 \family default
-'s design consists on a rich and throughly documented API that facilitates
+'s design consists on a rich and thoroughly documented API that facilitates
  the creation of new routines.
  Mostly implemented in Mata, 
 \family typewriter
 parallel
 \family default
-'s API contains functions for spliting datasets, exporting Mata and Stata
+'s API contains functions for splitting datasets, exporting Mata and Stata
  routines, writing do-files to be executed by the child processes, launch
  Stata instances, monitor child processes, and collecting the results generated
  by the child instances.
@@ -2880,13 +2926,33 @@ name "subsec:Installation"
 \end_layout
 
 \begin_layout Standard
-Stable versions of 
+The latest stable versions of 
 \family typewriter
 parallel
 \family default
- can be installed from the SSC archives.
- The latest development versions can be installed install the latest version
- using
+ can be installed from a GitHub URL
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Stata versions before 13 can not install from a GitHub URL, so download
+ a zip file of the repository (
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://github.com/gvegayon/parallel/archive/stable.zip
+\end_layout
+
+\end_inset
+
+), unzip the file, and replace the URL above with the full path to the files.
+\end_layout
+
+\end_inset
+
+,
 \end_layout
 
 \begin_layout Standard
@@ -2902,7 +2968,7 @@ status open
 
 \begin_layout Plain Layout
 
-    from(https://raw.github.com/gvegayon/parallel/master/)
+    from(https://raw.github.com/gvegayon/parallel/stable/)
 \end_layout
 
 \begin_layout Plain Layout
@@ -2913,7 +2979,16 @@ status open
 
 \end_inset
 
-If one is switching the source of the installation materials (e.g.
+If one would like the latest development version, use 
+\family typewriter
+master
+\family default
+ instead of 
+\family typewriter
+stable
+\family default
+ in the URL.
+ If one is switching the source of the installation materials (e.g.
  if moving from SSC to GitHub versions), then be sure to uninstall the program
  explicitly before installing the new version.
 \end_layout
@@ -2934,6 +3009,11 @@ status open
 
 \end_layout
 
+\begin_layout Standard
+An older version of the package is available at the SSC, though it is not
+ kept as up to date, so we recommend the GitHub version.
+\end_layout
+
 \begin_layout Section
 Examples
 \begin_inset CommandInset label
@@ -2946,8 +3026,13 @@ name "sec:examples"
 \end_layout
 
 \begin_layout Standard
-In this section we discuss basic usage of the commands as some common use
+In this section we discuss basic usage of the commands in some common use
  cases.
+ The first demonstrates how 
+\family typewriter
+parallel
+\family default
+ can be initialized, but the latter ones assume this has already been done.
 \end_layout
 
 \begin_layout Subsection
@@ -3092,6 +3177,12 @@ Enter -parallel printlog #- to checkout logfiles.
 --------------------------------------------------------------- 
 \end_layout
 
+\begin_layout Plain Layout
+
+.
+ drop price2
+\end_layout
+
 \end_inset
 
 
@@ -3101,11 +3192,7 @@ Enter -parallel printlog #- to checkout logfiles.
 This example illustrates that many simple tasks can be parallelized.
  This particular task was not executed faster in parallel since parallel
  execution has its own overhead and the task was quite easy.
- The short examples that follow assume that 
-\family typewriter
-parallel
-\family default
- has been setup.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -3183,7 +3270,7 @@ gen price4 = price3*price
 \end_layout
 
 \begin_layout Standard
-We can execute it either sequentially or
+We can execute it either sequentially or in parallel using
 \end_layout
 
 \begin_layout Standard
@@ -3235,7 +3322,7 @@ begin{stexample}[Example Bootstrap]
 \end_layout
 
 \begin_layout Standard
-A simple sequential bootstrap would
+A simple sequential bootstrap would be
 \end_layout
 
 \begin_layout Standard
@@ -3402,7 +3489,7 @@ status open
 \end_layout
 
 \begin_layout Standard
-To run it parallel we could instead use a very familiar syntax
+To run it in parallel we could instead use a very familiar syntax
 \end_layout
 
 \begin_layout Standard
@@ -3704,7 +3791,15 @@ Once each child process starts, for each dta file:
 
 \begin_deeper
 \begin_layout Enumerate
-Opens the file using [if] [in] accordingly to in and if options.
+Opens the file using 
+\family typewriter
+[if]
+\family default
+ and 
+\family typewriter
+[in]
+\family default
+ options.
  
 \end_layout
 
@@ -3752,8 +3847,8 @@ name "subsec:Parallelizing-a-loop"
 \end_layout
 
 \begin_layout Standard
-If a user has a loop where the processing in each iteration are independent
- of each other and the output can be aggregated easily then it is easily
+If a user has a loop where the processing in each iteration is independent
+ of the others and the output can be aggregated easily, then it is easily
  transformed using 
 \family typewriter
 parallel
@@ -3791,8 +3886,8 @@ forval i=1/`num_total'{
 \end_layout
 
 \begin_layout Standard
-We can transform this so that a setup that can be done either parallel or
- sequential.
+We can transform this so that a setup that can be done either in parallel
+ or sequentially.
 \end_layout
 
 \begin_layout Standard
@@ -4183,7 +4278,7 @@ sort n
 \end_layout
 
 \begin_layout Standard
-The output be the same no matter the number of child processes or if the
+The output will be the same no matter the number of child processes or if
  
 \family typewriter
 do_work
@@ -4222,14 +4317,18 @@ A third-party Stata package developer with easily parallelizable tasks can
 parallel
 \family default
  if it is installed.
- We recommend that packages not require 
+ We suggest that 
 \family typewriter
 parallel
 \family default
- as users may be on machines with limited resources.
+ be a recommended dependendcy rather than a required one as users may be
+ on machines with limited resources.
  The most common example would be wanting to parallelize an existing loop,
- so one can follow the examples of the parallel for loops or the sequential
- consistency example.
+ so one can follow the examples of the 
+\family typewriter
+parallel
+\family default
+ for loops or the sequential consistency example.
  One can put that secondary program in the original ado file (in which case
  use 
 \family typewriter
@@ -4260,7 +4359,7 @@ parallel viewlog
 trace
 \family default
  can be turned on in the executed task or custom diagnostic information
- and be printed.
+ can be printed.
  
 \end_layout
 
@@ -4276,7 +4375,7 @@ name "sec:Benchmarks"
 \end_layout
 
 \begin_layout Standard
-In order to assess the speed-gains obtain when using 
+In order to assess the speed-gains obtained when using 
 \family typewriter
 parallel
 \family default
@@ -4288,8 +4387,10 @@ parallel
 status open
 
 \begin_layout Plain Layout
-Tests were run using StataIC 12.1 on a Unix machine with an Intel i7-4790
+Tests were run using Stata/IC 12.1 on a Unix machine with an Intel i7-4790
  CPU @ 3.60GHz with 8 processors.
+ The code used to perform the benchmarks and generate the figures and tables
+ is available in the project's website.
 \end_layout
 
 \end_inset
@@ -4311,12 +4412,7 @@ It is important to keep in mind that, as we will see, the lack of perfectly
  linear speed-gains is due to the simplicity of the problem with respect
  to the time that it takes to compute it in a serial fashion.
  On the other hand, overall, as the problem size (number of simulations,
- resamples, etc.) increases, the speed-gains do become perfectly linear.
-\end_layout
-
-\begin_layout Standard
-The code used to perform the benchmarks and generate the figures and tables
- is available in the project's website.
+ resamplings, etc.) increases, the speed-gains approach linear speed-ups.
 \end_layout
 
 \begin_layout Subsection
@@ -4681,19 +4777,20 @@ name "sec:development"
 \end_layout
 
 \begin_layout Standard
-In case one would like to report a bug or feature request, check first if
- there is an existing issue at 
+Development is done at the 
 \begin_inset Flex URL
 status open
 
 \begin_layout Plain Layout
 
-https://github.com/gvegayon/parallel/issues
+https://github.com/gvegayon/parallel/
 \end_layout
 
 \end_inset
 
 .
+ In case one would like to report a bug or feature request, check first
+ if there is an existing GitHub issue.
  Please also try the latest development version to see if the problem has
  been solved already (see section 
 \begin_inset CommandInset ref
@@ -4705,13 +4802,14 @@ reference "subsec:Installation"
 ).
  If these do not resolve the concern, please submit an issue at the GitHub
  issue address so that anyone available may help to solve the issue.
- Include in the issue the steps to reproduce the issue and the output of
- the 
+ The issue will prompt for the details such as the steps to reproduce the
+ problem and the output of 
 \family typewriter
 creturn list
 \family default
 .
- 
+ The GitHub page also has a wiki with a larger gallery of examples of paralleliz
+ing tasks.
 \end_layout
 
 \begin_layout Subsection
