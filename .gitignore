@@ -3,6 +3,8 @@ __pll*
 *~
 *.do
 
+papers/stata-journal/*.pdf
+
 test files/all_tests_results.txt
 test files/platformname.txt
 ado/temp.txt

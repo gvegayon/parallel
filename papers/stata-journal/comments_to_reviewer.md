@@ -2,7 +2,7 @@ The quoted sections (>) are the reviewer comments and we've bulleted (*) our res
 
 > It would probably be useful to define "socket" for users who are not as familiar with these concepts.  It could also be useful to reference either processors or cores to avoid any potential confusion among readers.  It would be useful to provide some type of context/explanation of what types of tasks might be considered "embarrassingly parallel" and to provide a bit of context around  what types of tasks make good candidates for parallelization.  The first paragraph is fine for readers who are already familiar with this topic area to some degree, but I think providing a bit more context initially could make the opening  more appealing to the broader readership of the Stata Journal.  In the last sentence the 'to parallelize these tasks' is vague.  If you're able to  provide some context around tasks that don't require communication between themselves I think it will clarify the meaning/intent of this sentence quite a bit.  The citation refering to Stata's performance report lists  a different year from the website that it references : 30jan2016 Superscripts in the paragraph below redirect users to the wrong location in  the document (both direct users to the figure on the following page).
 
-*   We simplified this paragraph by removing all the part mentioning sockets and cores, and just talk about processors (cores) and leave it there.
+*   We simplified this paragraph by removing the part mentioning sockets and cores, and just talking about processors (cores) and leave it there.
 
 *   We gave examples of embarassingly parallel tasks
 
@@ -25,7 +25,7 @@ The quoted sections (>) are the reviewer comments and we've bulleted (*) our res
     
 > I'm not sure you need this paragraph.  It isn't bad, but the transition between introducing this roadmap and then introducing another road map immediately after the next section heading seems too lose momentum.
 
-*   Removed and just introduce the next section.
+*   Removed and just introduced the next section.
 
 > Perhaps add a reference to when you will discuss the diagnostic tool commands.
 
@@ -45,19 +45,18 @@ The quoted sections (>) are the reviewer comments and we've bulleted (*) our res
 
 > Since the Stata path is stored in `c(sysdir_stata)', is the purpose for this to allow users to point at different versions of Stata that would be launched from the master process?  It might be useful to provide some type of example (even hypothetical) to illustrate the use case for this option.
 
-*   We have seen in the past that the stata path is not there... and it
-    can sometimes be different for mac os. Clarified.
+*   We have seen in the past that the stata path is not there... and it can sometimes be different for mac os. Clarified.
 
 
 > Why would end users use this subcommand versus : di c(processors)?  It might be more useful if there was a command that returned something  analogous to a configuration file that users could call to get more information than they would by just displaying creturn values.  
 
-*   Only on Stata/MP can you query this (with c(c(processors_mach))
+*   Only on Stata/MP can you query this (with c(processors_mach))
 
 > It seems like parallel is based on row-wise operations.  What if a user wanted to parallelize execution over the columns (e.g., variables)?  The use case that I am  thinking about here is data cleaning where someone may want to implement the same set of code to clean many variables.  Rather than looping over the variable names, would it be possible to parallelize the operations over the columns instead of the rows in the data object?
 
-*   Sure, you can create your own implementation of parallel that does that. We will add it to the wish list.
+*   This is technically possible, but currently difficult. We will add it to the wish list.
 
-*   Add a short paragrpah of the API
+*   Added a short paragrpah of the API
 
 > I think it could be useful to discuss why the programs and mata objects get handled this way.  I'm not exactly sure why the program names would need to be passed in the manner specified below (assuming those programs are found on the user's ADOPATH.  If this is more intended to reference something defined in the local directory, it would definitely be helpful to clarify that since it could have some fairly bizarre effects if a user calls one program that has dependencies on several others that they are unaware of. The Mata issue seems a bit more problematic since I imagine there are a fair number of mata libraries that make use of pointers in their functions/objects.  It might be good to connect with some of the folks at Stata to see what happens when a single machine runs multiple instances of Stata and each instance has access to the same Mata libraries and calls some function that uses pointers in both instances.  
 
@@ -73,7 +72,6 @@ The quoted sections (>) are the reviewer comments and we've bulleted (*) our res
 
 > What is the default behavior when a user does not pass any values to any of the optional parameters? Also, it would be useful to define what you mean by event.  Does event mean a spawned process, an individual command within a do file, or something else?
 
-
 *   Clarified
 
 > See the note above about defining the term event.  This part of the information gets a bit difficult to understand precisely what you are trying to convey.
@@ -88,11 +86,11 @@ The quoted sections (>) are the reviewer comments and we've bulleted (*) our res
 
 > I cannot express the look on my face reading the last few sentences sufficiently enough, but know that my response was wholeheartedly positive. Is there potentially some way to use the OS to suppress launching the GUI or to potentially launch the GUI with the application forced into the background or minimized? As an additional note, I attempted running the examples on a machine running Windows 10 and did not notice any screen flashing or anything like that.  However, there were some other errors when I attempted running things.  I'll try  running the examples again once I'm in the office, but am connected to a physical machine using Remote Desktop Connection at the moment.
 
-*   Yes, we use the Win32 mechanism to launch the child processes hidden.
+*   Yes, we use the Win32 mechanism to launch the child processes in a hidden desktop.
 
 > How would this potentially effect estimation commands if matrices are not available once the child process finishes the execution of the commands?
 
-*   Not able to use with regression. You can always store things explicitly. Noted.
+*   One's not able to use it with regression. You can always store things explicitly. Noted.
 
 > If you want to provide instructions for this you can use:
 \begin{lstlisting}
@@ -145,8 +143,8 @@ This will probably return more results than they would hope, but it at least cou
 
 > Unrelated to the article itself, but if you've not already set up templates for pull-requests and issues it would probably be useful to do that.  Even though you are explaining what information you'd like to receive in the issue body, I suspect you'll have instances where users forget to include reproducible examples in the issue body.  Setting up the templates would help to prevent this from happening and would also make it cleaner/easier to read the initial issue that comes in.  Feel free to reach out if you need any help with this.
 
-Thanks, we do have a template!
+* Thanks, we do have a template!
 
 > I think the conclusion is nice, short, and too the point.  However, I think it might be useful to provide an example that better illustrates how community contributors could integrate parallel with the programs they are developing.  The sequential consistency example doesn't make it clear how a community contributor would make use of parallel internally in a program.  You could also potentially add this as a wiki page for the package and direct readers to the wiki page/project page to find a fleshed out example of how you would suggest others integrate parallel within their packages.
 
-*   Mention the wiki page.
+*   Mentioned the wiki page.
