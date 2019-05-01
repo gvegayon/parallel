@@ -1,5 +1,6 @@
 SHELL := /bin/bash
 PATH:=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/stata12/:$(PATH)
+#Don't include test_all
 TESTS=test_bs.do test_append.do test_sim.do test_prefix.do test.do \
 	test_append_loop.do test_length.do test_aux_out.do
 TESTS_LOGS:= $(TESTS:.do=.log)
@@ -59,6 +60,7 @@ check_version:
 inc_dist_date:
 	sed -ie "s/\(d Distribution-Date: \).\+/\1$$(date +%Y%m%d)/g" ../parallel.pkg
 
+#Or you can run "test files/test_all.do"
 tests: 
 	@echo Running tests 
 	@echo When looking at the combined log, search for "^r\(".
