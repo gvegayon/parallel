@@ -18,7 +18,7 @@ program procwait, rclass
 	else {
 		//kill -0 is the POSIX way of checking
 		tempfile kill_exit_code
-		shell `connection' kill -0 `anything' 2> /dev/null; echo \$? > "`kill_exit_code'"
+		shell `connection' kill -0 `anything' >&/dev/null; echo \$? > "`kill_exit_code'"
 		//kill exits with 0 if exists, 1 otherwise
 		
 		tempname fh
