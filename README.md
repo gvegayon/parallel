@@ -11,8 +11,8 @@ See the HTML version of the program [help file](https://rawgit.com/gvegayon/para
 2.  [Minimal examples](#minimal-examples)
 3.  [Authors](#authors)
 
-Citation {#citation}
-=======
+Citation
+========
 
 When using `parallel`, please include the following:
 
