@@ -21,12 +21,13 @@
 {p2col: 6.  {help parallel##tech:Technical note}}Some details under the hood.{p_end}
 {p2col: 7.  {help parallel##examples:Examples}}Some examples using parallel{p_end}
 {p2col: 8.  {help parallel##saved_results:Saved results}}A list of parallel's save results{p_end}
-{p2col: 9.  {help parallel##development:Development}}Up-to-date version and bug reporting{p_end}
-{p2col: 10. {help parallel##source:Source code}}parallel's (MATA) source code{p_end}
-{p2col: 11. {help parallel##authors:Authors}}Authors behind parallel{p_end}
-{p2col: 12. {help parallel##contrib:Contributors}}Notable contributors{p_end}
-{p2col: 13. {help parallel##also:Also see}}Other modules related to parallel{p_end}
-{p2col: 14. {help parallel##faqs:FAQs}}Frequently Asked Questions{p_end}
+{p2col: 9.  {help parallel##citation:Citation}}How cite parallel.{p_end}
+{p2col: 10. {help parallel##development:Development}}Up-to-date version and bug reporting{p_end}
+{p2col: 11. {help parallel##source:Source code}}parallel's (MATA) source code{p_end}
+{p2col: 12. {help parallel##authors:Authors}}Authors behind parallel{p_end}
+{p2col: 13. {help parallel##contrib:Contributors}}Notable contributors{p_end}
+{p2col: 14. {help parallel##also:Also see}}Other modules related to parallel{p_end}
+{p2col: 15. {help parallel##faqs:FAQs}}Frequently Asked Questions{p_end}
 
 
 {p2colset 5 32 32 2}
@@ -818,8 +819,17 @@ been executed.{p_end}
 {synopt:{cmd:$PLL_STATA_PATH, $PLL_CLUSTERS (deprecated), $PLL_CHILDREN, $USE_PROCEXEC, $PLL_HOSTNAMES, $PLL_SSH}}Internal usage.{p_end}
 
 
+{marker citation}{...}
+{title:9. Citation}
+{pstd}
+When using parallel, please include the following:
+
+Vega Yon GG, Quistorff B. parallel: A command for parallel computing. The Stata Journal. 2019;19(3):667-684. doi:10.1177/1536867X19874242
+{p_end}
+
+
 {marker development}{...}
-{title:9. Development}
+{title:10. Development}
 
 {pstd}
 You can always have access to the latest version of -{cmd:parallel}-. One option
@@ -853,7 +863,7 @@ command -creturn list-.
 
 
 {marker source}{...}
-{title:10. {cmd:mata} source code}
+{title:11. {cmd:mata} source code}
 
 {pstd}
 Most of -{cmd:parallel}- has been programmed in {cmd:mata}. This means that, as a difference
@@ -884,7 +894,7 @@ links:
 
 {marker references}{...}
 
-{title:11. References}
+{title:12. References}
 
 {phang}Luke Tierney, A. J. Rossini, Na Li and H. Sevcikova (2012). {it:snow: Simple Network of Workstations}. R package version 0.3-9. {browse "http://CRAN.R-project.org/package=snow"}{p_end}
 {phang}R Core Team (2012). {it:R: A language and environment for statistical computing}. R Foundation for Statistical Computing, Vienna, Austria. ISBN 3-900051-07-0, URL {browse "http://www.R-project.org/"}.{p_end}
@@ -894,7 +904,7 @@ links:
 
 
 {marker authors}{...}
-{title:12. Authors}
+{title:13. Authors}
 
 {pstd}
 George Vega Yon [cre,aut], University of Southern California. {browse "mailto:g.vegayon@gmail.com"}
@@ -906,7 +916,7 @@ Brian Quistorff [aut], Microsoft Research. {browse "mailto:Brian.Quistorff@micro
 {p_end}
 
 {marker contrib}{...}
-{title:13. Contributors}
+{title:14. Contributors}
 
 {pstd}{it:Special Thanks to:}
 Elan P. Kugelmass (aka as epkugelmass at github) [ctb],
@@ -927,7 +937,7 @@ Michael Lacy (Colorado State).
 
 
 {marker also}{...}
-{title:14. Also see}
+{title:15. Also see}
 
 {psee}
 Manual: {mansection "GSM CAdvancedStatausage":{bf:[GSM] Advanced Stata usage (Mac)}},
@@ -947,7 +957,7 @@ Project's wiki {browse "https://github.com/gvegayon/parallel/wiki/Gallery":page 
 
 
 {marker faqs}{...}
-{title:15. FAQs}
+{title:16. FAQs}
 
 {pstd}
 Here follows a list of Frequently Asked Questions:{p_end}

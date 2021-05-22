@@ -21,6 +21,31 @@ SSC at Boston College: <http://ideas.repec.org/c/boc/bocode/s457527.html> (thoug
 2. [Minimal examples](#minimal-examples)
 2. [Authors](#authors)
 
+Citation {#citation}
+=======
+
+When using `parallel`, please include the following:
+
+Vega Yon GG, Quistorff B. parallel: A command for parallel computing. The Stata Journal. 2019;19(3):667-684. doi:10.1177/1536867X19874242
+
+Or use the following bibtex entry:
+
+```bib
+@article{
+  VegaYon2019,
+  author = {George G. {Vega Yon} and Brian Quistorff},
+  title ={parallel: A command for parallel computing},
+  journal = {The Stata Journal},
+  volume = {19},
+  number = {3},
+  pages = {667-684},
+  year = {2019},
+  doi = {10.1177/1536867X19874242},
+  URL = {https://doi.org/10.1177/1536867X19874242},
+  eprint = {https://doi.org/10.1177/1536867X19874242}
+}
+```
+
 Installation {#installation}
 =======
 
