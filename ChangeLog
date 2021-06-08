@@ -1,5 +1,9 @@
 Unreleased:
 
+2021-06-07 George G. Vega Yon
+	* Added a citation command.
+	* Preparing to submit to ssc.
+
 2018-03-26 (1.20.0):
 	* Rename cluster -> child process in docs, comments, and internal variables - Brian Quistorff
 	* Rename PLL_CLUSTERS -> PLL_CHILDREN (keep, but deprecate old name) - Brian Quistorff

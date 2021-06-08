@@ -1645,7 +1645,7 @@ real scalar parallel_run(
             // if the folder has a space in it (it makes it the first word before the space,
             // rather than the base). So do the < > redirect way.
             //exec_cmd = ssh_str+hostname + paralleldir+stata_batch+stata_quiet+" "+`"do \""'+dofile_i + `"\""'
-            exec_cmd = paralleldir+stata_quiet + `" < ""'+dofile_i + `"" > "' + dofile_i_base + ".log"
+            exec_cmd = paralleldir+stata_quiet + `" < ""'+dofile_i + `"" > "' + dofile_i_base + ".log 2>&1"
             fput(fh, rmt_begin + exec_cmd + " & echo $!" + rmt_end + " >> "+pidfile)
             log_err_cmd = `"echo "Stata was not able to execute" > "'+dofile_i_base + ".log; "
             fin_file = "__pll"+parallelid+"_finito"+strofreal(i,"%04.0f")

@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.20.0 19mar2019}{...}
+{* *! version 1.20.1 07jun2021}{...}
 {cmd:help parallel}{right:also see:  {net "describe miparallel, from(http://fmwww.bc.edu/RePEc/bocode/m)":miparallel}}
 {hline}
 
@@ -43,6 +43,7 @@
 {p2col: 8.  {help parallel##clean:parallel clean}}Removing auxiliary files.{p_end}
 {p2col: 9.  {help parallel##printlog:parallel printlog}}Checking out child processes' log files.{p_end}
 {p2col:10.  {help parallel##version:parallel version}}Query parallel current version.{p_end}
+{p2col:11.  {help parallel##citation:parallel citation}}How to cite parallel.{p_end}
 
 
 {marker syntax}{...}
@@ -134,6 +135,8 @@ Checking out child processes' logfiles by showing the output in a view window.
 {p 8 17 2}
 {cmdab:parallel version}
 
+{p 8 17 2}
+{cmdab:parallel citation}
 
 {synoptset 15 tabbed}{...}
 {synopthdr}
@@ -823,10 +826,15 @@ been executed.{p_end}
 {title:9. Citation}
 {pstd}
 When using parallel, please include the following:
+{p_end}
 
+{pstd}
 Vega Yon GG, Quistorff B. parallel: A command for parallel computing. The Stata Journal. 2019;19(3):667-684. doi:10.1177/1536867X19874242
 {p_end}
 
+{pstd}
+For a bibentry, checkout the {cmd:parallel citation} command.
+{p_end}
 
 {marker development}{...}
 {title:10. Development}

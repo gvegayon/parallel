@@ -34,12 +34,13 @@ BODY{background-color: ffffff;
     6.  Technical note        Some details under the hood.
     7.  Examples              Some examples using parallel
     8.  Saved results         A list of parallel's save results
-    9.  Development           Up-to-date version and bug reporting
-    10. Source code           parallel's (MATA) source code
-    11. Authors               Authors behind parallel
-    12. Contributors          Notable contributors
-    13. Also see              Other modules related to parallel
-    14. FAQs                  Frequently Asked Questions
+    9.  Citation              How cite parallel.
+    10. Development           Up-to-date version and bug reporting
+    11. Source code           parallel's (MATA) source code
+    12. Authors               Authors behind parallel
+    13. Contributors          Notable contributors
+    14. Also see              Other modules related to parallel
+    15. FAQs                  Frequently Asked Questions
 <br><br>
 <br><br>
 <br><br>
@@ -55,6 +56,7 @@ BODY{background-color: ffffff;
     8.  parallel clean         Removing auxiliary files.
     9.  parallel printlog      Checking out child processes' log files.
     10.  parallel version      Query parallel current version.
+    11.  parallel citation     How to cite parallel.
 <br><br>
 <br><br>
 <a name="syntax"></a><span class=result><u>1. Syntax</u></span>
@@ -113,6 +115,7 @@ BODY{background-color: ffffff;
 <br><br>
         <span class=result>parallel version</span>
 <br><br>
+        <span class=result>parallel citation</span>
 <br><br>
     <i>options</i>          Description
     -------------------------------------------------------------------------------------------------------------------------------------------
@@ -357,9 +360,9 @@ BODY{background-color: ffffff;
 <a name="tech"></a><span class=result><u>6. Technical note</u></span>
 <br><br>
     In order to protect a <i>pll_id</i> code (and thus ancillary files), once -<span class=result>parallel</span>- is called it creates a new file called <i>__pll</i>[<i>pll_id</i>]<i>sandbox</i>
-    (stored at c(tmpdir), in your case: <u>/tmp</u>). This forbids -<span class=result>parallel clean</span>- from deleting any auxiliary file used by that process and reserves
-    the <i>pll_id</i> so that no other call of -<span class=result>parallel</span>- can use this <i>pll_id</i>. Once every child process has finished, the sandbox file is removed,
-    freeing the <i>pll_id</i>.
+    (stored at c(tmpdir), in your case: <u>/scratch2/vegayon/stata/</u>). This forbids -<span class=result>parallel clean</span>- from deleting any auxiliary file used by that
+    process and reserves the <i>pll_id</i> so that no other call of -<span class=result>parallel</span>- can use this <i>pll_id</i>. Once every child process has finished, the sandbox
+    file is removed, freeing the <i>pll_id</i>.
 <br><br>
     If for any reason the algorithm breaks due to a flaw or crush of the system, the sandbox file and the rest of auxiliary files will not be
     deleted. In order to clean up this, the user will be able to do so manually (moving the file(s) to the OS recycle bin) or using parallel
@@ -516,7 +519,7 @@ BODY{background-color: ffffff;
 <br><br>
     Experiment that will be performed
         <span class=result>program define lnsim, rclass</span>
-                <span class=result>version 13</span>
+                <span class=result>version 16.1</span>
                 <span class=result>syntax [, obs(integer 1) mu(real 0) sigma(real 1) ]</span>
                 <span class=result>drop _all</span>
                 <span class=result>set obs `obs'</span>
@@ -612,7 +615,14 @@ BODY{background-color: ffffff;
                             Internal usage.
 <br><br>
 <br><br>
-<a name="development"></a><span class=result><u>9. Development</u></span>
+<a name="citation"></a><span class=result><u>9. Citation</u></span>
+    When using parallel, please include the following:
+<br><br>
+    Vega Yon GG, Quistorff B. parallel: A command for parallel computing. The Stata Journal. 2019;19(3):667-684. doi:10.1177/1536867X19874242
+<br><br>
+    For a bibentry, checkout the <span class=result>parallel citation</span> command.
+<br><br>
+<a name="development"></a><span class=result><u>10. Development</u></span>
 <br><br>
     You can always have access to the latest version of -<span class=result>parallel</span>-. One option is from its github repo (on-development source code):
 <br><br>
@@ -635,7 +645,7 @@ BODY{background-color: ffffff;
     command -creturn list-.
 <br><br>
 <br><br>
-<a name="source"></a><span class=result><u>10. </u></span><span class=result><u>mata</u></span><span class=result><u> source code</u></span>
+<a name="source"></a><span class=result><u>11. </u></span><span class=result><u>mata</u></span><span class=result><u> source code</u></span>
 <br><br>
     Most of -<span class=result>parallel</span>- has been programmed in <span class=result>mata</span>. This means that, as a difference from typical ado files, -<span class=result>parallel</span>- is distributed with
     <span class=result>lparallel</span> mata library (compiled code) and thus source code can not be reached directly by users. Given this, the help file
@@ -660,7 +670,7 @@ BODY{background-color: ffffff;
         Write a dofile to be paralellized                 parallel_write_do.mata
 <br><br>
 <a name="references"></a><br><br>
-<span class=result><u>11. References</u></span>
+<span class=result><u>12. References</u></span>
 <br><br>
     Luke Tierney, A. J. Rossini, Na Li and H. Sevcikova (2012). <i>snow: Simple Network of Workstations</i>. R package version 0.3-9. 
         http://CRAN.R-project.org/package=snow
@@ -673,23 +683,23 @@ BODY{background-color: ffffff;
     Haahr, M. (2006). <i>Random.org: True random number service</i>. Random.org. http://www.random.org/clients/http/.
 <br><br>
 <br><br>
-<a name="authors"></a><span class=result><u>12. Authors</u></span>
+<a name="authors"></a><span class=result><u>13. Authors</u></span>
 <br><br>
     George Vega Yon [cre,aut], University of Southern California. mailto:g.vegayon@gmail.com http://ggvy.cl/
 <br><br>
     Brian Quistorff [aut], Microsoft Research. mailto:Brian.Quistorff@microsoft.com http://quistorff.com
 <br><br>
-<a name="contrib"></a><span class=result><u>13. Contributors</u></span>
+<a name="contrib"></a><span class=result><u>14. Contributors</u></span>
 <br><br>
     <i>Special Thanks to:</i>  Elan P. Kugelmass (aka as epkugelmass at github) [ctb], Timothy Mak (University of Hong Kong) (author of miparallel)
 <br><br>
     Damian C. Clarke (Oxford University, England), Felix Villatoro (Superintendencia de Pensiones, Chile), Eduardo Fajnzylber (Universidad
-    Adolfo Ibáñez, Chile), Eric Melse (CAREM, Netherlands), Tomás Rau (Universidad Católica, Chile), Research Division (Superindentendia de
+    Adolfo IbÃ¡Ã±ez, Chile), Eric Melse (CAREM, Netherlands), TomÃ¡s Rau (Universidad CatÃ³lica, Chile), Research Division (Superindentendia de
     Pensiones, Chile), attendees to the Stata conference 2013 (New Orleans), Philippe Ruh (University of Zurich), Michael Lacy (Colorado
     State).
 <br><br>
 <br><br>
-<a name="also"></a><span class=result><u>14. Also see</u></span>
+<a name="also"></a><span class=result><u>15. Also see</u></span>
 <br><br>
     Manual: <span class=result>[GSM] Advanced Stata usage (Mac)</span>, <span class=result>[GSU] Advanced Stata usage (Unix)</span>, <span class=result>[GSW] Advanced Stata usage (Windows)</span>
 <br><br>
@@ -699,7 +709,7 @@ BODY{background-color: ffffff;
     Project's wiki page of other examples.
 <br><br>
 <br><br>
-<a name="faqs"></a><span class=result><u>15. FAQs</u></span>
+<a name="faqs"></a><span class=result><u>16. FAQs</u></span>
 <br><br>
     Here follows a list of Frequently Asked Questions:
 <br><br>

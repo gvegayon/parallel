@@ -1,4 +1,4 @@
-*! version 1.20.0 19mar2019
+*! version 1.20.1 07jun2021
 *! PARALLEL: Stata module for parallel computing
 *! by George G. Vega [cre,aut], Brian Quistorff [aut]
 *! 
@@ -33,7 +33,7 @@ program def parallel
     version 11.0
 
 	// Checks wether if is parallel prefix or not
-	if  (regexm(`"`0'"', "^(do|clean|break|version|append|printlog|viewlog|numprocessors)")) {
+	if  (regexm(`"`0'"', "^(do|clean|break|version|append|printlog|viewlog|numprocessors|citation)")) {
 	/* If not prefix */
 		parallel_`0'
 	} 
@@ -46,7 +46,7 @@ program def parallel
 		local cmd = regexs(1)
     if inlist("`cmd'","bootstrap","bstrap") local cmd = "bs"
     if "`cmd'"=="simulate" local cmd = "sim"
-		mata: st_local("0", regexr(st_local("0"), "^(bootstrap|bstrap|bs|simulate|sim)", ""))
+		mata: st_local("0", regexr(st_local("0"), "^(bootstrap|bstrap|bs|simulate|sim|citation)", ""))
 		gettoken x 0 : 0, parse(":") bind
 		local 0 = regexr(`"`0'"', "^[:]", "")
 		gettoken x options : x, parse(",") bind
@@ -106,10 +106,10 @@ end
 program def parallel_version, rclass
 	version 11.0
 	di as result "parallel" as text " Stata module for parallel computing"
-	di as result "vers" as text " 1.20.0 19mar2019"
+	di as result "vers" as text " 1.20.1 07jun2021"
 	di as result "auth" as text " George G. Vega [cre,aut], Brian Quistorff [aut]"
 	
-	return local pll_vers = "1.20.0"
+	return local pll_vers = "1.20.1"
 end
 
 /* Take a look to logfiles */
@@ -613,6 +613,32 @@ program def parallel_fusion
 	if "`sortlist'"!="" sort `sortlist'	
 	
 end
+
+////////////////////////////////////////////////////////////////////////////////
+// Checks whether the user pressed break inside a loop
+program def parallel_citation
+	version 11.0
+
+	di "When using `parallel`, please include the following:"
+	di "Vega Yon GG, Quistorff B. parallel: A command for parallel computing. The Stata Journal. 2019;19(3):667-684. doi:10.1177/1536867X19874242"
+	di "Or use the following bibtex entry:"
+	di ""
+	di "@article{"
+	di "  VegaYon2019,"
+	di "  author = {George G. {Vega Yon} and Brian Quistorff},"
+	di "  title ={parallel: A command for parallel computing},"
+	di "  journal = {The Stata Journal},"
+	di "  volume = {19},"
+	di "  number = {3},"
+	di "  pages = {667-684},"
+	di "  year = {2019},"
+	di "  doi = {10.1177/1536867X19874242},"
+	di "  URL = {https://doi.org/10.1177/1536867X19874242},"
+	di "  eprint = {https://doi.org/10.1177/1536867X19874242}"
+	di "}"
+
+end
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Checks whether the user pressed break inside a loop
