@@ -443,6 +443,17 @@ In this example we create a short program (`parfor`) which is intended to work a
 
     . 
 
+
+
+Building
+================
+If you need to use `parallel` on an older version of Stata than what we build here, you can build and install the package locally.
+
+You will need to install [Stata devtools](https://github.com/gvegayon/devtools) to build the package and `log2html` to build the html version of the help.
+
+Then you can go to `ado/` and either `do compile.do` or `do compile_and_install.do` depending on whether you want to just build the package (`.mlib`) or also install. There are also several build build checks in the `makefile` that can easily be run from Linux.
+
+
 Authors
 =======
 
