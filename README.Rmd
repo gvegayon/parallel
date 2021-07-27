@@ -241,7 +241,7 @@ George G. Vega [aut,cre]
 g.vegayon %at% gmail
 
 Brian Quistorff [aut]
-Brian.Quistorff %at% microsoft
+brian-work %at% quistorff . com
 
 
 

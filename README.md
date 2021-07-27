@@ -448,4 +448,4 @@ Authors
 
 George G. Vega \[aut,cre\] g.vegayon %at% gmail
 
-Brian Quistorff \[aut\] Brian.Quistorff %at% microsoft
+Brian Quistorff \[aut\] brian-work %at% quistorff . com

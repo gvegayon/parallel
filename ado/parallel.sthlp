@@ -920,7 +920,7 @@ George Vega Yon [cre,aut], University of Southern California. {browse "mailto:g.
 {p_end}
 
 {pstd}
-Brian Quistorff [aut], Microsoft Research. {browse "mailto:Brian.Quistorff@microsoft.com"} {browse "http://quistorff.com"}
+Brian Quistorff [aut], Bureau of Economic Analysis. {browse "mailto:brian-work@quistorff.com"} {browse "http://quistorff.com"}
 {p_end}
 
 {marker contrib}{...}
