@@ -7,7 +7,7 @@ program _seeded_cmd_wrapper
 	if "`sub_cmd'"=="permute" gettoken permvar 0 : 0
 	gettoken seeds cmd : 0
 	*local seeds seeds
-	local s = `=`seeds'[$REP_n,1]'
+	local s = `=`seeds'[$REP_lc_i,1]'
 	set seed `s'
 	//nothing if "`sub_cmd'"=="simulate" //simulate doesn't preserve
 	if "`sub_cmd'"=="bootstrap" {
@@ -19,7 +19,8 @@ program _seeded_cmd_wrapper
 		permute_once `permvar'
 	}
 	`cmd'
-	global REP_n = $REP_n + 1
+	global REP_lc_i = $REP_lc_i + 1
+	global REP_gl_i = $REP_gl_i + 1
 end
 
 program permute_once

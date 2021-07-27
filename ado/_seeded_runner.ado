@@ -18,7 +18,11 @@ program _seeded_runner
 	drop _all
 	if "`maindata'"!="" use `maindata', clear
 	
-	global REP_n 1
+	global REP_lc_i = 1
+	global REP_gl_i = 1
+	if("$pll_instance"!=""){
+		global REP_gl_i = 1 + ($pll_instance-1)*floor(${REP_N}/${PLL_CHILDREN})
+	}
 	if "`sub_cmd'"=="sim_to_post" {
 		syntax anything(equalok everything) [, maindata(string) nodots]
 		
@@ -40,5 +44,6 @@ program _seeded_runner
 	else {
 		simulate `anything', reps(`reps') `options': _seeded_cmd_wrapper `sub_cmd' `permvar' `seeds' `cmd'
 	}
-	global REP_n
+	global REP_lc_i
+	global REP_gl_i
 end

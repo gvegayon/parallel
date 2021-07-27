@@ -3,14 +3,15 @@
 
 * TODO:
 * - For bootstrap and permute, check that the estimation outputs from -seeding ...- align with main verisons
+* - For permute, only allow very simple exp_list that only has spaces between expressions (not inside) and I think they have to be very simple.
+* - For permute there are other char's that it saves to the dataset, but I don't.
 * - check more of the main options. Low priority (can be added by others as needed).
-* Determine if we want REP_n's range to 1/`reps' globally or locally
 
 /*
 * In case we're running this individually
 include setup_ado.do
 */
-
+program drop _all
 parallel setclusters 2
 set seed 1337
 
@@ -20,14 +21,13 @@ cap program drop my_sp_post
 program my_sp_post
 	syntax, postname(string)
 
-	post `postname' (`=runiform()')
-	post `postname' (`=runiform()')
+	post `postname' (`=runiform()') ($REP_gl_i)
 end
 drop _all
 forv p = 1/2 {
 	set seed 1
 	loc par = cond(`p'==2, "parallel parallel_opts(programs(my_sp_post))", "")
-	seeding sim_to_post float(rand), reps(2) nodots `par': my_sp_post
+	seeding sim_to_post float(rand) int(i), reps(2) nodots `par': my_sp_post
 	sort *
 	tempfile sim2post`p'
 	qui save `sim2post`p'', replace
@@ -58,7 +58,6 @@ forv p = 1/2 {
 	qui save `lnsim`p'', replace
 }
 dta_equal `lnsim1' `lnsim2'
-*CHECK output here 
 
 
 ************** Bootstrap
@@ -77,17 +76,15 @@ forv p = 1/2 {
 	qui save `bs`p'', replace
 }
 dta_equal `bs1' `bs2'
-*CHECK output here 
-
 
 ************ Permute
 *Main version
-qui webuse lbw
+qui webuse lbw, clear
 set seed 1
-seeding permute smoke x2=e(chi2), reps(2) nodots nolegend `par': logit low smoke
-	
+permute smoke x2=e(chi2), reps(2) nodots nolegend: logit low smoke
+
 forv p = 1/2 {
-	qui webuse lbw
+	qui webuse lbw, clear
 	set seed 1
 	loc par = cond(`p'==2, "parallel", "")
 	seeding permute smoke x2=e(chi2), reps(2) nodots nolegend `par': logit low smoke
@@ -96,4 +93,4 @@ forv p = 1/2 {
 	qui save `perm`p'', replace
 }
 dta_equal `perm1' `perm2'
-*CHECK output here 
+
