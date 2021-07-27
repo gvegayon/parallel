@@ -4,6 +4,7 @@
 * TODO:
 * - For bootstrap and permute, check that the estimation outputs from -seeding ...- align with main verisons
 * - check more of the main options. Low priority (can be added by others as needed).
+* Determine if we want REP_n's range to 1/`reps' globally or locally
 
 /*
 * In case we're running this individually
@@ -12,6 +13,27 @@ include setup_ado.do
 
 parallel setclusters 2
 set seed 1337
+
+************ sim_post
+*This is like simulate but we wave results in a post-file rather than via returns. This each iteration can reults several rows (and even different numbers)
+cap program drop my_sp_post
+program my_sp_post
+	syntax, postname(string)
+
+	post `postname' (`=runiform()')
+	post `postname' (`=runiform()')
+end
+drop _all
+forv p = 1/2 {
+	set seed 1
+	loc par = cond(`p'==2, "parallel parallel_opts(programs(my_sp_post))", "")
+	seeding sim_to_post float(rand), reps(2) nodots `par': my_sp_post
+	sort *
+	tempfile sim2post`p'
+	qui save `sim2post`p'', replace
+	list
+}
+dta_equal `sim2post1' `sim2post2'
 
 ******** Simulate
 cap program drop lnsim

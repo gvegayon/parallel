@@ -9,7 +9,7 @@ program _seeded_cmd_wrapper
 	*local seeds seeds
 	local s = `=`seeds'[$REP_n,1]'
 	set seed `s'
-	//nothing if "`sub_cmd'"=="simulate"
+	//nothing if "`sub_cmd'"=="simulate" //simulate doesn't preserve
 	if "`sub_cmd'"=="bootstrap" {
 		preserve
 		bsample
