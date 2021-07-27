@@ -5,6 +5,11 @@
 * - For bootstrap and permute, check that the estimation outputs from -seeding ...- align with main verisons
 * - check more of the main options. Low priority (can be added by others as needed).
 
+/*
+* In case we're running this individually
+include setup_ado.do
+*/
+
 parallel setclusters 2
 set seed 1337
 
