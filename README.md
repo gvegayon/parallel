@@ -47,8 +47,8 @@ GitHub
 Stata version &gt;=13 can install the latest stable version using a GitHub URL,
 
 ``` stata
-. net install parallel, from(https://raw.github.com/gvegayon/parallel/stable/) replace
-. mata mata mlib index
+net install parallel, from(https://raw.github.com/gvegayon/parallel/stable/) replace
+mata mata mlib index
 ```
 
 For Stata version &lt;13, [download as zip](https://github.com/gvegayon/parallel/archive/stable.zip), unzip, and then replace the above URL with the full local path to the files.
@@ -64,8 +64,8 @@ SSC
 An older version is available from the SSC. It does not have all the bug fixes so it is not recommended to install it. If it is required, however, use
 
 ``` stata
-. ssc install parallel, replace
-. mata mata mlib index
+ssc install parallel, replace
+mata mata mlib index
 ```
 
 Minimal examples
