@@ -38,6 +38,7 @@ program _seeded_runner
 			_seeded_cmd_wrapper sim_post `seeds' `anything', `options' postname(`sp_post')
 			if "`dots'"!="nodots" _dots `i' 0
 		}
+		if "`dots'"!="" di _n
 		postclose `sp_post'
 		use `sp_post_file', clear
 	}
