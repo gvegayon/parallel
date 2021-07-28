@@ -15,15 +15,15 @@ program drop _all
 parallel setclusters 2
 set seed 1337
 
-************ sim_post
+************ sim_to_post
 *This is like simulate but we wave results in a post-file rather than via returns. This each iteration can reults several rows (and even different numbers)
+drop _all
 cap program drop my_sp_post
 program my_sp_post
 	syntax, postname(string)
 
 	post `postname' (`=runiform()') ($REP_gl_i)
 end
-drop _all
 forv p = 1/2 {
 	set seed 1
 	loc par = cond(`p'==2, "parallel parallel_opts(programs(my_sp_post))", "")
@@ -38,7 +38,6 @@ dta_equal `sim2post1' `sim2post2'
 ******** Simulate
 cap program drop lnsim
 program define lnsim, rclass
-	version 15.1
 	syntax [, obs(integer 1) mu(real 0) sigma(real 1) ]
 	drop _all
 	qui set obs `obs'

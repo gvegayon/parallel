@@ -14,7 +14,20 @@ program seeding
 	gettoken sub_cmd 0 : 0
 	gettoken 0 cmd : 0, parse(":") bind
 	gettoken tmp cmd: cmd //pop the ":"
-	syntax anything(equalok everything), [reps(integer 100) parallel parallel_opts(string) *]
+	
+	if "`sub_cmd'"=="simulate" {
+		mac dir
+		syntax anything(equalok everything) [, Reps(integer 100) parallel parallel_opts(string) nodots noisily nolegend verbose] //dots(integer) <- how do capture this and nodots at the same time?
+		syntax anything(equalok everything) [, Reps(integer 100) parallel parallel_opts(string) *]
+	}
+	if "`sub_cmd'"=="sim_to_post" {
+		syntax anything(equalok everything) [, Reps(integer 100) parallel parallel_opts(string) nodots]
+		syntax anything(equalok everything) [, Reps(integer 100) parallel parallel_opts(string) *]
+	}
+	if "`sub_cmd'"!="simulate" & "`sub_cmd'"!="sim_to_post" {
+		_assert "`sub_cmd'"=="permute" | "`sub_cmd'"=="bootstrap", msg("sub_cmd's allowed: simulate, sim_to_post, permute, bootstrap.")
+		syntax anything(equalok everything) [, Reps(integer 100) parallel parallel_opts(string) *]
+	}
 	
 	if `=_N'>0 {
 		tempfile maindata

@@ -29,6 +29,10 @@ copy parallel.sthlp parallel.smcl, replace
 log2html parallel, replace linesize(145)
 erase parallel.smcl
 
+copy seeding.sthlp seeding.smcl, replace
+log2html seeding, replace linesize(145)
+erase seeding.smcl
+
 if `c(stata_version)'>=12 di "WARNING: compiled mlib will only work on Stata version >=`c(stata_version)'"
 
 /* Compiling */
