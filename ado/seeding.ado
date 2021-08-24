@@ -16,7 +16,7 @@ program seeding
 	gettoken tmp cmd: cmd //pop the ":"
 	
 	if "`sub_cmd'"=="simulate" {
-		mac dir
+		* mac dir
 		syntax anything(equalok everything) [, Reps(integer 100) parallel parallel_opts(string) nodots noisily nolegend verbose] //dots(integer) <- how do capture this and nodots at the same time?
 		syntax anything(equalok everything) [, Reps(integer 100) parallel parallel_opts(string) *]
 	}
