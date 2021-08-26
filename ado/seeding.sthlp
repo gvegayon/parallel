@@ -1,5 +1,6 @@
 {smcl}
 {* *! version 1.20.1 07jun2021}{...}
+{vieweralsosee "parallel" "help parallel"}{...}
 {cmd:help seeding}
 {hline}
 
@@ -39,10 +40,12 @@ with identical results when run sequentially or in parallel.
 {synopt :{opt r:eps(#)}}perform {it:#} random permutations; default is {cmd:reps(100)}{p_end}
 {synopt :{opt parallel}}compute the iterations using {cmd:parallel}. Must have specified the
 cluster using {cmd:parallel setclusters}. Default is non-parallel (sequential).{p_end}
-{synopt :{opt parallel_opts(string)}}options passed to {help prefix_saving_option:{cmd:parallel}}. If you have a local program (not in an .ado) then you will want to specify it using {opt programs(program_name)}.{p_end}
+{synopt :{opt parallel_opts(string)}}options passed to {help prefix_saving_option:{cmd:parallel}}. If you have a local 
+program (not in an .ado) then you will want to specify it using {opt programs(program_name)}.{p_end}
 
 {syntab :Options}
-{synopt :{opt simulate_options}}Currently supported (see {help simulate} for more details): {opt nodots} {opt noisily} {opt nolegend} {opt verbose}.{p_end}
+{synopt :{opt simulate_options}}Currently supported (see {help simulate} for more details): {opt nodots} {opt noisily} 
+{opt nolegend} {opt verbose}.{p_end}
 {synopt :{opt sim_to_post_options}}Subset of those used for simulate. Currently supported: {opt nodots}.{p_end}
 {synoptline}
 {p2colreset}{...}
@@ -51,10 +54,14 @@ cluster using {cmd:parallel setclusters}. Default is non-parallel (sequential).{
 {title:Description}
 
 {pstd}
-{cmd:seeding} executes {it:command} for each repetition. It specifies the RNG seed to a new value before each iteration allowing results to be identical between sequential and parallel execution. It also defines globals {cmd:REP_gl_i} (the global iteration number) and {cmd:REP_lc_i} (the local iteration number, which differs from {cmd:REP_gl_i} if this is in a {cmd:parallel} sub-process) that may be used by {it:command}. The main data is replaced with these results.
+{cmd:seeding} executes {it:command} for each repetition. It specifies the RNG seed to a new value before each iteration 
+allowing results to be identical between sequential and parallel execution. It also defines globals {cmd:REP_gl_i} 
+(the global iteration number) and {cmd:REP_lc_i} (the local iteration number, which differs from {cmd:REP_gl_i} if 
+this is in a {cmd:parallel} sub-process) that may be used by {it:command}. The main data is replaced with the results.
 
 {pstd}
-{cmd:seeding simulate/sim_to_post} do not preserve the dataset between iterations, though if results depend on sequential modifications to the main data this may not be reproducible as in parallel mode, each child cluster starts with the initial data.
+{cmd:seeding simulate/sim_to_post} do not preserve the dataset between iterations, though if results depend on sequential 
+modifications to the main data this may not be reproducible as in parallel mode, each child cluster starts with the initial data.
 
 {pstd}
 {cmd:seeding sim_to_post} requires that {it:command} accepts the option {it:postname(string)} as the place to store data.

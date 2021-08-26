@@ -1,0 +1,101 @@
+
+<html>
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css">
+BODY{background-color: ffffff;
+    font-family: monaco, "courier new", monospace;
+     color: #000000}
+.input {color: #CC6600}
+.result{color: #000099}
+.error{color: #dd0000}
+</style>
+</head>
+<body>
+<pre>
+<span class=result>help seeding</span>
+-------------------------------------------------------------------------------------------------------------------------------------------------
+<br><br>
+<span class=result><u>Title</u></span>
+<br><br>
+    <span class=result>seeding</span> -- Stata module to run loop iterations involving randomness with identical results when run sequentially or in parallel.
+<br><br>
+<br><br>
+<a name="syntax"></a><span class=result><u>Syntax</u></span>
+<br><br>
+<a name="initialize"></a>    ---------------------------------------------------------------------------------------------------------------------------------------------
+    Aggregate results in return statements via <span class=result>simulate</span>.
+<br><br>
+        <span class=result>seeding simulate</span> <i>exp_list</i> [<span class=result>,</span> <span class=result><u>r</u></span><span class=result>eps(</span><i>#</i><span class=result>)</span> <span class=result>parallel</span> <span class=result>parallel_opts(</span><i>options</i><span class=result>)</span> <i>simulate_options</i>] <span class=result>:</span> <i>command</i>
+<br><br>
+<a name="numprocessors"></a>    ---------------------------------------------------------------------------------------------------------------------------------------------
+    Aggregate results via <span class=result>post</span>
+<br><br>
+        <span class=result>seeding sim_to_post</span> <i>newvarlist</i> [<span class=result>,</span> <span class=result><u>r</u></span><span class=result>eps(</span><i>#</i><span class=result>)</span> <span class=result>parallel</span> <span class=result>parallel_opts(</span><i>options</i><span class=result>)</span> <i>sim_to_post_options</i>] <span class=result>:</span> <i>command</i>
+<br><br>
+<a name="options_table"></a>    <i>options</i>                  Description
+    -------------------------------------------------------------------------------------------------------------------------------------------
+    Main
+      <span class=result><u>r</u></span><span class=result>eps(</span><i>#</i><span class=result>)</span>                perform <i>#</i> random permutations; default is <span class=result>reps(100)</span>
+      <span class=result>parallel</span>               compute the iterations using <span class=result>parallel</span>. Must have specified the cluster using <span class=result>parallel setclusters</span>. Default is
+                               non-parallel (sequential).
+      <span class=result>parallel_opts(</span><i>string</i><span class=result>)</span>  options passed to <span class=result>parallel</span>. If you have a local program (not in an .ado) then you will want to specify it using
+                               <span class=result>programs(</span><i>program_name</i><span class=result>)</span>.
+<br><br>
+    Options
+      <span class=result>simulate_options</span>       Currently supported (see simulate for more details): <span class=result>nodots</span> <span class=result>noisily</span> <span class=result>nolegend</span> <span class=result>verbose</span>.
+      <span class=result>sim_to_post_options</span>    Subset of those used for simulate. Currently supported: <span class=result>nodots</span>.
+    -------------------------------------------------------------------------------------------------------------------------------------------
+<br><br>
+<a name="description"></a><span class=result><u>Description</u></span>
+<br><br>
+    <span class=result>seeding</span> executes <i>command</i> for each repetition. It specifies the RNG seed to a new value before each iteration allowing results to be
+    identical between sequential and parallel execution. It also defines globals <span class=result>REP_gl_i</span> (the global iteration number) and <span class=result>REP_lc_i</span> (the local
+    iteration number, which differs from <span class=result>REP_gl_i</span> if this is in a <span class=result>parallel</span> sub-process) that may be used by <i>command</i>. The main data is replaced
+    with these results.
+<br><br>
+    <span class=result>seeding simulate/sim_to_post</span> do not preserve the dataset between iterations, though if results depend on sequential modifications to the
+    main data this may not be reproducible as in parallel mode, each child cluster starts with the initial data.
+<br><br>
+    <span class=result>seeding sim_to_post</span> requires that <i>command</i> accepts the option <i>postname(string)</i> as the place to store data.
+<br><br>
+<a name="examples"></a><span class=result><u>Examples</u></span>
+<br><br>
+    Example using <span class=result>simulate</span>:
+<br><br>
+        <span class=result>program define lnsim, rclass</span>
+                <span class=result>syntax [, obs(integer 1) mu(real 0) sigma(real 1) ]</span>
+                <span class=result>drop _all</span>
+                <span class=result>set obs `obs'</span>
+                <span class=result>tempvar z</span>
+                <span class=result>gen `z' = exp(rnormal(`mu',`sigma'))</span>
+                <span class=result>summarize `z'</span>
+                <span class=result>return scalar mean = r(mean)</span>
+                <span class=result>return scalar Var  = r(Var)</span>
+        <span class=result>end</span>
+        <span class=result>parallel setclusters 2</span>
+        <span class=result>set seed 1337</span>
+        <span class=result>seeding simulate mean=r(mean) var=r(Var), reps(100) parallel parallel_opts(programs(lnsim)): lnsim, obs(100)</span>
+        <span class=result>set seed 1337</span>
+        <span class=result>seeding simulate mean=r(mean) var=r(Var), reps(100): lnsim, obs(100)</span>
+<br><br>
+    Both produce identical results.
+<br><br>
+<br><br>
+    Example using <span class=result>sim_to_post</span>:
+<br><br>
+        <span class=result>program my_sp_post</span>
+                <span class=result>syntax, postname(string)</span>
+                <span class=result>post `postname' (`=runiform()') ($REP_gl_i)</span>
+        <span class=result>end</span>
+        <span class=result>parallel setclusters 2</span>
+        <span class=result>set seed 1337</span>
+        <span class=result>seeding sim_to_post float(rand) int(i), reps(100) parallel parallel_opts(programs(my_sp_post)): my_sp_post</span>
+        <span class=result>set seed 1337</span>
+        <span class=result>seeding sim_to_post float(rand) int(i), reps(100): my_sp_post</span>
+<br><br>
+    Both produce identical results.
+</pre>
+</body>
+</html>
