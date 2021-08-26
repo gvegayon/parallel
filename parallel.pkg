@@ -51,6 +51,10 @@ f ado/procenv.ado
 f ado/procexec.ado
 f ado/prockill.ado
 f ado/procwait.ado
+f ado/_seeded_cmd_wrapper.ado
+f ado/_seeded_runner.ado
+f ado/seeding.ado
+f ado/seeding.sthlp
 g WIN ado/WIN/procenv.plugin procenv.plugin
 g WIN64A ado/WIN64A/procenv.plugin procenv.plugin  
 g WIN ado/WIN/procexec.plugin procexec.plugin

@@ -1,5 +1,6 @@
 {smcl}
 {* *! version 1.20.1 07jun2021}{...}
+{vieweralsosee "seeding" "help seeding"}{...}
 {cmd:help parallel}{right:also see:  {net "describe miparallel, from(http://fmwww.bc.edu/RePEc/bocode/m)":miparallel}}
 {hline}
 
@@ -980,6 +981,10 @@ write files) in a directory where you have writing priviledges (where you can
 save files).
 {p_end}
 
-{p2col: 2.} {p_end}
+{p2colset 6 10 10 2}
+{p2col: 1.}{bf:How can I create reproducible results between sequential and parallel excecution when randomness is involved?}{p_end}
+
+{p2col:}See our utility command {it:{help seeding:seeding}}.
+{p_end}
 
 
