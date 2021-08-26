@@ -1,5 +1,8 @@
 Unreleased:
 
+2021-08-26 Brian Quistorff
+	* Added -seeding- command to allow reproducible results across sequential and parallel tasks that involve randomness.
+
 2021-06-07 George G. Vega Yon
 	* Added a citation command.
 	* Preparing to submit to ssc.
