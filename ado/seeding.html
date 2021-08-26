@@ -53,7 +53,7 @@ BODY{background-color: ffffff;
     <span class=result>seeding</span> executes <i>command</i> for each repetition. It specifies the RNG seed to a new value before each iteration allowing results to be
     identical between sequential and parallel execution. It also defines globals <span class=result>REP_gl_i</span> (the global iteration number) and <span class=result>REP_lc_i</span> (the local
     iteration number, which differs from <span class=result>REP_gl_i</span> if this is in a <span class=result>parallel</span> sub-process) that may be used by <i>command</i>. The main data is replaced
-    with these results.
+    with the results.
 <br><br>
     <span class=result>seeding simulate/sim_to_post</span> do not preserve the dataset between iterations, though if results depend on sequential modifications to the
     main data this may not be reproducible as in parallel mode, each child cluster starts with the initial data.
