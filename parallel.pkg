@@ -32,9 +32,9 @@ d KW: bootstrapping
 d KW: monte carlo
 d KW: multiple imputations
 d
-d Requires: Stata version 16
+d Requires: Stata version 14
 d
-d Distribution-Date: 20210607
+d Distribution-Date: 20210826
 d
 d Authors: George Vega Yon , California Institute of Technology, USA
 d          Brian Quistorff, Bureau of Economic Analysis, USA
