@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31624.102
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "procwait", "procwait\procwait.vcxproj", "{68169A03-0512-4BF0-B2BD-EB495B6C27AC}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "procenv", "procenv\procenv.vcxproj", "{A3B13E0B-8292-4541-91B3-2A7CD7B60E89}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "prockill", "prockill\prockill.vcxproj", "{1D80503A-F970-457B-9B41-115B7C9B1D56}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "procexecw", "procexecw\procexecw.vcxproj", "{68169A03-0512-4BF0-B2BD-EB495B6C27AD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,8 +66,23 @@ Global
 		{1D80503A-F970-457B-9B41-115B7C9B1D56}.Release|Win32.Build.0 = Release|x64
 		{1D80503A-F970-457B-9B41-115B7C9B1D56}.Release|x64.ActiveCfg = Release|x64
 		{1D80503A-F970-457B-9B41-115B7C9B1D56}.Release|x64.Build.0 = Release|x64
+		{68169A03-0512-4BF0-B2BD-EB495B6C27AD}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{68169A03-0512-4BF0-B2BD-EB495B6C27AD}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{68169A03-0512-4BF0-B2BD-EB495B6C27AD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{68169A03-0512-4BF0-B2BD-EB495B6C27AD}.Debug|Win32.Build.0 = Debug|Win32
+		{68169A03-0512-4BF0-B2BD-EB495B6C27AD}.Debug|x64.ActiveCfg = Debug|x64
+		{68169A03-0512-4BF0-B2BD-EB495B6C27AD}.Debug|x64.Build.0 = Debug|x64
+		{68169A03-0512-4BF0-B2BD-EB495B6C27AD}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{68169A03-0512-4BF0-B2BD-EB495B6C27AD}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{68169A03-0512-4BF0-B2BD-EB495B6C27AD}.Release|Win32.ActiveCfg = Release|Win32
+		{68169A03-0512-4BF0-B2BD-EB495B6C27AD}.Release|Win32.Build.0 = Release|Win32
+		{68169A03-0512-4BF0-B2BD-EB495B6C27AD}.Release|x64.ActiveCfg = Release|x64
+		{68169A03-0512-4BF0-B2BD-EB495B6C27AD}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {00DB6129-8A3D-425D-AC86-E82F0A324703}
 	EndGlobalSection
 EndGlobal

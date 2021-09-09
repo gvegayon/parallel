@@ -453,6 +453,8 @@ You will need to install [Stata devtools](https://github.com/gvegayon/devtools) 
 
 Then you can go to `ado/` and either `do compile.do` or `do compile_and_install.do` depending on whether you want to just build the package (`.mlib`) or also install. There are also several build build checks in the `makefile` that can easily be run from Linux.
 
+The Windows plugins can be built using Visual Studio Community Edition (tested on 2019), which is freee, with the C++ build tools and Windows SDK.
+
 
 Authors
 =======
