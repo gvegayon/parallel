@@ -54,7 +54,7 @@ program seeding
 	local final_seed = c(seed)
 	
 	if "`parallel'"=="parallel" loc parallel_prefix "parallel, `parallel_opts':"
-	`parallel_prefix' _seeded_runner `sub_cmd' `anything', maindata(`maindata') `options': `cmd'
+	`parallel_prefix' _seeded_runner `sub_cmd' `anything', maindata(`maindata') `parallel' `options': `cmd'
 
 	global REP_N
 	*For some commands run procedures on the results.

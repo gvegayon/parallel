@@ -9,7 +9,7 @@ program _seeded_runner
 	gettoken 0 cmd : 0, parse(":") bind
 	gettoken tmp cmd: cmd //pop the ":"
 	if "`sub_cmd'"=="permute" gettoken permvar 0 : 0
-	syntax anything(equalok everything) [, maindata(string) *]
+	syntax anything(equalok everything) [, maindata(string) parallel *]
 	loc reps = `=_N'
 	
 	tempname seeds
@@ -20,7 +20,7 @@ program _seeded_runner
 	
 	global REP_lc_i = 1
 	global REP_gl_i = 1
-	if("$pll_instance"!=""){
+	if("$pll_instance"!="" & "`parallel'"!=""){
 		global REP_gl_i = 1 + ($pll_instance-1)*floor(${REP_N}/${PLL_CHILDREN})
 	}
 	if "`sub_cmd'"=="sim_to_post" {
