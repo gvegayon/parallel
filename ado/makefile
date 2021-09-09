@@ -11,6 +11,7 @@ TESTS_LOGS:= $(TESTS:.do=.log)
 ifeq "$(STATABATCH)" ""
   STATABATCH:=stata -b
 endif
+# For Windows it is "C:\Program Files\StataXXX\StataXXX" /e 
 
 .PHONY: compile home inc_dist_date clean tests checks check_version releasehelp release
 
