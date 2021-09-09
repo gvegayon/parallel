@@ -33,6 +33,10 @@ copy seeding.sthlp seeding.smcl, replace
 log2html seeding, replace linesize(145)
 erase seeding.smcl
 
+copy bshell.sthlp bshell.smcl, replace
+log2html bshell, replace linesize(145)
+erase bshell.smcl
+
 if `c(stata_version)'>=12 di "WARNING: compiled mlib will only work on Stata version >=`c(stata_version)'"
 
 /* Compiling */

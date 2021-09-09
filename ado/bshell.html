@@ -1,0 +1,43 @@
+
+<html>
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css">
+BODY{background-color: ffffff;
+    font-family: monaco, "courier new", monospace;
+     color: #000000}
+.input {color: #CC6600}
+.result{color: #000099}
+.error{color: #dd0000}
+</style>
+</head>
+<body>
+<pre>
+<span class=result>help bshell</span>
+-------------------------------------------------------------------------------------------------------------------------------------------------
+<br><br>
+<span class=result><u>Title</u></span>
+<br><br>
+    <span class=result>bshell</span> -- Stata module to run shell processes in all platforms and modes.
+<br><br>
+<br><br>
+<a name="syntax"></a><span class=result><u>Syntax</u></span>
+<br><br>
+        <span class=result>bshell</span> <i>command</i>
+<br><br>
+<a name="description"></a><span class=result><u>Description</u></span>
+<br><br>
+    This is a drop-in replacement for <span class=result>shell</span> that works on all platforms and modes.  Normally it just passes the <i>command</i> on to <span class=result>shell</span>. But in
+    batch-mode on Windows <span class=result>shell</span> doesn't work (commands are ignored) and so in these cases we use a compiled plugin to launch the process using
+    win32 API.
+<br><br>
+<a name="examples"></a><span class=result><u>Examples</u></span>
+<br><br>
+    Example using <span class=result>bshell</span>:
+<br><br>
+        <span class=result>bshell notepad</span>
+<br><br>
+</pre>
+</body>
+</html>

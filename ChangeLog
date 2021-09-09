@@ -1,5 +1,8 @@
 Unreleased:
 
+2021-09-09 Brian Quistorff
+	* Added -bshell- command (drop-in replacement for shell) to allow running shell commands on all platforms.
+
 2021-08-26 Brian Quistorff
 	* Added -seeding- command to allow reproducible results across sequential and parallel tasks that involve randomness.
 
