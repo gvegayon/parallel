@@ -34,12 +34,15 @@ d KW: multiple imputations
 d
 d Requires: Stata version 14
 d
-d Distribution-Date: 20210909
+d Distribution-Date: 20210913
 d
 d Authors: George Vega Yon , California Institute of Technology, USA
 d          Brian Quistorff, Bureau of Economic Analysis, USA
 d Support: email vegayon@@usc.edu
 d
+f ado/cmd_list.ado
+f ado/_cmd_list_runner.ado
+f ado/cmd_list.sthlp
 f ado/parallel.ado
 f ado/parallel_append.ado
 f ado/parallel_bs.ado

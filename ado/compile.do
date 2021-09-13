@@ -24,18 +24,12 @@ end
 
 //make the HTML version of help
 //Use log2html. Couldn't get parse-smcl to work with code that had tabs (loops).
-copy parallel.sthlp parallel.smcl, replace
-//linesize needs to be sufficiently long or lines with quotes get cut-off and mis-parsed
-log2html parallel, replace linesize(145)
-erase parallel.smcl
-
-copy seeding.sthlp seeding.smcl, replace
-log2html seeding, replace linesize(145)
-erase seeding.smcl
-
-copy bshell.sthlp bshell.smcl, replace
-log2html bshell, replace linesize(145)
-erase bshell.smcl
+foreach n in parallel seeding bshell cmd_list {
+	copy `n'.sthlp `n'.smcl, replace
+	//linesize needs to be sufficiently long or lines with quotes get cut-off and mis-parsed
+	log2html `n', replace linesize(145)
+	erase `n'.smcl
+}
 
 if `c(stata_version)'>=12 di "WARNING: compiled mlib will only work on Stata version >=`c(stata_version)'"
 

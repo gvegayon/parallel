@@ -1,0 +1,72 @@
+
+<html>
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css">
+BODY{background-color: ffffff;
+    font-family: monaco, "courier new", monospace;
+     color: #000000}
+.input {color: #CC6600}
+.result{color: #000099}
+.error{color: #dd0000}
+</style>
+</head>
+<body>
+<pre>
+<span class=result>help cmd_list</span>
+-------------------------------------------------------------------------------------------------------------------------------------------------
+<br><br>
+<span class=result><u>Title</u></span>
+<br><br>
+    <span class=result>cmd_list</span> -- Stata module to run loop iterations involving separate commands sequentially or in parallel.
+<br><br>
+<br><br>
+<a name="syntax"></a><span class=result><u>Syntax</u></span>
+<br><br>
+<a name="sub_clear"></a>    ---------------------------------------------------------------------------------------------------------------------------------------------
+    Clear a <i>command list</i>
+<br><br>
+        <span class=result>cmd_list clear</span>
+<br><br>
+<a name="sub_add"></a>    ---------------------------------------------------------------------------------------------------------------------------------------------
+    Add a command to the <i>command list</i>
+<br><br>
+        <span class=result>cmd_list add:</span> <i>command</i>
+<br><br>
+<a name="sub_run"></a>    ---------------------------------------------------------------------------------------------------------------------------------------------
+    Run a <i>command list</i>
+<br><br>
+        <span class=result>cmd_list run</span> [<span class=result>,</span> <span class=result>parallel</span> <i>parallel_options</i>]
+<br><br>
+<a name="options_table"></a>    <i>options</i>                  Description
+    -------------------------------------------------------------------------------------------------------------------------------------------
+    run
+      <span class=result>parallel</span>               execute the iterations using <span class=result>parallel</span>. Must have specified the cluster using <span class=result>parallel setclusters</span>. Default is
+                               non-parallel (sequential).
+<br><br>
+    -------------------------------------------------------------------------------------------------------------------------------------------
+<br><br>
+<a name="description"></a><span class=result><u>Description</u></span>
+<br><br>
+    <span class=result>cmd_list</span> builds up a list of commands and then allows one to execute them sequentially or using <span class=result>parallel</span>.  <span class=result>cmd_list add</span> just records the
+    literal command string, it does not snapshot the dataset when each command is added (so the commands must work with the dataset present
+    when <span class=result>cmd_list run</span>). <span class=result>cmd_list run</span> automaticaly clears the command list. If the command list needs to be cleared manually, one can use
+    <span class=result>cmd_list clear</span>.
+<br><br>
+<a name="examples"></a><span class=result><u>Examples</u></span>
+<br><br>
+    Example using <span class=result>cmd_list</span>:
+<br><br>
+        <span class=result>foreach v1 in a b c d</span> {
+                <span class=result>foreach v2 in a b c d</span> {
+                        <span class=result>cmd_list add</span>: <i>cmd</i> `v1' `v2'
+                }
+        }
+        <span class=result>cmd_list run, parallel</span>
+<br><br>
+    Omit <i>parallel</i> to run the commands sequentially.
+<br><br>
+</pre>
+</body>
+</html>

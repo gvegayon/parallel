@@ -1,5 +1,8 @@
 Unreleased:
 
+2021-09-13 Brian Quistorff
+	* Added -cmd_list- command to store list of commands and run them all either sequentially or in parallel.
+
 2021-09-09 Brian Quistorff
 	* Added -bshell- command (drop-in replacement for shell) to allow running shell commands on all platforms.
 
