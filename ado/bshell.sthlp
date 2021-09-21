@@ -23,6 +23,7 @@
 This is a drop-in replacement for {cmd:shell} that works on all platforms and modes.
 Normally it just passes the {it:command} on to {cmd:shell}. But in batch-mode on Windows {cmd:shell} doesn't work 
 (commands are ignored) and so in these cases we use a compiled plugin to launch the process using win32 API.
+If you need to invoke {cmd:cmd}, you can call {cmd:bshell cmd /c ...}.
 
 {marker examples}{...}
 {title:Examples}
