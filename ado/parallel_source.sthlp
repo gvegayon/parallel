@@ -1949,7 +1949,10 @@ real scalar parallel_setstatapath(string scalar statadir, | real scalar force) {
             if (c("MP")) flv = "MP"
             else if (c("SE")) flv = "SE"
             else if (c("flavor") == "Small") flv = "SM"
-            else if (c("flavor") == "IC") flv = ""
+            else if (c("flavor") == "IC"){ 
+                if (c("stata_version") <17) flv = "" 
+                else flv = "BE" //Basic Edition. the new c(edition)=="BE"
+            }
         
             /* If the version is less than eleven */
             if (c("stata_version") < 11) fname = "w"+flv+"Stata.exe"
