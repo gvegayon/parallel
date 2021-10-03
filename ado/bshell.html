@@ -30,7 +30,8 @@ BODY{background-color: ffffff;
 <br><br>
     This is a drop-in replacement for <span class=result>shell</span> that works on all platforms and modes.  Normally it just passes the <i>command</i> on to <span class=result>shell</span>. But in
     batch-mode on Windows <span class=result>shell</span> doesn't work (commands are ignored) and so in these cases we use a compiled plugin to launch the process using
-    win32 API.
+    win32 API.  If you need to invoke <span class=result>cmd</span> (for example to handle redirections), you can call <span class=result>bshell cmd /c ...</span>, though note that if <span class=result>...</span> starts
+    and ends with double quotes, then <span class=result>cmd</span> will strip them (so you might have to add extras).
 <br><br>
 <a name="examples"></a><span class=result><u>Examples</u></span>
 <br><br>
