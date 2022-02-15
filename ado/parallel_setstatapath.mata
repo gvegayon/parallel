@@ -9,7 +9,7 @@
  */
 
 mata:
-string scalar default_statapath() {
+string scalar parallel_default_statapath() {
 
 	string scalar bit, flv, flv2, fname, statadir
 	
@@ -79,7 +79,7 @@ real scalar parallel_setstatapath(string scalar statadir, | real scalar force) {
 	string scalar fname
 	// Building fullpath name
 	if (statadir == J(1,1,"") | statadir == "") {
-		statadir = default_statapath()
+		statadir = parallel_default_statapath()
 		
 		//might need to convert to cygwin path-name
 		if (c("os") == "Windows" & c("mode")=="batch" & st_global("USE_PROCEXEC")=="0"){

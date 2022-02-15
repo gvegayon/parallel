@@ -1925,7 +1925,7 @@ ls
 
 mata:
 {smcl}
-*! {marker default_statapath}{bf:function -{it:default_statapath}- in file -{it:parallel_setstatapath.mata}-}
+*! {marker parallel_default_statapath}{bf:function -{it:parallel_default_statapath}- in file -{it:parallel_setstatapath.mata}-}
 *! {back:{it:(previous page)}}
 *!{dup 78:{c -}}
 *!{col 4}{it:Sets the path where stata exe is installed.}
@@ -1935,7 +1935,7 @@ mata:
 *!{col 4}{bf:returns:}
 *!{col 6}{it:A global PLL_STATA_PATH.}
 *!{dup 78:{c -}}{asis}
-string scalar default_statapath() {
+string scalar parallel_default_statapath() {
 
     string scalar bit, flv, flv2, fname, statadir
     
@@ -2009,7 +2009,7 @@ real scalar parallel_setstatapath(string scalar statadir, | real scalar force) {
     string scalar fname
     // Building fullpath name
     if (statadir == J(1,1,"") | statadir == "") {
-        statadir = default_statapath()
+        statadir = parallel_default_statapath()
         
         //might need to convert to cygwin path-name
         if (c("os") == "Windows" & c("mode")=="batch" & st_global("USE_PROCEXEC")=="0"){
