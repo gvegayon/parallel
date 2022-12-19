@@ -60,7 +60,7 @@ program def parallel_bootstrap, rclass
 		di "Small workload. Temporarily setting number of child processes to ${PLL_CHILDREN}"
 	}
 	local csize = floor(`reps'/$PLL_CHILDREN)
-	local lsize = `csize' + (`reps' - `csize'*$PLL_CHILDREN)
+	local lsize = /*`csize' +*/ (`reps' - `csize'*$PLL_CHILDREN)
 	
 	/* Reserving a pll_id. This will be stored in the -parallelid- local
 	macro */	
@@ -106,8 +106,9 @@ program def parallel_bootstrap, rclass
 	tempname fh
 	cap file open `fh' using `"`simul'"', w replace
 	file write `fh' `"use `tmpdta', clear"' _n
-	file write `fh' "if (\`pll_instance'==\$PLL_CHILDREN) local reps = `lsize'" _n
-	file write `fh' "else local reps = `csize'" _n
+// 	file write `fh' "if (\`pll_instance'==\$PLL_CHILDREN) local reps = `lsize'" _n
+// 	file write `fh' "else local reps = `csize'" _n
+  file write `fh' "local reps = `csize' + (\`pll_instance' <= `lsize')" _n
 	file write `fh' `"local pll_instance : di %04.0f \`pll_instance'"' _n
 	file write `fh' `"bs `expression', sav(__pll\`pll_id'_bs_eststore\`pll_instance', replace `double' `every') `options' rep(\`reps'): `model' `argopt'"' _n
 	file close `fh' 
