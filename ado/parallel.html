@@ -360,9 +360,9 @@ BODY{background-color: ffffff;
 <a name="tech"></a><span class=result><u>6. Technical note</u></span>
 <br><br>
     In order to protect a <i>pll_id</i> code (and thus ancillary files), once -<span class=result>parallel</span>- is called it creates a new file called <i>__pll</i>[<i>pll_id</i>]<i>sandbox</i>
-    (stored at c(tmpdir), in your case: <u>C:\Users\Brian\AppData\Local\Temp/</u>). This forbids -<span class=result>parallel clean</span>- from deleting any auxiliary file
-    used by that process and reserves the <i>pll_id</i> so that no other call of -<span class=result>parallel</span>- can use this <i>pll_id</i>. Once every child process has
-    finished, the sandbox file is removed, freeing the <i>pll_id</i>.
+    (stored at c(tmpdir), in your case: <u>/scratch/local/u6039184/8523353</u>). This forbids -<span class=result>parallel clean</span>- from deleting any auxiliary file used
+    by that process and reserves the <i>pll_id</i> so that no other call of -<span class=result>parallel</span>- can use this <i>pll_id</i>. Once every child process has finished, the
+    sandbox file is removed, freeing the <i>pll_id</i>.
 <br><br>
     If for any reason the algorithm breaks due to a flaw or crush of the system, the sandbox file and the rest of auxiliary files will not be
     deleted. In order to clean up this, the user will be able to do so manually (moving the file(s) to the OS recycle bin) or using parallel
@@ -519,7 +519,7 @@ BODY{background-color: ffffff;
 <br><br>
     Experiment that will be performed
         <span class=result>program define lnsim, rclass</span>
-                <span class=result>version 14</span>
+                <span class=result>version 18</span>
                 <span class=result>syntax [, obs(integer 1) mu(real 0) sigma(real 1) ]</span>
                 <span class=result>drop _all</span>
                 <span class=result>set obs `obs'</span>
