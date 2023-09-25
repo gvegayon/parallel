@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.20.1 07jun2021}{...}
+{* *! version 0.2 25sep2023}{...}
 {vieweralsosee "parallel" "help parallel"}{...}
 {cmd:help cmd_list}
 {hline}
@@ -21,6 +21,12 @@
 
 {col 5}{hline}{marker sub_add}{...}
 {pstd}Add a command to the {it:command list}
+
+{p 8 17 2}
+{cmd:cmd_list view}
+
+{col 5}{hline}{marker sub_view}{...}
+{pstd}View the commands in the {it:command list}
 
 {p 8 17 2}
 {cmd:cmd_list add:} {it:command}
@@ -46,9 +52,7 @@ cluster using {cmd:parallel setclusters}. Default is non-parallel (sequential).{
 {title:Description}
 
 {pstd}
-{cmd:cmd_list} builds up a list of commands and then allows one to execute them sequentially or using {cmd:parallel}.
-{cmd:cmd_list add} just records the literal command string, it does not snapshot the dataset when each command is added (so the commands must work with the 
-dataset present when {cmd:cmd_list run}). {cmd:cmd_list run} automaticaly clears the command list. If the command list needs to be cleared manually, one can use {cmd:cmd_list clear}.
+{cmd:cmd_list} builds up a list of commands and then allows one to execute them sequentially or using {cmd:parallel}. The dataset at the time of {cmd:cmd_list run} is presented fresh to each iteration and restored at the end. Any required output will from each iteration will need to be saved separately and then processed later. {cmd:cmd_list run} automaticaly clears the command list.
 
 {marker examples}{...}
 {title:Examples}

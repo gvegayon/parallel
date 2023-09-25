@@ -32,6 +32,11 @@ BODY{background-color: ffffff;
 <a name="sub_add"></a>    ---------------------------------------------------------------------------------------------------------------------------------------------
     Add a command to the <i>command list</i>
 <br><br>
+        <span class=result>cmd_list view</span>
+<br><br>
+<a name="sub_view"></a>    ---------------------------------------------------------------------------------------------------------------------------------------------
+    View the commands in the <i>command list</i>
+<br><br>
         <span class=result>cmd_list add:</span> <i>command</i>
 <br><br>
 <a name="sub_run"></a>    ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -49,10 +54,9 @@ BODY{background-color: ffffff;
 <br><br>
 <a name="description"></a><span class=result><u>Description</u></span>
 <br><br>
-    <span class=result>cmd_list</span> builds up a list of commands and then allows one to execute them sequentially or using <span class=result>parallel</span>.  <span class=result>cmd_list add</span> just records the
-    literal command string, it does not snapshot the dataset when each command is added (so the commands must work with the dataset present
-    when <span class=result>cmd_list run</span>). <span class=result>cmd_list run</span> automaticaly clears the command list. If the command list needs to be cleared manually, one can use
-    <span class=result>cmd_list clear</span>.
+    <span class=result>cmd_list</span> builds up a list of commands and then allows one to execute them sequentially or using <span class=result>parallel</span>. The dataset at the time of
+    <span class=result>cmd_list run</span> is presented fresh to each iteration and restored at the end. Any required output will from each iteration will need to be
+    saved separately and then processed later. <span class=result>cmd_list run</span> automaticaly clears the command list.
 <br><br>
 <a name="examples"></a><span class=result><u>Examples</u></span>
 <br><br>
