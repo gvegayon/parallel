@@ -53,7 +53,10 @@ cluster using {cmd:parallel setclusters}. Default is non-parallel (sequential).{
 
 {pstd}
 {cmd:cmd_list} builds up a list of commands and then allows one to execute them sequentially or using {cmd:parallel}. The dataset at the time of {cmd:cmd_list run} is presented fresh to each iteration and restored at the end. Any required output will from each iteration will need to be saved separately and then processed later.
-Mata variables are used to keep track of the progress, so commands in the list should not clear all mata variables. {cmd:cmd_list run} automaticaly clears the command list.
+When run in parallel, tasks are assigned in a "round robin" (task i will be assigned to cluster mod(i-1, $PLL_CLUSTERS)+1). If this does not ensure balanced work across loads, then the user can adjust the order of tasks added to the cmd_list.
+Mata variables are used to keep track of the progress, so commands in the list should not clear all mata variables.
+
+{cmd:cmd_list run} automaticaly clears the command list.
 
 {marker examples}{...}
 {title:Examples}

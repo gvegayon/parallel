@@ -28,11 +28,17 @@ program cmd_list
         }
         else loc maindata ""
         
-        if "`parallel'"!="" loc parallel "parallel, mata `options':"
         preserve
         clear
         qui set obs `n_iters'
         gen long i = _n
+		if "`parallel'"!=""{
+			loc parallel "parallel, mata `options':"
+			* switch from [c1,c1,...,c2,c2] -> [c1,c2,...,c1,c2]
+			gen long cl=mod(_n-1, $PLL_CLUSTERS)+1
+			sort cl i
+			drop cl
+		}
         `parallel' _cmd_list_runner, maindata("`maindata'")
         restore
 

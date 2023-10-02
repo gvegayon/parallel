@@ -1,17 +1,19 @@
 program _cmd_list_runner
 	syntax [, maindata(string)]
 	loc N = _N
-	loc first = i[1]
 
-	forv i=1/`N' {		
+	forv i=1/`N' {	
+		preserve
+		loc cmd_i = i[`i']
 		if "`maindata'"!=""{
 			use "`maindata'", clear
 		} 
 		else {
 			clear
 		}
-		mata: st_local("cmd", PLL_iters[1, `first'-1+`i'])
+		mata: st_local("cmd", PLL_iters[1, `cmd_i'])
 		di `"cmd: `cmd'"'
 		`cmd'
+		restore
 	}
 end
