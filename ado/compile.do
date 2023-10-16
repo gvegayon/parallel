@@ -23,12 +23,8 @@ dt_moxygen(archmata, "parallel_source.sthlp", 1)
 end
 
 //make the HTML version of help
-//Use log2html. Couldn't get parse-smcl to work with code that had tabs (loops).
 foreach n in parallel seeding bshell cmd_list {
-	copy `n'.sthlp `n'.smcl, replace
-	//linesize needs to be sufficiently long or lines with quotes get cut-off and mis-parsed
-	log2html `n', replace linesize(145)
-	erase `n'.smcl
+	make_html_help `n'
 }
 
 if `c(stata_version)'>=12 di "WARNING: compiled mlib will only work on Stata version >=`c(stata_version)'"
