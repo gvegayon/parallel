@@ -29,13 +29,13 @@ BODY{background-color: ffffff;
 <br><br>
         <span class=result>cmd_list clear</span>
 <br><br>
-<a name="sub_add"></a>    ---------------------------------------------------------------------------------------------------------------------------------------------
-    Add a command to the <i>command list</i>
+<a name="sub_view"></a>    ---------------------------------------------------------------------------------------------------------------------------------------------
+    View the commands in the <i>command list</i>
 <br><br>
         <span class=result>cmd_list view</span>
 <br><br>
-<a name="sub_view"></a>    ---------------------------------------------------------------------------------------------------------------------------------------------
-    View the commands in the <i>command list</i>
+<a name="sub_add"></a>    ---------------------------------------------------------------------------------------------------------------------------------------------
+    Add a command to the <i>command list</i>
 <br><br>
         <span class=result>cmd_list add:</span> <i>command</i>
 <br><br>
@@ -49,6 +49,7 @@ BODY{background-color: ffffff;
     run
       <span class=result>parallel</span>               execute the iterations using <span class=result>parallel</span>. Must have specified the cluster using <span class=result>parallel setclusters</span>. Default is
                                non-parallel (sequential).
+      <i>parallel_options</i>       Options passed through to <span class=result>parallel</span>.
 <br><br>
     -------------------------------------------------------------------------------------------------------------------------------------------
 <br><br>
@@ -56,7 +57,11 @@ BODY{background-color: ffffff;
 <br><br>
     <span class=result>cmd_list</span> builds up a list of commands and then allows one to execute them sequentially or using <span class=result>parallel</span>. The dataset at the time of
     <span class=result>cmd_list run</span> is presented fresh to each iteration and restored at the end. Any required output will from each iteration will need to be
-    saved separately and then processed later. <span class=result>cmd_list run</span> automaticaly clears the command list.
+    saved separately and then processed later.  When run in parallel, tasks are assigned in a "round robin" (task i will be assigned to cluster
+    mod(i-1, $PLL_CLUSTERS)+1). If this does not ensure balanced work across loads, then the user can adjust the order of tasks added to the
+    cmd_list.  Mata variables are used to keep track of the progress, so commands in the list should not clear all mata variables.
+<br><br>
+<span class=result>cmd_list run</span> automaticaly clears the command list.
 <br><br>
 <a name="examples"></a><span class=result><u>Examples</u></span>
 <br><br>

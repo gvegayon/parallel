@@ -19,14 +19,14 @@
 {p 8 17 2}
 {cmd:cmd_list clear}
 
-{col 5}{hline}{marker sub_add}{...}
-{pstd}Add a command to the {it:command list}
+{col 5}{hline}{marker sub_view}{...}
+{pstd}View the commands in the {it:command list}
 
 {p 8 17 2}
 {cmd:cmd_list view}
 
-{col 5}{hline}{marker sub_view}{...}
-{pstd}View the commands in the {it:command list}
+{col 5}{hline}{marker sub_add}{...}
+{pstd}Add a command to the {it:command list}
 
 {p 8 17 2}
 {cmd:cmd_list add:} {it:command}
@@ -44,6 +44,7 @@
 {syntab :run}
 {synopt :{opt parallel}}execute the iterations using {cmd:parallel}. Must have specified the
 cluster using {cmd:parallel setclusters}. Default is non-parallel (sequential).{p_end}
+{synopt :{it:parallel_options}}Options passed through to {cmd:parallel}.{p_end}
 
 {synoptline}
 {p2colreset}{...}
