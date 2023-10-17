@@ -186,7 +186,8 @@ used within each child process.{p_end}
 (-current-), the current datetime (-datetime-) or random.org API (-random.org-) to
 generate the seeds for each child processes (please read the Description section).{p_end}
 {synopt:{opt proc:essors}}Integer. If running on StataMP, sets the number of processors
-each child process should use. Default value is 1.{p_end}
+each child process should use. Default value is 1, to help avoid the sum total of Stata processes across child instances 
+being more than the number of physical processors (which can severly limit performance).{p_end}
 {synopt:{opt t:imeout}}Integer. If a child process hasn't started, how much time in seconds
 does {cmd:parallel} has to wait until assume that there was a connection error and thus
 the child process won't start. Default value is 60.{p_end}

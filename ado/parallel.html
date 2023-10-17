@@ -152,7 +152,9 @@ BODY{background-color: ffffff;
       <span class=result><u>s</u></span><span class=result>eeds</span>          Numlist. With this option the user can pass an specific seed to be used within each child process.
       <span class=result><u>randt</u></span><span class=result>ype</span>       String. Tells parallel whether to use the current seed (-current-), the current datetime (-datetime-) or random.org API
                        (-random.org-) to generate the seeds for each child processes (please read the Description section).
-      <span class=result><u>proc</u></span><span class=result>essors</span>     Integer. If running on StataMP, sets the number of processors each child process should use. Default value is 1.
+      <span class=result><u>proc</u></span><span class=result>essors</span>     Integer. If running on StataMP, sets the number of processors each child process should use. Default value is 1, to help
+                       avoid the sum total of Stata processes across child instances being more than the number of physical processors (which
+                       can severly limit performance).
       <span class=result><u>t</u></span><span class=result>imeout</span>        Integer. If a child process hasn't started, how much time in seconds does <span class=result>parallel</span> has to wait until assume that there was
                        a connection error and thus the child process won't start. Default value is 60.
       <span class=result><u>out</u></span><span class=result>putopts</span>      A list of option names that are aggregating output options.  <span class=result>parallel</span> automtically aggregates main data from child
