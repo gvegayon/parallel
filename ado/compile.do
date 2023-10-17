@@ -26,6 +26,7 @@ end
 foreach n in parallel seeding bshell cmd_list {
 	make_html_help `n'
 }
+di "MANUAL: Remove ', in your case: <u>XXX</u>' from parallel.html"
 
 if `c(stata_version)'>=12 di "WARNING: compiled mlib will only work on Stata version >=`c(stata_version)'"
 

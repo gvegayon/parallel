@@ -152,8 +152,7 @@ BODY{background-color: ffffff;
       <span class=result><u>s</u></span><span class=result>eeds</span>          Numlist. With this option the user can pass an specific seed to be used within each child process.
       <span class=result><u>randt</u></span><span class=result>ype</span>       String. Tells parallel whether to use the current seed (-current-), the current datetime (-datetime-) or random.org API
                        (-random.org-) to generate the seeds for each child processes (please read the Description section).
-      <span class=result><u>proc</u></span><span class=result>essors</span>     Integer. If running on StataMP, sets the number of processors each child process should use. Default value is 0 (do
-                       nothing).
+      <span class=result><u>proc</u></span><span class=result>essors</span>     Integer. If running on StataMP, sets the number of processors each child process should use. Default value is 1.
       <span class=result><u>t</u></span><span class=result>imeout</span>        Integer. If a child process hasn't started, how much time in seconds does <span class=result>parallel</span> has to wait until assume that there was
                        a connection error and thus the child process won't start. Default value is 60.
       <span class=result><u>out</u></span><span class=result>putopts</span>      A list of option names that are aggregating output options.  <span class=result>parallel</span> automtically aggregates main data from child
@@ -360,9 +359,9 @@ BODY{background-color: ffffff;
 <a name="tech"></a><span class=result><u>6. Technical note</u></span>
 <br><br>
     In order to protect a <i>pll_id</i> code (and thus ancillary files), once -<span class=result>parallel</span>- is called it creates a new file called <i>__pll</i>[<i>pll_id</i>]<i>sandbox</i>
-    (stored at c(tmpdir), in your case: <u>/scratch/local/u6039184/8523353</u>). This forbids -<span class=result>parallel clean</span>- from deleting any auxiliary file used
-    by that process and reserves the <i>pll_id</i> so that no other call of -<span class=result>parallel</span>- can use this <i>pll_id</i>. Once every child process has finished, the
-    sandbox file is removed, freeing the <i>pll_id</i>.
+    (stored at c(tmpdir)). This forbids -<span class=result>parallel clean</span>- from deleting any auxiliary file
+    used by that process and reserves the <i>pll_id</i> so that no other call of -<span class=result>parallel</span>- can use this <i>pll_id</i>. Once every child process has
+    finished, the sandbox file is removed, freeing the <i>pll_id</i>.
 <br><br>
     If for any reason the algorithm breaks due to a flaw or crush of the system, the sandbox file and the rest of auxiliary files will not be
     deleted. In order to clean up this, the user will be able to do so manually (moving the file(s) to the OS recycle bin) or using parallel
@@ -519,7 +518,7 @@ BODY{background-color: ffffff;
 <br><br>
     Experiment that will be performed
         <span class=result>program define lnsim, rclass</span>
-                <span class=result>version 18</span>
+                <span class=result>version 17</span>
                 <span class=result>syntax [, obs(integer 1) mu(real 0) sigma(real 1) ]</span>
                 <span class=result>drop _all</span>
                 <span class=result>set obs `obs'</span>
