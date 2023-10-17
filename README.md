@@ -44,6 +44,8 @@ If you have a previous installation of `parallel` installed from a different sou
 GitHub
 -----------------------------------
 
+### Stable Version
+
 Stata version &gt;=13 can install the latest stable version using a GitHub URL,
 
 ``` stata
@@ -53,10 +55,20 @@ mata mata mlib index
 
 For Stata version &lt;13, [download as zip](https://github.com/gvegayon/parallel/archive/stable.zip), unzip, and then replace the above URL with the full local path to the files.
 
-Latest version (master branch): Use the URL `https://raw.github.com/gvegayon/parallel/master/`. To get a zip click the "Clone or download" button and choose zip.
+
+### Latest Version
+To install the latest version (master branch):
+
+``` stata
+net install parallel, from(https://raw.github.com/gvegayon/parallel/master/) replace
+mata mata mlib index
+```
+
+To get a zip, go to https://raw.github.com/gvegayon/parallel/master/, click the "Clone or download" button and choose zip.
 
 
-Older releases: Go to the [Releases Page](https://github.com/gvegayon/parallel/releases). You can use the release tag to in the URL (e.g., `https://raw.github.com/gvegayon/parallel/v1.15.8.19/`). See also the associated zip download option.
+### Older releases
+Go to the [Releases Page](https://github.com/gvegayon/parallel/releases). You can use the release tag to in the URL (e.g., `https://raw.github.com/gvegayon/parallel/v1.15.8.19/`). See also the associated zip download option.
 
 SSC
 ---
