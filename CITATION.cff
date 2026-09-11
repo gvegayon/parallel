@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the preferred publication below."
+type: software
+title: "parallel: Stata Module for Parallel Computing"
+version: "1.20.1"
+date-released: "2021-06-07"
+authors:
+  - family-names: "Vega Yon"
+    given-names: "George G."
+    orcid: "https://orcid.org/0000-0002-3171-0844"
+  - family-names: "Quistorff"
+    given-names: "Brian"
+abstract: "A Stata module for parallel computing through multiple Stata instances."
+license: "MIT"
+repository-code: "https://github.com/gvegayon/parallel"
+keywords:
+  - "Stata"
+  - "parallel computing"
+  - "high-performance computing"
+preferred-citation:
+  type: article
+  title: "parallel: A Command for Parallel Computing"
+  authors:
+    - family-names: "Vega Yon"
+      given-names: "George G."
+      orcid: "https://orcid.org/0000-0002-3171-0844"
+    - family-names: "Quistorff"
+      given-names: "Brian"
+  journal: "The Stata Journal"
+  year: 2019
+  volume: "19"
+  issue: "3"
+  start: "667"
+  end: "684"
+  doi: "10.1177/1536867X19874242"
